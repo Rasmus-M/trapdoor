@@ -113,43 +113,81 @@ public class SkoolConverter {
         tms9900Line.setZ80Instruction(z80Line.getInstruction());
         List<TMS9900Line> additionalLines = new ArrayList<>();
         switch (instruction.getOpcode()) {
+            case "add":
+                tms9900Line.setInstruction("a    " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
+                break;
+            case "and":
+                tms9900Line.setInstruction("andi a," + opr1.getValue() + "*256");
+                break;
+            case "bit":
+                tms9900Line.setInstruction("mov  " + getTMS9900Equivalent(opr2) + ",tmp0");
+                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "andi tmp0," + (1 << opr1.getValue())));
+                break;
             case "call":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("bl @" + Util.getLabel(opr1.getValue()));
+                    tms9900Line.setInstruction("bl   @" + Util.getLabel(opr1.getValue()));
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
+                break;
+            case "cp":
+                tms9900Line.setInstruction("cb   a," + getTMS9900Equivalent(opr1));
                 break;
             case "dec":
                 if (opr1 != null) {
                     boolean isWord = opr1.isWordOperand();
                     if (isWord) {
-                        tms9900Line.setInstruction("dec " + getTMS9900Equivalent(opr1));
+                        tms9900Line.setInstruction("dec  " + getTMS9900Equivalent(opr1));
                     } else {
-                        tms9900Line.setInstruction("sb one," + getTMS9900Equivalent(opr1));
+                        tms9900Line.setInstruction("sb   one," + getTMS9900Equivalent(opr1));
                     }
                 }
+                break;
+            case "djnz":
+                tms9900Line.setInstruction("sb   one,b");
+                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "jne  " + Util.getLabel(opr1.getValue())));
                 break;
             case "inc":
                 if (opr1 != null) {
                     boolean isWord = opr1.isWordOperand();
                     if (isWord) {
-                        tms9900Line.setInstruction("inc " + getTMS9900Equivalent(opr1));
+                        tms9900Line.setInstruction("inc  " + getTMS9900Equivalent(opr1));
                     } else {
-                        tms9900Line.setInstruction("ab one," + getTMS9900Equivalent(opr1));
+                        tms9900Line.setInstruction("ab   one," + getTMS9900Equivalent(opr1));
                     }
                 }
                 break;
             case "jp":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("b @" + Util.getLabel(opr1.getValue()));
+                    tms9900Line.setInstruction("b    @" + Util.getLabel(opr1.getValue()));
+                } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
+                    switch (opr1.getFlag()) {
+                        case "z":
+                            tms9900Line.setInstruction("jne  !");
+                            break;
+                        case "nz":
+                            tms9900Line.setInstruction("jeq  !");
+                            break;
+                        case "c":
+                            tms9900Line.setInstruction("jnc  !");
+                            break;
+                        case "nc":
+                            tms9900Line.setInstruction("joc  !");
+                            break;
+                    }
+                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "b    @" + Util.getLabel(opr2.getValue())));
+                    TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
+                    label.setLabel("!");
+                    additionalLines.add(label);
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
                 break;
             case "jr":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("jmp " + Util.getLabel(opr1.getValue()));
+                    tms9900Line.setInstruction("jmp  " + Util.getLabel(opr1.getValue()));
+                } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
+                    tms9900Line.setInstruction("j" + getTMS9900Equivalent(opr1) + "  " + Util.getLabel(opr2.getValue()));
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
@@ -160,18 +198,37 @@ public class SkoolConverter {
                     boolean isImmediate = opr2.getType() == Operand.Type.Immediate;
                     if (isImmediate) {
                         if (isWord) {
-                            tms9900Line.setInstruction("li " + getTMS9900Equivalent(opr1) + "," + getTMS9900Equivalent(opr2, isWord));
+                            tms9900Line.setInstruction("li   " + getTMS9900Equivalent(opr1) + "," + getTMS9900Equivalent(opr2, isWord));
                         } else {
                             tms9900Line.setInstruction("movb " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                         }
                     } else {
-                        tms9900Line.setInstruction((isWord ? "mov" : "movb") + " " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
+                        tms9900Line.setInstruction((isWord ? "mov " : "movb") + " " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                     }
                 }
+                break;
+            case "neg":
+                tms9900Line.setInstruction("neg a");
+                break;
+            case "push":
+                tms9900Line.setInstruction(".push " + opr1.getRegister());
+                break;
+            case "pop":
+                tms9900Line.setInstruction(".pop " + opr1.getRegister());
                 break;
             case "ret":
                 if (opr1 == null) {
                     tms9900Line.setInstruction("rt");
+                } else {
+                    tms9900Line.setInstruction("; " + instruction);
+                }
+                break;
+            case "sub":
+                tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr1) + ",a");
+                break;
+            case "xor":
+                if (opr1.getType() == Operand.Type.Register && opr1.getRegister().equals("a")) {
+                    tms9900Line.setInstruction("clr  af");
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
@@ -221,6 +278,19 @@ public class SkoolConverter {
                     return "@" + operand.getValue() + "(" + operand.getRegister() + ")";
                 } else {
                     return "*" + operand.getRegister();
+                }
+            case Flag:
+                switch (operand.getFlag()) {
+                    case "z":
+                        return "eq";
+                    case "nz":
+                        return "ne";
+                    case "c":
+                        return "oc";
+                    case "nc":
+                        return "nc";
+                    default:
+                        return "";
                 }
             default:
                 return operand.getOperand();

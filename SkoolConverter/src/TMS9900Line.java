@@ -64,7 +64,7 @@ public class TMS9900Line {
                 return Util.space(7) + instruction + (comment != null ? dataCommentIndent + "; " + comment : "");
             case Instruction:
                 String commentIndent = Util.space(Math.max(39 - 7 - instruction.length(), 1));
-                String combinedComment = Util.fit(z80Instruction, 17) + " " + (comment != null ? "; " + comment : "");
+                String combinedComment = Util.fit(z80Instruction != null ? z80Instruction : "", 17) + " " + (comment != null ? "; " + comment : "");
                 return Util.space(7) + instruction + commentIndent + "; " + combinedComment;
         }
         return "";

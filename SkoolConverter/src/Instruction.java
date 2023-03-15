@@ -12,8 +12,8 @@ public class Instruction {
         opcode = instrParts[0];
         operands = instrParts.length > 1 ? instrParts[1] : null;
         String[] argParts = operands != null ? operands.split(",", 2) : null;
-        opr1 = argParts != null ? new Operand(argParts[0]) : null;
-        opr2 = argParts != null && argParts.length > 1 ? new Operand(argParts[1]) : null;
+        opr1 = argParts != null ? new Operand(argParts[0], opcode) : null;
+        opr2 = argParts != null && argParts.length > 1 ? new Operand(argParts[1], opcode) : null;
     }
 
     public String getOpcode() {

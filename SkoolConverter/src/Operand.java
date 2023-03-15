@@ -8,6 +8,7 @@ public class Operand {
     private static final Pattern indirectPattern = Pattern.compile("^\\(([0-9]{1,5})\\)$");
     private static final Pattern indirectRegisterPattern = Pattern.compile("^\\((bc|de|hl|ix|iy|sp)\\)$");
     private static final Pattern indexedPattern = Pattern.compile("^\\((ix|iy)\\+([0-9]{1,3})\\)$");
+    private static final Pattern flagPattern = Pattern.compile("^(nz|z|c|nc)$");
 
     private static final Pattern wordPattern = Pattern.compile("^(bc|de|hl|ix|iy|\\(?[0-9]{4,5}\\)?)$");
 
@@ -23,11 +24,12 @@ public class Operand {
     }
 
     private final String operand;
-    private Type type;
+    private final Type type;
     private int value;
     private String register;
+    private String flag;
 
-    public Operand(String operand) {
+    public Operand(String operand, String opcode) {
         this.operand = operand;
         Matcher m;
         m = immediatePattern.matcher(operand);
@@ -36,11 +38,13 @@ public class Operand {
             value = Integer.parseInt(operand);
             return;
         }
-        m = registerPattern.matcher(operand);
-        if (m.find()) {
-            type = Type.Register;
-            register = operand;
-            return;
+        if (!opcode.equals("jr") && !opcode.equals("jp")) {
+            m = registerPattern.matcher(operand);
+            if (m.find()) {
+                type = Type.Register;
+                register = operand;
+                return;
+            }
         }
         m = indirectPattern.matcher(operand);
         if (m.find()) {
@@ -59,6 +63,12 @@ public class Operand {
             type = Type.Indexed;
             register = m.group(1);
             value = Integer.parseInt(m.group(2));
+            return;
+        }
+        m = flagPattern.matcher(operand);
+        if (m.find()) {
+            type = Type.Flag;
+            flag = m.group(1);
             return;
         }
         type = Type.Other;
@@ -86,5 +96,9 @@ public class Operand {
 
     public String getRegister() {
         return register;
+    }
+
+    public String getFlag() {
+        return flag;
     }
 }
