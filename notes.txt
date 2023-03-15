@@ -1,0 +1,32 @@
+tmp0   equ  0
+tmp1   equ  1
+one    equ  2
+mone   equ  3
+af     equ  4
+a      equ  4
+bc     equ  5
+b      equ  5
+c      equ  R5LB
+de     equ  6
+d      equ  6
+e      equ  R6LB
+hl     equ  7
+h      equ  7
+l      equ  R7LB
+ix     equ  8
+iy     equ  9
+sp     equ  10
+af_    equ  12
+bc_    equ  13
+de_    equ  14
+hl_    equ  15
+
+one and mone are constants 1 and -1 that I found that I used all the time.
+
+It's inefficient to use the LSB registers c, e, and l because they have to be accessed as memory bytes rather than registers.
+
+The Knight Lore code is checking the carry flag a lot. I found that after a byte compare (cp on Z80, cb on the TI) the carry condition on the Z80 correspond to JL on the TI or JHE for the inverse condition. If the carry flag is checked after a subtraction instead of a compare this has to be turned into a compare followed by a (possible) subtraction on the TI.
+
+The biggest conversion issue is probably that loading data into a register (ld on Z80, mov or li on the TI) does not set any flags on the Z80, so here you can do a compare, then load something, and then check the condition. This type of code has to be reworked on the TI.
+
+A stack and calls to subroutines can easily, but somewhat slowly, be emulated on the TI, but on the TI it's the called routine that pushes the return address (r11) onto the stack. If Z80 code is jumping directly into subroutines (rather than calling) it is necessary to bypass the initial push of the return address on the TI.

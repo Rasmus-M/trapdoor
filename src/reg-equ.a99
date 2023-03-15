@@ -1,0 +1,43 @@
+wrksp  equ  >8300
+
+tmp0   requ 0
+tmp1   requ 1
+one    requ 2
+mone   requ 3
+af     requ 4
+a      requ 4
+bc     requ 5
+b      requ 5
+c      requ wrksp+11
+de     requ 6
+d      requ 6
+e      requ wrksp+13
+hl     requ 7
+h      requ 7
+l      requ wrksp+15
+ix     requ 8
+iy     requ 9
+sp     requ 10
+af_    requ 12
+bc_    requ 13
+de_    requ 14
+hl_    requ 15
+
+bytes:
+b0     byte 0
+b1     byte 1
+b2     byte 2
+b3     byte 3
+b4     byte 4
+b5     byte 5
+b6     byte 6
+b7     byte 7
+b8     byte 8
+b9     byte 9
+b10    byte 10
+b11    byte 11
+b12    byte 12
+b13    byte 13
+b14    byte 14
+b15    byte 15
+       bss    240
