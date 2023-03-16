@@ -147,6 +147,12 @@ public class SkoolConverter {
                 tms9900Line.setInstruction("sb   one,b");
                 additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "jne  " + Util.getLabel(opr1.getValue())));
                 break;
+            case "ex":
+                tms9900Line.setInstruction(".ex_" + getTMS9900Equivalent(opr1) + "_" + getTMS9900Equivalent(opr2));
+                break;
+            case "exx":
+                tms9900Line.setInstruction(".exx");
+                break;
             case "inc":
                 if (opr1 != null) {
                     boolean isWord = opr1.isWordOperand();
@@ -207,6 +213,9 @@ public class SkoolConverter {
                     }
                 }
                 break;
+            case "ldir":
+                tms9900Line.setInstruction(".ldir");
+                break;
             case "neg":
                 tms9900Line.setInstruction("neg a");
                 break;
@@ -216,6 +225,9 @@ public class SkoolConverter {
             case "pop":
                 tms9900Line.setInstruction(".pop " + opr1.getRegister());
                 break;
+            case "res":
+                tms9900Line.setInstruction("szcb @bits+" + opr1.getValue() + "," + getTMS9900Equivalent(opr2));
+                break;
             case "ret":
                 if (opr1 == null) {
                     tms9900Line.setInstruction("rt");
@@ -223,8 +235,17 @@ public class SkoolConverter {
                     tms9900Line.setInstruction("; " + instruction);
                 }
                 break;
+            case "set":
+                tms9900Line.setInstruction("socb @bits+" + opr1.getValue() + "," + getTMS9900Equivalent(opr2));
+                break;
             case "sub":
                 tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr1) + ",a");
+                break;
+            case "sbc":
+                tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
+                break;
+            case "srl":
+                tms9900Line.setInstruction("srl  " + getTMS9900Equivalent(opr1) + ",1");
                 break;
             case "xor":
                 if (opr1.getType() == Operand.Type.Register && opr1.getRegister().equals("a")) {

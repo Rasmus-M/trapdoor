@@ -23,6 +23,16 @@ bc_    requ 13
 de_    requ 14
 hl_    requ 15
 
+bits:
+       byte >01
+       byte >02
+       byte >04
+       byte >08
+       byte >10
+       byte >20
+       byte >40
+       byte >80
+
 bytes:
 b0     byte 0
 b1     byte 1

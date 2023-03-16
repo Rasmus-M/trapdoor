@@ -1,0 +1,50 @@
+**
+* Macros
+*
+       .defm proc
+       mov  r11,*sp+
+       .endm
+
+       .defm endproc
+       dect r10
+       mov  *sp,r11
+       b    *r11
+       .endm
+
+       .defm push
+       mov  #1,*sp+
+       .endm
+
+       .defm pop
+       dect sp
+       mov  *sp,#1
+       .endm
+
+       .defm peek
+       mov  @-2(sp),#1
+       .endm
+
+       .defm ldir
+!      movb *hl+,*de+
+       dec  bc
+       jne  -!
+       .endm
+
+       .defm exx
+       mov  bc,tmp0
+       mov  bc_,bc
+       mov  tmp0,bc_
+       mov  hl,tmp0
+       mov  hl_,hl
+       mov  tmp0,hl_
+       mov  de,tmp0
+       mov  de_,de
+       mov  tmp0,de_
+       .endm
+
+       .defm ex_de_hl
+       mov  de,tmp0
+       mov  hl,de
+       mov  tmp0,hl
+       .endm
+

@@ -1793,7 +1793,7 @@ _34466:
        jne  _34557                     ; JR NZ,34557       ; ...then skip ahead to #R34557
        movb @bytes+2,a                 ; LD A,2            ; Set depth of "Home Sweet Home" brickwork to 2...
        mov  a,@_43159                  ; LD (43159),A      ; ...
-       ; SET 3,(IX+10)                 ; SET 3,(IX+10)     ; Set "All Home" Flag
+       socb @bits+3,@10(ix)            ; SET 3,(IX+10)     ; Set "All Home" Flag
        jmp  _34557                     ; JR 34557          ; Skip ahead to #R34557
 _34527:
        movb @_34207,a                  ; LD A,(34207)      ; If current level is not Level 2...
@@ -1835,7 +1835,7 @@ _34557:
        mov  *hl,tmp0                   ; BIT 5,(HL)        ; ...
        andi tmp0,32                    ;                   
        jeq  _34606                     ; JR Z,34606        ; ...then skip ahead to #R34606
-       ; RES 5,(HL)                    ; RES 5,(HL)        ; Reset Update Scores and Display Flag
+       szcb @bits+5,*hl                ; RES 5,(HL)        ; Reset Update Scores and Display Flag
        bl   @_47499                    ; CALL 47499        ; Update scores and display
 _34606:
        li   hl,_61312                  ; LD HL,61312       ; Point HL at Display Buffer 1
@@ -1845,7 +1845,7 @@ _34606:
        mov  a,@_34271                  ; LD (34271),A      ; ...
        jeq  _34623                     ; JR Z,34623        ; If "Display Buffer 2 is Primary" Flag is reset then skip ahead to #R34623 (Display Buffer 1
                                                            ; is Primary, Display Buffer 2 is Secondary)
-       ; EX DE,HL                      ; EX DE,HL          ; Switch DE and HL (Display Buffer 1 is Secondary, Display Buffer 2 is Primary)
+       .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (Display Buffer 1 is Secondary, Display Buffer 2 is Primary)
 _34623:
        mov  hl,@_34279                 ; LD (34279),HL     ; Store address of Primary Display Buffer at #R34279
        movb @_34219,a                  ; LD A,(34219)      ; Load A with control input
@@ -1924,7 +1924,7 @@ _34718:
        .push ix                        ; PUSH IX           ; Transfer start address of current entry in complex state data into HL...
        .pop hl                         ; POP HL            ; ...
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
-       ; LDIR                          ; LDIR              ; Copy current entry in complex state data into Table of Initial-State Data for Complex
+       .ldir                           ; LDIR              ; Copy current entry in complex state data into Table of Initial-State Data for Complex
                                                            ; Entities at #R59821
 _34740:
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
@@ -1961,7 +1961,7 @@ _34774:
        .push ix                        ; PUSH IX           ; Transfer start address of current entry in complex state data into DE...
        .pop de                         ; POP DE            ; ...
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
-       ; LDIR                          ; LDIR              ; Copy current entry in Table of Initial-State Data for Complex Entities at #R59821 into
+       .ldir                           ; LDIR              ; Copy current entry in Table of Initial-State Data for Complex Entities at #R59821 into
                                                            ; complex state data
 _34796:
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
@@ -1974,7 +1974,7 @@ _34803:
        li   hl,_34298                  ; LD HL,34298       ; Point HL at Joystick Mode Flag
        li   de,_34207                  ; LD DE,34207       ; Point DE at store for current level number
        clr  af                         ; XOR A             ; Set A to zero and reset Carry Flag
-       ; SBC HL,DE                     ; SBC HL,DE         ; Subtract DE from HL to leave HL = 91
+       sb   de,hl                      ; SBC HL,DE         ; Subtract DE from HL to leave HL = 91
        movb l,b                        ; LD B,L            ; Load B with 91
        li   hl,_34207                  ; LD HL,34207       ; Point HL at store for current level number...
 _34819:
@@ -2017,7 +2017,7 @@ _34880:
        jne  _34880                     ; JR NZ,34880       ; Loop back if we have not reached data for required level
 * At this point, HL points to the start of the list of start addresses of the current level's data blocks
        li   de,_34236                  ; LD DE,34236       ; Copy this level's data block start addresses to #R34236...
-       ; LDIR                          ; LDIR              ; ...
+       .ldir                           ; LDIR              ; ...
        movb @bytes+9,b                 ; LD B,9            ; Clear Store for Script Instruction Loop Data...
        li   hl,_34285                  ; LD HL,34285       ; ...
 _34894:
@@ -2041,7 +2041,7 @@ _34894:
        li   de,_22529                  ; LD DE,22529       ; ...
        movb @bytes+9,*hl               ; LD (HL),9         ; ...
        li   bc,767                     ; LD BC,767         ; ...
-       ; LDIR                          ; LDIR              ; ...
+       .ldir                           ; LDIR              ; ...
        rt                              ; RET               ; Return
 
 * If Fire Pressed, or Character Swap Pending Flag Set, then Swap Characters
@@ -2052,14 +2052,14 @@ _34916:
        mov  *hl,tmp0                   ; BIT 6,(HL)        ; ...
        andi tmp0,64                    ;                   
        jeq  _34927                     ; JR Z,34927        ; ...then skip ahead to #R34927
-       ; RES 6,(HL)                    ; RES 6,(HL)        ; Reset Character Swap Pending Flag
+       szcb @bits+6,*hl                ; RES 6,(HL)        ; Reset Character Swap Pending Flag
        jmp  _34944                     ; JR 34944          ; Skip ahead to #R34944
 _34927:
        movb @_34219,a                  ; LD A,(34219)      ; Load A with control input
        mov  a,tmp0                     ; BIT 4,A           ; If fire was pressed...
        andi tmp0,16                    ;                   
        jne  _34940                     ; JR NZ,34940       ; ...then skip ahead to #R34940
-       ; RES 1,(HL)                    ; RES 1,(HL)        ; Reset Characters Already Swapped Flag
+       szcb @bits+1,*hl                ; RES 1,(HL)        ; Reset Characters Already Swapped Flag
 _34936:
        bl   @_53825                    ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
                                                            ; location (#R34230)
@@ -2070,7 +2070,7 @@ _34940:
        andi tmp0,2                     ;                   
        jne  _34936                     ; JR NZ,34936       ; ...then jump back to #R34936
 _34944:
-       ; SET 1,(HL)                    ; SET 1,(HL)        ; Set Characters Already Swapped Flag
+       socb @bits+1,*hl                ; SET 1,(HL)        ; Set Characters Already Swapped Flag
        movb *hl,a                      ; LD A,(HL)         ; Load Game Flags into A
        ; XOR 1                         ; XOR 1             ; Flip bit 7 (Berk / Drutt flag)...
        movb a,*hl                      ; LD (HL),A         ; ...
@@ -2633,7 +2633,7 @@ _35786:
        andi tmp0,64                    ;                   
        jeq  _35802                     ; JR Z,35802        ; ...then skip ahead to #R35802
 * Berk is flying
-       ; RES 6,(IX+9)                  ; RES 6,(IX+9)      ; Reset Berk's Is Flying Flag
+       szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset Berk's Is Flying Flag
        li   hl,_35359                  ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
        b    @_48098                    ; JP 48098          ; ...and execute
 * No control pressed and Berk not flying
@@ -2765,7 +2765,7 @@ _35969:
        b    @_48098                    ; JP 48098          ; ...and execute
 * Berk's current power is flying
 _35985:
-       ; SET 6,(IX+9)                  ; SET 6,(IX+9)      ; Set Berk's Is Flying Flag
+       socb @bits+6,@9(ix)             ; SET 6,(IX+9)      ; Set Berk's Is Flying Flag
        li   hl,_35417                  ; LD HL,35417       ; Point HL at script data for Berk starting to fly...
        b    @_48098                    ; JP 48098          ; ...and execute
 * Berk's current power is jumping
@@ -2859,7 +2859,7 @@ _36103:
 _36116:
        movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with width of entity at IY, minus 1...
        sb   @5(iy),a                   ; SUB (IY+5)        ; ...
-       ; SRL A                         ; SRL A             ; ...divide value by 2...
+       srl  a,1                        ; SRL A             ; ...divide value by 2...
        sb   @bytes+2,a                 ; SUB 2             ; ...and subtract 2
        a    @5(iy),a                   ; ADD A,(IY+5)      ; Add result to x-coordinate of entity's left edge
 * At this point, A holds the x-coordinate of the middle of the entity at IY, minus two
@@ -2876,7 +2876,7 @@ _36137:
        andi tmp0,64                    ;                   
        jne  _36200                     ; JR NZ,36200       ; ...then skip ahead to #R36200
 * Attempt to move Berk left (not flying) (see bugs)
-       ; RES 1,(IX+9)                  ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
        bl   @_54666                    ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
        jnc  _36171                     ; JR NC,36171       ; ...and if a collision occurred, then skip ahead to #R36171
 * No collision
@@ -2930,7 +2930,7 @@ _36214:
        b    @_36282                    ;                   
 !:
 * Attempt to move Berk right (not flying) (see bugs)
-       ; RES 1,(IX+9)                  ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
        bl   @_54569                    ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  _36249                     ; JR NC,36249       ; ...and if a collision occurred, then skip ahead to #R36249
@@ -2993,9 +2993,9 @@ _36296:
        mov  a,@_34221                  ; LD (34221),A      ; ...
        mov  @_34260,iy                 ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set this dropped entity's velocity factor to 2...
-       ; RES 5,(IY+10)                 ; RES 5,(IY+10)     ; ...reset its Is Being Carried Flag...
-       ; SET 6,(IY+10)                 ; SET 6,(IY+10)     ; ...and set its Can Fall Flag
-       ; RES 4,(IX+9)                  ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
+       szcb @bits+5,@10(iy)            ; RES 5,(IY+10)     ; ...reset its Is Being Carried Flag...
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its Can Fall Flag
+       szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
        mov  @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Berk's Walking Right Flag is reset...
        andi tmp0,1                     ;                   
        jeq  _36339                     ; JR Z,36339        ; ...then skip ahead to #R36339
@@ -3059,7 +3059,7 @@ _36393:
        mov  a,@_50712                  ; LD (50712),A      ; ...
        bl   @_36296                    ; CALL 36296        ; Make Berk drop the key and load IY with its complex state data address
        movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set depth of key to 0 (i.e. out of display)
-       ; SET 4,E                       ; SET 4,E           ; Set Level Exit Door Unlocked Flag...
+       socb @bits+4,e                  ; SET 4,E           ; Set Level Exit Door Unlocked Flag...
        movb e,a                        ; LD A,E            ; ...
        mov  a,@_34208                  ; LD (34208),A      ; ...
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
@@ -3106,7 +3106,7 @@ _36471:
        clr  af                         ; XOR A             ; Set class of entity held by Berk to zero (i.e. none)...
        mov  a,@_34221                  ; LD (34221),A      ; ...
        mov  a,@_34224                  ; LD (34224),A      ; Set number of elapsed game-cycles in current block to zero
-       ; RES 4,(IX+9)                  ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
+       szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
        mov  @_34260,iy                 ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk...
        movb a,@1(iy)                   ; LD (IY+1),A       ; ...and set its depth to zero (i.e. outside room)
        movb @10(iy),a                  ; LD A,(IY+10)      ; Initialise remaining duration of power to value encoded entity's complex state data (bits
@@ -3120,10 +3120,10 @@ _36471:
 !:
 * Power is floating
        movb @bytes+12,@12(ix)          ; LD (IX+12),12     ; Set distance Berk will be pushed by Drutt while floating to 12
-       ; SET 7,(IX+9)                  ; SET 7,(IX+9)      ; Set Berk's Moving Upwards Flag
+       socb @bits+7,@9(ix)             ; SET 7,(IX+9)      ; Set Berk's Moving Upwards Flag
        movb @bytes+240,@11(ix)         ; LD (IX+11),240    ; Reset Berk's Walking Right, Walking Left, Unused (11,2) and Unused (11,3) flags, and set his
                                                            ; Impassable Leftwards, Impassable Rightwards, Interaction (11,6) and Interaction (11,7) flags
-       ; SET 7,(IX+8)                  ; SET 7,(IX+8)      ; Set bit 7 of Berk's class value (i.e. set "Spans Full Depth" Flag)
+       socb @bits+7,@8(ix)             ; SET 7,(IX+8)      ; Set bit 7 of Berk's class value (i.e. set "Spans Full Depth" Flag)
        ab   one,@6(ix)                 ; INC (IX+6)        ; Increase y-coordinate of Berk's bottom edge by two characters...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
 _36536:
@@ -3202,7 +3202,7 @@ _36625:
 * Used by the routine at #R36390.
 _36638:
        movb @_34208,a                  ; LD A,(34208)      ; Set Update Scores and Display Flag...
-       ; SET 5,A                       ; SET 5,A           ; ...
+       socb @bits+5,a                  ; SET 5,A           ; ...
        mov  a,@_34208                  ; LD (34208),A      ; ...
        mov  @_34256,iy                 ; LD IY,(34256)     ; Load IY with address of complex state data for Door just interacted with
        movb @9(iy),a                   ; LD A,(IY+9)       ; Load A with destination level from Door's state data...
@@ -3212,7 +3212,7 @@ _36638:
 * Destination level is Level 1 (i.e. Level 4 completed)
        bl   @_36753                    ; CALL 36753        ; Load IX with address of Berk's complex state data and set his horizontal position to match
                                                            ; Level 1's entry door
-       ; SET 2,(IX+10)                 ; SET 2,(IX+10)     ; Set "Back to Level 1" Flag
+       socb @bits+2,@10(ix)            ; SET 2,(IX+10)     ; Set "Back to Level 1" Flag
        movb @bytes+10,*ix              ; LD (IX+0),10      ; Set Berk's room to 10
        movb @bytes+103,@4(ix)          ; LD (IX+4),103     ; Set y-coordinate of Berk's top edge to 103
        movb @bytes+109,@6(ix)          ; LD (IX+6),109     ; Set y-coordinate of Berk's bottom edge to 109
@@ -3228,7 +3228,7 @@ _36638:
        li   hl,_36625                  ; LD HL,36625       ; Overwrite Drutt's entry in Level 1's State Data for Complex Entities with data at #R36625...
        li   de,_43671                  ; LD DE,43671       ; ...
        li   bc,13                      ; LD BC,13          ; ...
-       ; LDIR                          ; LDIR              ; ...
+       .ldir                           ; LDIR              ; ...
        li   hl,_35359                  ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
        b    @_48098                    ; JP 48098          ; ...and execute
 * Destination level is not Level 1
@@ -3239,7 +3239,7 @@ _36725:
        bl   @_48850                    ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
 _36739:
        li   hl,_34208                  ; LD HL,34208       ; Reset Level Exit Door Unlocked Flag...
-       ; RES 4,(HL)                    ; RES 4,(HL)        ; ...
+       szcb @bits+4,*hl                ; RES 4,(HL)        ; ...
        movb @bytes+5,a                 ; LD A,5            ; Set door colour to 5 (cyan, i.e. locked)...
        mov  a,@_50712                  ; LD (50712),A      ; ...
        bl   @_36616                    ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
@@ -3354,7 +3354,7 @@ _36921:
        movb @5(iy),a                   ; LD A,(IY+5)       ; If x-coordinate of Berk's left side is 104 or greater...
        cb   a,@bytes+104               ; CP 104            ; ...
        ; RET NC                        ; RET NC            ; ...then return
-       ; SET 2,(IX+9)                  ; SET 2,(IX+9)      ; Set Trap Door Opened Flag
+       socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set Trap Door Opened Flag
        clr  af                         ; XOR A             ; Set room of "Closed Trap Door" to 0 (i.e. remove from Trap Door Room)...
        mov  a,@_43188                  ; LD (43188),A      ; ...
        ab   one,a                      ; INC A             ; Increase A to 1 (index of Trap Door Room)...
@@ -3378,7 +3378,7 @@ _36950:
 * Address of complex state data for an entity
        clr  af                         ; XOR A             ; Set current room of Flying Skeleton Creature (Level 1) to zero...
        mov  a,@_43619                  ; LD (43619),A      ; ...
-       ; SET 1,(IX+9)                  ; SET 1,(IX+9)      ; Set Flying Skeleton Creature's Inactive Flag
+       socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set Flying Skeleton Creature's Inactive Flag
        rt                              ; RET               ; Return (i.e. terminate further script processing)
 
 * Close the Trap Door if Berk is Not in Room 1 and Drutt is in Room 4 (Level 1)
@@ -3391,7 +3391,7 @@ _36966:
        movb @_43671,a                  ; LD A,(43671)      ; If Drutt's current room is not 4 (room at bottom of Trap Door Shaft)...
        cb   a,@bytes+4                 ; CP 4              ; ...
        ; RET NZ                        ; RET NZ            ; ...then return
-       ; SET 3,(IX+9)                  ; SET 3,(IX+9)      ; Set Berk and Drutt Through Trap Door Flag
+       socb @bits+3,@9(ix)             ; SET 3,(IX+9)      ; Set Berk and Drutt Through Trap Door Flag
        jmp  _36996                     ; JR 36996          ; Close the Trap Door and return
 
 * Script Routine (38) Close the Trap Door
@@ -3491,7 +3491,7 @@ _37111:
        mov  @10(iy),tmp0               ; BIT 6,(IY+10)     ; If Drutt's Can Fall Flag is set...
        andi tmp0,64                    ;                   
        jne  _37128                     ; JR NZ,37128       ; ...then skip ahead to #R37128
-       ; SET 6,(IY+10)                 ; SET 6,(IY+10)     ; Set Drutt's Can Fall Flag
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; Set Drutt's Can Fall Flag
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set Drutt's Velocity Factor to 2
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 _37128:
@@ -3799,8 +3799,8 @@ _37718:
 * The following code affects the behaviour of the right-most spider depending upon how many times Berk has been
 * killed by a spider. See (trivia) and (pokes).
        movb @_34223,a                  ; LD A,(34223)      ; Load number of times Berk has been killed by a spider into A...
-       ; SRL A                         ; SRL A             ; ...and divide by four, discarding remainder...
-       ; SRL A                         ; SRL A             ; ...
+       srl  a,1                        ; SRL A             ; ...and divide by four, discarding remainder...
+       srl  a,1                        ; SRL A             ; ...
        a    c,a                        ; ADD A,C           ; Add this value to C, in C...
        movb a,c                        ; LD C,A            ; ...
 _37744:
@@ -4011,7 +4011,7 @@ _38074:
        movb @_34220,a                  ; LD A,(34220)      ; If Berk's current power is not immunity to Bubo (Level 2)...
        cb   a,@bytes+9                 ; CP 9              ; ...
        jne  _38093                     ; JR NZ,38093       ; ...then skip ahead to #R38093
-       ; SET 3,(IX+9)                  ; SET 3,(IX+9)      ; Set Bubo's Harmless Flag
+       socb @bits+3,@9(ix)             ; SET 3,(IX+9)      ; Set Bubo's Harmless Flag
        jmp  _38101                     ; JR 38101          ; Skip ahead to #R38101
 _38093:
        bl   @_54768                    ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
@@ -4034,7 +4034,7 @@ _38119:
        mov  @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Bubo is not being carried...
        andi tmp0,32                    ;                   
        jeq  _38132                     ; JR Z,38132        ; ...then skip ahead to #R38132
-       ; SET 2,(IX+9)                  ; SET 2,(IX+9)      ; Set Bubo's Waiting to Fire Flag
+       socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set Bubo's Waiting to Fire Flag
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 * The code block below is only entered if Bubo's Must Process Current Script Data Flag is reset (i.e. he is not
 * firing), the Projectile's Fired Flag is reset and Bubo is not being carried.
@@ -4054,7 +4054,7 @@ _38132:
        b    @_48096                    ;                   
 !:
 _38155:
-       ; RES 2,(IX+9)                  ; RES 2,(IX+9)      ; Reset Bubo's Waiting to Fire Flag
+       szcb @bits+2,@9(ix)             ; RES 2,(IX+9)      ; Reset Bubo's Waiting to Fire Flag
        li   hl,_38032                  ; LD HL,38032       ; Point HL at script data for Bubo firing...
        b    @_48098                    ; JP 48098          ; ...and execute
 
@@ -4065,7 +4065,7 @@ _38155:
 * routine. Input:  IX  Address of complex state data for Bubo (Level 2) IY  Address of complex state data for Bubo's
 * projectile
 _38165:
-       ; SET 1,(IY+9)                  ; SET 1,(IY+9)      ; Set projectile's Fired Flag
+       socb @bits+1,@9(iy)             ; SET 1,(IY+9)      ; Set projectile's Fired Flag
        mov  @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Bubo is being carried...
        andi tmp0,32                    ;                   
        jne  _38181                     ; JR NZ,38181       ; ...then skip ahead to #R38181
@@ -4142,7 +4142,7 @@ _38293:
        movb c,@2(ix)                   ; LD (IX+2),C       ; ...and set this as the Graphic Lookup Address for the projectile's complex state data
                                                            ; entry...
        movb b,@3(ix)                   ; LD (IX+3),B       ; ...
-       ; SET 2,(IX+9)                  ; SET 2,(IX+9)      ; Set projectile's Has Hit Target Flag
+       socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set projectile's Has Hit Target Flag
        .pop bc                         ; POP BC            ; Restore BC (B = current velocity factor)
        rt                              ; RET               ; Return
 _38328:
@@ -4173,7 +4173,7 @@ _38361:
        ab   one,@12(ix)                ; INC (IX+12)       ; Increase projectile's velocity factor by one
        rt                              ; RET               ; Return
 _38372:
-       ; RES 1,(IX+9)                  ; RES 1,(IX+9)      ; Reset projectile's Fired Flag
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset projectile's Fired Flag
        rt                              ; RET               ; Return
 
 * Start Level 2 Key Falling if Bubo's Projectile is in Place Below it
@@ -4195,7 +4195,7 @@ _38377:
        mov  @10(iy),tmp0               ; BIT 6,(IY+10)     ; If key's Is Falling Flag is set...
        andi tmp0,64                    ;                   
        ; RET NZ                        ; RET NZ            ; ...then return
-       ; SET 6,(IY+10)                 ; SET 6,(IY+10)     ; Set key's Is Falling Flag
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; Set key's Is Falling Flag
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set key's velocity factor to 2
        rt                              ; RET               ; Return
 
@@ -4242,7 +4242,7 @@ _38468:
        li   de,_38424                  ; LD DE,38424       ; Point DE at Table of Current Positions in Apebeasts' Script Data
        li   hl,_38416                  ; LD HL,38416       ; Point HL at Table of Initial Positions in Apebeasts' Script Data
        li   bc,8                       ; LD BC,8           ; Load BC with 8 (as there are eight bytes to copy)
-       ; LDIR                          ; LDIR              ; Overwrite addresses in Table of Current Positions with those from Table of Initial Positions
+       .ldir                           ; LDIR              ; Overwrite addresses in Table of Current Positions with those from Table of Initial Positions
        rt                              ; RET               ; Return
 
 * Update States of Apebeasts (Level 2) and Store Current Positions in Script Data
@@ -4644,7 +4644,7 @@ _39227:
        jne  _39227                     ;                   
        movb @bytes+107,@5(ix)          ; LD (IX+5),107     ; Set x-coordinate of Berk's left edge to 107
        movb @bytes+112,@7(ix)          ; LD (IX+7),112     ; Set x-coordinate of Berk's right edge to 112
-       ; SET 0,(IX+9)                  ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
        li   hl,_59048                  ; LD HL,59048       ; Set Berk's graphic layout data address to #R59048...
        movb l,@2(ix)                   ; LD (IX+2),L       ; ...(Berk being thrown left)...
        movb h,@3(ix)                   ; LD (IX+3),H       ; ...
@@ -4696,7 +4696,7 @@ _39289:
        movb a,@5(iy)                   ; LD (IY+5),A       ; ...
        a    @bytes+2,a                 ; ADD A,2           ; Set the Clawed Foot's right edge...
        movb a,@7(iy)                   ; LD (IY+7),A       ; ...to be two characters to the right of its left edge
-       ; SET 1,(IY+9)                  ; SET 1,(IY+9)      ; Set Clawed Foot's Moving Down Flag
+       socb @bits+1,@9(iy)             ; SET 1,(IY+9)      ; Set Clawed Foot's Moving Down Flag
        jmp  _39341                     ; JR 39341          ; Skip ahead to #R39341
 * Clawed Foot attack underway
 _39337:
@@ -4737,7 +4737,7 @@ _39386:
 _39391:
        li   bc,_35515                  ; LD BC,35515       ; Set current position in Berk's script data to...
        mov  bc,@_35687                 ; LD (35687),BC     ; ...Berk in floating position
-       ; SET 0,(IX+9)                  ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
        movb @bytes+12,a                ; LD A,12           ; Set Clawed Foot's Moving Up Flag and Holding Berk Flag...
        movb a,@9(iy)                   ; LD (IY+9),A       ; ...
        li   bc,_40368                  ; LD BC,40368       ; Set Clawed Foot's graphic layout data address to point to #R40368 (Reaching, Closed)...
@@ -4799,7 +4799,7 @@ _39496:
 _39501:
        movb @bytes+100,a               ; LD A,100          ; Set Clawed Foot's Attack Timer to 100...
        mov  a,@_34228                  ; LD (34228),A      ; ...i.e. Clawed Foot will attack again in 100 cycles
-       ; SET 6,(IX+10)                 ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
+       socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set Berk's velocity factor to 2
        li   bc,_35359                  ; LD BC,35359       ; Set current position in Berk's script data to...
        mov  bc,@_35687                 ; LD (35687),BC     ; ...Berk starting to fall downwards
@@ -5046,7 +5046,7 @@ _39845:
 _39890:
        movb @bytes+8,*hl               ; LD (HL),8         ; Set creature's mode to "Attacking"
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set creature's depth to 1
-       ; SET 5,(IX+9)                  ; SET 5,(IX+9)      ; Set Berk's "Do Not Update State" Flag
+       socb @bits+5,@9(ix)             ; SET 5,(IX+9)      ; Set Berk's "Do Not Update State" Flag
        li   bc,_40442                  ; LD BC,40442       ; Set graphic layout data address for creature to #R40442 (Large Yellow Creature with mouth
                                                            ; open)...
        bl   @_39944                    ; CALL 39944        ; ...
@@ -5076,7 +5076,7 @@ _39918:
 * Used by the routine at #R39776.
 _39934:
        bl   @_53667                    ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-       ; RES 5,(IX+9)                  ; RES 5,(IX+9)      ; Reset Berk's "Do Not Update State" Flag
+       szcb @bits+5,@9(ix)             ; RES 5,(IX+9)      ; Reset Berk's "Do Not Update State" Flag
        movb @bytes+0,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
        rt                              ; RET               ; Return
 
@@ -5795,8 +5795,8 @@ _41424:
        ab   one,a                      ; INC A             ; Set x-coordinate of Boni's right edge...
        movb a,@7(iy)                   ; LD (IY+7),A       ; ...to one to the right of this
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set Boni's depth to 1
-       ; SET 6,(IY+10)                 ; SET 6,(IY+10)     ; Set Boni's Can Fall Flag
-       ; SET 2,(IX+9)                  ; SET 2,(IX+9)      ; Set Skeleton's Removed From Game Flag
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; Set Boni's Can Fall Flag
+       socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set Skeleton's Removed From Game Flag
        rt                              ; RET               ; Return
 * Current attribute in Skeleton's graphic layout data is not 1
 _41473:
@@ -5877,7 +5877,7 @@ _41580:
        mov  @9(ix),tmp0                ; BIT 0,(IX+9)      ; If Skeleton's Must Process Current Script Data Flag is reset...
        andi tmp0,1                     ;                   
        jeq  _41597                     ; JR Z,41597        ; ...then skip ahead to #R41597
-       ; RES 0,(IX+9)                  ; RES 0,(IX+9)      ; Reset Skeleton's Must Process Current Script Data Flag
+       szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Skeleton's Must Process Current Script Data Flag
        movb @_45430,a                  ; LD A,(45430)      ; If Fake Boni is in a room with index of 4 or more (room above Pit, or Pit)...
        cb   a,@bytes+4                 ; CP 4              ; ...
        jnc  _41561                     ; JR NC,41561       ; ...then jump back to #R41561 (move Skeleton back)
@@ -5886,7 +5886,7 @@ _41597:
        sb   @bytes+9,a                 ; SUB 9             ; ...is at least nine characters to the right of Berk's right edge...
        cb   a,@7(iy)                   ; CP (IY+7)         ; ...
        jnc  _41561                     ; JR NC,41561       ; ...then jump back to #R41561 (move Skeleton back)
-       ; SET 0,(IX+9)                  ; SET 0,(IX+9)      ; Set Skeleton's Must Process Current Script Data Flag
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Skeleton's Must Process Current Script Data Flag
        li   hl,_41280                  ; LD HL,41280       ; Point HL at script data for Skeleton stepping forward (left)...
        b    @_48098                    ; JP 48098          ; ...and execute
 
@@ -5932,7 +5932,7 @@ _41653:
        jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
        b    @_42360                    ;                   
 !:
-       ; SET 0,(IX+9)                  ; SET 0,(IX+9)      ; Set Ghost's Moving Upwards Flag
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Ghost's Moving Upwards Flag
        rt                              ; RET               ; Return
 * Ghost's current room is 4 (room above pit)
 _41687:
@@ -5965,7 +5965,7 @@ _41716:
        jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
        b    @_42374                    ;                   
 !:
-       ; RES 0,(IX+9)                  ; RES 0,(IX+9)      ; Reset Ghost's Moving Upwards Flag (i.e. moving downwards)
+       szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Ghost's Moving Upwards Flag (i.e. moving downwards)
        rt                              ; RET               ; Return
 * Ghost's current room is 5 (pit)
 _41731:
@@ -6009,7 +6009,7 @@ _41767:
                                                            ; (Rocking) and return...
        b    @_42512                    ; JP 42512          ; ...
 _41791:
-       ; RES 2,(IX+9)                  ; RES 2,(IX+9)      ; Reset Cannon's Just Loaded Flag
+       szcb @bits+2,@9(ix)             ; RES 2,(IX+9)      ; Reset Cannon's Just Loaded Flag
        movb @bytes+50,@12(ix)          ; LD (IX+12),50     ; Set Cannon's Fire Timer to 50
 _41799:
        li   bc,_42530                  ; LD BC,42530       ; Set Cannon's graphic layout data address to point to graphic layout data for Cannon
@@ -6149,7 +6149,7 @@ _42015:
        cb   a,@bytes+36                ; CP 36             ; If collision was not with entity of class 36 (skeleton, Level 4)...
        jne  _42058                     ; JR NZ,42058       ; ...then skip ahead to #R42058
        li   hl,_45413                  ; LD HL,45413       ; Set Skeleton's Is Dying Flag...
-       ; SET 1,(HL)                    ; SET 1,(HL)        ; ...
+       socb @bits+1,*hl                ; SET 1,(HL)        ; ...
 _42058:
        cb   a,@bytes+31                ; CP 31             ; If collision was with entity of class 31 (Berk)...
        ; CALL Z,53667                  ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
@@ -6218,7 +6218,7 @@ _42140:
        movb @_34209,a                  ; LD A,(34209)      ; Increase Cannon's ammunition level by 10...
        a    @bytes+10,a                ; ADD A,10          ; ...
        mov  a,@_34209                  ; LD (34209),A      ; ...
-       ; SET 2,(IY+9)                  ; SET 2,(IY+9)      ; Set Cannon's Just Loaded Flag
+       socb @bits+2,@9(iy)             ; SET 2,(IY+9)      ; Set Cannon's Just Loaded Flag
        movb @bytes+20,@12(iy)          ; LD (IY+12),20     ; Set Cannon's Fire Timer to 20
        jmp  _42084                     ; JR 42084          ; Reset current drip's state and loop back to #R42070 for next drip
 _42190:
@@ -6298,7 +6298,7 @@ _42285:
        movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of creature's right edge is less than 126...
        cb   a,@bytes+126               ; CP 126            ; ...
        joc  _42309                     ; JR C,42309        ; ...then skip ahead to #R42309
-       ; SET 0,(HL)                    ; SET 0,(HL)        ; Set creature's Horizontal Direction Flag (moving left)
+       socb @bits+0,*hl                ; SET 0,(HL)        ; Set creature's Horizontal Direction Flag (moving left)
        rt                              ; RET               ; Return
 _42309:
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move creature right one character...
@@ -6313,7 +6313,7 @@ _42320:
        movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of creature's left edge is at least 108...
        cb   a,@bytes+108               ; CP 108            ; ...
        jnc  _42337                     ; JR NC,42337       ; ...then skip ahead to #R42337
-       ; RES 0,(HL)                    ; RES 0,(HL)        ; Reset creature's Horizontal Direction Flag (moving right)
+       szcb @bits+0,*hl                ; RES 0,(HL)        ; Reset creature's Horizontal Direction Flag (moving right)
        rt                              ; RET               ; Return
 _42337:
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move creature left one character...
@@ -6327,7 +6327,7 @@ _42346:
 * Vertical Direction Flag reset, moving down
        cb   a,@bytes+108               ; CP 108            ; If y-coordinate of creature's top edge is not 108...
        jne  _42360                     ; JR NZ,42360       ; ...then skip ahead to #R42360
-       ; SET 1,(HL)                    ; SET 1,(HL)        ; Set creature's Vertical Direction Flag (moving up)
+       socb @bits+1,*hl                ; SET 1,(HL)        ; Set creature's Vertical Direction Flag (moving up)
        rt                              ; RET               ; Return
 * This entry point is used by the routine at #R41633.
 _42360:
@@ -6338,7 +6338,7 @@ _42360:
 _42367:
        cb   a,@bytes+100               ; CP 100            ; If y-coordinate of creature's top edge is not 100...
        jne  _42374                     ; JR NZ,42374       ; ...then skip ahead to #R42374
-       ; RES 1,(HL)                    ; RES 1,(HL)        ; Reset creature's Vertical Direction Flag (moving down)
+       szcb @bits+1,*hl                ; RES 1,(HL)        ; Reset creature's Vertical Direction Flag (moving down)
        rt                              ; RET               ; Return
 * This entry point is used by the routine at #R41633.
 _42374:
@@ -7187,11 +7187,11 @@ _45939:
        movb c,a                        ; LD A,C            ; If entity's depth is not the same as current depth in C...
        cb   a,@1(ix)                   ; CP (IX+1)         ; ...
        jne  _45957                     ; JR NZ,45957       ; ...then skip ahead to #R45957
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
        .push ix                        ; PUSH IX           ; Store IX (pointer to current entry in simple/complex state data)
        bl   @_45965                    ; CALL 45965        ; Load Primary Display Buffer with graphic layout data for current entity
        .pop ix                         ; POP IX            ; Restore IX (pointer to current entry in simple/complex state data)
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
 _45957:
        a    de,ix                      ; ADD IX,DE         ; Advance IX to next entity's state data
        jmp  _45921                     ; JR 45921          ; Loop back to #R45921
@@ -7277,7 +7277,7 @@ _46045:
        a    de,hl                      ; ADD HL,DE         ; Move HL to position in Primary Display Buffer corresponding to x- and y-coordinates of
                                                            ; entity...
        a    bc,hl                      ; ADD HL,BC         ; ...
-       ; EX DE,HL                      ; EX DE,HL          ; Switch DE (now points to position in Primary Display Buffer for current entity) and HL
+       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now points to position in Primary Display Buffer for current entity) and HL
 _46051:
        movb *de,a                      ; LD A,(DE)         ; Load A with Graphic Set Index plus one from this entry in Primary Display Buffer...
        ab   one,a                      ; INC A             ; ...and if value is now zero (i.e. old value was 255 corresponding to a block outside
@@ -8119,7 +8119,7 @@ _47227:
 * Used by the routines at #R34438, #R34916 and #R47468.
 _47241:
        movb @_34208,a                  ; LD A,(34208)      ; Reset Show Score Flag...
-       ; RES 7,A                       ; RES 7,A           ; ...
+       szcb @bits+7,a                  ; RES 7,A           ; ...
        mov  a,@_34208                  ; LD (34208),A      ; ...
        li   ix,_23232                  ; LD IX,23232       ; Point IX to start of second-last row of Attribute File
        movb @_34210,a                  ; LD A,(34210)      ; Load remaining time / lives into A...
@@ -8328,7 +8328,7 @@ _47485:
 * Used by the routine at #R34438.
 _47499:
        li   hl,_34208                  ; LD HL,34208       ; Set Show Score Flag...
-       ; SET 7,(HL)                    ; SET 7,(HL)        ; ...
+       socb @bits+7,*hl                ; SET 7,(HL)        ; ...
        li   hl,0                       ; LD HL,0           ; Set HL to zero
        movb @_34210,a                  ; LD A,(34210)      ; If no time / lives remain...
        ; OR A                          ; OR A              ; ...
@@ -8340,14 +8340,14 @@ _47517:
        sb   one,b                      ; DJNZ 47517        ; ...
        jne  _47517                     ;                   
        mov  @_34211,de                 ; LD DE,(34211)     ; Subtract value of Timer Tick Counter (i.e. Score Penalty) from current level's score...
-       ; SBC HL,DE                     ; SBC HL,DE         ; ...
+       sb   de,hl                      ; SBC HL,DE         ; ...
 _47526:
        mov  hl,@_34213                 ; LD (34213),HL     ; Set score for current level
        mov  @_34215,de                 ; LD DE,(34215)     ; Load DE with current total score
        a    de,hl                      ; ADD HL,DE         ; Add score for current level to total score...
        mov  hl,@_34215                 ; LD (34215),HL     ; ...and store
        mov  @_34299,de                 ; LD DE,(34299)     ; Load current high score into DE
-       ; SBC HL,DE                     ; SBC HL,DE         ; Subtract high score from current total score...
+       sb   de,hl                      ; SBC HL,DE         ; Subtract high score from current total score...
        joc  _47551                     ; JR C,47551        ; ...and if this is less than zero (i.e. high score is higher than current total score) then
                                                            ; skip ahead to #R47551
        mov  @_34215,hl                 ; LD HL,(34215)     ; Load current total score into HL...
@@ -8413,7 +8413,7 @@ _47682:
        li   bc,32                      ; LD BC,32          ; Load BC with 32 (width of a row in Attribute File)
        .push hl                        ; PUSH HL           ; Store HL (Attribute File address at which to print character)
        movb @bytes+0,d                 ; LD D,0            ; Set D to zero
-       ; EX DE,HL                      ; EX DE,HL          ; Swap DE (now Attribute File address at which to print character) and HL (now H = 0, L =
+       .ex_de_hl                       ; EX DE,HL          ; Swap DE (now Attribute File address at which to print character) and HL (now H = 0, L =
                                                            ; character to print)
        a    hl,hl                      ; ADD HL,HL         ; Multiply index of character to print by eight in HL, as each character's graphic data is
                                                            ; eight bytes long...
@@ -8421,13 +8421,13 @@ _47682:
        a    hl,hl                      ; ADD HL,HL         ; ...
        li   de,15360                   ; LD DE,15360       ; Add eight times character index to 15360 in HL, to point to graphic of character in ROM...
        a    de,hl                      ; ADD HL,DE         ; ...
-       ; EX DE,HL                      ; EX DE,HL          ; Swap DE (now points to graphic of character in ROM) and HL (now 15360)
+       .ex_de_hl                       ; EX DE,HL          ; Swap DE (now points to graphic of character in ROM) and HL (now 15360)
        .pop hl                         ; POP HL            ; Restore HL (Attribute File address at which to print character)
        bl   @_47709                    ; CALL 47709        ; Print top half of a double-height text character
        a    bc,hl                      ; ADD HL,BC         ; Add BC to HL to advance down a character row
        bl   @_47709                    ; CALL 47709        ; Print bottom half of a double-height text character
        andi a,0*256                    ; AND A             ; Reset Carry Flag
-       ; SBC HL,BC                     ; SBC HL,BC         ; Subtract 32 from HL to restore to value it had upon starting this routine
+       sb   bc,hl                      ; SBC HL,BC         ; Subtract 32 from HL to restore to value it had upon starting this routine
        rt                              ; RET               ; Return
 
 * Print Half of a Double-Height Text Character
@@ -8455,7 +8455,7 @@ _47709:
 _47724:
        movb *de,a                      ; LD A,(DE)         ; Load a byte from the graphic data into C...
        movb a,c                        ; LD C,A            ; ...
-       ; SRL C                         ; SRL C             ; Shift bitmap data left one pixel in C
+       srl  c,1                        ; SRL C             ; Shift bitmap data left one pixel in C
        ; OR C                          ; OR C              ; Merge this into bitmap data already in A to give a "bold" typeface appearance
        andi a,127*256                  ; AND 127           ; Drop the leftmost bit to prevent one character touching the next (space between letters)
        movb a,*hl                      ; LD (HL),A         ; Load the bitmap data into two consecutive rows to provide double-height (2 chars) text...
@@ -8496,7 +8496,7 @@ _47772:
        andi a,0*256                    ; AND A             ; Reset Carry Flag
 _47777:
        ab   one,*iy                    ; INC (IY+0)        ; Advance character at current string position to next numeric character up
-       ; SBC HL,DE                     ; SBC HL,DE         ; Subtract current power of ten from number to convert
+       sb   de,hl                      ; SBC HL,DE         ; Subtract current power of ten from number to convert
        jnc  _47777                     ; JR NC,47777       ; If number to convert has not dropped below 0 (i.e. we have not yet subtracted too many of the
                                                            ; current power of ten) then loop back to #R47777
        a    de,hl                      ; ADD HL,DE         ; We have subtracted one too many of the current power of ten, so add it back to make the
@@ -8509,11 +8509,11 @@ _47777:
 * 
 * Used by the routines at #R47893 and #R47942. Output: A  Index of the key that was pressed
 _47788:
-       ; EXX                           ; EXX               ; Swap registers
+       .exx                            ; EXX               ; Swap registers
        li   bc,_65278                  ; LD BC,65278       ; Load B and C with 254
        li   hl,_47853                  ; LD HL,47853       ; Point HL at list of return values
        ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard) [IN 65278 reads the half row CAPS SHIFT to V]
-       ; SET 0,A                       ; SET 0,A           ; Set bit 0 of A (i.e. clear pressing of CAPS SHIFT)
+       socb @bits+0,a                  ; SET 0,A           ; Set bit 0 of A (i.e. clear pressing of CAPS SHIFT)
        andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
        ; XOR 31                        ; XOR 31            ; Invert all of the lowest five bits
        jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
@@ -8535,21 +8535,21 @@ _47811:
        jne  _47811                     ; JR NZ,47811       ; If there are any more half rows to check then loop back to #R47811
        ; RLC B                         ; RLC B             ; Set BC to 32766 for final keyboard half-row
        ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
-       ; SET 1,A                       ; SET 1,A           ; Set bit 1 of A (i.e. clear pressing of SYMBOL SHIFT)
+       socb @bits+1,a                  ; SET 1,A           ; Set bit 1 of A (i.e. clear pressing of SYMBOL SHIFT)
        andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
        ; XOR 31                        ; XOR 31            ; Invert all of the lowest five bits
        jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
-       ; EXX                           ; EXX               ; Swap registers
+       .exx                            ; EXX               ; Swap registers
        rt                              ; RET               ; Return [no key pressed]
 _47843:
-       ; SRL A                         ; SRL A             ; Shift bits right
+       srl  a,1                        ; SRL A             ; Shift bits right
        joc  _47850                     ; JR C,47850        ; If carry flag is set, then this is the key that was pressed, so skip ahead to #R47850
        inc  hl                         ; INC HL            ; Advance HL to check next character
        jmp  _47843                     ; JR 47843          ; Loop back to #R47843
 _47850:
        movb *hl,a                      ; LD A,(HL)         ; Load current character in list of return values string into A as this is the key that was
                                                            ; pressed
-       ; EXX                           ; EXX               ; Swap registers
+       .exx                            ; EXX               ; Swap registers
        rt                              ; RET               ; Return [key pressed]
 
 * Return Values from Keyboard Reading Routine
@@ -8778,11 +8778,11 @@ _48160:
        andi tmp0,16                    ;                   
        ; RET Z                         ; RET Z             ; ...then return
 * Berk is carrying something
-       ; RES 4,(IX+9)                  ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
+       szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
        clr  af                         ; XOR A             ; Set class of entity held by Berk to zero (i.e. nothing)...
        mov  a,@_34221                  ; LD (34221),A      ; ...
        mov  @_34260,iy                 ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk...
-       ; RES 5,(IY+10)                 ; RES 5,(IY+10)     ; ...and reset its Is Being Carried Flag
+       szcb @bits+5,@10(iy)            ; RES 5,(IY+10)     ; ...and reset its Is Being Carried Flag
        movb @6(iy),a                   ; LD A,(IY+6)       ; Load E with height of entity minus one...
        sb   @4(iy),a                   ; SUB (IY+4)        ; ...
        movb a,e                        ; LD E,A            ; ...
@@ -8863,13 +8863,13 @@ _48248:
 * Script Routine (09) Reset Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
 _48260:
-       ; RES 0,(IX+9)                  ; RES 0,(IX+9)      ; Reset Must Process Current Script Data Flag
+       szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Must Process Current Script Data Flag
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (08) Set Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
 _48267:
-       ; SET 0,(IX+9)                  ; SET 0,(IX+9)      ; Set Must Process Current Script Data Flag
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Must Process Current Script Data Flag
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (15) Jump to New Address if Berk Is Carrying Something Input:  HL  Current position in script data
@@ -9026,10 +9026,10 @@ _48445:
        cb   a,@bytes+10                ; CP 10             ; If Berk's current power is not 10 (floating)...
        jne  _48474                     ; JR NZ,48474       ; ...then skip ahead to #R48474
        mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
-       ; RES 7,(IX+9)                  ; RES 7,(IX+9)      ; Reset Berk's Moving Upwards Flag
+       szcb @bits+7,@9(ix)             ; RES 7,(IX+9)      ; Reset Berk's Moving Upwards Flag
        movb @bytes+192,@11(ix)         ; LD (IX+11),192    ; Reset Berk's Walking Right, Walking Left, Unused (11,2), Unused (11,3), Impassable Leftwards
                                                            ; and Impassable Rightwards flags and set his Interaction (11,6) and Interaction (11,7) flags
-       ; RES 7,(IX+8)                  ; RES 7,(IX+8)      ; Reset bit 7 of Berk's class value (change from 159 to 31)
+       szcb @bits+7,@8(ix)             ; RES 7,(IX+8)      ; Reset bit 7 of Berk's class value (change from 159 to 31)
        sb   one,@6(ix)                 ; DEC (IX+6)        ; Decrease Berk's bottom y-coordinate by two...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
        bl   @_55516                    ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
@@ -9055,7 +9055,7 @@ _48487:
        cb   a,@bytes+130               ; CP 130            ; ...and if collision was not with entity of class 130 (causes Berk and Drutt to bounce off or
                                                            ; bang head)...
        jne  _48507                     ; JR NZ,48507       ; ...then skip ahead to #R48507
-       ; RES 6,(IX+9)                  ; RES 6,(IX+9)      ; Reset entity's Is Flying Flag
+       szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset entity's Is Flying Flag
        li   hl,_35359                  ; LD HL,35359       ; Load HL with script data address for Berk starting to fall downwards
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 _48507:
@@ -9269,7 +9269,7 @@ _48768:
        bl   @_48897                    ; CALL 48897        ; Move carried entity into vertical position appropriate to its height
        movb @_34272,a                  ; LD A,(34272)      ; Load A and E with width of entity (characters) carried by Berk, minus 1...
        movb a,e                        ; LD E,A            ; ...
-       ; SRL A                         ; SRL A             ; Divide A by two, removing remainder
+       srl  a,1                        ; SRL A             ; Divide A by two, removing remainder
        movb @1(ix),d                   ; LD D,(IX+1)       ; Load carried entity's depth into D
        rt                              ; RET               ; Return
 
@@ -9291,11 +9291,11 @@ _48791:
        movb @7(ix),a                   ; LD A,(IX+7)       ; Load B with width of Entity 1 minus one...
        sb   @5(ix),a                   ; SUB (IX+5)        ; ...
        movb a,b                        ; LD B,A            ; ...
-       ; SRL A                         ; SRL A             ; Load C with half of width of Entity 1 minus one...
+       srl  a,1                        ; SRL A             ; Load C with half of width of Entity 1 minus one...
        movb a,c                        ; LD C,A            ; ...
        movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with half of width of Entity 2 minus one...
        sb   @5(iy),a                   ; SUB (IY+5)        ; ...
-       ; SRL A                         ; SRL A             ; ...
+       srl  a,1                        ; SRL A             ; ...
        a    @5(iy),a                   ; ADD A,(IY+5)      ; ...and add x-coordinate of left edge of Entity 2
 * At this point, A holds the x-coordinate of the mid-point of Entity 2
        sb   c,a                        ; SUB C             ; Subtract half of width of Entity 1 minus one...
@@ -9321,8 +9321,8 @@ _48791:
 _48850:
        mov  @_34256,iy                 ; LD IY,(34256)     ; Load IY with address of complex state data for entity to be held by Berk...
        mov  iy,@_34260                 ; LD (34260),IY     ; ...and store at #R34260 as address of state data for entity held by Berk
-       ; SET 5,(IY+10)                 ; SET 5,(IY+10)     ; Set the entity's Is Being Carried Flag
-       ; SET 4,(IX+9)                  ; SET 4,(IX+9)      ; Set Berk's Carrying Something Flag
+       socb @bits+5,@10(iy)            ; SET 5,(IY+10)     ; Set the entity's Is Being Carried Flag
+       socb @bits+4,@9(ix)             ; SET 4,(IX+9)      ; Set Berk's Carrying Something Flag
        movb @8(iy),a                   ; LD A,(IY+8)       ; Set class of entity held by Berk to be this entity's class...
        mov  a,@_34221                  ; LD (34221),A      ; ...
 _48872:
@@ -9330,7 +9330,7 @@ _48872:
        sb   @5(iy),a                   ; SUB (IY+5)        ; ...
        mov  a,@_34272                  ; LD (34272),A      ; ...and store at #R34272
        movb a,e                        ; LD E,A            ; Load E with width of entity, minus 1
-       ; SRL A                         ; SRL A             ; Move entity defined at IY into horizontal position appropriate to its height (see notes
+       srl  a,1                        ; SRL A             ; Move entity defined at IY into horizontal position appropriate to its height (see notes
                                                            ; above)...
        ; XOR 1                         ; XOR 1             ; ...
        ab   one,a                      ; INC A             ; ...
@@ -9345,7 +9345,7 @@ _48897:
                                                            ; above)...
        sb   @4(iy),a                   ; SUB (IY+4)        ; ...
        movb a,e                        ; LD E,A            ; ...
-       ; SRL A                         ; SRL A             ; ...
+       srl  a,1                        ; SRL A             ; ...
        ; XOR 1                         ; XOR 1             ; ...
        ab   one,a                      ; INC A             ; ...
        a    @4(ix),a                   ; ADD A,(IX+4)      ; ...
@@ -9359,7 +9359,7 @@ _48916:
 * complex state data for an entity
 _48920:
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set Berk's initial velocity factor to 2
-       ; SET 6,(IX+10)                 ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
+       socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
        bl   @_36296                    ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 
@@ -9426,7 +9426,7 @@ _49010:
        sb   one,a                      ; DEC A             ; Decrease Jump State Index
        li   de,_48994                  ; LD DE,48994       ; Load DE with start address of Table of Addresses of Berk's Jump Script Data
        bl   @_53814                    ; CALL 53814        ; Advance DE by 2xA Bytes, load WORD at this location into HL...
-       ; EX DE,HL                      ; EX DE,HL          ; ...
+       .ex_de_hl                       ; EX DE,HL          ; ...
        b    @_48098                    ; JP 48098          ; ...and execute script instruction at this location
 
 * Graphic Layout Data Architecture (Level 4) Double Row of Green Bricks, 32 Characters Wide
@@ -10667,7 +10667,7 @@ _51792:
        andi tmp0,1                     ;                   
        jeq  _51841                     ; JR Z,51841        ; ...then skip ahead to #R51841
 * Drutt Mode Flag is set (i.e. Drutt Mode)
-       ; SET 1,(IX+9)                  ; SET 1,(IX+9)      ; Set Drutt's Under Player Control Flag
+       socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set Drutt's Under Player Control Flag
        movb @_34219,a                  ; LD A,(34219)      ; Load A with control input
        mov  a,tmp0                     ; BIT 0,A           ; If right has been pressed...
        andi tmp0,1                     ;                   
@@ -10686,14 +10686,14 @@ _51792:
        b    @_51944                    ;                   
 !:
 * At this point, no control has been pressed, so Drutt is effectively not under player control
-       ; RES 1,(IX+9)                  ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
        movb @1(iy),a                   ; LD A,(IY+1)       ; If worm's depth is zero (i.e. not in play area)...
        ; OR A                          ; OR A              ; ...
        jeq  _51875                     ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
        b    @_51960                    ; JP 51960          ; Move Drutt closer to the worm and eat it if close enough
 * Drutt Mode Flag is reset (i.e. Berk Mode)
 _51841:
-       ; RES 1,(IX+9)                  ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
        movb @1(iy),a                   ; LD A,(IY+1)       ; If worm's depth is not zero (i.e. is in play area)...
        ; OR A                          ; OR A              ; ...
        jeq  !                          ; JP NZ,51960       ; ...then move Drutt closer to the worm and eat it if close enough
@@ -10718,7 +10718,7 @@ _51875:
        bl   @_54222                    ; CALL 54222        ; ...
        li   de,_51890                  ; LD DE,51890       ; Point DE at Table of Addresses of Script Data for Drutt's Actions...
        bl   @_53814                    ; CALL 53814        ; ...and load DE with entry of index A in this table
-       ; EX DE,HL                      ; EX DE,HL          ; Switch DE and HL (now contains address of randomly selected script data)
+       .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (now contains address of randomly selected script data)
        b    @_48098                    ; JP 48098          ; Execute script data at address in HL
 
 * Table of Addresses of Script Data for Drutt's Actions
@@ -11442,7 +11442,7 @@ _52967:
        jeq  _53004                     ; JR Z,53004        ; ...then skip ahead to #R53004
 * Drutt and worm in different rooms, so countdown to next direction change resumes as worm out of danger
 _52982:
-       ; RES 1,(IX+9)                  ; RES 1,(IX+9)      ; Reset In Danger Flag
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset In Danger Flag
        movb @12(ix),a                  ; LD A,(IX+12)      ; If worm's Time Until Direction Change is zero...
        ; OR A                          ; OR A              ; ...
        jeq  _52998                     ; JR Z,52998        ; ...then skip ahead to #R52998 (have worm choose new direction)
@@ -11464,7 +11464,7 @@ _53004:
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @_48096                    ;                   
 !:
-       ; SET 1,(IX+9)                  ; SET 1,(IX+9)      ; Set In Danger Flag
+       socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set In Danger Flag
        li   hl,_52817                  ; LD HL,52817       ; Point HL at script data for worm, fleeing right...
        b    @_48098                    ; JP 48098          ; ...and execute
 * Drutt's left edge more than one character to the right of worm's left edge
@@ -11477,7 +11477,7 @@ _53034:
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @_48096                    ;                   
 !:
-       ; SET 1,(IX+9)                  ; SET 1,(IX+9)      ; Set In Danger Flag
+       socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set In Danger Flag
        li   hl,_52797                  ; LD HL,52797       ; Point HL at script data for worm, fleeing left...
        b    @_48098                    ; JP 48098          ; ...and execute
 
@@ -11855,7 +11855,7 @@ _53635:
        movb h,d                        ; LD D,H            ; ...
        movb l,e                        ; LD E,L            ; ...
        inc  de                         ; INC DE            ; ...
-       ; LDIR                          ; LDIR              ; ...
+       .ldir                           ; LDIR              ; ...
        rt                              ; RET               ; Return
 
 * Fill Top 22 Rows of Attribute File with Attribute Value in A
@@ -11868,7 +11868,7 @@ _53649:
        inc  de                         ; INC DE            ; ...
        li   bc,703                     ; LD BC,703         ; Set counter to 703, as we are filling 704 characters (32*22)
        movb a,*hl                      ; LD (HL),A         ; Set first byte to A...
-       ; LDIR                          ; LDIR              ; ...and repeat for remaining 703 bytes
+       .ldir                           ; LDIR              ; ...and repeat for remaining 703 bytes
        movb @bytes+3,b                 ; LD B,3            ; Pause for three iterations...
        bl   @_34675                    ; CALL 34675        ; ...
        rt                              ; RET               ; Return
@@ -11879,7 +11879,7 @@ _53649:
 * #R41633, #R41961, #R42064, #R42266 and #R42486.
 _53667:
        movb @_34208,a                  ; LD A,(34208)      ; Set "Berk Has Been Killed" Flag...
-       ; SET 2,A                       ; SET 2,A           ; ...
+       socb @bits+2,a                  ; SET 2,A           ; ...
        mov  a,@_34208                  ; LD (34208),A      ; ...
        rt                              ; RET               ; Return
 
@@ -11903,22 +11903,22 @@ _53667:
 * Used by the routine at #R34438.
 _53723:
        li   hl,_34208                  ; LD HL,34208       ; Point HL at Game Flags
-       ; RES 3,(HL)                    ; RES 3,(HL)        ; Reset "Reset Spiders to Initial State" Flag
+       szcb @bits+3,*hl                ; RES 3,(HL)        ; Reset "Reset Spiders to Initial State" Flag
        mov  *hl,tmp0                   ; BIT 2,(HL)        ; If "Berk Has Been Killed" Flag is not set...
        andi tmp0,4                     ;                   
        ; RET Z                         ; RET Z             ; ...then return
-       ; RES 2,(HL)                    ; RES 2,(HL)        ; Reset "Berk Has Been Killed" Flag
-       ; SET 3,(HL)                    ; SET 3,(HL)        ; Set "Reset Spiders to Initial State" Flag
+       szcb @bits+2,*hl                ; RES 2,(HL)        ; Reset "Berk Has Been Killed" Flag
+       socb @bits+3,*hl                ; SET 3,(HL)        ; Set "Reset Spiders to Initial State" Flag
        mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        bl   @_36296                    ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        li   de,_53674                  ; LD DE,53674       ; Point DE at location two bytes (1 WORD) before start of Table of Addresses of Berk Reset Data
        movb @_34207,a                  ; LD A,(34207)      ; Load current level number into A
        bl   @_53814                    ; CALL 53814        ; Load DE with that level's address (from table at #R53676) for complex state data to revert
                                                            ; Berk to after he is killed
-       ; EX DE,HL                      ; EX DE,HL          ; Swap HL (now address of complex state data to revert to) and DE
+       .ex_de_hl                       ; EX DE,HL          ; Swap HL (now address of complex state data to revert to) and DE
        mov  @_34240,de                 ; LD DE,(34240)     ; Load DE with address of current level's complex state data for Berk
        li   bc,13                      ; LD BC,13          ; Overwrite Berk's current complex state data...
-       ; LDIR                          ; LDIR              ; ...with reset data from table at #R53684 for current level
+       .ldir                           ; LDIR              ; ...with reset data from table at #R53684 for current level
        li   hl,_35363                  ; LD HL,35363       ; Load HL with address of script data for Berk starting to fall...
        mov  hl,@_35687                 ; LD (35687),HL     ; ...and store at #R35687 (as current position in Berk's script data)
        bl   @_53577                    ; CALL 53577        ; Cycle attributes (long, full-screen) and clear display buffers
@@ -12009,7 +12009,7 @@ _53848:
        mov  hl,@_34262                 ; LD (34262),HL     ; Store HL at #R34262
        movb @bytes+5,c                 ; LD C,5            ; Set BC to 5 (as entries are 5 bytes wide)
        li   de,_34230                  ; LD DE,34230       ; Copy data entry in room dimension data for entity's current room to #R34230...
-       ; LDIR                          ; LDIR              ; ...
+       .ldir                           ; LDIR              ; ...
        movb @_34231,a                  ; LD A,(34231)      ; Load position (chars) of left side of current room into E...
        movb a,e                        ; LD E,A            ; ...
        movb @_34232,a                  ; LD A,(34232)      ; Subtract position (chars) of right side of current room in A...
@@ -12026,10 +12026,10 @@ _53887:
                                                            ; location (#R34230)
        .push ix                        ; PUSH IX           ; Store IX
        bl   @_53635                    ; CALL 53635        ; Clear Display Buffers 1 & 2
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
        li   hl,_61312                  ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,_63424                  ; LD DE,63424       ; Point DE at Display Buffer 2
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
        mov  @_34231,hl                 ; LD HL,(34231)     ; For current character's current room, set H = room's right edge position and L = room's left
                                                            ; edge position (chars)
        mov  @_34233,de                 ; LD DE,(34233)     ; For current character's current room, set D = room's bottom edge position and E = room's top
@@ -12051,7 +12051,7 @@ _53926:
        movb h,a                        ; LD A,H            ; Load A with x-coordinate of right of room
        cb   a,c                        ; CP C              ; If x-coordinate of right of room is less than current x-coordinate...
        joc  _53940                     ; JR C,53940        ; ...then skip ahead to #R53940
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
        bl   @_53977                    ; CALL 53977        ; Advance pointers in Display Buffers and Attribute File address to next character
        jmp  _53943                     ; JR 53943          ; Skip ahead to #R53943
 * Current x-coordinate, C, is outside range of x-coordinates spanned by room
@@ -12088,7 +12088,7 @@ _53959:
 * display buffer 1 (at #R61312) DE'  Current position in display buffer 2 (at #R63424)
 _53968:
        movb @bytes+18,*ix              ; LD (IX+0),18      ; Set attribute to red INK, red PAPER
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
        movb @bytes+255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
        movb a,*hl                      ; LD (HL),A         ; ...
        movb a,*de                      ; LD (DE),A         ; ...
@@ -12100,7 +12100,7 @@ _53977:
        inc  de                         ; INC DE            ; Advance display buffer 2 pointer by three bytes to next entry...
        inc  de                         ; INC DE            ; ...
        inc  de                         ; INC DE            ; ...
-       ; EXX                           ; EXX               ; Switch registers
+       .exx                            ; EXX               ; Switch registers
        inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
        rt                              ; RET               ; Return
 
@@ -12158,7 +12158,7 @@ _54034:
        jne  !                          ; JP Z,54052        ; ...then skip ahead to #R54052
        b    @_54052                    ;                   
 !:
-       ; EX DE,HL                      ; EX DE,HL          ; Switch DE and HL (Display Buffer 1 is Secondary, Display Buffer 2 is Primary)
+       .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (Display Buffer 1 is Secondary, Display Buffer 2 is Primary)
 _54052:
        .push de                        ; PUSH DE           ; Copy address of Secondary Display Buffer into IY...
        .pop iy                         ; POP IY            ; ...
@@ -12232,7 +12232,7 @@ _54122:
 _54130:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
        movb *hl,a                      ; LD A,(HL)         ; Load attribute into A
-       ; SET 6,A                       ; SET 6,A           ; Set BRIGHT flag
+       socb @bits+6,a                  ; SET 6,A           ; Set BRIGHT flag
        movb a,*ix                      ; LD (IX+0),A       ; Place attribute at current position in Attribute File
        b    @_54107                    ; JP 54107          ; Loop back to #R54107
 _54140:
@@ -12245,7 +12245,7 @@ _54140:
 * to a Display File address. See the notes in #R47709 for more details. Input:  A  Attribute value (bit 7 is
 * "mirror" flag, rather than FLASH) B  Graphic set index C  Graphic index IX  Address in Attribute File
 _54144:
-       ; SET 6,A                       ; SET 6,A           ; Set Bright Flag
+       socb @bits+6,a                  ; SET 6,A           ; Set Bright Flag
        movb a,*ix                      ; LD (IX+0),A       ; Load attribute value into current Attribute File address
        clr  af                         ; XOR A             ; Load graphic set index into HL..
        movb b,l                        ; LD L,B            ; ...
@@ -12262,7 +12262,7 @@ _54144:
        a    hl,hl                      ; ADD HL,HL         ; ...
        a    hl,hl                      ; ADD HL,HL         ; ...
        a    de,hl                      ; ADD HL,DE         ; Add to address of start of this graphic set as an offset in HL
-       ; EX DE,HL                      ; EX DE,HL          ; Swap DE (now points to required graphic data) and HL (now address of start of graphic set
+       .ex_de_hl                       ; EX DE,HL          ; Swap DE (now points to required graphic data) and HL (now address of start of graphic set
                                                            ; from table at #R27000)
        .push ix                        ; PUSH IX           ; Switch Attribute File address into HL...
        .pop hl                         ; POP HL            ; ...
@@ -12272,7 +12272,7 @@ _54144:
        a    a,a                        ; ADD A,A           ; ...
        andi a,91*256                   ; AND 91            ; Drop the most significant bit to point to the correct location in Display File
        movb a,h                        ; LD H,A            ; Load back into HL (L is unaffected, as it should be)
-       ; EX DE,HL                      ; EX DE,HL          ; Switch DE (now Display File address) and HL (now pointer to graphic data)
+       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now Display File address) and HL (now pointer to graphic data)
        mov  *ix,tmp0                   ; BIT 7,(IX+0)      ; If mirror flag is set for Attribute File at current location...
        andi tmp0,128                   ;                   
        jeq  !                          ; JP NZ,54194       ; ...then skip to #R54194 to draw mirrored version
@@ -12292,7 +12292,7 @@ _54187:
 * 
 * Used by the routine at #R54144. Input:  HL  Address of bitmap data to draw IX  Address in Attribute File
 _54194:
-       ; RES 7,(IX+0)                  ; RES 7,(IX+0)      ; Reset Bit 7 (Mirror Flag, shared with FLASH flag so would cause graphic to flash)
+       szcb @bits+7,*ix                ; RES 7,(IX+0)      ; Reset Bit 7 (Mirror Flag, shared with FLASH flag so would cause graphic to flash)
        movb @bytes+8,b                 ; LD B,8            ; Set counter to 8 rows
 _54200:
        .push bc                        ; PUSH BC           ; Store BC (B = current counter value)
@@ -12343,14 +12343,14 @@ _54229:
        movb d,a                        ; LD A,D            ; Load most significant byte (MSB) of random seed into A
 * At this point, the three registers A, H and L encode a 24-bit number whose value is (256 * seed + 253)
        ; OR A                          ; OR A              ; Reset carry flag
-       ; SBC HL,DE                     ; SBC HL,DE         ; Subtract seed from HL...
-       ; SBC A,0                       ; SBC A,0           ; ...and decrement A if Carry Flag is set
-       ; SBC HL,DE                     ; SBC HL,DE         ; Subtract seed from HL...
-       ; SBC A,0                       ; SBC A,0           ; ...and decrement A if Carry Flag is set
+       sb   de,hl                      ; SBC HL,DE         ; Subtract seed from HL...
+       sb   @bytes+0,a                 ; SBC A,0           ; ...and decrement A if Carry Flag is set
+       sb   de,hl                      ; SBC HL,DE         ; Subtract seed from HL...
+       sb   @bytes+0,a                 ; SBC A,0           ; ...and decrement A if Carry Flag is set
 * At this point, the three registers A, H and L encode a 24-bit number whose value is (254 * seed + 253)
        movb a,e                        ; LD E,A            ; Calculate (AHL mod 65,537)...
        movb @bytes+0,d                 ; LD D,0            ; ...loading result into HL...
-       ; SBC HL,DE                     ; SBC HL,DE         ; ...
+       sb   de,hl                      ; SBC HL,DE         ; ...
        joc  !                          ; JP NC,54261       ; ...and if this is negative...
        b    @_54261                    ;                   
 !:
@@ -12936,7 +12936,7 @@ _55000:
        mov  @_34258,iy                 ; LD IY,(34258)     ; Load IY with address of complex state data for entity involved in last collision check
        movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with width of this entity, minus one...
        sb   @5(iy),a                   ; SUB (IY+5)        ; ...
-       ; SRL A                         ; SRL A             ; Divide result by two, clearing remainder...
+       srl  a,1                        ; SRL A             ; Divide result by two, clearing remainder...
        sb   one,a                      ; DEC A             ; ...and subtract one
        a    @5(iy),a                   ; ADD A,(IY+5)      ; Add x-coordinate of entity's left edge
        cb   a,@5(ix)                   ; CP (IX+5)         ; 
@@ -13084,7 +13084,7 @@ _55183:
 * Used by the routine at #R55041.
 _55187:
        movb @_34208,a                  ; LD A,(34208)      ; Set Character Swap Pending Flag...
-       ; SET 6,A                       ; SET 6,A           ; ...
+       socb @bits+6,a                  ; SET 6,A           ; ...
        mov  a,@_34208                  ; LD (34208),A      ; ...
        rt                              ; RET               ; Return
 
@@ -13112,7 +13112,7 @@ _55196:
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Move jumper up one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
 _55223:
-       ; SET 6,(IX+12)                 ; SET 6,(IX+12)     ; Set Downward Jump Phase Flag
+       socb @bits+6,@12(ix)            ; SET 6,(IX+12)     ; Set Downward Jump Phase Flag
        bl   @_55421                    ; CALL 55421        ; Increase current velocity of jumper's jump if less than 7
        movb one,a                      ; LD A,1            ; Prepare to set velocity of jumper's jump to one, downwards
        jmp  _55284                     ; JR 55284          ; Skip ahead to #R55284 (handle downward phase of jump)
@@ -13140,7 +13140,7 @@ _55258:
        jnc  _55270                     ; JR NC,55270       ; ...then skip ahead to #R55270
 * Drutt has knocked down an entity, e.g. Red Sweet on Level 1
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set initial velocity factor of entity jumper collided with to 2...
-       ; SET 6,(IY+10)                 ; SET 6,(IY+10)     ; ...and set its "Can Fall" flag
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its "Can Fall" flag
 _55270:
        bl   @_55433                    ; CALL 55433        ; Change jumper's room up one if appropriate
        sb   one,b                      ; DJNZ 55235        ; Decrease B (remaining number of characters to move up) and loop back to #R55235 if not zero
@@ -13211,7 +13211,7 @@ _55352:
 * Downward phase, and collision with entity of class 35 (platform, Level 1 or Level 3) or no collision at bottom of
 * screen
 _55363:
-       ; RES 6,(IX+12)                 ; RES 6,(IX+12)     ; Reset Downward Jump Phase Flag (i.e. prepare to jump up again)
+       szcb @bits+6,@12(ix)            ; RES 6,(IX+12)     ; Reset Downward Jump Phase Flag (i.e. prepare to jump up again)
        movb @_55022,a                  ; LD A,(55022)      ; Load A with Cached Control Input...
        mov  a,tmp0                     ; BIT 3,A           ; ...and if Back Bit is reset...
        andi tmp0,8                     ;                   
@@ -13321,7 +13321,7 @@ _55512:
 * Used by the routines at #R36638, #R39760, #R48417, #R51779, #R52098, #R52193 and #R52243. Input:  IX  Address of
 * complex state data for an entity
 _55516:
-       ; SET 6,(IX+10)                 ; SET 6,(IX+10)     ; Set entity's "Can Fall" flag
+       socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set entity's "Can Fall" flag
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set entity's initial velocity factor to 2
        rt                              ; RET               ; Return
 
@@ -13354,7 +13354,7 @@ _55532:
        ab   one,a                      ; INC A             ; Increase velocity factor by one and store for next pass (i.e. acceleration)...
        movb a,@12(ix)                  ; LD (IX+12),A      ; ...
 _55569:
-       ; SRL B                         ; SRL B             ; Divide current (i.e. not increased) velocity factor by 2
+       srl  b,1                        ; SRL B             ; Divide current (i.e. not increased) velocity factor by 2
 _55571:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If sum of y-coordinate of entity's bottom and entity's depth is 122...
        a    @1(ix),a                   ; ADD A,(IX+1)      ; ...(i.e. entity is at ground-level)...
@@ -13385,7 +13385,7 @@ _55599:
        jmp  _55599                     ; JR 55599          ; ...
 * Entity has landed (i.e. is at ground-level and has not collided with a marker of class 129)
 _55610:
-       ; RES 6,(IX+10)                 ; RES 6,(IX+10)     ; Reset entity's "Can Fall" flag as entity has landed
+       szcb @bits+6,@10(ix)            ; RES 6,(IX+10)     ; Reset entity's "Can Fall" flag as entity has landed
        jmp  _55592                     ; JR 55592          ; Loop back for next entity
 
 * Change Entity's Room Down One if Appropriate
@@ -14698,7 +14698,7 @@ _59543:
        li   hl,_40000                  ; LD HL,40000       ; Copy data just loaded to Display File / Attribute File...
        li   de,_16384                  ; LD DE,16384       ; ...
        li   bc,6912                    ; LD BC,6912        ; ...
-       ; LDIR                          ; LDIR              ; ...
+       .ldir                           ; LDIR              ; ...
        li   de,_32860                  ; LD DE,32860       ; Set data length to 32860
        li   ix,_27000                  ; LD IX,27000       ; Set base address for load to 27000
        movb @bytes+255,a               ; LD A,255          ; Load A with 255 to denote a data block
@@ -14804,7 +14804,7 @@ _59752:
 _59764:
        .push bc                        ; PUSH BC           ; Store BC (B = inner repeat count, C = outer repeat count)
        movb @_34217,a                  ; LD A,(34217)      ; Load current border colour into A
-       ; SET 4,A                       ; SET 4,A           ; Set Speaker Bit
+       socb @bits+4,a                  ; SET 4,A           ; Set Speaker Bit
        ; OUT (254),A                   ; OUT (254),A       ; Write Speaker Bit and border colour to Port 254
        movb d,b                        ; LD B,D            ; Apply delay based upon delay constant D...
 _59773:
@@ -14828,7 +14828,7 @@ _59782:
        sb   one,b                      ; DJNZ 59782        ; ...
        jne  _59782                     ;                   
 _59794:
-       ; RES 4,A                       ; RES 4,A           ; Reset Speaker Bit
+       szcb @bits+4,a                  ; RES 4,A           ; Reset Speaker Bit
        ; OUT (254),A                   ; OUT (254),A       ; Write Speaker Bit and border colour to Port 254
        movb e,b                        ; LD B,E            ; Do nothing for E cycles...
 _59799:
@@ -14901,7 +14901,7 @@ _63000:
        li   hl,_40000                  ; LD HL,40000       ; 
        li   de,_16384                  ; LD DE,16384       ; 
        li   bc,6912                    ; LD BC,6912        ; 
-       ; LDIR                          ; LDIR              ; 
+       .ldir                           ; LDIR              ; 
        li   de,_32860                  ; LD DE,32860       ; Load 32860 bytes to 27000
        li   ix,_27000                  ; LD IX,27000       ; 
        movb @bytes+255,a               ; LD A,255          ; 
