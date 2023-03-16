@@ -10,11 +10,15 @@ public class SkoolConverter {
 
     private final static Pattern commentReferencePattern = Pattern.compile("#R([0-9]{5})");
 
+    private Set<Integer> references;
+    private List<Integer> labels;
+
     public void convert(File skoolFile, File tms9900File) throws IOException  {
         List<Z80Line> z80Lines = readSkoolFile(skoolFile);
         System.out.println(z80Lines.size() + " lines read from: " + skoolFile.getPath());
-        Set<Integer> references = findReferences(z80Lines);
-        List<TMS9900Line> tms9900Lines = convert(z80Lines, references);
+        references = findReferences(z80Lines);
+        labels = findLabels(z80Lines);
+        List<TMS9900Line> tms9900Lines = convert(z80Lines);
         writeTMS9900File(tms9900File, tms9900Lines);
         System.out.println(tms9900Lines.size() + " lines written to: " + tms9900File.getPath());
     }
@@ -35,6 +39,15 @@ public class SkoolConverter {
                     }
                     break;
                 case Data:
+                    if (z80Line.getInstruction().startsWith("DEFW")) {
+                        String[] words = z80Line.getInstruction().substring(4).trim().split(",");
+                        for (String word : words) {
+                            int addr = Integer.parseInt(word);
+                            if (addr >= 16384) {
+                                references.add(addr);
+                            }
+                        }
+                    }
                 case Comment:
                 case ContinuationComment:
                     String comment = z80Line.getComment();
@@ -50,7 +63,19 @@ public class SkoolConverter {
         return references;
     }
 
-    private List<TMS9900Line> convert(List<Z80Line> z80Lines, Set<Integer> references) {
+    private List<Integer> findLabels(List<Z80Line> z80Lines) {
+        List<Integer> labels = new ArrayList<>();
+        for (Z80Line z80Line : z80Lines) {
+            if (z80Line.getType() == Z80Line.Type.Data || z80Line.getType() == Z80Line.Type.Instruction) {
+                if (references.contains(z80Line.getAddress())) {
+                    labels.add(z80Line.getAddress());
+                }
+            }
+        }
+        return labels;
+    }
+
+    private List<TMS9900Line> convert(List<Z80Line> z80Lines) {
         List<TMS9900Line> tms9900Lines = new ArrayList<>();
         int i = 0;
         while (i < z80Lines.size()) {
@@ -65,7 +90,11 @@ public class SkoolConverter {
                     tms9900Lines.add(new TMS9900Line(TMS9900Line.Type.Comment, z80Line.getComment()));
                     break;
                 case ContinuationComment:
-                    Z80Line previousLine = i > 0 ? z80Lines.get(i - 1) : null;
+                    int j = i;
+                    Z80Line previousLine = j > 0 ? z80Lines.get(--j) : null;
+                    while (previousLine != null && previousLine.getType() == Z80Line.Type.ContinuationComment && j > 0) {
+                        previousLine = z80Lines.get(--j);
+                    }
                     Z80Line.Type previousLineType = previousLine != null ? previousLine.getType() : null;
                     tms9900Lines.add(new TMS9900Line(previousLineType == Z80Line.Type.Data ? TMS9900Line.Type.ContinuationCommentData : TMS9900Line.Type.ContinuationCommentInstruction, z80Line.getComment()));
                     break;
@@ -89,16 +118,31 @@ public class SkoolConverter {
     }
 
     private int convertData(Z80Line z80Line, List<TMS9900Line> tms9900Lines) {
-        String instruction = z80Line.getInstruction().replace("DEFB", "byte").replace("DEFW", "data");
-        if (z80Line.getComment() != null) {
-            Matcher matcher = commentReferencePattern.matcher(z80Line.getComment());
-            while (matcher.find()) {
-                int address = Integer.parseInt(matcher.group(1));
-                int msb = address / 256;
-                int lsb = address % 256;
-                String z80Bytes = lsb + "," + msb;
-                String tms9900Bytes = Util.getLabel(address) + "%256," + Util.getLabel(address) + "/256";
-                instruction = instruction.replace(z80Bytes, tms9900Bytes);
+        String instruction;
+        if (z80Line.getInstruction().startsWith("DEFM")) {
+            instruction = z80Line.getInstruction().replace("DEFM", "text").replace("'", "''").replace("\"", "'");
+        } else {
+            boolean isWord = z80Line.getInstruction().startsWith("DEFW");
+            instruction = z80Line.getInstruction().replace("DEFB", "byte").replace("DEFW", "data");
+            if (isWord) {
+                String[] words = instruction.substring(4).trim().split(",");
+                for (String word : words) {
+                    if (!word.isEmpty() && references.contains(Integer.parseInt(word))) {
+                        instruction = instruction.replace(word, getValidLabel(Integer.parseInt(word)));
+                    }
+                }
+            } else {
+                if (z80Line.getComment() != null) {
+                    Matcher matcher = commentReferencePattern.matcher(z80Line.getComment());
+                    while (matcher.find()) {
+                        int address = Integer.parseInt(matcher.group(1));
+                        int msb = address / 256;
+                        int lsb = address % 256;
+                        String z80Bytes = lsb + "," + msb;
+                        String tms9900Bytes = Util.getLabel(address) + "%256," + Util.getLabel(address) + "/256";
+                        instruction = instruction.replace(z80Bytes, tms9900Bytes);
+                    }
+                }
             }
         }
         tms9900Lines.add(new TMS9900Line(TMS9900Line.Type.Data, z80Line.getComment(), instruction));
@@ -125,7 +169,13 @@ public class SkoolConverter {
                 break;
             case "call":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("bl   @" + Util.getLabel(opr1.getValue()));
+                    tms9900Line.setInstruction("bl   @" + getTMS9900Equivalent(opr1));
+                } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
+                    tms9900Line.setInstruction(getInverseJumpInstruction(opr1.getFlag()));
+                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "bl   @" + getTMS9900Equivalent(opr2)));
+                    TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
+                    label.setLabel("!");
+                    additionalLines.add(label);
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
@@ -143,9 +193,12 @@ public class SkoolConverter {
                     }
                 }
                 break;
+            case "di":
+                tms9900Line.setInstruction("limi 0");
+                break;
             case "djnz":
                 tms9900Line.setInstruction("sb   one,b");
-                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "jne  " + Util.getLabel(opr1.getValue())));
+                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "jne  " + getTMS9900Equivalent(opr1)));
                 break;
             case "ex":
                 tms9900Line.setInstruction(".ex_" + getTMS9900Equivalent(opr1) + "_" + getTMS9900Equivalent(opr2));
@@ -165,23 +218,10 @@ public class SkoolConverter {
                 break;
             case "jp":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("b    @" + Util.getLabel(opr1.getValue()));
+                    tms9900Line.setInstruction("b    @" + getTMS9900Equivalent(opr1));
                 } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
-                    switch (opr1.getFlag()) {
-                        case "z":
-                            tms9900Line.setInstruction("jne  !");
-                            break;
-                        case "nz":
-                            tms9900Line.setInstruction("jeq  !");
-                            break;
-                        case "c":
-                            tms9900Line.setInstruction("jnc  !");
-                            break;
-                        case "nc":
-                            tms9900Line.setInstruction("joc  !");
-                            break;
-                    }
-                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "b    @" + Util.getLabel(opr2.getValue())));
+                    tms9900Line.setInstruction(getInverseJumpInstruction(opr1.getFlag()));
+                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "b    @" + getTMS9900Equivalent(opr2)));
                     TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                     label.setLabel("!");
                     additionalLines.add(label);
@@ -191,9 +231,9 @@ public class SkoolConverter {
                 break;
             case "jr":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("jmp  " + Util.getLabel(opr1.getValue()));
+                    tms9900Line.setInstruction("jmp  " + getTMS9900Equivalent(opr1));
                 } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
-                    tms9900Line.setInstruction("j" + getTMS9900Equivalent(opr1) + "  " + Util.getLabel(opr2.getValue()));
+                    tms9900Line.setInstruction("j" + getTMS9900Equivalent(opr1) + "  " + getTMS9900Equivalent(opr2));
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
@@ -219,11 +259,17 @@ public class SkoolConverter {
             case "neg":
                 tms9900Line.setInstruction("neg a");
                 break;
+            case "nop":
+                tms9900Line.setInstruction("nop");
+                break;
+            case "or":
+                tms9900Line.setInstruction("socb " + getTMS9900Equivalent(opr1) + ",a");
+                break;
             case "push":
-                tms9900Line.setInstruction(".push " + opr1.getRegister());
+                tms9900Line.setInstruction(".push " + getTMS9900Equivalent(opr1));
                 break;
             case "pop":
-                tms9900Line.setInstruction(".pop " + opr1.getRegister());
+                tms9900Line.setInstruction(".pop " + getTMS9900Equivalent(opr1));
                 break;
             case "res":
                 tms9900Line.setInstruction("szcb @bits+" + opr1.getValue() + "," + getTMS9900Equivalent(opr2));
@@ -231,9 +277,18 @@ public class SkoolConverter {
             case "ret":
                 if (opr1 == null) {
                     tms9900Line.setInstruction("rt");
+                } else if (opr1.getType() == Operand.Type.Flag) {
+                    tms9900Line.setInstruction(getInverseJumpInstruction(opr1.getFlag()));
+                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "rt"));
+                    TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
+                    label.setLabel("!");
+                    additionalLines.add(label);
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
+                break;
+            case "rlc":
+                tms9900Line.setInstruction("sra  " + getTMS9900Equivalent(opr1) + ",1");
                 break;
             case "set":
                 tms9900Line.setInstruction("socb @bits+" + opr1.getValue() + "," + getTMS9900Equivalent(opr2));
@@ -249,7 +304,9 @@ public class SkoolConverter {
                 break;
             case "xor":
                 if (opr1.getType() == Operand.Type.Register && opr1.getRegister().equals("a")) {
-                    tms9900Line.setInstruction("clr  af");
+                    tms9900Line.setInstruction("sb   a,a");
+                } else if (opr1.getType() == Operand.Type.Immediate && opr1.getValue() == 1) {
+                    tms9900Line.setInstruction("xor  one,a");
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
@@ -263,11 +320,26 @@ public class SkoolConverter {
         return 0;
     }
 
-    public String getTMS9900Equivalent(Operand operand) {
+    private String getInverseJumpInstruction(String flag) {
+        switch (flag) {
+            case "z":
+                return "jne  !";
+            case "nz":
+                return "jeq  !";
+            case "c":
+                return "jnc  !";
+            case "nc":
+                return "joc  !";
+            default:
+                return "; " + flag;
+        }
+    }
+
+    private String getTMS9900Equivalent(Operand operand) {
         return getTMS9900Equivalent(operand, operand.isWordOperand());
     }
 
-    public String getTMS9900Equivalent(Operand operand, boolean isWord) {
+    private String getTMS9900Equivalent(Operand operand, boolean isWord) {
         if (operand == null) {
             return "?";
         }
@@ -285,13 +357,14 @@ public class SkoolConverter {
                     if (operand.getValue() < 16384) {
                         return Integer.toString(operand.getValue());
                     } else {
-                        return Util.getLabel(operand.getValue());
+                        return getValidLabel(operand.getValue());
                     }
                 }
             case Register:
-                return operand.getRegister();
+                String reg = operand.getRegister();
+                return (reg.equals("c") || reg.equals("e") || reg.equals("l") ? "@" : "") + reg;
             case Indirect:
-                return "@" + Util.getLabel(operand.getValue());
+                return "@" + getValidLabel(operand.getValue());
             case IndirectRegister:
                 return "*" + operand.getRegister();
             case Indexed:
@@ -316,6 +389,24 @@ public class SkoolConverter {
             default:
                 return operand.getOperand();
         }
+    }
+
+    private String getValidLabel(int address) {
+        for (int i = 0; i < labels.size(); i++) {
+            int addr = labels.get(i);
+            if (addr == address) {
+                return Util.getLabel(address);
+            }
+            if (addr > address) {
+                if (i > 0) {
+                    int previousAddr = labels.get(i - 1);
+                    return Util.getLabel(previousAddr) + "+" + (address - previousAddr);
+                } else {
+                    return Integer.toString(address);
+                }
+            }
+        }
+        return Integer.toString(address);
     }
 
     private List<Z80Line> readSkoolFile(File skoolFile) throws IOException {

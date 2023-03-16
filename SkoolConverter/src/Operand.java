@@ -7,10 +7,10 @@ public class Operand {
     private static final Pattern registerPattern = Pattern.compile("^(a|af|b|c|bc|d|e|de|h|l|hl|ix|iy|sp)$");
     private static final Pattern indirectPattern = Pattern.compile("^\\(([0-9]{1,5})\\)$");
     private static final Pattern indirectRegisterPattern = Pattern.compile("^\\((bc|de|hl|ix|iy|sp)\\)$");
-    private static final Pattern indexedPattern = Pattern.compile("^\\((ix|iy)\\+([0-9]{1,3})\\)$");
+    private static final Pattern indexedPattern = Pattern.compile("^\\((ix|iy)([+-][0-9]{1,3})\\)$");
     private static final Pattern flagPattern = Pattern.compile("^(nz|z|c|nc)$");
 
-    private static final Pattern wordPattern = Pattern.compile("^(bc|de|hl|ix|iy|\\(?[0-9]{4,5}\\)?)$");
+    private static final Pattern wordPattern = Pattern.compile("^(bc|de|hl|ix|iy|sp|\\(?[0-9]{4,5}\\)?)$");
 
     public enum Type {
         Immediate,
@@ -38,7 +38,7 @@ public class Operand {
             value = Integer.parseInt(operand);
             return;
         }
-        if (!opcode.equals("jr") && !opcode.equals("jp")) {
+        if (!opcode.equals("jr") && !opcode.equals("jp") && !opcode.equals("ret")) {
             m = registerPattern.matcher(operand);
             if (m.find()) {
                 type = Type.Register;
