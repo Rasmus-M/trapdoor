@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public class SkoolConverter {
 
     private final static Pattern commentReferencePattern = Pattern.compile("#R([0-9]{5})");
+    private final static Pattern lsbRegisterPattern = Pattern.compile("[cel]");
 
     private Set<Integer> references;
     private List<Integer> labels;
@@ -101,9 +102,15 @@ public class SkoolConverter {
                 case Data:
                 case Instruction:
                     if (references.contains(z80Line.getAddress())) {
+                        boolean lastLineWasALabel = lastLineWasALabel(tms9900Lines);
                         TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                         label.setLabel(Util.getLabel(z80Line.getAddress()));
                         tms9900Lines.add(label);
+                        if (lastLineWasALabel) {
+                            TMS9900Line directive = new TMS9900Line(TMS9900Line.Type.Directive);
+                            directive.setDirective("equ  $");
+                            tms9900Lines.add(directive);
+                        }
                     }
                     if (z80Line.getType() == Z80Line.Type.Data) {
                         i += convertData(z80Line, tms9900Lines);
@@ -120,7 +127,16 @@ public class SkoolConverter {
     private int convertData(Z80Line z80Line, List<TMS9900Line> tms9900Lines) {
         String instruction;
         if (z80Line.getInstruction().startsWith("DEFM")) {
-            instruction = z80Line.getInstruction().replace("DEFM", "text").replace("'", "''").replace("\"", "'");
+            String message = "";
+            String[] messageParts = z80Line.getInstruction().substring(4).trim().split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+            for (String messagePart : messageParts) {
+                if (messagePart.startsWith("\"")) {
+                    message += messagePart.substring(1, messagePart.length() - 1).replace("\"", "").replace("'", "'");
+                } else {
+                    message += (char) Integer.parseInt(messagePart);
+                }
+            }
+            instruction = "text '" + message + "'";
         } else {
             boolean isWord = z80Line.getInstruction().startsWith("DEFW");
             instruction = z80Line.getInstruction().replace("DEFB", "byte").replace("DEFW", "data");
@@ -171,7 +187,7 @@ public class SkoolConverter {
                 if (opr1 != null && opr2 == null) {
                     tms9900Line.setInstruction("bl   @" + getTMS9900Equivalent(opr1));
                 } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
-                    tms9900Line.setInstruction(getInverseJumpInstruction(opr1.getFlag()));
+                    setInverseJumpInstruction(tms9900Line, tms9900Lines, opr1);
                     additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "bl   @" + getTMS9900Equivalent(opr2)));
                     TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                     label.setLabel("!");
@@ -218,9 +234,14 @@ public class SkoolConverter {
                 break;
             case "jp":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("b    @" + getTMS9900Equivalent(opr1));
+                    if (opr1.getValue() != 0) {
+                        tms9900Line.setInstruction("b    @" + getTMS9900Equivalent(opr1));
+                    } else {
+                        tms9900Line.setInstruction("b    " + opr1.getValue());
+                        tms9900Line.setComment("TODO. ");
+                    }
                 } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
-                    tms9900Line.setInstruction(getInverseJumpInstruction(opr1.getFlag()));
+                    setInverseJumpInstruction(tms9900Line, tms9900Lines, opr1);
                     additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "b    @" + getTMS9900Equivalent(opr2)));
                     TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                     label.setLabel("!");
@@ -233,7 +254,19 @@ public class SkoolConverter {
                 if (opr1 != null && opr2 == null) {
                     tms9900Line.setInstruction("jmp  " + getTMS9900Equivalent(opr1));
                 } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
-                    tms9900Line.setInstruction("j" + getTMS9900Equivalent(opr1) + "  " + getTMS9900Equivalent(opr2));
+                    String flag = opr1.getFlag();
+                    if ((flag.equals("c") || flag.equals("nc")) && getLastInstruction(tms9900Lines).startsWith("cb")) {
+                        if (flag.equals("c")) {
+                            tms9900Line.setInstruction("jl   " + getTMS9900Equivalent(opr2));
+                        } else {
+                            tms9900Line.setInstruction("jhe  " + getTMS9900Equivalent(opr2));
+                        }
+                    } else {
+                        tms9900Line.setInstruction("j" + getTMS9900Equivalent(opr1) + "  " + getTMS9900Equivalent(opr2));
+                        if (flag.equals("c") || flag.equals("nc")) {
+                            tms9900Line.setComment("TODO: check code. " + tms9900Line.getComment());
+                        }
+                    }
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
@@ -241,8 +274,7 @@ public class SkoolConverter {
             case "ld":
                 if (opr1 != null && opr2 != null) {
                     boolean isWord = opr1.isWordOperand();
-                    boolean isImmediate = opr2.getType() == Operand.Type.Immediate;
-                    if (isImmediate) {
+                    if (opr2.getType() == Operand.Type.Immediate) {
                         if (isWord) {
                             tms9900Line.setInstruction("li   " + getTMS9900Equivalent(opr1) + "," + getTMS9900Equivalent(opr2, isWord));
                         } else {
@@ -278,7 +310,7 @@ public class SkoolConverter {
                 if (opr1 == null) {
                     tms9900Line.setInstruction("rt");
                 } else if (opr1.getType() == Operand.Type.Flag) {
-                    tms9900Line.setInstruction(getInverseJumpInstruction(opr1.getFlag()));
+                    setInverseJumpInstruction(tms9900Line, tms9900Lines, opr1);
                     additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "rt"));
                     TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                     label.setLabel("!");
@@ -300,7 +332,11 @@ public class SkoolConverter {
                 tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                 break;
             case "srl":
-                tms9900Line.setInstruction("srl  " + getTMS9900Equivalent(opr1) + ",1");
+                if (!lsbRegisterPattern.matcher(opr1.getRegister()).matches()) {
+                    tms9900Line.setInstruction("srl  " + getTMS9900Equivalent(opr1) + ",1");
+                } else {
+                    tms9900Line.setInstruction("; " + instruction);
+                }
                 break;
             case "xor":
                 if (opr1.getType() == Operand.Type.Register && opr1.getRegister().equals("a")) {
@@ -320,18 +356,31 @@ public class SkoolConverter {
         return 0;
     }
 
-    private String getInverseJumpInstruction(String flag) {
-        switch (flag) {
-            case "z":
-                return "jne  !";
-            case "nz":
-                return "jeq  !";
-            case "c":
-                return "jnc  !";
-            case "nc":
-                return "joc  !";
-            default:
-                return "; " + flag;
+    private void setInverseJumpInstruction(TMS9900Line tms9900Line, List<TMS9900Line> tms9900Lines, Operand opr1) {
+        String flag = opr1.getFlag();
+        if ((flag.equals("c") || flag.equals("nc")) && getLastInstruction(tms9900Lines).startsWith("cb")) {
+            if (flag.equals("c")) {
+                tms9900Line.setInstruction("jhe  !");
+            } else {
+                tms9900Line.setInstruction("jl   !");
+            }
+        } else {
+            switch (flag) {
+                case "z":
+                    tms9900Line.setInstruction("jne  !");
+                    break;
+                case "nz":
+                    tms9900Line.setInstruction("jeq  !");
+                    break;
+                case "c":
+                    tms9900Line.setInstruction("jnc  !");
+                    tms9900Line.setComment("TODO: check code. " + tms9900Line.getComment());
+                    break;
+                case "nc":
+                    tms9900Line.setInstruction("joc  !");
+                    tms9900Line.setComment("TODO: check code. " + tms9900Line.getComment());
+                    break;
+            }
         }
     }
 
@@ -362,7 +411,7 @@ public class SkoolConverter {
                 }
             case Register:
                 String reg = operand.getRegister();
-                return (reg.equals("c") || reg.equals("e") || reg.equals("l") ? "@" : "") + reg;
+                return (lsbRegisterPattern.matcher(reg).matches() ? "@" : "") + reg;
             case Indirect:
                 return "@" + getValidLabel(operand.getValue());
             case IndirectRegister:
@@ -407,6 +456,29 @@ public class SkoolConverter {
             }
         }
         return Integer.toString(address);
+    }
+
+    private String getLastInstruction(List<TMS9900Line> tms9900Lines) {
+        for (int i = tms9900Lines.size() - 1; i >= 0; i--) {
+            TMS9900Line tms9900Line = tms9900Lines.get(i);
+            if (tms9900Line.getType() == TMS9900Line.Type.Instruction) {
+                return tms9900Line.getInstruction();
+            }
+        }
+        return "";
+    }
+
+    private boolean lastLineWasALabel(List<TMS9900Line> tms9900Lines) {
+        for (int i = tms9900Lines.size() - 1; i >= 0; i--) {
+            TMS9900Line tms9900Line = tms9900Lines.get(i);
+            TMS9900Line.Type type = tms9900Line.getType();
+            if (type == TMS9900Line.Type.Label) {
+                return true;
+            } else if (type == TMS9900Line.Type.Instruction || type == TMS9900Line.Type.Data) {
+                return false;
+            }
+        }
+        return false;
     }
 
     private List<Z80Line> readSkoolFile(File skoolFile) throws IOException {
