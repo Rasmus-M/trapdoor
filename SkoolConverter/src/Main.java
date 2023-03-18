@@ -5,7 +5,8 @@ public class Main {
     public static void main(String[] args) throws IOException {
         new SkoolConverter().convert(
             new File("ZX-Spectrum/through-the-trap-door.skool"),
-            new File("src/trap-door.a99")
+            new File("src/trap-door.a99"),
+            27000
         );
     }
 }

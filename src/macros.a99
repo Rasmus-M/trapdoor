@@ -1,12 +1,24 @@
 **
 * Macros
 *
+       .defm call
+       li   tmp0,$+10
+       mov  tmp0,*sp+
+       b    #1
+       .endm
+
+       .defm ret
+       dect sp
+       mov  *sp,tmp1
+       b    *tmp1
+       .endm
+
        .defm proc
        mov  r11,*sp+
        .endm
 
        .defm endproc
-       dect r10
+       dect sp
        mov  *sp,r11
        b    *r11
        .endm

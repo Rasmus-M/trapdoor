@@ -14,12 +14,12 @@ public class SkoolConverter {
     private Set<Integer> references;
     private List<Integer> labels;
 
-    public void convert(File skoolFile, File tms9900File) throws IOException  {
+    public void convert(File skoolFile, File tms9900File, int startAddress) throws IOException  {
         List<Z80Line> z80Lines = readSkoolFile(skoolFile);
         System.out.println(z80Lines.size() + " lines read from: " + skoolFile.getPath());
         references = findReferences(z80Lines);
         labels = findLabels(z80Lines);
-        List<TMS9900Line> tms9900Lines = convert(z80Lines);
+        List<TMS9900Line> tms9900Lines = convert(z80Lines, startAddress);
         writeTMS9900File(tms9900File, tms9900Lines);
         System.out.println(tms9900Lines.size() + " lines written to: " + tms9900File.getPath());
     }
@@ -76,7 +76,7 @@ public class SkoolConverter {
         return labels;
     }
 
-    private List<TMS9900Line> convert(List<Z80Line> z80Lines) {
+    private List<TMS9900Line> convert(List<Z80Line> z80Lines, int startAddress) {
         List<TMS9900Line> tms9900Lines = new ArrayList<>();
         int i = 0;
         while (i < z80Lines.size()) {
@@ -101,21 +101,23 @@ public class SkoolConverter {
                     break;
                 case Data:
                 case Instruction:
-                    if (references.contains(z80Line.getAddress())) {
-                        boolean lastLineWasALabel = lastLineWasALabel(tms9900Lines);
-                        TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
-                        label.setLabel(Util.getLabel(z80Line.getAddress()));
-                        tms9900Lines.add(label);
-                        if (lastLineWasALabel) {
-                            TMS9900Line directive = new TMS9900Line(TMS9900Line.Type.Directive);
-                            directive.setDirective("equ  $");
-                            tms9900Lines.add(directive);
+                    if (z80Line.getAddress() >= startAddress) {
+                        if (references.contains(z80Line.getAddress())) {
+                            boolean lastLineWasALabel = lastLineWasALabel(tms9900Lines);
+                            TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
+                            label.setLabel(Util.getLabel(z80Line.getAddress()));
+                            tms9900Lines.add(label);
+                            if (lastLineWasALabel) {
+                                TMS9900Line directive = new TMS9900Line(TMS9900Line.Type.Directive);
+                                directive.setDirective("equ  $");
+                                tms9900Lines.add(directive);
+                            }
                         }
-                    }
-                    if (z80Line.getType() == Z80Line.Type.Data) {
-                        i += convertData(z80Line, tms9900Lines);
-                    } else {
-                        i += convertInstruction(z80Line, tms9900Lines);
+                        if (z80Line.getType() == Z80Line.Type.Data) {
+                            i += convertData(z80Line, tms9900Lines);
+                        } else {
+                            i += convertInstruction(z80Line, tms9900Lines);
+                        }
                     }
                     break;
             }
@@ -185,10 +187,10 @@ public class SkoolConverter {
                 break;
             case "call":
                 if (opr1 != null && opr2 == null) {
-                    tms9900Line.setInstruction("bl   @" + getTMS9900Equivalent(opr1));
+                    tms9900Line.setInstruction(".call @" + getTMS9900Equivalent(opr1));
                 } else if (opr1 != null && opr1.getType() == Operand.Type.Flag) {
                     setInverseJumpInstruction(tms9900Line, tms9900Lines, opr1);
-                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "bl   @" + getTMS9900Equivalent(opr2)));
+                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, ".call @" + getTMS9900Equivalent(opr2)));
                     TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                     label.setLabel("!");
                     additionalLines.add(label);
@@ -308,10 +310,10 @@ public class SkoolConverter {
                 break;
             case "ret":
                 if (opr1 == null) {
-                    tms9900Line.setInstruction("rt");
+                    tms9900Line.setInstruction(".ret");
                 } else if (opr1.getType() == Operand.Type.Flag) {
                     setInverseJumpInstruction(tms9900Line, tms9900Lines, opr1);
-                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "rt"));
+                    additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, ".ret"));
                     TMS9900Line label = new TMS9900Line(TMS9900Line.Type.Label);
                     label.setLabel("!");
                     additionalLines.add(label);
@@ -341,8 +343,13 @@ public class SkoolConverter {
             case "xor":
                 if (opr1.getType() == Operand.Type.Register && opr1.getRegister().equals("a")) {
                     tms9900Line.setInstruction("sb   a,a");
-                } else if (opr1.getType() == Operand.Type.Immediate && opr1.getValue() == 1) {
-                    tms9900Line.setInstruction("xor  one,a");
+                } else if (opr1.getType() == Operand.Type.Immediate) {
+                    if (opr1.getValue() == 1) {
+                        tms9900Line.setInstruction("xor  one,a");
+                    } else {
+                        tms9900Line.setInstruction("li   tmp0," + opr1.getValue());
+                        additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "xor  tmp0,a"));
+                    }
                 } else {
                     tms9900Line.setInstruction("; " + instruction);
                 }
