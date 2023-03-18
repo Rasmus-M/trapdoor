@@ -1,0 +1,28 @@
+rndsd  equ  >83c0                      ; Random number seed
+
+wrksp  equ  >8300
+
+tmp0   requ 0
+tmp1   requ 1
+one    requ 2                          ; >0100
+mone   requ 3                          ; >ff00
+af     requ 4
+a      requ 4
+bc     requ 5
+b      requ 5
+c      equ wrksp+11
+de     requ 6
+d      requ 6
+e      equ wrksp+13
+hl     requ 7
+h      requ 7
+l      equ wrksp+15
+ix     requ 8
+iy     requ 9
+sp     requ 10
+af_    requ 12
+bc_    requ 13
+de_    requ 14
+hl_    requ 15
+
+stack  equ  wrksp+>20

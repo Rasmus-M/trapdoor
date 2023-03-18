@@ -1,6 +1,6 @@
-       aorg >0000
-       copy "reg-equ.a99"
+       copy "equates.a99"
        copy "macros.a99"
-       copy "trap-door.a99"
-       ; copy "test.a99"
+       copy "lower-memory.a99"
+       copy "upper-memory.a99"
+       copy "cartridge-memory.a99"
        end
