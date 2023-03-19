@@ -183,7 +183,7 @@ public class SkoolConverter {
                 break;
             case "bit":
                 tms9900Line.setInstruction("movb " + getTMS9900Equivalent(opr2) + ",tmp0");
-                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "andi tmp0," + (1 << (opr1.getValue() + 8))));
+                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "andi tmp0," + (1 << opr1.getValue()) + "*256"));
                 break;
             case "call":
                 if (opr1 != null && opr2 == null) {

@@ -6,8 +6,8 @@
 * Jump to Start of Initialisation Code
 * 
 * Used by the routines at #R59543 and #R63000.
-_34200:
-       b    @start                    ; JP 34428          ; Jump to start of initialisation code
+start:
+       b    @init                    ; JP 34428          ; Jump to start of initialisation code
 
 * Unused
        byte 190,133,173,233
@@ -299,7 +299,7 @@ _34299:
 * Set Up Random Seed and Disable Interrupts
 * 
 * Used by the routine at #R34200.
-start:
+init:
        lwpi wrksp
        movb @rndsd,a                   ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
        movb a,@_54219                  ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
