@@ -3,4 +3,4 @@
        copy "lower-memory.a99"
        copy "upper-memory.a99"
        copy "cartridge-memory.a99"
-       end
+       end start

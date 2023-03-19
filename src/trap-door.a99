@@ -300,6 +300,7 @@ _34299:
 * 
 * Used by the routine at #R34200.
 start:
+       lwpi wrksp
        movb @rndsd,a                   ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
        mov  a,@_54219                  ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
