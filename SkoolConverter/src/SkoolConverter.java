@@ -182,8 +182,8 @@ public class SkoolConverter {
                 tms9900Line.setInstruction("andi a," + opr1.getValue() + "*256");
                 break;
             case "bit":
-                tms9900Line.setInstruction("mov  " + getTMS9900Equivalent(opr2) + ",tmp0");
-                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "andi tmp0," + (1 << opr1.getValue())));
+                tms9900Line.setInstruction("movb " + getTMS9900Equivalent(opr2) + ",tmp0");
+                additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "andi tmp0," + (1 << (opr1.getValue() + 8))));
                 break;
             case "call":
                 if (opr1 != null && opr2 == null) {
@@ -275,14 +275,16 @@ public class SkoolConverter {
                 break;
             case "ld":
                 if (opr1 != null && opr2 != null) {
-                    boolean isWord = opr1.isWordOperand();
+                    boolean isWord;
                     if (opr2.getType() == Operand.Type.Immediate) {
+                        isWord = opr1.isWordOperand();
                         if (isWord) {
                             tms9900Line.setInstruction("li   " + getTMS9900Equivalent(opr1) + "," + getTMS9900Equivalent(opr2, isWord));
                         } else {
                             tms9900Line.setInstruction("movb " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                         }
                     } else {
+                        isWord = opr1.isWordOperand() && opr2.isWordOperand();
                         tms9900Line.setInstruction((isWord ? "mov " : "movb") + " " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                     }
                 }
