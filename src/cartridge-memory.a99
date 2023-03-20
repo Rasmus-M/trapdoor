@@ -1,3 +1,7 @@
        aorg >6000
 
        copy "graphics.a99"
+font:
+       bcopy "font.bin"
+
+

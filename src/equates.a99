@@ -1,11 +1,27 @@
-rndsd  equ  >83c0                      ; Random number seed
+**
+* Memory mapped addresses
+*
+vdpwd:                                 ; VDP write data
+       equ  >8c00
+vdpwa:                                 ; VDP set read/write address
+       equ  >8c02
+vdprd:                                 ; VDP read data
+       equ  >8800
+vdpsta:                                ; VDP status
+       equ  >8802
+sound:                                 ; Sound
+       equ  >8400
+spchwt:
+       equ  >9400
+spchrd:
+       equ  >9000
 
 wrksp  equ  >8300
 
 tmp0   requ 0
 tmp1   requ 1
-one    requ 2                          ; >0100
-mone   requ 3                          ; >ff00
+tmp3   requ 2
+one    requ 3                          ; >0100
 af     requ 4
 a      requ 4
 bc     requ 5
@@ -25,4 +41,22 @@ bc_    requ 13
 de_    requ 14
 hl_    requ 15
 
+r0lb   equ  wrksp+1
+
 stack  equ  wrksp+>20
+
+rndsd  equ  >83c0                      ; Random number seed
+
+**
+* VDP memory map
+*
+pattern_table:                         ; Pattern table
+       equ  >0000
+sprite_pattern_table:                  ; Sprite pattern table
+       equ  >1800
+color_table:                           ; Color table
+       equ  >2000
+name_table:                            ; Name table x 2
+       equ  >3800
+sprite_attr_table:                     ; Sprite attribute table
+       equ  >3b00

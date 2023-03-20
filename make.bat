@@ -1,1 +1,1 @@
-xas99.py src/main.a99 -q -L trapdoor.lst
+xas99.py src/main.a99 -q -R -L trapdoor.lst

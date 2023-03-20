@@ -1,0 +1,190 @@
+*********************************************************************
+*
+* Set graphics mode
+*
+graphics_mode:
+       .proc
+       clr  r0
+       li   r1,vdp_registers
+       li   r2,8
+graphics_mode_1:
+       movb *r1+,@r0lb
+       bl   @vwtr                      ; Set register
+       ai   r0,>0100
+       dec  r2
+       jne  graphics_mode_1
+*      Clear VDP RAM
+       clr  r0
+       clr  r1
+       li   r2,>4000
+       bl   @vsmw
+*      Disable sprites
+       li   r0,sprite_attr_table
+       li   r1,>d000
+       bl   @vsbw
+*      Init color table
+       li   r0,color_table
+       li   r1,>f000
+       li   r2,>1800
+       bl   @vsmw
+*      Init name table
+       li   r0,name_table
+       bl   @vwad
+       clr  r1
+       li   r2,768
+graphics_mode_2:
+       movb r1,@vdpwd
+       ai   r1,>0100
+       dec  r2
+       jne  graphics_mode_2
+       .endproc
+*      VDP registers
+vdp_registers:
+       byte >02                        ; Graphics II mode
+       byte >e2                        ; 16K, display on, interrupt enabled
+       byte name_table/>400            ; Name table
+       byte >ff                        ; Color table
+       byte pattern_table/>800+>03     ; Pattern table
+       byte sprite_attr_table/>80      ; Sprite attribute table
+       byte sprite_pattern_table/>800  ; Sprite pattern table
+       byte >01                        ; Backdrop color
+*// graphics_mode
+
+*********************************************************************
+*
+* VDP Write To Register
+*
+* R0 MSB: VDP register to write to
+* R0 LSB: Value to write
+*
+vwtr:
+       swpb r0
+       movb r0,@vdpwa                  ; Send low byte (value) to write to VDP register
+       swpb r0
+       ori  r0,>8000                   ; Set up a VDP register write operation (10)
+       movb r0,@vdpwa                  ; Send high byte (address) of VDP register
+       rt
+*// vwtr
+
+*********************************************************************
+*
+* VDP Set Write Address
+*
+* R0: Write address in VDP RAM
+*
+vwad:
+       swpb r0
+       movb r0,@vdpwa                  ; Send low byte of VDP RAM write address
+       swpb r0
+       ori  r0,>4000                   ; Set read/write bits 14 and 15 to write (01)
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM write address
+       rt
+*// vwad
+
+*********************************************************************
+*
+* VDP Single Byte Write
+*
+* R0: Write address in VDP RAM
+* R1: MSB of R1 sent to VDP RAM
+*
+vsbw:
+       swpb r0
+       movb r0,@vdpwa                  ; Send low byte of VDP RAM write address
+       swpb r0
+       ori  r0,>4000                   ; Set read/write bits 14 and 15 to write (01)
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM write address
+       movb r1,@vdpwd                  ; Write byte to VDP RAM
+       rt
+*// vsbw
+
+*********************************************************************
+*
+* VDP multiple Byte Write
+*
+* R0: Write address in VDP RAM
+* R1: Starting read address in CPU RAM
+* R2: Number of bytes to send
+*
+vmbw:
+       movb  @r0lb,@vdpwa              ; Send low byte of VDP RAM write address
+       ori  r0,>4000                   ; Set read/write bits 14 and 15 to write (01)
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM write address
+vmbw_1:
+       movb *r1+,@vdpwd                ; Write byte to VDP RAM
+       dec  r2
+       jne  vmbw_1
+       rt
+*// vmbw
+
+*********************************************************************
+*
+* VDP Single Byte Multiple Write
+*
+* R0: Write address in VDP RAM
+* R1: MSB of R1 sent to VDP RAM
+* R2: Number of bytes to write to VDP RAM
+*
+vsmw:
+       movb  @r0lb,@vdpwa              ; Send low byte of VDP RAM write address
+       ori  r0,>4000                   ; Set read/write bits 14 and 15 to write (01)
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM write address
+vsmw_1:
+       movb r1,@vdpwd                  ; Write byte to VDP RAM
+       dec  r2                         ; Byte counter
+       jne  vsmw_1
+       rt
+*// vsmw
+
+*********************************************************************
+*
+* VDP Set Read Address
+*
+* R0: Read address in VDP RAM
+*
+vrad:
+       swpb r0
+       movb r0,@vdpwa                  ; Send low byte of VDP RAM read address
+       swpb r0
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
+       rt
+*// vrad
+
+*********************************************************************
+*
+* VDP Single Byte Read
+*
+* R0:  Read address in VDP RAM
+* R1:  MSB of R1 set to byte from VDP RAM
+*
+vsbr:
+       swpb r0
+       movb r0,@vdpwa                  ; Send low byte of VDP RAM read address
+       swpb r0
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
+       nop
+       movb @vdprd,r1                  ; Read byte from VDP RAM
+       rt
+*// vsbr
+
+*********************************************************************
+*
+* VDP Multiple Byte Read
+*
+* R0: Starting read address in VDP RAM
+* R1: Starting write address in CPU RAM
+* R2: Number of bytes to read from VDP RAM
+*
+* Modifies R0-R2
+*
+vmbr:
+       movb  @r0lb,@vdpwa              ; Send low byte of VDP RAM read address
+       andi r0,>3fff                   ; Set read/write bits 14 and 15 to read (00)
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
+       li   r0,vdprd
+vmbr_1:
+       movb *r0,*r1+                   ; Read byte from VDP RAM
+       dec  r2                         ; Byte counter
+       jne  vmbr_1                     ; Check if finished
+       rt
+*// vmbr

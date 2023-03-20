@@ -176,7 +176,11 @@ public class SkoolConverter {
         List<TMS9900Line> additionalLines = new ArrayList<>();
         switch (instruction.getOpcode()) {
             case "add":
-                tms9900Line.setInstruction("a    " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
+            case "adc":
+                if (opr1 != null) {
+                    boolean isWord = opr1.isWordOperand();
+                    tms9900Line.setInstruction((isWord ? "a    " : "ab   ") + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
+                }
                 break;
             case "and":
                 tms9900Line.setInstruction("andi a," + opr1.getValue() + "*256");
@@ -330,10 +334,11 @@ public class SkoolConverter {
                 tms9900Line.setInstruction("socb @bits+" + opr1.getValue() + "," + getTMS9900Equivalent(opr2));
                 break;
             case "sub":
-                tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr1) + ",a");
-                break;
             case "sbc":
-                tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
+                if (opr1 != null) {
+                    boolean isWord = opr1.isWordOperand();
+                    tms9900Line.setInstruction((isWord ? "s    " : "sb   ") + getTMS9900Equivalent(opr1) + ",a");
+                }
                 break;
             case "srl":
                 if (!lsbRegisterPattern.matcher(opr1.getRegister()).matches()) {
