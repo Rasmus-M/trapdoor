@@ -183,7 +183,13 @@ public class SkoolConverter {
                 }
                 break;
             case "and":
-                tms9900Line.setInstruction("andi a," + opr1.getValue() + "*256");
+                if (opr1 != null) {
+                    if (opr1.getType() == Operand.Type.Immediate) {
+                        tms9900Line.setInstruction("andi a," + opr1.getValue() + "*256");
+                    } else {
+                        tms9900Line.setInstruction("; " + instruction);
+                    }
+                }
                 break;
             case "bit":
                 tms9900Line.setInstruction("movb " + getTMS9900Equivalent(opr2) + ",tmp0");
@@ -334,10 +340,12 @@ public class SkoolConverter {
                 tms9900Line.setInstruction("socb @bits+" + opr1.getValue() + "," + getTMS9900Equivalent(opr2));
                 break;
             case "sub":
+                tms9900Line.setInstruction("sb   " + getTMS9900Equivalent(opr1) + ",a");
+                break;
             case "sbc":
                 if (opr1 != null) {
                     boolean isWord = opr1.isWordOperand();
-                    tms9900Line.setInstruction((isWord ? "s    " : "sb   ") + getTMS9900Equivalent(opr1) + ",a");
+                    tms9900Line.setInstruction((isWord ? "s    " : "sb   ") + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                 }
                 break;
             case "srl":

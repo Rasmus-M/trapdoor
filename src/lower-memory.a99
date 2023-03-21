@@ -14,7 +14,16 @@ display_buffer_1:
 display_buffer_2:
        bss 32*22*3
 
-       copy "lookup-tables.a99"
        copy "script-data.a99"
+
+* Table of Initial-State Data for Complex Entities
+*
+* This table is used to store the initial states of the various entities in the game, so that they can be reset when
+* a new game is started.
+initial_entity_states:
+       bss  728
+
+       data -1
+
 
 

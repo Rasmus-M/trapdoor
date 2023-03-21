@@ -41,11 +41,14 @@ bc_    requ 13
 de_    requ 14
 hl_    requ 15
 
-r0lb   equ  wrksp+1
-
-stack  equ  wrksp+>20
-
-rndsd  equ  >83c0                      ; Random number seed
+r0lb:
+       equ  wrksp+1
+wrksp2:
+       equ  wrksp+>20
+stack:
+       equ  wrksp2+>20
+rndsd:
+       equ  >83c0                      ; Random number seed
 
 **
 * VDP memory map
@@ -60,3 +63,6 @@ name_table:                            ; Name table x 2
        equ  >3800
 sprite_attr_table:                     ; Sprite attribute table
        equ  >3b00
+
+zx_attributes:
+       equ  22528
