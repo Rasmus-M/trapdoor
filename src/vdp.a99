@@ -47,8 +47,21 @@ vdp_registers:
        byte pattern_table/>800+>03     ; Pattern table
        byte sprite_attr_table/>80      ; Sprite attribute table
        byte sprite_pattern_table/>800  ; Sprite pattern table
-       byte >05                        ; Backdrop color
+       byte >00                        ; Backdrop color
 *// graphics_mode
+
+*********************************************************************************
+*
+* Set border color
+*
+set_border_color:
+       .proc
+       bl   @ti_color
+       srl  r0,12
+       ori  r0,>0700
+       bl   @vwtr
+       .endproc
+*// set_border_color
 
 *********************************************************************************
 *

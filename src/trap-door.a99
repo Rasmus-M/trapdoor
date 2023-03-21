@@ -52,7 +52,7 @@ _34215:
        data 0                                                        ; Current Total Score
 
 * Current Border Colour
-_34217:
+border_color:
        byte 1
 
 * Index of Current Character's Current Room
@@ -60,7 +60,7 @@ _34218:
        byte 0
 
 * Control Input Bitmap
-* 
+* 3
 * #TABLE(default,centre,:w)
 * { =h Bit | =h Effect }
 * { 0 | Right }
@@ -314,8 +314,8 @@ _34438:
        movb one,a                      ; LD A,1            ; Set current level to 1...
        movb a,@_34207                  ; LD (34207),A      ; ...
        bl   @main_menu                 ; CALL 46830        ; Display and handle Main Menu
-       movb @_34217,a                  ; LD A,(34217)      ; Load current border colour into A
-       ; OUT (254),A                   ; OUT (254),A       ; Set border colour
+       movb @border_color,a            ; LD A,(34217)      ; Load current border colour into A
+       bl   @set_border_color          ; OUT (254),A       ; Set border colour
        .call @_34864                   ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .call @_47241                   ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
@@ -4829,8 +4829,8 @@ main_menu_strings:
 main_menu:
        .proc
        movb one,a                      ; LD A,1            ; Load A with 1 (blue)
-       movb a,@_34217                  ; LD (34217),A      ; Store at #R34217 and...
-       ; OUT (254),A                   ; OUT (254),A       ; ...set border to this value (blue)
+       movb a,@border_color            ; LD (34217),A      ; Store at #R34217 and...
+       bl   @set_border_color          ; OUT (254),A       ; ...set border to this value (blue)
        movb @bytes+9,a                 ; LD A,9            ; Fill top 22 rows of Attribute File with blue PAPER & blue INK...
        .call @_53649                   ; CALL 53649        ; ...
        .call @_47140                   ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
@@ -4869,10 +4869,8 @@ _46900:
        cb   a,@bytes+83                ; CP 83             ; If pressed key was not 83 (S)...
        jne  _46915                     ; JR NZ,46915       ; ...then skip ahead to #R46915
        movb @bytes+2,a                 ; LD A,2            ; Set current border colour to red...
-       movb a,@_34217                  ; LD (34217),A      ; ...
-       ; OUT (254),A                   ; OUT (254),A       ; ...
-       li   r0,>0708
-       bl   @vwtr
+       movb a,@border_color            ; LD (34217),A      ; ...
+       bl   @set_border_color          ; OUT (254),A       ; ...
        .endproc                        ; RET               ; Return
 _46915:
        cb   a,@bytes+74                ; CP 74             ; If pressed key was not 74 (J)...
@@ -9106,7 +9104,7 @@ play_sound:
 ;       movb @6(ix),h                   ; LD H,(IX+6)       ; Load most significant byte of pseudo-random address into H
 ;_59764:
 ;       .push bc                        ; PUSH BC           ; Store BC (B = inner repeat count, C = outer repeat count)
-;       movb @_34217,a                  ; LD A,(34217)      ; Load current border colour into A
+;       movb @border_color,a            ; LD A,(34217)      ; Load current border colour into A
 ;       socb @bits+4,a                  ; SET 4,A           ; Set Speaker Bit
 ;       ; OUT (254),A                   ; OUT (254),A       ; Write Speaker Bit and border colour to Port 254
 ;       movb d,b                        ; LD B,D            ; Apply delay based upon delay constant D...
