@@ -9,8 +9,8 @@
 
        .defm ret
        dect sp
-       mov  *sp,tmp1
-       b    *tmp1
+       mov  *sp,tmp0
+       b    *tmp0
        .endm
 
        .defm proc
