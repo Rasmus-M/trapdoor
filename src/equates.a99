@@ -20,7 +20,7 @@ wrksp  equ  >8300
 
 tmp0   requ 0
 tmp1   requ 1
-tmp3   requ 2
+tmp2   requ 2
 one    requ 3                          ; >0100
 af     requ 4
 a      requ 4
@@ -43,6 +43,8 @@ hl_    requ 15
 
 r0lb:
        equ  wrksp+1
+r1lb:
+       equ  wrksp+3
 wrksp2:
        equ  wrksp+>20
 stack:

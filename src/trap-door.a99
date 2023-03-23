@@ -13,7 +13,7 @@ start:
        byte 190,133,173,233
 
 * Index of Current Level
-_34207:
+current_level:
        byte 1
 
 * Game Flags
@@ -29,7 +29,7 @@ _34207:
 * { 6 | Character Swap Pending Flag }
 * { 7 | Show Score Flag (Reset = draw Timer Figures / Set = Display Score / Hi Score) }
 * TABLE#
-_34208:
+game_flags:
        byte 0
 
 * Cannon's (Level 4) Ammunition Counter
@@ -40,7 +40,7 @@ _34209:
        byte 0
 
 * Current Time / Lives
-_34210:
+time_left:
        byte 16
 
 * Score Data
@@ -56,7 +56,7 @@ border_color:
        byte 1
 
 * Index of Current Character's Current Room
-_34218:
+current_characters_room:
        byte 0
 
 * Control Input Bitmap
@@ -115,7 +115,7 @@ _34225:
 * Attribute of Current Character
 * 
 * This is 1 (blue) for Berk, or 6 (yellow) for Drutt.
-_34226:
+current_character_attr:
        byte 1
 
 * Timer Figure Blink Duration Counter
@@ -137,7 +137,7 @@ _34229:
 * 
 * Contains an entry from one of the room dimension data blocks (at #R43815, #R44436, #R45116 or #R45860) for the
 * current room of interest (see also #R34262).
-_34230:
+tmp_room_dim_data:
        byte 0,0,0,0,0
 
 * Temporary Store for Width of Entity's Current Room
@@ -147,19 +147,19 @@ _34235:
        byte 0
 
 * Table of Data Addresses (Current Level)
-_34236:
+current_data_addrs:
        data 99                                                       ; State Data for Simple Entities
 _34238:
        data 99                                                       ; State Data for Complex Entities
-_34240:
+berk_state_addr:
        data 99                                                       ; Address of Berk's state data
-_34242:
+drutt_state_addr:
        data 99                                                       ; Address of Drutt's state data
-_34244:
+worm_state_addr:
        data 99                                                       ; Address of worm's state data
 _34246:
        data 99                                                       ; Start address for reverse-order collision checks
-_34248:
+room_dim_data:
        data 99                                                       ; Room Dimension Data
 _34250:
        data 99                                                       ; Horizontal Room Connectivity Map
@@ -219,7 +219,7 @@ _34281:
        byte 0,0
 
 * Store for Script Instruction Loop Data
-_34285:
+script_instr_loop_data:
        byte 0,0,1                                                    ; Repeat count and loop start address for script instructions 23 and 24
 _34288:
        byte 0,0,1                                                    ; Repeat count and loop start address for script instructions 25 and 26
@@ -249,49 +249,53 @@ _34299:
        data 999
 
 * Table of Data Addresses (Level 1)
+data_addresses_1:
        data _43146                                                   ; State Data for Simple Entities (Level 1)
        data _43333                                                   ; State Data for Complex Entities (Level 1)
        data _43593                                                   ; Address of Berk's state data (Level 1)
        data _43671                                                   ; Address of Drutt's state data (Level 1)
        data _43684                                                   ; Address of worm's state data (Level 1)
        data _43736                                                   ; Start address for reverse-order collision checks (Level 1)
-       data _43815                                                   ; Room Dimension Data (Level 1)
+       data room_dim_data_1                                          ; Room Dimension Data (Level 1)
        data _43871                                                   ; Horizontal Room Connectivity Map (Level 1)
        data _43881                                                   ; Unused Data Block (09) (Level 1)
        data _43882                                                   ; Vertical Room Connectivity Map (Level 1)
 
 * Table of Data Addresses (Level 2)
+data_addresses_2:
        data _43896                                                   ; State Data for Simple Entities (Level 2)
        data _43993                                                   ; State Data for Complex Entities (Level 2)
        data _44149                                                   ; Address of Berk's state data (Level 2)
        data _44396                                                   ; Address of Drutt's state data (Level 2)
        data _44409                                                   ; Address of Worm's state data (Level 2)
        data _44422                                                   ; Start address for reverse-order collision checks (Level 2)
-       data _44436                                                   ; Room Dimension Data (Level 2)
+       data room_dim_data_2                                          ; Room Dimension Data (Level 2)
        data _44472                                                   ; Horizontal Room Connectivity Map (Level 2)
        data _44482                                                   ; Unused Data Block (09) (Level 2)
        data _44483                                                   ; Vertical Room Connectivity Map (Level 2)
 
 * Table of Data Addresses (Level 3)
+data_addresses_3:
        data _44487                                                   ; State Data for Simple Entities (Level 3)
        data _44608                                                   ; State Data for Complex Entities (Level 3)
        data _44855                                                   ; Address of Berk's state data (Level 3)
        data _44998                                                   ; Address of Drutt's state data (Level 3)
        data _45024                                                   ; Address of worm's state data (Level 3)
        data _45102                                                   ; Start address for reverse-order collision checks (Level 3)
-       data _45116                                                   ; Room Dimension Data (Level 3)
+       data room_dim_data_3                                          ; Room Dimension Data (Level 3)
        data _45152                                                   ; Horizontal Room Connectivity Map (Level 3)
        data _45164                                                   ; Unused Data Block (09) (Level 3)
        data _45165                                                   ; Vertical Room Connectivity Map (Level 3)
 
 * Table of Data Addresses (Level 4)
+data_addresses_4:
        data _45171                                                   ; State Data for Simple Entities (Level 4)
        data _45274                                                   ; State Data for Complex Entities (Level 4)
        data _45391                                                   ; Address of Berk's state data (Level 4)
        data _45443                                                   ; Address of Drutt's state data (Level 4)
        data _45469                                                   ; Address of worm's state data (Level 4)
        data _45846                                                   ; Start address for reverse-order collision checks (Level 4)
-       data _45860                                                   ; Room Dimension Data (Level 4)
+       data room_dim_data_4                                          ; Room Dimension Data (Level 4)
        data _45886                                                   ; Horizontal Room Connectivity Map (Level 4)
        data _45894                                                   ; Unused Data Block (09) (Level 4)
        data _45895                                                   ; Vertical Room Connectivity Map (Level 4)
@@ -312,24 +316,25 @@ _34438:
        bl   @graphics_mode
        bl   @reset_initial_state_data  ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
        movb one,a                      ; LD A,1            ; Set current level to 1...
-       movb a,@_34207                  ; LD (34207),A      ; ...
+       movb a,@current_level           ; LD (34207),A      ; ...
        bl   @main_menu                 ; CALL 46830        ; Display and handle Main Menu
        movb @border_color,a            ; LD A,(34217)      ; Load current border colour into A
        bl   @set_border_color          ; OUT (254),A       ; Set border colour
-       .call @_34864                   ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
-       .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       .call @_47241                   ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
+       bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
+*      OK UNTIL HERE
+       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       .call @draw_timer_bar                   ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
 * Start of main loop
 _34466:
        .call @_53723                   ; CALL 53723        ; If Berk has been killed then reset his state, flash screen and decrease time / lives
        .call @_35689                   ; CALL 35689        ; Update state of Berk and store current position in script data
        .call @_51739                   ; CALL 51739        ; Update states of Drutt and worm and store current positions in script data
-       movb @_34207,a                  ; LD A,(34207)      ; If current level is not Level 1...
+       movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 1...
        cb   a,one                      ; CP 1              ; ...
        jne  _34527                     ; JR NZ,34527       ; ...then skip ahead to #R34527
 * Level 1
        .call @_36791                   ; CALL 36791        ; Update states of all Level 1 entities
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
        movb @10(ix),tmp0               ; BIT 2,(IX+10)     ; If "Back to Level 1" Flag is reset...
        andi tmp0,4*256                 ;                   
        jeq  _34557                     ; JR Z,34557        ; ...then skip ahead to #R34557
@@ -348,19 +353,19 @@ _34466:
        socb @bits+3,@10(ix)            ; SET 3,(IX+10)     ; Set "All Home" Flag
        jmp  _34557                     ; JR 34557          ; Skip ahead to #R34557
 _34527:
-       movb @_34207,a                  ; LD A,(34207)      ; If current level is not Level 2...
+       movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 2...
        cb   a,@bytes+2                 ; CP 2              ; ...
        jne  _34537                     ; JR NZ,34537       ; ...then skip ahead to #R34537
 * Level 2
        .call @_38009                   ; CALL 38009        ; Update states of all Level 2 entities
 _34537:
-       movb @_34207,a                  ; LD A,(34207)      ; If current level is not Level 3...
+       movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 3...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jne  _34547                     ; JR NZ,34547       ; ...then skip ahead to #R34547
 * Level 3
        .call @_39137                   ; CALL 39137        ; Update states of all Level 3 entities
 _34547:
-       movb @_34207,a                  ; LD A,(34207)      ; If current level is not Level 4...
+       movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 4...
        cb   a,@bytes+4                 ; CP 4              ; ...
        jne  _34557                     ; JR NZ,34557       ; ...then skip ahead to #R34557
 * Level 4
@@ -374,7 +379,7 @@ _34557:
        .call @_45899                   ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
        .call @_54034                   ; CALL 54034        ; Draw contents of Primary Display Buffer to display
        .call @play_sound                   ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
-       movb @_34210,a                  ; LD A,(34210)      ; Load remaining time / lives into A
+       movb @time_left,a                  ; LD A,(34210)      ; Load remaining time / lives into A
        socb a,a                        ; OR A              ; If no time / lives are left...
        jeq  _34645                     ; JR Z,34645        ; ...then jump to #R34645
        movb @_43593+10,a               ; LD A,(43603)      ; If "All Home" Flag is set...
@@ -383,7 +388,7 @@ _34557:
        jne  _34658                     ; JR NZ,34658       ; ...then skip ahead to #R34658
        .call @_47363                   ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
                                                            ; timer figure blinking
-       li   hl,_34208                  ; LD HL,34208       ; If Update Scores and Display Flag is reset...
+       li   hl,game_flags                  ; LD HL,34208       ; If Update Scores and Display Flag is reset...
        movb *hl,tmp0                   ; BIT 5,(HL)        ; ...
        andi tmp0,32*256                ;                   
        jeq  _34606                     ; JR Z,34606        ; ...then skip ahead to #R34606
@@ -525,20 +530,20 @@ _34803:
        sb   one,b                      ; DJNZ 34760        ; Decrease B and loop back to #R34760 to process next level
        jne  _34760                     ;                   
        li   hl,_34298                  ; LD HL,34298       ; Point HL at Joystick Mode Flag
-       li   de,_34207                  ; LD DE,34207       ; Point DE at store for current level number
+       li   de,current_level           ; LD DE,34207       ; Point DE at store for current level number
        sb   a,a                        ; XOR A             ; Set A to zero and reset Carry Flag
        s    de,hl                      ; SBC HL,DE         ; Subtract DE from HL to leave HL = 91
        movb @l,b                       ; LD B,L            ; Load B with 91
-       li   hl,_34207                  ; LD HL,34207       ; Point HL at store for current level number...
+       li   hl,current_level           ; LD HL,34207       ; Point HL at store for current level number...
 _34819:
        movb a,*hl                      ; LD (HL),A         ; ...and set 91 bytes from here onwards to zero...
        inc  hl                         ; INC HL            ; ...
        sb   one,b                      ; DJNZ 34819        ; ...
        jne  _34819                     ;                   
        movb @bytes+16,a                ; LD A,16           ; Set time / lives to 16...
-       movb a,@_34210                  ; LD (34210),A      ; ...
+       movb a,@time_left                  ; LD (34210),A      ; ...
        movb one,a                      ; LD A,1            ; Set current level to Level 1...
-       movb a,@_34207                  ; LD (34207),A      ; ...
+       movb a,@current_level           ; LD (34207),A      ; ...
        .call @_36778                   ; CALL 36778        ; Initialise script data positions for Flying Skeleton Creature and Bat (Level 1)
        .call @_38468                   ; CALL 38468        ; Reset current positions in apebeasts' script data to initial values
        .call @_41354                   ; CALL 41354        ; Reset Skeleton to initial state
@@ -546,7 +551,7 @@ _34819:
        movb one,a                      ; LD A,1            ; Set room of "Closed Trap Door" and impassable marker to 1 (i.e. starting room)...
        movb a,@_43188                  ; LD (43188),A      ; ...
        movb a,@_43450                  ; LD (43450),A      ; ...
-       movb a,@_34226                  ; LD (34226),A      ; Set attribute of current character to 1 (blue, Berk)
+       movb a,@current_character_attr  ; LD (34226),A      ; Set attribute of current character to 1 (blue, Berk)
        sb   one,a                      ; DEC A             ; Set room of "Open Trap Door" and "Home Sweet Home" brickwork to 0...
        movb a,@_43437                  ; LD (43437),A      ; ...i.e. remove from game...
        movb a,@_43146+13               ; LD (43159),A      ; ...
@@ -555,32 +560,33 @@ _34819:
 * Copy Start Addresses of Current Level's Data Blocks to 34236 and Clean Up Old Data
 * 
 * Used by the routines at #R34438 and #R36753.
-_34864:
+init_level_data:
+       .proc
        .push de                        ; PUSH DE           ; Store DE
        .push hl                        ; PUSH HL           ; Store HL
-       mov  @_34244,hl                 ; LD HL,(34244)     ; Load HL with address of complex state data (current level) for worm
+       mov  @worm_state_addr,hl        ; LD HL,(34244)     ; Load HL with address of complex state data (current level) for worm
        movb @bytes+0,*hl               ; LD (HL),0         ; Set worm's current room to zero
-       movb @_34207,a                  ; LD A,(34207)      ; Load current level into A
-       li   hl,_34281                  ; LD HL,34281       ; Point HL at position 20 bytes before start of list of start addresses of level 1's data
+       movb @current_level,a           ; LD A,(34207)      ; Load current level into A
+       li   hl,data_addresses_1-20     ; LD HL,34281       ; Point HL at position 20 bytes before start of list of start addresses of level 1's data
                                                            ; blocks
        li   bc,20                      ; LD BC,20          ; Set data length to 20, as there are 10 data blocks per level (so 10 addresses)
-_34880:
+init_level_data_1:
        a    bc,hl                      ; ADD HL,BC         ; Advance HL to start of data block address list for next level
        sb   one,a                      ; DEC A             ; Decrease level counter
-       jne  _34880                     ; JR NZ,34880       ; Loop back if we have not reached data for required level
+       jne  init_level_data_1          ; JR NZ,34880       ; Loop back if we have not reached data for required level
 * At this point, HL points to the start of the list of start addresses of the current level's data blocks
-       li   de,_34236                  ; LD DE,34236       ; Copy this level's data block start addresses to #R34236...
+       li   de,current_data_addrs      ; LD DE,34236       ; Copy this level's data block start addresses to #R34236...
        .ldir                           ; LDIR              ; ...
-       movb @bytes+9,b                 ; LD B,9            ; Clear Store for Script Instruction Loop Data...
-       li   hl,_34285                  ; LD HL,34285       ; ...
-_34894:
-       movb a,*hl                      ; LD (HL),A         ; ...
-       inc  hl                         ; INC HL            ; ...
-       sb   one,b                      ; DJNZ 34894        ; ...
-       jne  _34894                     ;                   
+       li   bc,9                       ; LD B,9            ; Clear Store for Script Instruction Loop Data...
+       li   hl,script_instr_loop_data  ; LD HL,34285       ; ...
+init_level_data_2:
+       movb a,*hl+                     ; LD (HL),A         ; ...
+                                       ; INC HL            ; ...
+       dec  bc                         ; DJNZ 34894        ; ...
+       jne  init_level_data_2                     ;
        .pop hl                         ; POP HL            ; Restore HL
        .pop de                         ; POP DE            ; Restore DE
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Script Routine (48, 49) Return
 * 
@@ -602,7 +608,7 @@ _34901:
 * 
 * Used by the routine at #R34438.
 _34916:
-       li   hl,_34208                  ; LD HL,34208       ; If Character Swap Pending Flag is reset...
+       li   hl,game_flags                  ; LD HL,34208       ; If Character Swap Pending Flag is reset...
        movb *hl,tmp0                   ; BIT 6,(HL)        ; ...
        andi tmp0,64*256                ;                   
        jeq  _34927                     ; JR Z,34927        ; ...then skip ahead to #R34927
@@ -615,7 +621,7 @@ _34927:
        jne  _34940                     ; JR NZ,34940       ; ...then skip ahead to #R34940
        szcb @bits+1,*hl                ; RES 1,(HL)        ; Reset Characters Already Swapped Flag
 _34936:
-       .call @_53825                   ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
+       bl   @copy_room_dim_data_to_tmp ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
                                                            ; location (#R34230)
        .ret                            ; RET               ; Return
 * [Fire pressed]
@@ -636,21 +642,21 @@ _34944:
 _34958:
        movb one,a                      ; LD A,1            ; Load A with 1 (attribute for Berk's timer indicator figures)
 _34960:
-       movb a,@_34226                  ; LD (34226),A      ; Set attribute of timer indicator figures to value in A
-       .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       li   hl,_34208                  ; LD HL,34208       ; If Show Score Flag is set...
+       movb a,@current_character_attr  ; LD (34226),A      ; Set attribute of timer indicator figures to value in A
+       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       li   hl,game_flags                  ; LD HL,34208       ; If Show Score Flag is set...
        movb *hl,tmp0                   ; BIT 7,(HL)        ; ...
        andi tmp0,128*256               ;                   
        jeq  !                          ; JP NZ,47628       ; ...then print SCORE / TOTAL / HI-SC string in current character's colours and return
        b    @_47628                    ;                   
 !
-       b    @_47241                    ; JP 47241          ; Reset Show Score Flag, draw timer figures bar and return
+       b    @draw_timer_bar                    ; JP 47241          ; Reset Show Score Flag, draw timer figures bar and return
 
 * Change Direction Berk is Facing Depending Upon Relative Position of Drutt
 * 
 * Used by the routine at #R35735. Input:  IX  Address of complex state data (current level) for Berk
 _35577:
-       movb @_34218,a                  ; LD A,(34218)      ; If Drutt's current room...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; If Drutt's current room...
        cb   a,*ix                      ; CP (IX+0)         ; ...is not the same as Berk's current room...
        jeq  !                          ; JP NZ,35786       ; ...then jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
        b    @_35786                    ;                   
@@ -660,7 +666,7 @@ _35577:
        andi a,240*256                  ; AND 240           ; ...
        movb a,@11(ix)                  ; LD (IX+11),A      ; ...
        movb @9(ix),@e                  ; LD E,(IX+9)       ; Load Berk's Flags into E
-       mov  @_34242,iy                 ; LD IY,(34242)     ; Load IY with address of complex state data (current level) for Drutt
+       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of complex state data (current level) for Drutt
        movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with x-coordinate of Drutt's right side...
        ab   one,a                      ; INC A             ; ...and increase by one
        cb   a,@5(ix)                   ; CP (IX+5)         ; If x-coordinate of Berk's left side is greater than this (i.e. Drutt is to the left of
@@ -734,8 +740,8 @@ _35687:
 * 
 * Used by the routine at #R34438.
 _35689:
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
-       .call @_53848                   ; CALL 53848        ; Store room size data for Berk's current room
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Berk's current room
        movb @9(ix),tmp0                ; BIT 5,(IX+9)      ; If Berk's "Do Not Update State" Flag is set...
        andi tmp0,32*256                ;                   
        jeq  !                          ; RET NZ            ; ...then return
@@ -774,7 +780,7 @@ _35735:
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @_48096                    ;                   
 !
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  !                          ; JP NZ,35577       ; ...then jump to #R35577 (change direction Berk is facing depending upon relative position of
@@ -1250,7 +1256,7 @@ _36390:
 * This entry point is used by the routine at #R36385.
 _36393:
        mov  bc,@_34266                 ; LD (34266),BC     ; Store script data address in BC at #R34266
-       movb @_34208,a                  ; LD A,(34208)      ; Load E with Game Flags...
+       movb @game_flags,a                  ; LD A,(34208)      ; Load E with Game Flags...
        movb a,@e                       ; LD E,A            ; ...
        movb @_34221,a                  ; LD A,(34221)      ; Load A with class of entity currently held by Berk...
        cb   a,@bytes+17                ; CP 17             ; ... and if this is not 17 (Key)...
@@ -1262,7 +1268,7 @@ _36393:
        movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set depth of key to 0 (i.e. out of display)
        socb @bits+4,@e                 ; SET 4,E           ; Set Level Exit Door Unlocked Flag...
        movb @e,a                       ; LD A,E            ; ...
-       movb a,@_34208                  ; LD (34208),A      ; ...
+       movb a,@game_flags                  ; LD (34208),A      ; ...
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 * Berk is not holding a key
 _36429:
@@ -1270,7 +1276,7 @@ _36429:
        andi tmp0,16*256                ;                   
        jeq  _36462                     ; JR Z,36462        ; ...then skip ahead to #R36462
        movb a,d                        ; LD D,A            ; Load D with class of entity currently held by Berk
-       movb @_34207,a                  ; LD A,(34207)      ; Set Zero Flag if current level is Level 4...
+       movb @current_level,a           ; LD A,(34207)      ; Set Zero Flag if current level is Level 4...
        cb   a,@bytes+4                 ; CP 4              ; ...
        movb d,a                        ; LD A,D            ; Load A with class of entity currently held by Berk
        jne  _36446                     ; JR NZ,36446       ; If Zero Flag is not set (i.e. we are not on Level 4) then skip ahead to #R36446
@@ -1387,7 +1393,7 @@ _36610:
 _36616:
        .push hl                        ; PUSH HL           ; Store HL
        .call @_53581                   ; CALL 53581        ; Cycle Attributes (Full-Screen) and Clear Display Buffers
-       .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .pop hl                         ; POP HL            ; Restore HL
        .ret                            ; RET               ; Return
 
@@ -1402,12 +1408,12 @@ _36625:
 * 
 * Used by the routine at #R36390.
 _36638:
-       movb @_34208,a                  ; LD A,(34208)      ; Set Update Scores and Display Flag...
+       movb @game_flags,a                  ; LD A,(34208)      ; Set Update Scores and Display Flag...
        socb @bits+5,a                  ; SET 5,A           ; ...
-       movb a,@_34208                  ; LD (34208),A      ; ...
+       movb a,@game_flags                  ; LD (34208),A      ; ...
        mov  @_34256,iy                 ; LD IY,(34256)     ; Load IY with address of complex state data for Door just interacted with
        movb @9(iy),a                   ; LD A,(IY+9)       ; Load A with destination level from Door's state data...
-       movb a,@_34207                  ; LD (34207),A      ; ...and set current level to this value
+       movb a,@current_level           ; LD (34207),A      ; ...and set current level to this value
        cb   a,one                      ; CP 1              ; If destination level is not Level 1...
        jne  _36725                     ; JR NZ,36725       ; ...then skip ahead to #R36725
 * Destination level is Level 1 (i.e. Level 4 completed)
@@ -1435,11 +1441,11 @@ _36638:
 * Destination level is not Level 1
 _36725:
        .call @_36753                   ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
-       mov  @_34242,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
+       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
        mov  iy,@_34256                 ; LD (34256),IY     ; ...and store at #R34256
        .call @_48850                   ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
 _36739:
-       li   hl,_34208                  ; LD HL,34208       ; Reset Level Exit Door Unlocked Flag...
+       li   hl,game_flags                  ; LD HL,34208       ; Reset Level Exit Door Unlocked Flag...
        szcb @bits+4,*hl                ; RES 4,(HL)        ; ...
        movb @bytes+5,a                 ; LD A,5            ; Set door colour to 5 (cyan, i.e. locked)...
        movb a,@_50711+1                ; LD (50712),A      ; ...
@@ -1451,11 +1457,11 @@ _36739:
 * 
 * Used by the routine at #R36638.
 _36753:
-       .call @_34864                   ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
+       bl   @init_level_data                   ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        movb @bytes+33,a                ; LD A,33           ; Load IY with address of complex state data for first entity that has class of 33 (Entry
                                                            ; Door)...
        .call @_54019                   ; CALL 54019        ; ...
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with start address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with start address of current level's complex state data for Berk
        movb @5(iy),a                   ; LD A,(IY+5)       ; Load A with x-coordinate of left of Entry Door...
        ab   one,a                      ; INC A             ; ...and add one
        movb a,@5(ix)                   ; LD (IX+5),A       ; Adjust Berk's horizontal position so that his left side is at coordinate in A...
@@ -1607,7 +1613,7 @@ _37016:
 * Used by the routine at #R36791.
 _37062:
        li   ix,_43463                  ; LD IX,43463       ; Point IX at position data for Bat (Level 1)
-       .call @_53848                   ; CALL 53848        ; Store room size data for Bat's room
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Bat's room
        mov  @_37016,hl                 ; LD HL,(37016)     ; Load current position in Bat's script data from #R37016 into HL...
        mov  hl,@_34277                 ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
        .call @_37085                   ; CALL 37085        ; Update state of Bat
@@ -1648,14 +1654,14 @@ _37128:
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @_48096                    ;                   
 !
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jne  _37148                     ; JR NZ,37148       ; ...then skip ahead to #R37148
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        jmp  _37152                     ; JR 37152          ; Skip ahead to #R37152
 _37148:
-       mov  @_34242,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
+       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
 * At this point, IY points to the complex state data entry for the current character.
 _37152:
        movb *iy,a                      ; LD A,(IY+0)       ; If current character's current room is not the same as the Bat's...
@@ -1727,7 +1733,7 @@ _37596:
 * Used by the routine at #R37586. Input:  IX  Address of complex state data for a (Level 1) spider (#R43749, #R43762
 * or #R43775)
 _37639:
-       movb @_34208,a                  ; LD A,(34208)      ; If "Reset Spiders to Initial State" Flag is reset...
+       movb @game_flags,a                  ; LD A,(34208)      ; If "Reset Spiders to Initial State" Flag is reset...
        movb a,tmp0                     ; BIT 3,A           ; ...
        andi tmp0,8*256                 ;                   
        jeq  _37662                     ; JR Z,37662        ; ...then skip ahead to #R37662
@@ -1754,7 +1760,7 @@ _37662:
        movb a,@_34223                  ; LD (34223),A      ; ...
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 _37685:
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If spider's Must Process Current Script Data Flag is set...
        andi tmp0,1*256                 ;                   
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -1903,7 +1909,7 @@ _38132:
        andi tmp0,4*256                 ;                   
        jne  _38155                     ; JR NZ,38155       ; ...then skip ahead to #R38155 (make Bubo fire)
        movb @bytes+60,a                ; LD A,60           ; Load A with a random number, 0-59...
-       .call @_54222                   ; CALL 54222        ; ...
+       .call @rnd_no                   ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is not zero (59 in 60 chance)...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @_48096                    ;                   
@@ -1991,7 +1997,7 @@ _38278:
 _38293:
        cb   a,@bytes+25                ; CP 25             ; If collision was not with entity of class 25 (Green Apebeast, Level 2)...
        jne  _38328                     ; JR NZ,38328       ; ...then skip ahead to #R38328
-       movb @_34218,a                  ; LD A,(34218)      ; Load A with current character's current room...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; Load A with current character's current room...
        cb   a,*ix                      ; CP (IX+0)         ; ...and if this is not the same as the projectile's room...
        jne  _38328                     ; JR NZ,38328       ; ...then skip ahead to #R38328
        movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set Ape Beast's depth to zero
@@ -2171,7 +2177,7 @@ _38596:
        socb a,a                        ; OR A              ; ...
        jne  _38635                     ; JR NZ,38635       ; ...then skip ahead to #R38635
        movb @bytes+40,a                ; LD A,40           ; Load A with a random number, 0-39...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is not zero (39 in 40 chance)...
        jeq  !                          ; JP NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
        b    @_38748                    ;                   
@@ -2189,7 +2195,7 @@ _38635:
        jne  _38707                     ; JR NZ,38707       ; ...then check for collision with Berk killing him if so, ensure stalactite is falling and
                                                            ; update its vertical position (#R38707)
        movb @5(ix),@e                  ; LD E,(IX+5)       ; Load E with x-coordinate of left of stalactite
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is not the same as the stalactite's...
        cb   a,*ix                      ; CP (IX+0)         ; ...
        jne  _38679                     ; JR NZ,38679       ; ...then skip ahead to #R38679 to check Drutt's position
@@ -2221,7 +2227,7 @@ _38679:
                                                            ; update its vertical position (#R38707)
 _38699:
        movb @bytes+200,a               ; LD A,200          ; Load A with a random number, 0-199...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is not zero (199 in 200 chance)...
        jne  _38748                     ; JR NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
 _38707:
@@ -2277,7 +2283,7 @@ _39150:
 * 
 * Used by the routine at #R39137.
 _39151:
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        li   hl,_39150                  ; LD HL,39150       ; If Hatch State Index is zero...
        movb *hl,a                      ; LD A,(HL)         ; ...
        socb a,a                        ; OR A              ; ...
@@ -2373,8 +2379,8 @@ _39278:
 * Clawed Foot is attacking
 _39289:
        li   iy,_44881                  ; LD IY,44881       ; Load IY with address of complex state data for Clawed Foot (Level 3)
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
-       .call @_53848                   ; CALL 53848        ; Store room size data for Berk's current room
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Berk's current room
        movb @_44881+9,a                ; LD A,(44890)      ; Load A with Clawed Foot's flags...
        socb a,a                        ; OR A              ; ...and if any are set...
        jne  _39337                     ; JR NZ,39337       ; ...then skip ahead to #R39337
@@ -2589,7 +2595,7 @@ _39601:
        jne  !                          ; RET Z             ; ...then return
        .ret                            ;                   
 !
-       movb @_34218,a                  ; LD A,(34218)      ; If current character's current room is not 6 (coloured creatures' room)...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; If current character's current room is not 6 (coloured creatures' room)...
        cb   a,@bytes+6                 ; CP 6              ; ...
        jeq  !                          ; RET NZ            ; ...then return
        .ret                            ;                   
@@ -2607,7 +2613,7 @@ _39601:
        li   hl,_39599                  ; LD HL,39599       ; Point HL at current Sequence ID
 _39641:
        movb @bytes+3,a                 ; LD A,3            ; Load A with a random number, 0-2...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        cb   a,*hl                      ; CP (HL)           ; ...and if this is the same as the current Sequence ID...
        jeq  _39641                     ; JR Z,39641        ; ...then jump back to #R39641 to generate a new random number
        movb a,*hl                      ; LD (HL),A         ; Set new Sequence ID to generated number
@@ -2699,7 +2705,7 @@ _39760:
 * Used by the routine at #R39137.
 _39776:
        li   iy,_44868                  ; LD IY,44868       ; Load IY with address of complex state data for Large Yellow Creature (Level 3)
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        li   hl,_44868+9                ; LD HL,44877       ; Load HL with address of Large Yellow Creature's flags...
        movb *hl,a                      ; LD A,(HL)         ; ...and load flags into A
        cb   a,@bytes+2                 ; CP 2              ; If creature is in "Rising From Floor" mode...
@@ -3004,7 +3010,7 @@ _41498:
        b    @_48096                    ; JP 48096          ; Advance HL to next script instruction and execute
 * The instructions below do a "manual" check for a collision between the Skeleton and Berk. See trivia
 _41513:
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is not 3 (Skeleton's room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -3035,7 +3041,7 @@ _41513:
 * apparent position or width graphically. Input:  IX  Address of complex state data for an entity Output: HL Address
 * of next script instruction to execute
 _41550:
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is 3 (Skeleton's room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jeq  _41580                     ; JR Z,41580        ; ...then jump to #R41580
@@ -3070,7 +3076,7 @@ _41597:
 * Script Routine (64) Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
 _41617:
        movb @bytes+10,a                ; LD A,10           ; Load A with a random number, 1-10...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        ab   one,a                      ; INC A             ; ...
        .push hl                        ; PUSH HL           ; Store HL (current position in script data)
        li   bc,4                       ; LD BC,4           ; Advance HL by four bytes...
@@ -3094,7 +3100,7 @@ _41633:
        jeq  _41653                     ; JR Z,41653        ; ...then skip ahead to #R41653
        .call @_53667                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
 _41653:
-       movb @_34218,a                  ; LD A,(34218)      ; Load E with current character's current room index...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; Load E with current character's current room index...
        movb a,@e                       ; LD E,A            ; ...
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with Ghost's current room index
        movb @4(ix),@c                  ; LD C,(IX+4)       ; Load C with y-coordinate of Ghost's top edge
@@ -3200,7 +3206,7 @@ _41805:
        movb @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Cannon has its Is Being Carried Flag set...
        andi tmp0,32*256                ;                   
        jne  _41799                     ; JR NZ,41799       ; ...then jump to #R41799 (Cannon dormant)
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is the same as the Cannon's room...
        cb   a,*iy                      ; CP (IY+0)         ; ...
        jeq  _41833                     ; JR Z,41833        ; ...then skip ahead to #R41833
@@ -3368,7 +3374,7 @@ _42092:
 _42102:
        movb a,@c                       ; LD C,A            ; Load drip's stage into C
        movb @bytes+15,a                ; LD A,15           ; Load A with a random number, 0-14...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; If A is not zero (14 in 15 chance)...
        jne  _42119                     ; JR NZ,42119       ; ...then advance IX to next entry in complex state data and loop back to #R42070
        movb @c,a                       ; LD A,C            ; Load drip's stage back into A...
@@ -3527,7 +3533,7 @@ _42374:
 * Used by the routine at #R41211.
 _42381:
        li   ix,_45495                  ; LD IX,45495       ; Point IX at start of state data for Snake (Level 4)
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        li   hl,_45495+12               ; LD HL,45507       ; Load HL with address of Snake's Attack Progress Index
        movb *hl,a                      ; LD A,(HL)         ; If Snake's Attack Progress Index is not zero...
        socb a,a                        ; OR A              ; ...
@@ -3750,7 +3756,7 @@ _43775:
 * { 3 | Position of top edge of room (chars) }
 * { 4 | Position of bottom edge of room (chars) }
 * TABLE#
-_43815:
+room_dim_data_1:
        byte 2,0,31,0,21                                              ; (01) Trap Door Room
        byte 2,11,20,0,21                                             ; (02) 1st room below Trap Door
        byte 2,8,23,0,21                                              ; (03) 2nd room below Trap Door
@@ -3860,7 +3866,7 @@ _44422:
        byte 255                                                      ; End Marker
 
 * Room Dimension Data (Level 2)
-_44436:
+room_dim_data_2:
        byte 2,0,31,0,21                                              ; (01) Door Room
        byte 2,11,20,0,21                                             ; (02) Key Room
        byte 2,0,31,0,21                                              ; (03) First Apebeast Room
@@ -3966,7 +3972,7 @@ _45102:
        byte 255                                                      ; End Marker
 
 * Room Dimension Data (Level 3)
-_45116:
+room_dim_data_3:
        byte 2,16,31,0,21                                             ; (01) Door Room
        byte 2,0,31,0,21                                              ; (02) Weight Room
        byte 2,0,31,0,21                                              ; (03) Large Yellow Creature Room
@@ -4085,7 +4091,7 @@ _45846:
        byte 255                                                      ; End Marker
 
 * Room Dimension Data (Level 4)
-_45860:
+room_dim_data_4:
        byte 2,0,31,0,21                                              ; (01) Door Room
        byte 2,0,31,0,21                                              ; (02) Five Drips Room
        byte 2,0,31,0,21                                              ; (03) Skeleton's Room
@@ -4118,14 +4124,14 @@ _45899:
        mov  @_34279,hl                 ; LD HL,(34279)     ; Modify instruction at #R46045 with address of Primary Display Buffer...
 _45902:
        mov  hl,@_46045+1               ; LD (46046),HL     ; ...
-       movb @_34230,a                  ; LD A,(34230)      ; Load C with depth of current character's current room...
+       movb @tmp_room_dim_data,a       ; LD A,(34230)      ; Load C with depth of current character's current room...
        movb a,@c                       ; LD C,A            ; ...
-       movb @_34218,a                  ; LD A,(34218)      ; Load B with index of current character's current room...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; Load B with index of current character's current room...
        movb a,b                        ; LD B,A            ; ...
        movb @bytes+0,d                 ; LD D,0            ; Load D with zero
 * Start drawing simple entities
 _45915:
-       mov  @_34236,ix                 ; LD IX,(34236)     ; Load IX with start address of current level's simple state data
+       mov  @current_data_addrs,ix                 ; LD IX,(34236)     ; Load IX with start address of current level's simple state data
        movb @bytes+6,@e                ; LD E,6            ; Load DE with 6 (as simple state data entries are 6 bytes wide)
 _45921:
        movb *ix,a                      ; LD A,(IX+0)       ; Load first byte of current simple state data entry into A
@@ -4167,11 +4173,11 @@ _45961:
 _45965:
        movb @2(ix),@e                  ; LD E,(IX+2)       ; Load DE with address of graphic layout data for entity...
        movb @3(ix),d                   ; LD D,(IX+3)       ; ...
-       movb @_34230+3,a                ; LD A,(34233)      ; Load A with y-coordinate of top edge of current character's current room...
+       movb @tmp_room_dim_data+3,a     ; LD A,(34233)      ; Load A with y-coordinate of top edge of current character's current room...
        ab   @4(ix),a                   ; ADD A,(IX+4)      ; ...add y-coordinate of graphic element to draw as offset...
        sb   @bytes+100,a               ; SUB 100           ; ...subtract 100...
        movb a,@l                       ; LD L,A            ; ...and load into L
-       movb @_34230+1,a                ; LD A,(34231)      ; Load A with x-coordinate of left edge of current character's current room...
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load A with x-coordinate of left edge of current character's current room...
        ab   @5(ix),a                   ; ADD A,(IX+5)      ; ...add x-coordinate of graphic element to draw as offset...
        sb   @bytes+100,a               ; SUB 100           ; ...subtract 100...
        movb a,h                        ; LD H,A            ; ...and load into H
@@ -4481,7 +4487,7 @@ _46317:
        .push ix                        ; PUSH IX           ; Store current position in graphic layout data
        movb *ix,a                      ; LD A,(IX+0)       ; Load current byte (Random Number Cap) from graphic layout data into A...
        movb a,@e                       ; LD E,A            ; ...and copy into E
-       .call @_54222                   ; CALL 54222        ; Load BC with a random number, 1-A...
+       bl   @rnd_no                    ; CALL 54222        ; Load BC with a random number, 1-A...
        ab   one,a                      ; INC A             ; ...
        movb a,@c                       ; LD C,A            ; ...
        movb @bytes+0,b                 ; LD B,0            ; ...
@@ -4539,7 +4545,7 @@ _46385:
        movb @1(ix),a                   ; LD A,(IX+1)       ; Set current timer value to maximum...
        movb a,*ix                      ; LD (IX+0),A       ; ...
        movb @2(ix),a                   ; LD A,(IX+2)       ; Load A with number of states
-       .call @_54222                   ; CALL 54222        ; Set C to a random number between 3 and (number of states + 2)...
+       bl   @rnd_no                    ; CALL 54222        ; Set C to a random number between 3 and (number of states + 2)...
        ab   @bytes+3,a                 ; ADD A,3           ; ...
        movb a,@c                       ; LD C,A            ; ...
        .push ix                        ; PUSH IX           ; Store IX (current position in graphic layout data)
@@ -4647,7 +4653,7 @@ _46495:
        jne  _46544                     ; JR NZ,46544       ; ...and if not zero, skip ahead to #R46544
        .pop ix                         ; POP IX            ; Restore (pointer to first parameter in graphic layout data)
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with random number...
-       .call @_54222                   ; CALL 54222        ; ...from zero to one less than number of states...
+       bl   @rnd_no                    ; CALL 54222        ; ...from zero to one less than number of states...
        movb a,@1(ix)                   ; LD (IX+1),A       ; ...and set this as the index of the current state
        ab   a,a                        ; ADD A,A           ; Multiply A by four and add two...
        ab   a,a                        ; ADD A,A           ; ...to give number of bytes of data to skip over...
@@ -4655,7 +4661,7 @@ _46495:
        movb a,@c                       ; LD C,A            ; Load BC with value in A
        a    bc,ix                      ; ADD IX,BC         ; Advance IX to start of data for (new) current state
        movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with random number...
-       .call @_54222                   ; CALL 54222        ; ...from one to maximum timer value for state...
+       bl   @rnd_no                    ; CALL 54222        ; ...from one to maximum timer value for state...
        ab   one,a                      ; INC A             ; ...
        movb a,*ix                      ; LD (IX+0),A       ; ...and set as current timer value for this state
        jmp  _46545                     ; JR 46545          ; Skip ahead to #R46545
@@ -4697,7 +4703,7 @@ _46569:
 _46577:
        movb *ix,a                      ; LD A,(IX+0)       ; Load current byte of graphic layout data into A
        inc  ix                         ; INC IX            ; Advance pointer to next byte
-       .call @_54222                   ; CALL 54222        ; Load A with a random number between 0 and (A-1)
+       bl   @rnd_no                    ; CALL 54222        ; Load A with a random number between 0 and (A-1)
 * This entry point is used by the routine at #R46594.
 _46585:
        ab   a,a                        ; ADD A,A           ; Double the number
@@ -4860,7 +4866,6 @@ _46872:
        sb   one,b                      ; DJNZ 46863        ; Loop back for next string
        jne  _46863                     ;
        bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
-*      OK UNTIL HERE
        movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
        bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
 * This entry point is used by the routine at #R46968.
@@ -5086,61 +5091,61 @@ _47227:
 * Reset Show Score Flag and Draw Timer Figures Bar
 * 
 * Used by the routines at #R34438, #R34916 and #R47468.
-_47241:
-       movb @_34208,a                  ; LD A,(34208)      ; Reset Show Score Flag...
+draw_timer_bar:
+       movb @game_flags,a              ; LD A,(34208)      ; Reset Show Score Flag...
        szcb @bits+7,a                  ; RES 7,A           ; ...
-       movb a,@_34208                  ; LD (34208),A      ; ...
-       li   ix,23232                   ; LD IX,23232       ; Point IX to start of second-last row of Attribute File
-       movb @_34210,a                  ; LD A,(34210)      ; Load remaining time / lives into A...
-       socb a,a                        ; OR A              ; ...and if zero...
-       jeq  _47267                     ; JR Z,47267        ; ...then skip ahead 47267
+       movb a,@game_flags              ; LD (34208),A      ; ...
+       li   ix,zx_attributes+(22*32)   ; LD IX,23232       ; Point IX to start of second-last row of Attribute File
+       movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A...
+                                       ; OR A              ; ...and if zero...
+       jeq  draw_timer_bar_2           ; JR Z,47267        ; ...then skip ahead 47267
        movb a,b                        ; LD B,A            ; Load number of lives into B
-_47260:
+draw_timer_bar_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of pairs of open eyes to draw)
-       .call @_47315                   ; CALL 47315        ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       .call @draw_open_eyes           ; CALL 47315        ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address in IX and advance by two bytes
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of pairs of open eyes to draw)
        sb   one,b                      ; DJNZ 47260        ; Decrease B (remaining number of pairs of open eyes to draw) and loop back to #R47260 if not
-       jne  _47260                     ;                   
-                                                           ; zero
-_47267:
-       movb @_34210,a                  ; LD A,(34210)      ; Load remaining time / lives into E...
-       movb a,@e                       ; LD E,A            ; ...
+       jne  draw_timer_bar_1           ;                   ; zero          
+                                                           
+draw_timer_bar_2:
+       movb @time_left,@e              ; LD A,(34210)      ; Load remaining time / lives into E...
+                                       ; LD E,A            ; ...
        movb @bytes+16,a                ; LD A,16           ; Load A with number of lives lost by subtracting E from 16...
        sb   @e,a                       ; SUB E             ; ...
-       jeq  _47284                     ; JR Z,47284        ; If zero, then skip ahead to #R47284
+       jeq  draw_timer_bar_4           ; JR Z,47284        ; If zero, then skip ahead to #R47284
        movb a,b                        ; LD B,A            ; Load number of lost lives into B as counter for loop
-_47277:
+draw_timer_bar_3:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of pairs of closed eyes to draw)
-       .call @_47302                   ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
+       .call @draw_closed_eyes         ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
                                                            ; address in IX and advance by two bytes
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of pairs of closed eyes to draw)
        sb   one,b                      ; DJNZ 47277        ; Decrease B (remaining number of pairs of open eyes to draw) and loop back to #R47277 if not
-       jne  _47277                     ;
-                                                           ; zero
-_47284:
+       jne  draw_timer_bar_3           ;                   ; zero
+                                                           
+draw_timer_bar_4:
        movb @bytes+27,@c               ; LD C,27           ; Set graphic index to 27 (timer figures' bodies)
-       movb @_34226,a                  ; LD A,(34226)      ; Load attribute of current character into A
+       movb @current_character_attr,a  ; LD A,(34226)      ; Load attribute of current character into A
        movb @bytes+16,b                ; LD B,16           ; Load B with 16 (as 16 timer figures' bodies to draw)
-_47291:
+draw_timer_bar_5:
        .push bc                        ; PUSH BC           ; Store B (remaining number of timer figure bodies to draw)
-       .call @_47333                   ; CALL 47333        ; Draw left half of timer figure's body and invert mirror flag on attribute
-       .call @_47333                   ; CALL 47333        ; Draw right half of timer figure's body
+       .call @draw_timer_part          ; CALL 47333        ; Draw left half of timer figure's body and invert mirror flag on attribute
+       .call @draw_timer_part          ; CALL 47333        ; Draw right half of timer figure's body
        .pop bc                         ; POP BC            ; Restore B (remaining number of timer figure bodies to draw)
        sb   one,b                      ; DJNZ 47291        ; Decrease B and loop back to #R47291
-       jne  _47291                     ;                   
+       jne  draw_timer_bar_5           ;                   
        .ret                            ; RET               ; Return
 
 * If Show Score Flag Reset then Draw Pair of Timer Figure Eyes (Closed) at Attribute File Address IX and Advance IX
 * by Two Bytes
 * 
 * Used by the routines at #R47241 and #R47363. Input:  IX  Pointer to a location in Attribute File
-_47302:
-       .call @_47355                   ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47305
-       movb @_34226,a                  ; LD A,(34226)      ; Load A with the attribute of the current character
+draw_closed_eyes:
+       .call @ret_if_show_score_flag   ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47305
+       movb @current_character_attr,a  ; LD A,(34226)      ; Load A with the attribute of the current character
        movb @bytes+28,@c               ; LD C,28           ; Load C with 28 (graphic index of timer figures' closed eyes)
-       .call @_47333                   ; CALL 47333        ; Draw the left (closed) eye at Attribute File address in IX and advance IX by one byte
-       jmp  _47333                     ; JR 47333          ; Draw the right (closed) eye at Attribute File address in IX, advance IX by one byte and
+       .call @draw_timer_part          ; CALL 47333        ; Draw the left (closed) eye at Attribute File address in IX and advance IX by one byte
+       jmp  draw_timer_part            ; JR 47333          ; Draw the right (closed) eye at Attribute File address in IX, advance IX by one byte and
                                                            ; return
 
 * If Show Score Flag Reset then Draw Pair of Timer Figure Eyes (Open, Random Frame) at Attribute File Address IX and
@@ -5148,29 +5153,29 @@ _47302:
 * 
 * Used by the routines at #R47241, #R47363 and #R47431. Input:  IX  Attribute File address at which to draw pair of
 * eyes Output: IX  Attribute File address two bytes on from initial IX
-_47315:
-       .call @_47355                   ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47318
-       .call @_47323                   ; CALL 47323        ; Draw Timer Figure's left eye (random frame) at Attribute File address in IX and advance IX by
+draw_open_eyes:
+       .call @ret_if_show_score_flag   ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47318
+       .call @draw_eye                 ; CALL 47323        ; Draw Timer Figure's left eye (random frame) at Attribute File address in IX and advance IX by
                                                            ; one byte
-       jmp  _47333                     ; JR 47333          ; Draw Timer Figure's right eye (same frame as above), advance IX by one byte then return
+       jmp  draw_timer_part            ; JR 47333          ; Draw Timer Figure's right eye (same frame as above), advance IX by one byte then return
 
 * Draw a Timer Figure's Eye (Random Frame) at Attribute File Address in IX and Advance IX by One Byte
 * 
 * Used by the routine at #R47315. Input:  IX  (Entry at #R47323 and #R47333) Pointer to a location in Attribute File
 * A  (Entry at #R47333 only) Attribute C  (Entry at #R47333 only) Graphic Index (e.g. 27 for timer figures' bodies)
 * Output: A  Attribute (including inverted mirror flag) IX  Pointer to next location in Attribute File
-_47323:
+draw_eye:
        movb @bytes+5,a                 ; LD A,5            ; Load A with a random number, 0-4...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        ab   @bytes+29,a                ; ADD A,29          ; Add 29 (as 29 is the index of the first of five eye direction graphics) in C...
        movb a,@c                       ; LD C,A            ; ...
        movb @bytes+7,a                 ; LD A,7            ; Set attribute for timer indicator figures' eyes to white INK on black PAPER
 * This entry point is used by the routines at #R47241, #R47302 and #R47315.
-_47333:
+draw_timer_part:
        movb @bytes+4,b                 ; LD B,4            ; Set Graphic Set Index to 4
        .push af                        ; PUSH AF           ; Store AF (A = attribute)
        .push bc                        ; PUSH BC           ; Store BC (B = graphic set index, C = graphic index)
-       .call @_54144                   ; CALL 54144        ; Draw a graphic character block to display
+       .call @draw_character_block     ; CALL 54144        ; Draw a graphic character block to display
        .pop bc                         ; POP BC            ; Restore BC (B = graphic set index, C = graphic index)
        movb @c,a                       ; LD A,C            ; Load Graphic Index into A
        cb   a,@bytes+32                ; CP 32             ; If graphic index is less than 32 (i.e. we're not dealing with #32 - eyes looking right or #33
@@ -5181,7 +5186,7 @@ _47333:
 _47348:
        movb a,@c                       ; LD C,A            ; Load Graphic Index into C
        .pop af                         ; POP AF            ; Restore AF (A = attribute)
-       li   tmp0,128                   ; XOR 128           ; Flip mirror flag to prepare to draw mirror image of just-drawn character block
+       li   tmp0,128*256               ; XOR 128           ; Flip mirror flag to prepare to draw mirror image of just-drawn character block
        xor  tmp0,a                     ;                   
        inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
        .ret                            ; RET               ; Return
@@ -5189,8 +5194,8 @@ _47348:
 * If Show Score Flag is Reset then Return to Calling Routine, else Return to Routine that Called Calling Routine
 * 
 * Used by the routines at #R47302 and #R47315.
-_47355:
-       movb @_34208,a                  ; LD A,(34208)      ; If Show Score Flag is reset...
+ret_if_show_score_flag:
+       movb @game_flags,a              ; LD A,(34208)      ; If Show Score Flag is reset...
        movb a,tmp0                     ; BIT 7,A           ; ...
        andi tmp0,128*256               ;                   
        jne  !                          ; RET Z             ; ...then return
@@ -5215,32 +5220,32 @@ _47363:
        .ret                            ;                   
 !
        mov  @_34264,ix                 ; LD IX,(34264)     ; Restore Attribute File address of eyes of currently blinking timer figure into IX
-       b    @_47315                    ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       b    @draw_open_eyes            ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address IX, advance IX by two bytes then return
 * Make a randomly chosen timer figure blink
 _47388:
        movb @bytes+10,a                ; LD A,10           ; Load A with a random number, 0-9...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; If A is not zero (9 in 10 chance)...
        jeq  !                          ; RET NZ            ; ...then return
        .ret                            ;                   
 !
-       movb @_34210,a                  ; LD A,(34210)      ; Load remaining time / lives into A
+       movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
        cb   a,@bytes+2                 ; CP 2              ; If less than two time / lives remain...
        jhe  !                          ; RET C             ; ...then return
        .ret                            ;                   
 !
-       .call @_54222                   ; CALL 54222        ; Load A with a random number, 0-(x-1) (where x is remaining time / lives)
+       bl   @rnd_no                    ; CALL 54222        ; Load A with a random number, 0-(x-1) (where x is remaining time / lives)
        ab   a,a                        ; ADD A,A           ; Double A...
        movb a,@c                       ; LD C,A            ; ...and load into BC...
        movb @bytes+0,b                 ; LD B,0            ; ...
        li   ix,23232                   ; LD IX,23232       ; Point IX to start of second-last row of Attribute File
        a    bc,ix                      ; ADD IX,BC         ; Add BC as offset to IX (i.e. point to a random "awake" timer figure)
        mov  ix,@_34264                 ; LD (34264),IX     ; Store Attribute File address of eyes of currently blinking timer figure at 34264
-       .call @_47302                   ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
+       .call @draw_closed_eyes         ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
                                                            ; address IX and advance IX by two bytes
        movb @bytes+10,a                ; LD A,10           ; Set Blink Duration Counter to a random number, 1-9...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        ab   one,a                      ; INC A             ; ...
        movb a,@_34227                  ; LD (34227),A      ; ...
        .ret                            ; RET               ; Return
@@ -5249,7 +5254,7 @@ _47388:
 * 
 * Used by the routine at #R47363.
 _47431:
-       movb @_34210,a                  ; LD A,(34210)      ; Load remaining time / lives into A...
+       movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A...
        socb a,a                        ; OR A              ; ...and if none remain...
        jne  !                          ; RET Z             ; ...then return
        .ret                            ;                   
@@ -5260,7 +5265,7 @@ _47431:
 * As the value of x (Remaining Time / Lives) decreases, the probability that a randomly generated number between 0
 * and (18-x) is 2 or more increases. This probability is used to ensure that the rate at which each timer figure is
 * updated remains roughly constant.
-       .call @_54222                   ; CALL 54222        ; Load A with a random number, 0-(17 minus remaining time / lives)
+       bl   @rnd_no                    ; CALL 54222        ; Load A with a random number, 0-(17 minus remaining time / lives)
        cb   a,@bytes+2                 ; CP 2              ; If generated number is 2 or more...
        jl   !                          ; RET NC            ; ...then return
        .ret                            ;                   
@@ -5270,16 +5275,16 @@ _47431:
 * If remaining time / lives is one, then there is only one Timer Figure to update
        cb   a,one                      ; CP 1              ; If this is 1...
        jne  !                          ; JP Z,47315        ; ...then jump to #R47315 (If Show Score Flag reset then draw pair of Timer Figure eyes and
-       b    @_47315                    ;                   
+       b    @draw_open_eyes                    ;                   
 !
                                                            ; return)
 * Otherwise, randomly select one of the remaining Timer Figures to update
-       .call @_54222                   ; CALL 54222        ; Load A with random number between 0 and (x-1) where x is remaining time / lives
+       bl   @rnd_no                    ; CALL 54222        ; Load A with random number between 0 and (x-1) where x is remaining time / lives
        ab   a,a                        ; ADD A,A           ; Double A...
        movb a,@c                       ; LD C,A            ; ...and load into BC...
        movb @bytes+0,b                 ; LD B,0            ; ...
        a    bc,ix                      ; ADD IX,BC         ; Add BC as offset to IX (i.e. advance IX to point to left eye of randomly chosen Timer Figure)
-       b    @_47315                    ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       b    @draw_open_eyes            ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address IX, advance IX by two bytes then return
 
 * Increase Timer Tick Counter and Reduce Remaining Time if Counter > 767
@@ -5298,23 +5303,23 @@ _47468:
        mov  hl,@_34211                 ; LD (34211),HL     ; ...
 * This entry point is used by the routine at #R53723.
 _47485:
-       movb @_34210,a                  ; LD A,(34210)      ; If no time / lives remain...
+       movb @time_left,a                  ; LD A,(34210)      ; If no time / lives remain...
        socb a,a                        ; OR A              ; ...
        jne  !                          ; JP Z,47241        ; ...then reset Show Score Flag, draw timer figures bar and return
-       b    @_47241                    ;                   
+       b    @draw_timer_bar                    ;                   
 !
        sb   one,a                      ; DEC A             ; Decrease current time / lives by one...
-       movb a,@_34210                  ; LD (34210),A      ; ...
-       b    @_47241                    ; JP 47241          ; Reset Show Score Flag, and draw timer figures bar and return
+       movb a,@time_left                  ; LD (34210),A      ; ...
+       b    @draw_timer_bar                    ; JP 47241          ; Reset Show Score Flag, and draw timer figures bar and return
 
 * Update Scores and Display
 * 
 * Used by the routine at #R34438.
 _47499:
-       li   hl,_34208                  ; LD HL,34208       ; Set Show Score Flag...
+       li   hl,game_flags                  ; LD HL,34208       ; Set Show Score Flag...
        socb @bits+7,*hl                ; SET 7,(HL)        ; ...
        li   hl,0                       ; LD HL,0           ; Set HL to zero
-       movb @_34210,a                  ; LD A,(34210)      ; If no time / lives remain...
+       movb @time_left,a                  ; LD A,(34210)      ; If no time / lives remain...
        socb a,a                        ; OR A              ; ...
        jeq  _47526                     ; JR Z,47526        ; ...then skip ahead to #R47526
        movb a,b                        ; LD B,A            ; Load HL with 1000 x current remaining time / lives...
@@ -5338,7 +5343,7 @@ _47526:
        mov  hl,@_34299                 ; LD (34299),HL     ; ...and store as new high score
 _47551:
        movb @bytes+16,a                ; LD A,16           ; Set time / lives to 16...
-       movb a,@_34210                  ; LD (34210),A      ; ...
+       movb a,@time_left                  ; LD (34210),A      ; ...
        li   iy,_47589+7                ; LD IY,47596       ; Point IY at "numeric (score)" part of string at 47589
        mov  @_34213,hl                 ; LD HL,(34213)     ; Load HL with current score...
        .call @_47741                   ; CALL 47741        ; ...and convert to string at IY
@@ -5368,7 +5373,7 @@ _47635:
 !
        cb   a,@bytes+42                ; CP 42             ; If character is not 42 ("set attribute to current character's colours" marker)...
        jne  _47660                     ; JR NZ,47660       ; ...then skip ahead to #R47660
-       movb @_34226,a                  ; LD A,(34226)      ; Load current character's attribute into A (blue for Berk, yellow for Drutt)
+       movb @current_character_attr,a  ; LD A,(34226)      ; Load current character's attribute into A (blue for Berk, yellow for Drutt)
        cb   a,one                      ; CP 1              ; If blue (Berk)...
        jeq  _47656                     ; JR Z,47656        ; ...then skip ahead to #R47656
        movb @bytes+112,a               ; LD A,112          ; Load A with value for black INK, yellow PAPER, BRIGHT (Drutt's colours)
@@ -5429,33 +5434,24 @@ print_dbl_height:
 * graphic data for the character of interest) HL  Attribute File address at which to print character
 print_half_dbl_height:
        .proc
-       mov  hl,r0
-       ai   r0,-zx_attributes
-       sla  r0,3
-       mov  r0,r1
+       mov  hl,tmp0
+       ai   tmp0,-zx_attributes
+       sla  tmp0,3
+       mov  tmp0,tmp1
        bl   @vwad
-       li   r2,vdpwd
-       movb *de,*r2
-       movb *de+,*r2
-       movb *de,*r2
-       movb *de+,*r2
-       movb *de,*r2
-       movb *de+,*r2
-       movb *de,*r2
-       movb *de+,*r2
-       mov  r1,r0
-       ai   r0,>2000
-       bl   @vwad
+       li   tmp2,vdpwd
+       movb *de,*tmp2
+       movb *de+,*tmp2
+       movb *de,*tmp2
+       movb *de+,*tmp2
+       movb *de,*tmp2
+       movb *de+,*tmp2
+       movb *de,*tmp2
+       movb *de+,*tmp2
+*      Draw attribute
        movb @print_attr,a
-       bl   @ti_color
-       movb tmp0,*r2
-       movb tmp0,*r2
-       movb tmp0,*r2
-       movb tmp0,*r2
-       movb tmp0,*r2
-       movb tmp0,*r2
-       movb tmp0,*r2
-       movb tmp0,*r2
+       mov  tmp1,tmp0
+       bl   @draw_attribute
 ;       .push hl                        ; PUSH HL           ; Store HL
 ;       .push bc                        ; PUSH BC           ; Store BC
 ;       movb @print_attr,a              ; LD A,(34269)      ; Load stored attribute into A
@@ -5530,7 +5526,7 @@ _47788:
        ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard) [IN 65278 reads the half row CAPS SHIFT to V]
        socb @bits+0,a                  ; SET 0,A           ; Set bit 0 of A (i.e. clear pressing of CAPS SHIFT)
        andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
-       li   tmp0,31                    ; XOR 31            ; Invert all of the lowest five bits
+       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
        xor  tmp0,a                     ;                   
        jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
        li   de,5                       ; LD DE,5           ; Advance HL by five characters in list of return values string...
@@ -5540,7 +5536,7 @@ _47811:
        sra  b,1                        ; RLC B             ; With each loop, change BC from 65278 -> 65022 -> 64510 -> 63486 -> 61438 -> 57342 -> 49150
        ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
        andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
-       li   tmp0,31                    ; XOR 31            ; Invert all of the lowest five bits
+       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
        xor  tmp0,a                     ;                   
        jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
        inc  hl                         ; INC HL            ; Advance HL by five characters in list of return values string...
@@ -5554,7 +5550,7 @@ _47811:
        ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
        socb @bits+1,a                  ; SET 1,A           ; Set bit 1 of A (i.e. clear pressing of SYMBOL SHIFT)
        andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
-       li   tmp0,31                    ; XOR 31            ; Invert all of the lowest five bits
+       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
        xor  tmp0,a                     ;                   
        jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
        .exx                            ; EXX               ; Swap registers
@@ -5638,7 +5634,7 @@ _47948:
 * Used by the routines at #R46830 and #R46968. Output: A  code of pressed key
 wait_keypress:
        .proc
-!      li   r0,JOY_FI
+!      li   r0,KEY_S
        bl   @check_key
        jeq  -!
        movb @bytes+83,a                ; Key S
@@ -5933,20 +5929,20 @@ _48287:
 * script instruction to execute
 _48295:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
-       movb a,@_34285                  ; LD (34285),A      ; Store repeat count at #R34285
-       mov  hl,@_34285+1               ; LD (34286),HL     ; Store address to return to (i.e. first instruction in loop) at #R34285...
+       movb a,@script_instr_loop_data                  ; LD (34285),A      ; Store repeat count at #R34285
+       mov  hl,@script_instr_loop_data+1               ; LD (34286),HL     ; Store address to return to (i.e. first instruction in loop) at #R34285...
        b    @_48098                    ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (24) End Loop (1 / 3) Output: HL  Address of next script instruction to execute
 _48307:
-       movb @_34285,a                  ; LD A,(34285)      ; Load A with current repeat count
+       movb @script_instr_loop_data,a                  ; LD A,(34285)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @_48096                    ;                   
 !
        sb   one,a                      ; DEC A             ; Decrease repeat count...
-       movb a,@_34285                  ; LD (34285),A      ; ...and store
-       mov  @_34285+1,hl               ; LD HL,(34286)     ; Load HL with address of first instruction in loop...
+       movb a,@script_instr_loop_data                  ; LD (34285),A      ; ...and store
+       mov  @script_instr_loop_data+1,hl               ; LD HL,(34286)     ; Load HL with address of first instruction in loop...
        b    @_48098                    ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (25) Start Loop (2 / 3)
@@ -6056,7 +6052,7 @@ _48417:
 _48445:
        cb   a,@bytes+10                ; CP 10             ; If Berk's current power is not 10 (floating)...
        jne  _48474                     ; JR NZ,48474       ; ...then skip ahead to #R48474
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        szcb @bits+7,@9(ix)             ; RES 7,(IX+9)      ; Reset Berk's Moving Upwards Flag
        movb @bytes+192,@11(ix)         ; LD (IX+11),192    ; Reset Berk's Walking Right, Walking Left, Unused (11,2), Unused (11,3), Impassable Leftwards
                                                            ; and Impassable Rightwards flags and set his Interaction (11,6) and Interaction (11,7) flags
@@ -6340,7 +6336,7 @@ _48791:
        .ret                            ;                   
 !
        .push hl                        ; PUSH HL           ; Store HL
-       .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .pop hl                         ; POP HL            ; Restore HL
        .ret                            ; RET               ; Return
 
@@ -6480,8 +6476,8 @@ _51732:
 * Used by the routine at #R34438.
 _51739:
        .call @_52837                   ; CALL 52837        ; Update state of Worm and store current position in script data
-       mov  @_34242,ix                 ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
-       .call @_53848                   ; CALL 53848        ; Store room size data for Drutt's current room
+       mov  @drutt_state_addr,ix       ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Drutt's current room
        mov  @_51518,hl                 ; LD HL,(51518)     ; Load current position in Drutt's script data from #R51518 into HL...
        mov  hl,@_34277                 ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
        .call @_51765                   ; CALL 51765        ; Update state of Drutt
@@ -6515,8 +6511,8 @@ _51779:
        .call @_55516                   ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
        b    @_52038                    ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
 _51792:
-       mov  @_34244,iy                 ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset...
+       mov  @worm_state_addr,iy                 ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  _51841                     ; JR Z,51841        ; ...then skip ahead to #R51841
@@ -6553,7 +6549,7 @@ _51841:
        jeq  !                          ; JP NZ,51960       ; ...then move Drutt closer to the worm and eat it if close enough
        b    @_51960                    ;                   
 !
-       mov  @_34240,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Drutt is in the same room as Berk...
        cb   a,*ix                      ; CP (IX+0)         ; ...
        jeq  _51875                     ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
@@ -6569,7 +6565,7 @@ _51864:
 * This entry point is used by the routine at #R51960.
 _51875:
        movb @bytes+7,a                 ; LD A,7            ; Load A with a random number, 0-6...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        li   de,_51890                  ; LD DE,51890       ; Point DE at Table of Addresses of Script Data for Drutt's Actions...
        .call @_53814                   ; CALL 53814        ; ...and load DE with entry of index A in this table
        .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (now contains address of randomly selected script data)
@@ -6593,7 +6589,7 @@ _51890:
 * Used by the routine at #R51779.
 _51904:
        movb @bytes+2,a                 ; LD A,2            ; Load A with a random number, 0-1...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is zero (1 in 2 chance)...
        jeq  _51918                     ; JR Z,51918        ; ...then skip ahead to #R51918
        li   hl,_51538                  ; LD HL,51538       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size four...
@@ -6608,7 +6604,7 @@ _51918:
 * Used by the routine at #R51779.
 _51924:
        movb @bytes+2,a                 ; LD A,2            ; Load A with a random number, 0-1...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is zero (1 in 2 chance)...
        jeq  _51938                     ; JR Z,51938        ; ...then skip ahead to #R51938
        li   hl,_51584                  ; LD HL,51584       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size four...
@@ -6915,7 +6911,7 @@ _52315:
        cb   a,one                      ; CP 1              ; ...
        jne  _52351                     ; JR NZ,52351       ; ...then skip ahead to #R52351
 * Drutt's depth is 1
-       movb @_34230,a                  ; LD A,(34230)      ; If Drutt's current depth is the same as number of available depth levels in current room...
+       movb @tmp_room_dim_data,a       ; LD A,(34230)      ; If Drutt's current depth is the same as number of available depth levels in current room...
        cb   a,@1(ix)                   ; CP (IX+1)         ; ...i.e. room has depth of 1...
        jne  !                          ; RET Z             ; ...then return (as there is no other depth level for Drutt to move to)
        .ret                            ;                   
@@ -6973,8 +6969,8 @@ _52728:
 * 
 * Used by the routine at #R51739.
 _52837:
-       mov  @_34244,ix                 ; LD IX,(34244)     ; Load IX with address of current level's complex state data for worm
-       .call @_53848                   ; CALL 53848        ; Store room size data for worm's current room
+       mov  @worm_state_addr,ix        ; LD IX,(34244)     ; Load IX with address of current level's complex state data for worm
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for worm's current room
        mov  @_52726,hl                 ; LD HL,(52726)     ; Load current position in worm's script data from #R52726 into HL...
        mov  hl,@_34277                 ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
        .call @_52860                   ; CALL 52860        ; Update state of worm
@@ -7028,11 +7024,11 @@ _52908:
 _52914:
        .call @_53057                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
        movb @bytes+20,a                ; LD A,20           ; Load A with a random number, 5-24...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        ab   @bytes+5,a                 ; ADD A,5           ; ...
        movb a,@12(ix)                  ; LD (IX+12),A      ; ...and set worm's Time Until Direction Change to this value
        movb @bytes+2,a                 ; LD A,2            ; Load A with a random number, 0-1...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if zero (1 in 2 chance)...
        jne  _52951                     ; JR NZ,52951       ; ...then skip ahead to #R52951
 * Have worm move left
@@ -7063,7 +7059,7 @@ _52961:
 * Output: HL  Address of next script instruction to execute
 _52967:
        .call @_53057                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
-       mov  @_34242,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
+       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
        movb *ix,a                      ; LD A,(IX+0)       ; If Drutt and the worm are in the same room...
        cb   a,*iy                      ; CP (IY+0)         ; ...
        jeq  _53004                     ; JR Z,53004        ; ...then skip ahead to #R53004
@@ -7120,7 +7116,7 @@ _53057:
        jne  !                          ; RET Z             ; ...then return
        .ret                            ;                   
 !
-       movb @_34218,a                  ; LD A,(34218)      ; If current character's room...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; If current character's room...
        cb   a,*ix                      ; CP (IX+0)         ; ...is the same as the worm's...
        jne  !                          ; RET Z             ; ...then return
        .ret                            ;                   
@@ -7136,23 +7132,23 @@ _53057:
 * Used by the routine at #R52860. Input:  IX  Address of complex state data (current level) for Worm
 _53083:
        movb @bytes+60,a                ; LD A,60           ; Load A with a random number, 0-59...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; If random number is not zero (59 in 60 chance)...
        jeq  !                          ; RET NZ            ; ...then return
        .ret                            ;                   
 !
-       movb @_34218,a                  ; LD A,(34218)      ; Set worm's current room to same as current character's...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; Set worm's current room to same as current character's...
        movb a,*ix                      ; LD (IX+0),A       ; ...
-       .call @_53848                   ; CALL 53848        ; Store room size data for worm's current room
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for worm's current room
        movb @_34235,a                  ; LD A,(34235)      ; Load A with width of current room (chars) + 99...
        sb   @bytes+100,a               ; SUB 100           ; ...and subtract 100 to get x-coordinate (zero-based) of right side of the room
-       .call @_54222                   ; CALL 54222        ; Load A with a random x-coordinate within current room
+       bl   @rnd_no                    ; CALL 54222        ; Load A with a random x-coordinate within current room
        ab   @bytes+100,a               ; ADD A,100         ; Add 100 to restore coordinate system
        movb a,@5(ix)                   ; LD (IX+5),A       ; Set this as the worm's left x-coordinate
        ab   @bytes+2,a                 ; ADD A,2           ; Add two to this...
        movb a,@7(ix)                   ; LD (IX+7),A       ; ...and set as the worm's right x-coordinate
        movb @bytes+2,a                 ; LD A,2            ; Load A with a random number, 1-2...
-       .call @_54222                   ; CALL 54222        ; ...
+       bl   @rnd_no                    ; CALL 54222        ; ...
        ab   one,a                      ; INC A             ; ...
        movb a,@1(ix)                   ; LD (IX+1),A       ; ...and assign the worm this depth
        movb @bytes+124,a               ; LD A,124          ; Load A with 124 (y-coordinate of character row below bottom of room)
@@ -7367,7 +7363,7 @@ _53616:
        sb   one,b                      ; DJNZ 53583        ; Loop back for next iteration
        jne  _53583                     ;                   
 * This entry point is used by the routine at #R53887.
-_53635:
+clear_display_buffers:
        li   hl,display_buffer_1        ; LD HL,61312       ; Clear Display Buffers 1 and 2...
        li   bc,4224                    ; LD BC,4224        ; ...
        movb @bytes+0,*hl               ; LD (HL),0         ; ...
@@ -7402,9 +7398,9 @@ _53649:
 * Used by the routines at #R36116, #R36390, #R37085, #R37639, #R38074, #R38219, #R38540, #R38592, #R39934, #R41498,
 * #R41633, #R41961, #R42064, #R42266 and #R42486.
 _53667:
-       movb @_34208,a                  ; LD A,(34208)      ; Set "Berk Has Been Killed" Flag...
+       movb @game_flags,a                  ; LD A,(34208)      ; Set "Berk Has Been Killed" Flag...
        socb @bits+2,a                  ; SET 2,A           ; ...
-       movb a,@_34208                  ; LD (34208),A      ; ...
+       movb a,@game_flags                  ; LD (34208),A      ; ...
        .ret                            ; RET               ; Return
 
 * Table of Berk's Reset Complex State Data Addresses
@@ -7429,7 +7425,7 @@ _53710:
 * 
 * Used by the routine at #R34438.
 _53723:
-       li   hl,_34208                  ; LD HL,34208       ; Point HL at Game Flags
+       li   hl,game_flags                  ; LD HL,34208       ; Point HL at Game Flags
        szcb @bits+3,*hl                ; RES 3,(HL)        ; Reset "Reset Spiders to Initial State" Flag
        movb *hl,tmp0                   ; BIT 2,(HL)        ; If "Berk Has Been Killed" Flag is not set...
        andi tmp0,4*256                 ;                   
@@ -7438,14 +7434,14 @@ _53723:
 !
        szcb @bits+2,*hl                ; RES 2,(HL)        ; Reset "Berk Has Been Killed" Flag
        socb @bits+3,*hl                ; SET 3,(HL)        ; Set "Reset Spiders to Initial State" Flag
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        .call @_36296                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        li   de,_53667+7                ; LD DE,53674       ; Point DE at location two bytes (1 WORD) before start of Table of Addresses of Berk Reset Data
-       movb @_34207,a                  ; LD A,(34207)      ; Load current level number into A
+       movb @current_level,a           ; LD A,(34207)      ; Load current level number into A
        .call @_53814                   ; CALL 53814        ; Load DE with that level's address (from table at #R53676) for complex state data to revert
                                                            ; Berk to after he is killed
        .ex_de_hl                       ; EX DE,HL          ; Swap HL (now address of complex state data to revert to) and DE
-       mov  @_34240,de                 ; LD DE,(34240)     ; Load DE with address of current level's complex state data for Berk
+       mov  @berk_state_addr,de                 ; LD DE,(34240)     ; Load DE with address of current level's complex state data for Berk
        li   bc,13                      ; LD BC,13          ; Overwrite Berk's current complex state data...
        .ldir                           ; LDIR              ; ...with reset data from table at #R53684 for current level
        li   hl,_35363                  ; LD HL,35363       ; Load HL with address of script data for Berk starting to fall...
@@ -7453,7 +7449,7 @@ _53723:
        .call @_53577                   ; CALL 53577        ; Cycle attributes (long, full-screen) and clear display buffers
        movb @bytes+127,a               ; LD A,127          ; Fill top 22 rows of Attribute File with white PAPER and white INK, BRIGHT...
        .call @_53649                   ; CALL 53649        ; ...
-       .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .call @_47485                   ; CALL 47485        ; Decrease current time / lives by one if greater than zero and redraw Timer Figures
        .ret                            ; RET               ; Return
 
@@ -7510,21 +7506,21 @@ _53814:
 * 
 * Used by the routines at #R34916 and #R53887. Input:  IX  (Entry at #R53848 only) Address of complex state data for
 * an entity
-_53825:
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+copy_room_dim_data_to_tmp:
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
-       jeq  _53838                     ; JR Z,53838        ; ...then skip ahead to #R53838
-       mov  @_34242,ix                 ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
-       jmp  _53842                     ; JR 53842          ; Skip ahead to #R53842
-_53838:
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
-_53842:
-       movb *ix,a                      ; LD A,(IX+0)       ; Store current character's current room at 34218...
-       movb a,@_34218                  ; LD (34218),A      ; ...
+       jeq  copy_room_dim_data_to_tmp_1 ; JR Z,53838        ; ...then skip ahead to #R53838
+       mov  @drutt_state_addr,ix       ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
+       jmp  copy_room_dim_data_to_tmp_2 ; JR 53842          ; Skip ahead to #R53842
+copy_room_dim_data_to_tmp_1:
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+copy_room_dim_data_to_tmp_2:
+       movb *ix,@current_characters_room ; LD A,(IX+0)       ; Store current character's current room at 34218...
+                                       ; LD (34218),A      ; ...
 * This entry point is used by the routines at #R35689, #R37062, #R39278, #R51739, #R52837, #R53083, #R54480 and
 * #R55525.
-_53848:
+copy_room_dim_data_to_tmp_3:
        movb *ix,a                      ; LD A,(IX+0)       ; Load entity's current room into A
        sb   one,a                      ; DEC A             ; Subtract 1...
        movb a,@e                       ; LD E,A            ; ...and multiply by 5...
@@ -7533,105 +7529,114 @@ _53848:
        ab   @e,a                       ; ADD A,E           ; ...
        movb a,@c                       ; LD C,A            ; Load into BC...
        movb @bytes+0,b                 ; LD B,0            ; ...
-       mov  @_34248,hl                 ; LD HL,(34248)     ; Load start address of current level's room dimension data into HL...
+       mov  @room_dim_data,hl          ; LD HL,(34248)     ; Load start address of current level's room dimension data into HL...
        a    bc,hl                      ; ADD HL,BC         ; ...and add BC as offset
        mov  hl,@_34262                 ; LD (34262),HL     ; Store HL at #R34262
        movb @bytes+5,@c                ; LD C,5            ; Set BC to 5 (as entries are 5 bytes wide)
-       li   de,_34230                  ; LD DE,34230       ; Copy data entry in room dimension data for entity's current room to #R34230...
+       li   de,tmp_room_dim_data       ; LD DE,34230       ; Copy data entry in room dimension data for entity's current room to #R34230...
        .ldir                           ; LDIR              ; ...
-       movb @_34230+1,a                ; LD A,(34231)      ; Load position (chars) of left side of current room into E...
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room into E...
        movb a,@e                       ; LD E,A            ; ...
-       movb @_34230+2,a                ; LD A,(34232)      ; Subtract position (chars) of right side of current room in A...
+       movb @tmp_room_dim_data+2,a     ; LD A,(34232)      ; Subtract position (chars) of right side of current room in A...
        sb   @e,a                       ; SUB E             ; ...
        ab   @bytes+100,a               ; ADD A,100         ; ...and add 100
        movb a,@_34235                  ; LD (34235),A      ; Store value (width of current room + 99) at #R34235
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 * Paint Red Areas Outside Accessible Areas of Current Character's Current Room
 * 
 * Used by the routines at #R34438, #R34916, #R36616, #R48791, #R53723 and #R54456.
-_53887:
-       .call @_53825                   ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
+paint_red_areas:
+       .proc
+       bl   @copy_room_dim_data_to_tmp ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
                                                            ; location (#R34230)
        .push ix                        ; PUSH IX           ; Store IX
-       .call @_53635                   ; CALL 53635        ; Clear Display Buffers 1 & 2
+       .call @clear_display_buffers    ; CALL 53635        ; Clear Display Buffers 1 & 2
        .exx                            ; EXX               ; Switch registers
        li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
        .exx                            ; EXX               ; Switch registers
-       mov  @_34230+1,hl               ; LD HL,(34231)     ; For current character's current room, set H = room's right edge position and L = room's left
-                                                           ; edge position (chars)
-       mov  @_34230+3,de               ; LD DE,(34233)     ; For current character's current room, set D = room's bottom edge position and E = room's top
-                                                           ; edge position (chars)
-       li   ix,22528                   ; LD IX,22528       ; Point IX at first byte of Attribute File
+       movb @tmp_room_dim_data+1,@l    ; LD HL,(34231)     ; For current character's current room, set H = room's right edge position and L = room's left
+       movb @tmp_room_dim_data+2,h     ; edge position (chars)
+       movb @tmp_room_dim_data+3,@e    ; LD DE,(34233)     ; For current character's current room, set D = room's bottom edge position and E = room's top
+       movb @tmp_room_dim_data+4,d     ; edge position (chars)
+       li   ix,zx_attributes           ; LD IX,22528       ; Point IX at first byte of Attribute File
        movb @bytes+0,b                 ; LD B,0            ; Set initial y-coordinate (characters) to zero
-_53916:
+paint_red_areas_1:
        movb b,a                        ; LD A,B            ; Load A with current y-coordinate
        cb   a,@e                       ; CP E              ; If y-coordinate of top of room is greater than current y-coordinate...
-       jl   _53950                     ; JR C,53950        ; ...then skip ahead to #R53950
+       jl   paint_red_areas_5                              ; JR C,53950        ; ...then skip ahead to #R53950
        movb d,a                        ; LD A,D            ; Load A with y-coordinate of bottom of room
        cb   a,b                        ; CP B              ; If y-coordinate of bottom of room is less than current y-coordinate...
-       jl   _53950                     ; JR C,53950        ; ...then skip ahead to #R53950
+       jl   paint_red_areas_5                              ; JR C,53950        ; ...then skip ahead to #R53950
        movb @bytes+0,@c                ; LD C,0            ; Set initial x-coordinate to zero
-_53926:
+paint_red_areas_2:
        movb @c,a                       ; LD A,C            ; Load A with current x-coordinate
        cb   a,@l                       ; CP L              ; If x-coordinate of left of room is greater than current x-coordinate...
-       jl   _53940                     ; JR C,53940        ; ...then skip ahead to #R53940
+       jl   paint_red_areas_3          ; JR C,53940        ; ...then skip ahead to #R53940
        movb h,a                        ; LD A,H            ; Load A with x-coordinate of right of room
        cb   a,@c                       ; CP C              ; If x-coordinate of right of room is less than current x-coordinate...
-       jl   _53940                     ; JR C,53940        ; ...then skip ahead to #R53940
+       jl   paint_red_areas_3          ; JR C,53940        ; ...then skip ahead to #R53940
        .exx                            ; EXX               ; Switch registers
-       .call @_53977                   ; CALL 53977        ; Advance pointers in Display Buffers and Attribute File address to next character
-       jmp  _53943                     ; JR 53943          ; Skip ahead to #R53943
+       bl   @print_red_cell_1          ; CALL 53977        ; Advance pointers in Display Buffers and Attribute File address to next character
+       jmp  paint_red_areas_4          ; JR 53943          ; Skip ahead to #R53943
 * Current x-coordinate, C, is outside range of x-coordinates spanned by room
-_53940:
-       .call @_53968                   ; CALL 53968        ; Print red cell to current Attribute File position (outside play area) and mark as unused in
+paint_red_areas_3:
+       bl   @print_red_cell            ; CALL 53968        ; Print red cell to current Attribute File position (outside play area) and mark as unused in
                                                            ; Display Buffers
-_53943:
+paint_red_areas_4:
        ab   one,@c                     ; INC C             ; Advance C by one (move right one character)
        movb @c,tmp0                    ; BIT 5,C           ; If bit 5 is not set (x-coordinate has not reached 32)...
        andi tmp0,32*256                ;                   
-       jeq  _53926                     ; JR Z,53926        ; ...then loop back to #R53926
-       jmp  _53959                     ; JR 53959          ; Skip ahead to #R53959
+       jeq  paint_red_areas_2          ; JR Z,53926        ; ...then loop back to #R53926
+       jmp  paint_red_areas_7          ; JR 53959          ; Skip ahead to #R53959
 * Current y-coordinate, B, is outside range of y-coordinates spanned by room
-_53950:
+paint_red_areas_5:
        .push bc                        ; PUSH BC           ; Store BC (B = current y-coordinate, C = current x-coordinate)
        movb @bytes+32,b                ; LD B,32           ; Load counter with 32 (as there are 32 characters per row)
-_53953:
-       .call @_53968                   ; CALL 53968        ; Print red cell to current Attribute File position (outside play area) and mark as unused in
+paint_red_areas_6:
+       bl   @print_red_cell            ; CALL 53968        ; Print red cell to current Attribute File position (outside play area) and mark as unused in
                                                            ; Display Buffers
        sb   one,b                      ; DJNZ 53953        ; Loop back to #R53953 for next character block
-       jne  _53953                     ;                   
+       jne  paint_red_areas_6                     ;
        .pop bc                         ; POP BC            ; Restore BC (B = current y-coordinate, C = current x-coordinate)
-_53959:
+paint_red_areas_7:
        ab   one,b                      ; INC B             ; Increase current y-coordinate by one
        movb b,a                        ; LD A,B            ; If y-coordinate has not reached 22...
        cb   a,@bytes+22                ; CP 22             ; ...
-       jne  _53916                     ; JR NZ,53916       ; ...then loop back to #R53916
+       jne  paint_red_areas_1          ; JR NZ,53916       ; ...then loop back to #R53916
        .pop ix                         ; POP IX            ; Restore IX
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Print Red Cell to Current Attribute File Position (Outside Play Area) and Mark as Unused in Display Buffers
 * 
 * Used by the routine at #R53887. Input:  IX  Address of start of Attribute File (22528) HL'  Current position in
 * display buffer 1 (at #R61312) DE'  Current position in display buffer 2 (at #R63424)
-_53968:
-       movb @bytes+18,*ix              ; LD (IX+0),18      ; Set attribute to red INK, red PAPER
+print_red_cell:
+       .proc
+;       movb @bytes+18,*ix              ; LD (IX+0),18      ; Set attribute to red INK, red PAPER
+       mov  ix,tmp0
+       ai   tmp0,-zx_attributes
+       li   tmp2,vdpwd
+       li   a,18*256
+       bl   @draw_attribute
        .exx                            ; EXX               ; Switch registers
        movb @bytes+255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
        movb a,*hl                      ; LD (HL),A         ; ...
        movb a,*de                      ; LD (DE),A         ; ...
+       jmp  !
 * This entry point is used by the routine at #R53887.
-_53977:
-       inc  hl                         ; INC HL            ; Advance display buffer 1 pointer by three bytes to next entry...
+print_red_cell_1:
+       .proc
+!      inct hl                         ; INC HL            ; Advance display buffer 1 pointer by three bytes to next entry...
+                                       ; INC HL            ; ...
        inc  hl                         ; INC HL            ; ...
-       inc  hl                         ; INC HL            ; ...
-       inc  de                         ; INC DE            ; Advance display buffer 2 pointer by three bytes to next entry...
-       inc  de                         ; INC DE            ; ...
+       inct de                         ; INC DE            ; Advance display buffer 2 pointer by three bytes to next entry...
+                                       ; INC DE            ; ...
        inc  de                         ; INC DE            ; ...
        .exx                            ; EXX               ; Switch registers
        inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Reset Complex State Data for First Entity of Class A to that Stored in Initial-State Table at 59821
 * 
@@ -7742,7 +7747,7 @@ _54089:
 _54102:
        equ  $
        .push hl                        ; PUSH HL           ; Store HL (pointer to current position in Primary Display Buffer)
-       .call @_54144                   ; CALL 54144        ; Draw a graphic character block to display
+       .call @draw_character_block     ; CALL 54144        ; Draw a graphic character block to display
        .pop hl                         ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
 _54107:
        inc  hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
@@ -7779,73 +7784,115 @@ _54140:
 * This routine uses the same technique as seen in the routine at #R47709 to convert from an Attribute File address
 * to a Display File address. See the notes in #R47709 for more details. Input:  A  Attribute value (bit 7 is
 * "mirror" flag, rather than FLASH) B  Graphic set index C  Graphic index IX  Address in Attribute File
-_54144:
+draw_character_block:
        socb @bits+6,a                  ; SET 6,A           ; Set Bright Flag
-       movb a,*ix                      ; LD (IX+0),A       ; Load attribute value into current Attribute File address
-       sb   a,a                        ; XOR A             ; Load graphic set index into HL..
-       movb b,@l                       ; LD L,B            ; ...
-       movb a,h                        ; LD H,A            ; ...
-       a    hl,hl                      ; ADD HL,HL         ; Double (as start address entries in table at #R27000 are two bytes wide)...
-       li   de,graphic_sets_table      ; LD DE,27000       ; ...and add as offset to #R27000 (in HL)...
-       a    de,hl                      ; ADD HL,DE         ; ...
-       movb *hl,@e                     ; LD E,(HL)         ; Load start address for this graphic set into DE...
-       inc  hl                         ; INC HL            ; ...
-       movb *hl,d                      ; LD D,(HL)         ; ...
-       movb @c,@l                      ; LD L,C            ; Load graphic index into HL...
-       movb a,h                        ; LD H,A            ; ...
-       a    hl,hl                      ; ADD HL,HL         ; Multiply by eight, as graphic blocks are eight bytes long...
-       a    hl,hl                      ; ADD HL,HL         ; ...
-       a    hl,hl                      ; ADD HL,HL         ; ...
-       a    de,hl                      ; ADD HL,DE         ; Add to address of start of this graphic set as an offset in HL
-       .ex_de_hl                       ; EX DE,HL          ; Swap DE (now points to required graphic data) and HL (now address of start of graphic set
-                                                           ; from table at #R27000)
-       .push ix                        ; PUSH IX           ; Switch Attribute File address into HL...
-       .pop hl                         ; POP HL            ; ...
-       movb h,a                        ; LD A,H            ; Multiply the most significant byte (MSB) of the Attribute File address by eight...
-       ab   a,a                        ; ADD A,A           ; ...to put it on the same scale as the MSB of the Display File address MSB (see notes)...
-       ab   a,a                        ; ADD A,A           ; ...
-       ab   a,a                        ; ADD A,A           ; ...
-       andi a,91*256                   ; AND 91            ; Drop the most significant bit to point to the correct location in Display File
-       movb a,h                        ; LD H,A            ; Load back into HL (L is unaffected, as it should be)
-       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now Display File address) and HL (now pointer to graphic data)
-       movb *ix,tmp0                   ; BIT 7,(IX+0)      ; If mirror flag is set for Attribute File at current location...
-       andi tmp0,128*256               ;                   
-       jeq  !                          ; JP NZ,54194       ; ...then skip to #R54194 to draw mirrored version
-       b    @_54194                    ;                   
-!
-       movb @bytes+8,b                 ; LD B,8            ; Set counter to 8 rows
-_54187:
-       movb *hl,a                      ; LD A,(HL)         ; Read byte from graphic data...
-       movb a,*de                      ; LD (DE),A         ; ...and load into Display File
-       ab   one,d                      ; INC D             ; Move down one pixel row in Display File
-       inc  hl                         ; INC HL            ; Advance to next byte of graphic data
-       sb   one,b                      ; DJNZ 54187        ; Loop back for next row of pixels
-       jne  _54187                     ;                   
+*      Graphics address
+       mov  bc,tmp1
+       srl  tmp1,8
+       sla  tmp1,1
+       mov  @graphic_sets_table(tmp1),hl
+       mov  bc,tmp0
+       andi tmp0,>00ff
+       sla  tmp0,3
+       a    tmp0,hl
+*      VDP address
+       mov  ix,tmp0
+       ai   tmp0,-zx_attributes
+       sla  tmp0,3
+       mov  tmp0,de
+       bl   @vwad
+       li   tmp2,vdpwd
+*      Draw mirrored?
+       movb a,a
+       jlt  draw_character_block_1
+*      Draw normal block
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       movb *hl+,*tmp2
+       jmp  draw_character_block_3
+*      Draw mirrored
+draw_character_block_1:
+       clr  tmp1
+       li   bc,8
+draw_character_block_2:
+       movb *hl+,@r1lb
+       movb @byte_mirror_table(tmp1),*tmp2
+       dec  bc
+       jne  draw_character_block_2
+*      Draw attribute
+draw_character_block_3:
+       mov  de,tmp0
+       bl   @draw_attribute
+;       movb a,*ix                      ; LD (IX+0),A       ; Load attribute value into current Attribute File address
+;       sb   a,a                        ; XOR A             ; Load graphic set index into HL..
+;       movb b,@l                       ; LD L,B            ; ...
+;       movb a,h                        ; LD H,A            ; ...
+;       a    hl,hl                      ; ADD HL,HL         ; Double (as start address entries in table at #R27000 are two bytes wide)...
+;       li   de,graphic_sets_table      ; LD DE,27000       ; ...and add as offset to #R27000 (in HL)...
+;       a    de,hl                      ; ADD HL,DE         ; ...
+;       movb *hl,@e                     ; LD E,(HL)         ; Load start address for this graphic set into DE...
+;       inc  hl                         ; INC HL            ; ...
+;       movb *hl,d                      ; LD D,(HL)         ; ...
+;       movb @c,@l                      ; LD L,C            ; Load graphic index into HL...
+;       movb a,h                        ; LD H,A            ; ...
+;       a    hl,hl                      ; ADD HL,HL         ; Multiply by eight, as graphic blocks are eight bytes long...
+;       a    hl,hl                      ; ADD HL,HL         ; ...
+;       a    hl,hl                      ; ADD HL,HL         ; ...
+;       a    de,hl                      ; ADD HL,DE         ; Add to address of start of this graphic set as an offset in HL
+;       .ex_de_hl                       ; EX DE,HL          ; Swap DE (now points to required graphic data) and HL (now address of start of graphic set
+;                                                           ; from table at #R27000)
+;       .push ix                        ; PUSH IX           ; Switch Attribute File address into HL...
+;       .pop hl                         ; POP HL            ; ...
+;       movb h,a                        ; LD A,H            ; Multiply the most significant byte (MSB) of the Attribute File address by eight...
+;       ab   a,a                        ; ADD A,A           ; ...to put it on the same scale as the MSB of the Display File address MSB (see notes)...
+;       ab   a,a                        ; ADD A,A           ; ...
+;       ab   a,a                        ; ADD A,A           ; ...
+;       andi a,91*256                   ; AND 91            ; Drop the most significant bit to point to the correct location in Display File
+;       movb a,h                        ; LD H,A            ; Load back into HL (L is unaffected, as it should be)
+;       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now Display File address) and HL (now pointer to graphic data)
+;       movb *ix,tmp0                   ; BIT 7,(IX+0)      ; If mirror flag is set for Attribute File at current location...
+;       andi tmp0,128*256               ;
+;       jeq  !                          ; JP NZ,54194       ; ...then skip to #R54194 to draw mirrored version
+;       b    @draw_mirrored_block       ;
+;!
+;       movb @bytes+8,b                 ; LD B,8            ; Set counter to 8 rows
+;_54187:
+;       movb *hl,a                      ; LD A,(HL)         ; Read byte from graphic data...
+;       movb a,*de                      ; LD (DE),A         ; ...and load into Display File
+;       ab   one,d                      ; INC D             ; Move down one pixel row in Display File
+;       inc  hl                         ; INC HL            ; Advance to next byte of graphic data
+;       sb   one,b                      ; DJNZ 54187        ; Loop back for next row of pixels
+;       jne  _54187                     ;
        .ret                            ; RET               ; Return
 
 * Draw Mirrored Graphic Character Block to Display File
 * 
 * Used by the routine at #R54144. Input:  HL  Address of bitmap data to draw IX  Address in Attribute File
-_54194:
-       szcb @bits+7,*ix                ; RES 7,(IX+0)      ; Reset Bit 7 (Mirror Flag, shared with FLASH flag so would cause graphic to flash)
-       movb @bytes+8,b                 ; LD B,8            ; Set counter to 8 rows
-_54200:
-       .push bc                        ; PUSH BC           ; Store BC (B = current counter value)
-       movb *hl,a                      ; LD A,(HL)         ; Read byte from graphic data...
-       .push hl                        ; PUSH HL           ; Store HL (pointer to graphic data)
-       li   hl,byte_mirror_table       ; LD HL,27030       ; Point HL at mirror graphic lookup table
-       movb a,@c                       ; LD C,A            ; Load graphic "value" into BC...
-       movb @bytes+0,b                 ; LD B,0            ; ...
-       a    bc,hl                      ; ADD HL,BC         ; ...and add to HL as offset
-       movb *hl,a                      ; LD A,(HL)         ; Read byte at this location (mirror image of graphic data read by instruction at 54201)
-       .pop hl                         ; POP HL            ; Restore HL (pointer to graphic data)
-       movb a,*de                      ; LD (DE),A         ; Load (mirrored) graphic data into Display File
-       ab   one,d                      ; INC D             ; Move down one pixel row in Display File
-       inc  hl                         ; INC HL            ; Advance to next byte of graphic data
-       .pop bc                         ; POP BC            ; Restore BC (B = current counter value)
-       sb   one,b                      ; DJNZ 54200        ; Loop back for next row of pixels
-       jne  _54200                     ;                   
-       .ret                            ; RET               ; Return
+;draw_mirrored_block:
+;       szcb @bits+7,*ix                ; RES 7,(IX+0)      ; Reset Bit 7 (Mirror Flag, shared with FLASH flag so would cause graphic to flash)
+;       movb @bytes+8,b                 ; LD B,8            ; Set counter to 8 rows
+;_54200:
+;       .push bc                        ; PUSH BC           ; Store BC (B = current counter value)
+;       movb *hl,a                      ; LD A,(HL)         ; Read byte from graphic data...
+;       .push hl                        ; PUSH HL           ; Store HL (pointer to graphic data)
+;       li   hl,byte_mirror_table       ; LD HL,27030       ; Point HL at mirror graphic lookup table
+;       movb a,@c                       ; LD C,A            ; Load graphic "value" into BC...
+;       movb @bytes+0,b                 ; LD B,0            ; ...
+;       a    bc,hl                      ; ADD HL,BC         ; ...and add to HL as offset
+;       movb *hl,a                      ; LD A,(HL)         ; Read byte at this location (mirror image of graphic data read by instruction at 54201)
+;       .pop hl                         ; POP HL            ; Restore HL (pointer to graphic data)
+;       movb a,*de                      ; LD (DE),A         ; Load (mirrored) graphic data into Display File
+;       ab   one,d                      ; INC D             ; Move down one pixel row in Display File
+;       inc  hl                         ; INC HL            ; Advance to next byte of graphic data
+;       .pop bc                         ; POP BC            ; Restore BC (B = current counter value)
+;       sb   one,b                      ; DJNZ 54200        ; Loop back for next row of pixels
+;       jne  _54200                     ;
+;       rt                               ; RET               ; Return
 
 * Data for Pseudo-Random Number Generator
 _54219:
@@ -7861,13 +7908,13 @@ _54221:
 * the A register holds the range for the random number (e.g. 5 means this routine will generate a random number in
 * the range 0-4 inclusive). A range of less than 2 is not allowed, so if A is less than this then it will be set to
 * 2. Input:  A  Range Output: A  Generated random number
-_54222:
+rnd_no:
        cb   a,@bytes+2                 ; CP 2              ; If range is less than 2...
        jl   !                          ; JP NC,54229       ; ...then set range to 2...
-       b    @_54229                    ;                   
+       b    @rnd_no_1                    ;
 !
        movb @bytes+2,a                 ; LD A,2            ; ...
-_54229:
+rnd_no_1:
        movb a,@_54221                  ; LD (54221),A      ; Store range at #R54211
        .push hl                        ; PUSH HL           ; Store HL
        .push de                        ; PUSH DE           ; Store DE
@@ -7887,10 +7934,10 @@ _54229:
        movb @bytes+0,d                 ; LD D,0            ; ...loading result into HL...
        s    de,hl                      ; SBC HL,DE         ; ...
        joc  !                          ; JP NC,54261       ; TODO: check code. ...and if this is negative...
-       b    @_54261                    ;                   
+       b    @rnd_no_2                    ;
 !
        inc  hl                         ; INC HL            ; ...then add one (as zero in HL can represent both zero and 65,536)
-_54261:
+rnd_no_2:
        mov  hl,@_54219                 ; LD (54219),HL     ; Store HL (new seed) at #R54219
 * At this point, HL contains a new pseudo-random 16-bit number
        .push hl                        ; PUSH HL           ; Copy 16-bit pseudo-random number from HL into DE...
@@ -7902,19 +7949,19 @@ _54261:
 * (RANGE x DE) is divided by 65,536 and the integer part of the result is loaded into A. A is therefore limited to
 * values between zero, and the value A had on entering this routine minus one, inclusive.
        sb   a,a                        ; XOR A             ; Set A to zero
-_54272:
+rnd_no_3:
        a    de,hl                      ; ADD HL,DE         ; Add DE to HL
        joc  !                          ; JP NC,54277       ; TODO: check code. If DE has not crossed the 65,535 - 0 boundary then skip ahead to #R54277
-       b    @_54277                    ;                   
+       b    @rnd_no_4                    ;
 !
        ab   one,a                      ; INC A             ; Increase A (count of number of times DE rolls over from 65,535 to 0)
-_54277:
+rnd_no_4:
        sb   one,b                      ; DJNZ 54272        ; Decrease B and loop back to #R54272
-       jne  _54272                     ;                   
+       jne  rnd_no_3                     ;
        .pop bc                         ; POP BC            ; Restore BC
        .pop de                         ; POP DE            ; Restore DE
        .pop hl                         ; POP HL            ; Restore HL
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 * Move Entity at IX into New Room (Left or Right) if it is at the Edge of its Current Room
 * 
@@ -7954,7 +8001,7 @@ _54306:
 _54313:
        movb @_34235,a                  ; LD A,(34235)      ; Load C with width of entity's current room (chars) + 99...
        movb a,@c                       ; LD C,A            ; ...
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  _54329                     ; JR Z,54329        ; ...then skip ahead to #R54329
@@ -7988,7 +8035,7 @@ _54332:
 * character's appropriate edge F  (Carry Flag) Set if entity is not at edge of current room, or has moved into new
 * room and has not collided. Reset otherwise (i.e. can't enter new room).
 _54348:
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  _54363                     ; JR Z,54363        ; ...then skip ahead to #R54363
@@ -8095,7 +8142,7 @@ _54434:
 * Used by the routines at #R54383, #R54419, #R55433 and #R55616. Input:  IX  Address of complex state data for an
 * entity
 _54456:
-       movb @_34208,a                  ; LD A,(34208)      ; Set Zero Flag if Drutt Mode Flag is reset...
+       movb @game_flags,a                  ; LD A,(34208)      ; Set Zero Flag if Drutt Mode Flag is reset...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        movb @8(ix),a                   ; LD A,(IX+8)       ; Load Entity Class Value of entity at IX into A
@@ -8112,7 +8159,7 @@ _54471:
 _54474:
        equ  $
        .push hl                        ; PUSH HL           ; Store HL
-       .call @_53887                   ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       bl @paint_red_areas             ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .pop hl                         ; POP HL            ; Restore HL
        .ret                            ; RET               ; Return
 
@@ -8125,7 +8172,7 @@ _54480:
        movb a,*ix                      ; LD (IX+0),A       ; ...
        .push hl                        ; PUSH HL           ; Store HL
        .push de                        ; PUSH DE           ; Store DE
-       .call @_53848                   ; CALL 53848        ; Store room size data for entity's current room
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for entity's current room
        .pop de                         ; POP DE            ; Restore DE
        .pop hl                         ; POP HL            ; Restore HL
        movb @7(ix),a                   ; LD A,(IX+7)       ; Load A with x-coordinate of entity's right...
@@ -8509,14 +8556,14 @@ _55022:
 * See description of routine at #R55041 for details. Output: E  (via routine at #R55041) Jump state index (see
 * #R55041)
 _55023:
-       mov  @_34242,ix                 ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
+       mov  @drutt_state_addr,ix                 ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
        movb @12(ix),tmp0               ; BIT 7,(IX+12)     ; If Drutt's Is Jumping Flag is reset...
        andi tmp0,128*256               ;                   
        jne  !                          ; RET Z             ; ...then return
        .ret                            ;                   
 !
 * Drutt's Is Jumping Flag is set
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  _55065                     ; JR Z,55065        ; ...then handle Drutt's jump, and load E with jump state index as appropriate based upon no
@@ -8535,14 +8582,14 @@ _55023:
 * #R55041) or Drutt (entry via #R55060 and #R55065) Output: E  Jump state index (see table above)
 _55041:
        .call @_54283                   ; CALL 54283        ; Move Berk into new room (left or right) if he is at the edge of his current room
-       mov  @_34240,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        movb @12(ix),tmp0               ; BIT 7,(IX+12)     ; If Berk's Is Jumping Flag is reset...
        andi tmp0,128*256               ;                   
        jne  !                          ; RET Z             ; ...then return
        .ret                            ;                   
 !
 * Berk's Is Jumping Flag is set
-       movb @_34208,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
+       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jne  _55065                     ; JR NZ,55065       ; ...then skip ahead to #R55065
@@ -8642,9 +8689,9 @@ _55183:
 * 
 * Used by the routine at #R55041.
 _55187:
-       movb @_34208,a                  ; LD A,(34208)      ; Set Character Swap Pending Flag...
+       movb @game_flags,a                  ; LD A,(34208)      ; Set Character Swap Pending Flag...
        socb @bits+6,a                  ; SET 6,A           ; ...
-       movb a,@_34208                  ; LD (34208),A      ; ...
+       movb a,@game_flags                  ; LD (34208),A      ; ...
        .ret                            ; RET               ; Return
 
 * Handle Vertical Component of Character's Jump, and Load E with Jump State Index As Appropriate
@@ -8853,11 +8900,11 @@ _55451:
        jmp  _55451                     ; JR 55451          ; Loop back to #R55451
 _55467:
        movb @-1(iy),b                  ; LD B,(IY-1)       ; Load first byte (upper room index) of current entry into B
-       movb @_34230+1,a                ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
        movb a,d                        ; LD D,A            ; ...
        .call @_54480                   ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
                                                            ; minus one
-       movb @_34230+1,a                ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
        sb   d,a                        ; SUB D             ; Subtract x-coordinate of old room's left edge from x-coordinate of new room's left edge...
        movb a,d                        ; LD D,A            ; ...and place result in D
        movb @5(ix),a                   ; LD A,(IX+5)       ; Load A with x-coordinate of left of entity...
@@ -8906,7 +8953,7 @@ _55532:
        jeq  _55592                     ; JR Z,55592        ; ...then skip ahead to #R55592 (advance to next entity)
 * Current entity's "Can Fall" Flag is set
        .push de                        ; PUSH DE           ; Store DE
-       .call @_53848                   ; CALL 53848        ; Store room size data for current entity's current room
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for current entity's current room
        .pop de                         ; POP DE            ; Restore DE
        movb @6(ix),a                   ; LD A,(IX+6)       ; Load C with height (of entity defined by entry) + 3...
        sb   @4(ix),a                   ; SUB (IX+4)        ; ...
@@ -8978,11 +9025,11 @@ _55631:
        jmp  _55631                     ; JR 55631          ; Loop back to #R55631
 _55647:
        movb @1(iy),b                   ; LD B,(IY+1)       ; Load second byte (lower room index) of current entry into B
-       movb @_34230+1,a                ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
        movb a,d                        ; LD D,A            ; ...
        .call @_54480                   ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
                                                            ; minus one
-       movb @_34230+1,a                ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
        sb   d,a                        ; SUB D             ; Subtract x-coordinate of old room's left edge from x-coordinate of new room's left edge...
        movb a,d                        ; LD D,A            ; ...and place result in D
        movb @5(ix),a                   ; LD A,(IX+5)       ; Load A with x-coordinate of left of entity...
@@ -9013,7 +9060,7 @@ _55695:
 * state data for target entity
 request_entity_sound:
        .push af                        ; PUSH AF           ; Store AF (A = index of requested sound)
-       movb @_34218,a                  ; LD A,(34218)      ; If current character's current room is the same as current room of target entity...
+       movb @current_characters_room,a                  ; LD A,(34218)      ; If current character's current room is the same as current room of target entity...
        cb   a,*ix                      ; CP (IX+0)         ; ...
        jeq  _59612                     ; JR Z,59612        ; ...then skip ahead to #R59612
        .pop af                         ; POP AF            ; Restore AF (A = index of requested sound)

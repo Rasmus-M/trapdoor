@@ -362,7 +362,7 @@ public class SkoolConverter {
                     if (opr1.getValue() == 1) {
                         tms9900Line.setInstruction("xor  one,a");
                     } else {
-                        tms9900Line.setInstruction("li   tmp0," + opr1.getValue());
+                        tms9900Line.setInstruction("li   tmp0," + opr1.getValue() + "*256");
                         additionalLines.add(new TMS9900Line(TMS9900Line.Type.Instruction, null, "xor  tmp0,a"));
                     }
                 } else {

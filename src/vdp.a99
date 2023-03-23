@@ -65,6 +65,26 @@ set_border_color:
 
 *********************************************************************************
 *
+* Draw attribute
+*
+draw_attribute:
+       .proc
+       ai   tmp0,>2000
+       bl   @vwad
+       bl   @ti_color
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       movb tmp0,*tmp2
+       .endproc
+*// draw_attribute
+
+*********************************************************************************
+*
 * Get TI-99 color from ZX Spectrum color
 *
 * a: Colour-byte FBPPPIII
