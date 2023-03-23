@@ -322,7 +322,7 @@ _34438:
        bl   @set_border_color          ; OUT (254),A       ; Set border colour
        bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       .call @draw_timer_bar           ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
+       bl   @draw_timer_bar            ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
 *      OK UNTIL HERE
 * Start of main loop
 _34466:
@@ -650,7 +650,7 @@ _34960:
        jeq  !                          ; JP NZ,47628       ; ...then print SCORE / TOTAL / HI-SC string in current character's colours and return
        b    @_47628                    ;                   
 !
-       b    @draw_timer_bar                    ; JP 47241          ; Reset Show Score Flag, draw timer figures bar and return
+       b    @draw_timer_bar_0          ; JP 47241          ; Reset Show Score Flag, draw timer figures bar and return
 
 * Change Direction Berk is Facing Depending Upon Relative Position of Drutt
 * 
@@ -5092,6 +5092,8 @@ _47227:
 * 
 * Used by the routines at #R34438, #R34916 and #R47468.
 draw_timer_bar:
+       .proc
+draw_timer_bar_0:
        movb @game_flags,a              ; LD A,(34208)      ; Reset Show Score Flag...
        szcb @bits+7,a                  ; RES 7,A           ; ...
        movb a,@game_flags              ; LD (34208),A      ; ...
@@ -5102,7 +5104,7 @@ draw_timer_bar:
        movb a,b                        ; LD B,A            ; Load number of lives into B
 draw_timer_bar_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of pairs of open eyes to draw)
-       .call @draw_open_eyes           ; CALL 47315        ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       bl   @draw_open_eyes           ; CALL 47315        ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address in IX and advance by two bytes
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of pairs of open eyes to draw)
        sb   one,b                      ; DJNZ 47260        ; Decrease B (remaining number of pairs of open eyes to draw) and loop back to #R47260 if not
@@ -5117,7 +5119,7 @@ draw_timer_bar_2:
        movb a,b                        ; LD B,A            ; Load number of lost lives into B as counter for loop
 draw_timer_bar_3:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of pairs of closed eyes to draw)
-       .call @draw_closed_eyes         ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
+       bl   @draw_closed_eyes         ; CALL 47302         ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
                                                            ; address in IX and advance by two bytes
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of pairs of closed eyes to draw)
        sb   one,b                      ; DJNZ 47277        ; Decrease B (remaining number of pairs of open eyes to draw) and loop back to #R47277 if not
@@ -5129,23 +5131,24 @@ draw_timer_bar_4:
        movb @bytes+16,b                ; LD B,16           ; Load B with 16 (as 16 timer figures' bodies to draw)
 draw_timer_bar_5:
        .push bc                        ; PUSH BC           ; Store B (remaining number of timer figure bodies to draw)
-       .call @draw_timer_part          ; CALL 47333        ; Draw left half of timer figure's body and invert mirror flag on attribute
-       .call @draw_timer_part          ; CALL 47333        ; Draw right half of timer figure's body
+       bl   @draw_timer_part          ; CALL 47333         ; Draw left half of timer figure's body and invert mirror flag on attribute
+       bl   @draw_timer_part          ; CALL 47333         ; Draw right half of timer figure's body
        .pop bc                         ; POP BC            ; Restore B (remaining number of timer figure bodies to draw)
        sb   one,b                      ; DJNZ 47291        ; Decrease B and loop back to #R47291
        jne  draw_timer_bar_5           ;                   
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * If Show Score Flag Reset then Draw Pair of Timer Figure Eyes (Closed) at Attribute File Address IX and Advance IX
 * by Two Bytes
 * 
 * Used by the routines at #R47241 and #R47363. Input:  IX  Pointer to a location in Attribute File
 draw_closed_eyes:
-       .call @ret_if_show_score_flag   ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47305
+       .proc
+       bl   @ret_if_show_score_flag    ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47305
        movb @current_character_attr,a  ; LD A,(34226)      ; Load A with the attribute of the current character
        movb @bytes+28,@c               ; LD C,28           ; Load C with 28 (graphic index of timer figures' closed eyes)
-       .call @draw_timer_part          ; CALL 47333        ; Draw the left (closed) eye at Attribute File address in IX and advance IX by one byte
-       jmp  draw_timer_part            ; JR 47333          ; Draw the right (closed) eye at Attribute File address in IX, advance IX by one byte and
+       bl   @draw_timer_part           ; CALL 47333        ; Draw the left (closed) eye at Attribute File address in IX and advance IX by one byte
+       jmp  draw_timer_part_0          ; JR 47333          ; Draw the right (closed) eye at Attribute File address in IX, advance IX by one byte and
                                                            ; return
 
 * If Show Score Flag Reset then Draw Pair of Timer Figure Eyes (Open, Random Frame) at Attribute File Address IX and
@@ -5154,10 +5157,11 @@ draw_closed_eyes:
 * Used by the routines at #R47241, #R47363 and #R47431. Input:  IX  Attribute File address at which to draw pair of
 * eyes Output: IX  Attribute File address two bytes on from initial IX
 draw_open_eyes:
-       .call @ret_if_show_score_flag   ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47318
-       .call @draw_eye                 ; CALL 47323        ; Draw Timer Figure's left eye (random frame) at Attribute File address in IX and advance IX by
+       .proc
+       bl  @ret_if_show_score_flag     ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47318
+       bl  @draw_eye                   ; CALL 47323        ; Draw Timer Figure's left eye (random frame) at Attribute File address in IX and advance IX by
                                                            ; one byte
-       jmp  draw_timer_part            ; JR 47333          ; Draw Timer Figure's right eye (same frame as above), advance IX by one byte then return
+       jmp  draw_timer_part_0          ; JR 47333          ; Draw Timer Figure's right eye (same frame as above), advance IX by one byte then return
 
 * Draw a Timer Figure's Eye (Random Frame) at Attribute File Address in IX and Advance IX by One Byte
 * 
@@ -5165,13 +5169,18 @@ draw_open_eyes:
 * A  (Entry at #R47333 only) Attribute C  (Entry at #R47333 only) Graphic Index (e.g. 27 for timer figures' bodies)
 * Output: A  Attribute (including inverted mirror flag) IX  Pointer to next location in Attribute File
 draw_eye:
+       .proc
        movb @bytes+5,a                 ; LD A,5            ; Load A with a random number, 0-4...
        bl   @rnd_no                    ; CALL 54222        ; ...
        ab   @bytes+29,a                ; ADD A,29          ; Add 29 (as 29 is the index of the first of five eye direction graphics) in C...
        movb a,@c                       ; LD C,A            ; ...
        movb @bytes+7,a                 ; LD A,7            ; Set attribute for timer indicator figures' eyes to white INK on black PAPER
+       jmp  draw_timer_part_0
+
 * This entry point is used by the routines at #R47241, #R47302 and #R47315.
 draw_timer_part:
+       .proc
+draw_timer_part_0:
        movb @bytes+4,b                 ; LD B,4            ; Set Graphic Set Index to 4
        .push af                        ; PUSH AF           ; Store AF (A = attribute)
        .push bc                        ; PUSH BC           ; Store BC (B = graphic set index, C = graphic index)
@@ -5189,7 +5198,7 @@ _47348:
        li   tmp0,128*256               ; XOR 128           ; Flip mirror flag to prepare to draw mirror image of just-drawn character block
        xor  tmp0,a                     ;                   
        inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * If Show Score Flag is Reset then Return to Calling Routine, else Return to Routine that Called Calling Routine
 * 
@@ -5199,10 +5208,10 @@ ret_if_show_score_flag:
        movb a,tmp0                     ; BIT 7,A           ; ...
        andi tmp0,128*256               ;                   
        jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
+       rt                              ;
 !
        .pop bc                         ; POP BC            ; Remove return address from stack...
-       .ret                            ; RET               ; ...and return to routine that called the calling routine
+       rt                              ; RET               ; ...and return to routine that called the calling routine
 
 * Update Eyes of a Randomly Selected Timer Figure, Increase Timer Tick Counter and Process Timer Figure Blinking
 * 
