@@ -118,11 +118,11 @@ ti_color:
        movb @tipal(r2),r3
        socb r3,r1
 *      Flash
-       andi r0,>8000
-       jeq  !
-       srl  r1,4
-       andi r1,>0ff0
-       socb @wrksp2+3,r1
+;       andi r0,>8000
+;       jeq  !
+;       srl  r1,4
+;       andi r1,>0ff0
+;       socb @wrksp2+3,r1
 !      lwpi wrksp
        movb @wrksp2+2,tmp0
        rt

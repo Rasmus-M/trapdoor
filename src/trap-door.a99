@@ -321,9 +321,9 @@ _34438:
        movb @border_color,a            ; LD A,(34217)      ; Load current border colour into A
        bl   @set_border_color          ; OUT (254),A       ; Set border colour
        bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
-*      OK UNTIL HERE
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       .call @draw_timer_bar                   ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
+       .call @draw_timer_bar           ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
+*      OK UNTIL HERE
 * Start of main loop
 _34466:
        .call @_53723                   ; CALL 53723        ; If Berk has been killed then reset his state, flash screen and decrease time / lives
@@ -334,7 +334,7 @@ _34466:
        jne  _34527                     ; JR NZ,34527       ; ...then skip ahead to #R34527
 * Level 1
        .call @_36791                   ; CALL 36791        ; Update states of all Level 1 entities
-       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
        movb @10(ix),tmp0               ; BIT 2,(IX+10)     ; If "Back to Level 1" Flag is reset...
        andi tmp0,4*256                 ;                   
        jeq  _34557                     ; JR Z,34557        ; ...then skip ahead to #R34557
@@ -378,8 +378,8 @@ _34557:
        .call @_53782                   ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
        .call @_45899                   ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
        .call @_54034                   ; CALL 54034        ; Draw contents of Primary Display Buffer to display
-       .call @play_sound                   ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
-       movb @time_left,a                  ; LD A,(34210)      ; Load remaining time / lives into A
+       .call @play_sound               ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
+       movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
        socb a,a                        ; OR A              ; If no time / lives are left...
        jeq  _34645                     ; JR Z,34645        ; ...then jump to #R34645
        movb @_43593+10,a               ; LD A,(43603)      ; If "All Home" Flag is set...
@@ -388,15 +388,15 @@ _34557:
        jne  _34658                     ; JR NZ,34658       ; ...then skip ahead to #R34658
        .call @_47363                   ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
                                                            ; timer figure blinking
-       li   hl,game_flags                  ; LD HL,34208       ; If Update Scores and Display Flag is reset...
+       li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
        movb *hl,tmp0                   ; BIT 5,(HL)        ; ...
        andi tmp0,32*256                ;                   
        jeq  _34606                     ; JR Z,34606        ; ...then skip ahead to #R34606
        szcb @bits+5,*hl                ; RES 5,(HL)        ; Reset Update Scores and Display Flag
        .call @_47499                   ; CALL 47499        ; Update scores and display
 _34606:
-       li   hl,display_buffer_1                  ; LD HL,61312       ; Point HL at Display Buffer 1
-       li   de,display_buffer_2                  ; LD DE,63424       ; Point DE at Display Buffer 2
+       li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
+       li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
        movb @_34271,a                  ; LD A,(34271)      ; Invert "Display Buffer 2 is Primary" Flag...
        xor  one,a                      ; XOR 1             ; ...
        movb a,@_34271                  ; LD (34271),A      ; ...
