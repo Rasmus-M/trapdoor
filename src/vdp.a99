@@ -54,6 +54,8 @@ vdp_registers:
 *
 * Set border color
 *
+* a: zx color
+*
 set_border_color:
        .proc
        bl   @ti_color
@@ -67,11 +69,17 @@ set_border_color:
 *
 * Draw attribute
 *
+* a: zx attribute
+* tmp0: address in zx attribute file
+*
 draw_attribute:
        .proc
+       ai   tmp0,-zx_attributes
+       sla  tmp0,3
        ai   tmp0,>2000
        bl   @vwad
        bl   @ti_color
+       li   tmp2,vdpwd
        movb tmp0,*tmp2
        movb tmp0,*tmp2
        movb tmp0,*tmp2

@@ -5444,10 +5444,9 @@ print_half_dbl_height:
        mov  hl,tmp0
        ai   tmp0,-zx_attributes
        sla  tmp0,3
-       mov  tmp0,tmp1
        bl   @vwad
        li   tmp2,vdpwd
-       movb *de,*tmp2
+       movb *de,*tmp2                  ; de must be advanced
        movb *de+,*tmp2
        movb *de,*tmp2
        movb *de+,*tmp2
@@ -5457,7 +5456,7 @@ print_half_dbl_height:
        movb *de+,*tmp2
 *      Draw attribute
        movb @print_attr,a
-       mov  tmp1,tmp0
+       mov  hl,tmp0
        bl   @draw_attribute
 ;       .push hl                        ; PUSH HL           ; Store HL
 ;       .push bc                        ; PUSH BC           ; Store BC
@@ -7626,10 +7625,8 @@ paint_red_areas_7:
 print_red_cell:
        .proc
 ;       movb @bytes+18,*ix              ; LD (IX+0),18      ; Set attribute to red INK, red PAPER
-       mov  ix,tmp0
-       ai   tmp0,-zx_attributes
-       li   tmp2,vdpwd
        li   a,18*256
+       mov  ix,tmp0
        bl   @draw_attribute
        .exx                            ; EXX               ; Switch registers
        movb @bytes+255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
@@ -7765,7 +7762,8 @@ draw_display_buffer_8:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
        movb *hl,a                      ; LD A,(HL)         ; Load attribute into A
        socb @bits+6,a                  ; SET 6,A           ; Set BRIGHT flag
-;       movb a,*ix                     ; LD (IX+0),A       ; Place attribute at current position in Attribute File
+       mov  ix,tmp0                    ; LD (IX+0),A       ; Place attribute at current position in Attribute File
+       bl   @draw_attribute
        jmp  draw_display_buffer_6      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_9:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
@@ -7781,7 +7779,12 @@ draw_display_buffer_10:
 * "mirror" flag, rather than FLASH) B  Graphic set index C  Graphic index IX  Address in Attribute File
 draw_character_block:
        .proc
-       socb @bits+6,a                  ; SET 6,A           ; Set Bright Flag
+*      VDP address
+       mov  ix,tmp0
+       ai   tmp0,-zx_attributes
+       sla  tmp0,3
+       bl   @vwad
+       li   tmp2,vdpwd
 *      Graphics address
        mov  bc,tmp1
        srl  tmp1,8
@@ -7791,15 +7794,8 @@ draw_character_block:
        andi tmp0,>00ff
        sla  tmp0,3
        a    tmp0,hl
-*      VDP address
-       mov  ix,tmp0
-       ai   tmp0,-zx_attributes
-       sla  tmp0,3
-       mov  tmp0,de
-       bl   @vwad
-       li   tmp2,vdpwd
 *      Draw mirrored?
-       movb a,a
+       socb @bits+6,a                  ; SET 6,A           ; Set Bright Flag
        jlt  draw_character_block_1
 *      Draw normal block
        movb *hl+,*tmp2
@@ -7822,7 +7818,7 @@ draw_character_block_2:
        jne  draw_character_block_2
 *      Draw attribute
 draw_character_block_3:
-       mov  de,tmp0
+       mov  ix,tmp0
        bl   @draw_attribute
 ;       movb a,*ix                      ; LD (IX+0),A       ; Load attribute value into current Attribute File address
 ;       sb   a,a                        ; XOR A             ; Load graphic set index into HL..
@@ -7848,8 +7844,7 @@ draw_character_block_3:
 ;       ab   a,a                        ; ADD A,A           ; ...to put it on the same scale as the MSB of the Display File address MSB (see notes)...
 ;       ab   a,a                        ; ADD A,A           ; ...
 ;       ab   a,a                        ; ADD A,A           ; ...
-;       andi a,91*256                   ; AND 91            ; Drop the most significant bit to point to the correct location in Display File
-;       movb a,h                        ; LD H,A            ; Load back into HL (L is unaffected, as it should be)
+;       andi a,91*256                   ; AND 91            ; Drop the most significant bit to point to the correct location in Display File;       movb a,h                        ; LD H,A            ; Load back into HL (L is unaffected, as it should be)
 ;       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now Display File address) and HL (now pointer to graphic data)
 ;       movb *ix,tmp0                   ; BIT 7,(IX+0)      ; If mirror flag is set for Attribute File at current location...
 ;       andi tmp0,128*256               ;
