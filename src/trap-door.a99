@@ -4251,17 +4251,15 @@ _46051:
        movb *de,a                      ; LD A,(DE)         ; Load A with Graphic Set Index plus one from this entry in Primary Display Buffer...
        ab   one,a                      ; INC A             ; ...and if value is now zero (i.e. old value was 255 corresponding to a block outside
                                                            ; dimensions of room)...
-       jne  !                          ; JP Z,46150        ; ...then skip ahead to #R46150
-       b    @_46150                    ;                   
-!
-       movb @graphic_set_index,a                  ; LD A,(34268)      ; Load current Graphic Set Index into this location in Primary Display Buffer...
-       movb a,*de                      ; LD (DE),A         ; ...
-       inc  de                         ; INC DE            ; Advance to Graphic Index in current character block's entry in Primary Display Buffer
-       movb *ix,a                      ; LD A,(IX+0)       ; Load Graphic Index into current Display Buffer location...
-       movb a,*de                      ; LD (DE),A         ; ...
-       inc  de                         ; INC DE            ; Advance to next byte in current character block's display buffer entry (Attribute)
-       movb @current_attr,a                  ; LD A,(34270)      ; Load Current Attribute into A...
-       socb a,a                        ; OR A              ; ...and if not zero...
+       jeq  _46150                     ; JP Z,46150        ; ...then skip ahead to #R46150
+       movb @graphic_set_index,a       ; LD A,(34268)      ; Load current Graphic Set Index into this location in Primary Display Buffer...
+       movb a,*de+                     ; LD (DE),A         ; ...
+                                       ; INC DE            ; Advance to Graphic Index in current character block's entry in Primary Display Buffer
+       movb *ix,*de+                   ; LD A,(IX+0)       ; Load Graphic Index into current Display Buffer location...
+                                       ; LD (DE),A         ; ...
+                                       ; INC DE            ; Advance to next byte in current character block's display buffer entry (Attribute)
+       movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
+                                       ; OR A              ; ...and if not zero...
        jne  _46077                     ; JR NZ,46077       ; ...then skip ahead to #R46077
 * Current Attribute is zero (i.e. not set) so DE points to attribute data
        inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)...
@@ -4279,42 +4277,33 @@ _46077:
 !
 * Override Attribute Flag reset
        movb a,@l                       ; LD L,A            ; Load L with attribute value
-       andi a,56*256                   ; AND 56            ; Check PAPER bits
-       movb @l,a                       ; LD A,L            ; Restore attribute value to A
-       jeq  !                          ; JP NZ,46111       ; If PAPER is not zero (i.e. black) then skip ahead to #R46111
-       b    @_46111                    ;                   
-!
+       movb a,tmp0
+       andi tmp0,56*256                ; AND 56            ; Check PAPER bits
+                                       ; LD A,L            ; Restore attribute value to A
+
+       jne  _46111                     ; JP NZ,46111       ; If PAPER is not zero (i.e. black) then skip ahead to #R46111
 * The instructions between #R46091 and #R46110 (inclusive) are executed only when the PAPER component of the
 * attribute in A (and L) is black. If the Preserve INK Flag is reset in the attribute value loaded (at #R46098) from
 * the Display Buffer, then the instruction at #R46107 will leave the reset (i.e. black) PAPER bits in A. If the
 * Preserve INK Flag is set, then the instructions between #R46104 and #R46106 (inclusive) will shift the bits used
 * for INK into the PAPER positions and this PAPER colour (originally INK colour) will be preserved when the
 * instruction at #R46107 is executed.
-_46091:
-       equ  $
        andi a,192*256                  ; AND 192           ; Reset all bits except Preserve INK and Mirror flags
        movb a,b                        ; LD B,A            ; Load B with Preserve INK and Mirror flags
        movb @l,a                       ; LD A,L            ; Restore attribute value to A
        andi a,63*256                   ; AND 63            ; Reset bits Preserve INK and Mirror flags
        movb a,@c                       ; LD C,A            ; Load C with INK and PAPER bits of attribute value
-_46098:
        movb *de,a                      ; LD A,(DE)         ; Load value currently in Display Buffer into A...
        movb a,tmp0                     ; BIT 6,A           ; ...and if Preserve INK Flag is reset...
-       andi tmp0,64*256                ;                   
-       jne  !                          ; JP Z,46107        ; ...then skip ahead to #R46107
-       b    @_46107                    ;                   
-!
+       andi tmp0,64*256                ;
+       jeq  _46107                     ; JP Z,46107        ; ...then skip ahead to #R46107
 * Preserve INK Flag set in Display Buffer
-_46104:
-       equ  $
        ab   a,a                        ; ADD A,A           ; Shift INK bits into PAPER bits...
        ab   a,a                        ; ADD A,A           ; ...
-_46106:
        ab   a,a                        ; ADD A,A           ; ...
 _46107:
        andi a,56*256                   ; AND 56            ; Reset all except PAPER bits
        socb b,a                        ; OR B              ; (Re)set Preserve INK and Mirror flags as stored in B previously
-_46110:
        socb @c,a                       ; OR C              ; Set INK bits as stored in C previously (PAPER was black)
 _46111:
        movb a,*de                      ; LD (DE),A         ; Load attribute in A into Display Buffer
@@ -4326,19 +4315,13 @@ _46111:
        movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
        cb   a,@bytes+255               ; CP 255            ; ...and if this is 255 (End Marker)...
        jne  !                          ; JP Z,46418        ; ...then jump to #R46418 (load HL with stored coordinates from #R34281 and return from
-       b    @graphics_routine_255                    ;
+       b    @graphics_routine_255                          ; drawing)
 !
-                                                           ; drawing)
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33, and if remaining value is 0 (i.e. original value was 33)...
-       jne  !                          ; JP Z,46140        ; ...then skip ahead to #R46140...
-       b    @_46140                    ;                   
-!
+       jeq  _46140                     ; JP Z,46140        ; ...then skip ahead to #R46140...
 _46128:
-       equ  $
-       joc  !                          ; JP NC,46132       ; TODO: check code. ...else, if value was greater than 33 then skip ahead to #R46132
-       b    @_46132                    ;                   
-!
+       jgt  _46132                    ; JP NC,46132       ; TODO: check code. ...else, if value was greater than 33 then skip ahead to #R46132
 * Cursor Shift byte was less than 33 (move the cursor down a character row, and left by 33-(n+1) characters)
        ab   one,@l                     ; INC L             ; Increase y-coordinate
 _46132:
@@ -4347,25 +4330,21 @@ _46132:
        movb a,h                        ; LD H,A            ; ...
 _46135:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address as change in coordinates is non-trivial
-       b    @inct_and_process_data                    ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
+       b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * Cursor Shift byte was 33 (move the cursor right by one character)
 _46140:
        inc  de                         ; INC DE            ; Advance pointer to start of next entry in Primary Display Buffer
        ab   one,h                      ; INC H             ; Increase x-coordinate by one
-       jne  !                          ; JP Z,46135        ; If x-coordinate is zero then jump back to #R46135 (see trivia)
-       b    @_46135                    ;                   
-!
+                                       ; JP Z,46135        ; If x-coordinate is zero then jump back to #R46135 (see trivia)
        movb one,b                      ; LD B,1            ; Prepare to skip over recalculation of Display Buffer address as we moved right one character
-       b    @inct_and_process_data                    ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
+       b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * First byte in Primary Display Buffer entry for current position is 255 (i.e. outside dimensions of room)
 _46150:
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
 _46151:
-       movb @current_attr,a                  ; LD A,(34270)      ; Load Current Attribute into A...
-       socb a,a                        ; OR A              ; ...and if not zero...
-       jeq  !                          ; JP NZ,46160       ; ...then skip ahead to #R46160
-       b    @_46160                    ;                   
-!
+       movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
+                                       ; OR A              ; ...and if not zero...
+       jne  _46160                     ; JP NZ,46160       ; ...then skip ahead to #R46160
        inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)
 _46160:
        movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
