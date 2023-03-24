@@ -308,8 +308,8 @@ data_addresses_4:
 * Used by the routine at #R34200.
 init:
        lwpi wrksp
-       movb @rndsd,a                   ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
-       movb a,@rnd_seed                  ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
+;       movb @rndsd,a                   ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
+;       movb a,@rnd_seed                ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
        limi 0                          ; DI                ; Disable interrupts
 
@@ -1910,7 +1910,7 @@ _38132:
        andi tmp0,4*256                 ;                   
        jne  _38155                     ; JR NZ,38155       ; ...then skip ahead to #R38155 (make Bubo fire)
        movb @bytes+60,a                ; LD A,60           ; Load A with a random number, 0-59...
-       .call @rnd_no                   ; CALL 54222        ; ...
+       bl   @rnd_no                   ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is not zero (59 in 60 chance)...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script                    ;                   
@@ -7873,7 +7873,7 @@ draw_character_block_3:
 
 * Data for Pseudo-Random Number Generator
 rnd_seed:
-       data 0                                                        ; Seed
+       data 23                                                       ; Seed
 rnd_range:
        byte 0                                                        ; Temporary store for range value
 
@@ -7890,7 +7890,6 @@ rnd_no:
        cb   a,@bytes+2                 ; CP 2              ; If range is less than 2...
        jhe  rnd_no_1                   ; JP NC,54229       ; ...then set range to 2...
        movb @bytes+2,a                 ; LD A,2            ; ...
-       jmp  rnd_no_5
 rnd_no_1:
        bl   @randl
 ;       movb a,@rnd_range               ; LD (54221),A      ; Store range at #R54211
@@ -7939,7 +7938,6 @@ rnd_no_1:
 ;       .pop bc                         ; POP BC            ; Restore BC
 ;       .pop de                         ; POP DE            ; Restore DE
 ;       .pop hl                         ; POP HL            ; Restore HL
-rnd_no_5:
        .endproc                         ; RET               ; Return
 
 * Move Entity at IX into New Room (Left or Right) if it is at the Edge of its Current Room
