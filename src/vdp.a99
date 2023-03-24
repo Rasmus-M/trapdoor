@@ -372,3 +372,41 @@ check_key:
        tb   0                          ; Test key, EQ if not pressed
        rt
 *// check_key
+
+*********************************************************************
+*
+* Generate a pseudo random number within the given limit
+*
+* a: Maximum number (0 - 255) inclusive
+*
+* On return a contains the number [0; a]
+*
+randl  .proc                           ; Push return address onto the stack
+       bl   @rand                      ; Generate a random number in tmp0
+       andi tmp0,>00ff                 ; Clear MSB: [0-255]
+       mov  af,tmp1                    ; range in MSB
+       swpb tmp1                       ; range in LSB
+       inc  tmp1                       ; inclusive
+       mpy  tmp1,tmp0                  ; range * [0-255]
+       srl  tmp1,8                     ; (range * [0-255]) / 256
+       mov  tmp1,a                     ; Copy result back
+       swpb a                          ; to MSB
+       .endproc                        ; Pop return address off the stack
+*// randl
+
+*********************************************************************
+*
+* Generate a pseudo random number
+*
+* On return tmp0 contains the number, which is also stored at @rnd_seed
+*
+* tmp1 and tmp2 are modified
+*
+rand   li   tmp1,28643                 ; A prime number to multiply by
+       mpy  @rnd_seed,tmp1             ; Multiply by last random number
+       ai   tmp2,31873                 ; Add a prime number
+       src  tmp2,7                     ; Mix up the number to break odd/even pattern
+       mov  tmp2,@rnd_seed             ; Save this number for next time
+       mov  tmp2,tmp0
+       rt
+*// rand
