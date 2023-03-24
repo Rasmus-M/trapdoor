@@ -377,17 +377,15 @@ check_key:
 *
 * Generate a pseudo random number within the given limit
 *
-* a: Maximum number (0 - 255) inclusive
+* a: Maximum number (0 - 255) exclusive
 *
-* On return a contains the number [0; a]
+* On return a contains the number [0; a[
 *
 randl  .proc                           ; Push return address onto the stack
        bl   @rand                      ; Generate a random number in tmp0
        andi tmp0,>00ff                 ; Clear MSB: [0-255]
-       mov  af,tmp1                    ; range in MSB
-       swpb tmp1                       ; range in LSB
-       inc  tmp1                       ; inclusive
-       mpy  tmp1,tmp0                  ; range * [0-255]
+       swpb af                         ; range in LSB
+       mpy  af,tmp0                    ; range * [0-255]
        srl  tmp1,8                     ; (range * [0-255]) / 256
        mov  tmp1,a                     ; Copy result back
        swpb a                          ; to MSB
