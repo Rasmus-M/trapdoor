@@ -10,7 +10,7 @@ start:
        b    @init                    ; JP 34428          ; Jump to start of initialisation code
 
 * Unused
-       byte 190,133,173,233
+;      byte 190,133,173,233
 
 * Index of Current Level
 current_level:
@@ -6141,9 +6141,9 @@ _48593:
        movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of Berk's right side is less than x-coordinate of right of current room...
        cb   a,@e                       ; CP E              ; ...
        jl   _48615                     ; JR C,48615        ; ...then skip ahead to #R48615 (move Berk right by one character
-       .call @_54505                   ; CALL 54505        ; Load B with index of room to right of current character's current room...
+       bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room...
        jne  !                          ; JP Z,48096        ; ...and if there is no room to the right, then jump to #R48096 (advance HL to next script
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;                   
 !
                                                            ; instruction and execute)
        .call @_54383                   ; CALL 54383        ; Move Berk into room to right of its current room and update position of carried entity if
@@ -6172,7 +6172,7 @@ _48641:
        movb @bytes+100,a               ; LD A,100          ; If Berk's left-side x-coordinate is greater than 100 (x-coordinate of left side of room)...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...
        jl   _48660                     ; JR C,48660        ; ...then skip ahead to #R48660 (move Berk left by one character)
-       .call @_54539                   ; CALL 54539        ; Load B with index of room to left of entity's current room...
+       bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room...
        jne  !                          ; JP Z,48096        ; ...and if there is no room to the left, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script                    ;                   
 !
@@ -6552,7 +6552,7 @@ _51841:
 * room is directly to the left or right of Drutt's room (i.e. no vertical separation). Otherwise, Drutt will perform
 * a random action. This entry point is used by the routine at #R51960.
 _51864:
-       .call @_53194                   ; CALL 53194        ; Load A with value indicating which direction room A lies relative to Drutt's current room
+       bl   @find_direction_to_room    ; CALL 53194        ; Load A with value indicating which direction room A lies relative to Drutt's current room
        cb   a,one                      ; CP 1              ; If target room is to the right...
        jeq  _51904                     ; JR Z,51904        ; ...then randomly select script data for rightward hop of size three or four, and execute
        cb   a,@bytes+2                 ; CP 2              ; If target room is to the left...
@@ -6741,7 +6741,7 @@ _52112:
        movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of left edge of pushed entity is at least 103...
        cb   a,@bytes+103               ; CP 103            ; ...i.e. not yet at left edge of room...
        jhe  _52127                     ; JR NC,52127       ; ...then skip ahead to #R52127
-       .call @_54539                   ; CALL 54539        ; Load B with index of room to left of current character's current room...
+       bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of current character's current room...
        jne  !                          ; RET Z             ; ...and if there is no room to the left then return
        .ret                            ;                   
 !
@@ -6823,7 +6823,7 @@ _52207:
        movb @7(ix),a                   ; LD A,(IX+7)       ; ...and if x-coordinate of right edge of pushed entity is less than this...
        cb   a,@e                       ; CP E              ; ...i.e. not yet at right edge of room...
        jl   _52227                     ; JR C,52227        ; ...then skip ahead to #R52227
-       .call @_54505                   ; CALL 54505        ; Load B with index of room to right of current character's current room...
+       bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room...
        jne  !                          ; RET Z             ; ...and if there is no room to the right then return
        .ret                            ;                   
 !
@@ -7167,9 +7167,9 @@ _53154:
 * Pathfinding Data Table
 * 
 * When built, this table has a header and a main data block. The header is three bytes long and contains the values:
-_53159:
+pathfinding_data_table:
        byte 0,0,0
-_53162:
+pathfinding_1st_entry:
        byte 0,0
        byte 0,0
        byte 0,0
@@ -7177,137 +7177,137 @@ _53162:
        byte 0
 
 * Unused
-       byte 0,0,0,0,0,0,0,0
-       byte 0,0,0,0,0,0,0,0
-       byte 0,0,100,100,100,100,100
+;       byte 0,0,0,0,0,0,0,0
+;       byte 0,0,0,0,0,0,0,0
+;       byte 0,0,100,100,100,100,100
 
 * Load A with Value Indicating Which Direction Room A Lies Relative to Room in State Data at IX
 * 
 * Direction index value in A denotes which direction (left or right), e.g. Drutt, has to travel to reach the target
 * room: Input:  A  Target room index (e.g. Berk's room or worm's room) IX  Address of complex state data (current
 * level) for Drutt Output: A  Direction index
-_53194:
+find_direction_to_room:
+       .proc
        .push hl                        ; PUSH HL           ; Store HL
        .push ix                        ; PUSH IX           ; Store IX
        movb a,@e                       ; LD E,A            ; Load E with target room index
        movb *ix,a                      ; LD A,(IX+0)       ; Load D with Drutt's current room...
        movb a,d                        ; LD D,A            ; ...
-       li   hl,_53159                  ; LD HL,53159       ; Set first two bytes of header to 255 (Start Marker)...
-       movb @bytes+255,*hl             ; LD (HL),255       ; ...
-       inc  hl                         ; INC HL            ; ...
-       movb @bytes+255,*hl             ; LD (HL),255       ; ...
-       inc  hl                         ; INC HL            ; Set third byte of header to index of Drutt's current room...
-       movb a,*hl                      ; LD (HL),A         ; ...
-       inc  hl                         ; INC HL            ; Advance HL to first byte of first entry
-       .call @_54542                   ; CALL 54542        ; Load B with index of room to left of Drutt's current room...
-       jeq  _53228                     ; JR Z,53228        ; ...and if there is no such room then skip ahead to #R53228
+       li   hl,pathfinding_data_table  ; LD HL,53159       ; Set first two bytes of header to 255 (Start Marker)...
+       movb @bytes+255,*hl+            ; LD (HL),255       ; ...
+                                       ; INC HL            ; ...
+       movb @bytes+255,*hl+            ; LD (HL),255       ; ...
+                                       ; INC HL            ; Set third byte of header to index of Drutt's current room...
+       movb a,*hl+                     ; LD (HL),A         ; ...
+                                       ; INC HL            ; Advance HL to first byte of first entry
+       bl   @get_left_room_index_1     ; CALL 54542        ; Load B with index of room to left of Drutt's current room...
+       jeq  find_direction_to_room_1   ; JR Z,53228        ; ...and if there is no such room then skip ahead to #R53228
        movb @e,a                       ; LD A,E            ; If room to left of Drutt's current room is the target room...
        cb   a,b                        ; CP B              ; ...then set Zero Flag
        movb @bytes+2,a                 ; LD A,2            ; Load A with 2 ("go left")
        jne  !                          ; JP Z,53336        ; If Zero Flag is set (room to left is target room) then restore registers and return
-       b    @_53336                    ;                   
+       b    @find_direction_to_room_7                    ;
 !
-       .call @_53309                   ; CALL 53309        ; Add entry to Pathfinding Data Table stating room to left of Drutt is to the left
-_53228:
-       .call @_54508                   ; CALL 54508        ; Load B with index of room to right of Drutt's room...
-       jeq  _53243                     ; JR Z,53243        ; ...and if there is no such room then skip ahead to #R53243
+       bl   @add_pathfinding_entry     ; CALL 53309        ; Add entry to Pathfinding Data Table stating room to left of Drutt is to the left
+find_direction_to_room_1:
+       bl   @get_right_room_index_1    ; CALL 54508        ; Load B with index of room to right of Drutt's room...
+       jeq  find_direction_to_room_2                     ; JR Z,53243        ; ...and if there is no such room then skip ahead to #R53243
        movb @e,a                       ; LD A,E            ; If room to right of Drutt's current room is the target room...
        cb   a,b                        ; CP B              ; ...then set Zero Flag
        movb one,a                      ; LD A,1            ; Load A with 1 ("go right")
        jne  !                          ; JP Z,53336        ; If Zero Flag is set (room to right is target room) then restore registers and return
-       b    @_53336                    ;                   
+       b    @find_direction_to_room_7                    ;
 !
-       .call @_53309                   ; CALL 53309        ; Add entry to Pathfinding Data Table stating room to right of Drutt is to the right
+       bl   @add_pathfinding_entry     ; CALL 53309        ; Add entry to Pathfinding Data Table stating room to right of Drutt is to the right
 * Now the Pathfinding Data Table has a header and zero, one or two records, depending upon the horizontal
 * connectivity of Drutt's current room.
-_53243:
-       li   ix,_53162                  ; LD IX,53162       ; Load IX with address of first entry in Pathfinding Data Table
-_53247:
+find_direction_to_room_2:
+       li   ix,pathfinding_1st_entry   ; LD IX,53162       ; Load IX with address of first entry in Pathfinding Data Table
+find_direction_to_room_3:
        movb @1(ix),d                   ; LD D,(IX+1)       ; Load D with index of room from current entry in Pathfinding Data Table
-       .call @_54542                   ; CALL 54542        ; Load B with index of room to left of room D...
-       jeq  _53271                     ; JR Z,53271        ; ...and if there is no such room then skip ahead to #R53271
+       bl   @get_left_room_index_1     ; CALL 54542        ; Load B with index of room to left of room D...
+       jeq  find_direction_to_room_4                     ; JR Z,53271        ; ...and if there is no such room then skip ahead to #R53271
        movb @e,a                       ; LD A,E            ; If room to left of room D is the target room...
        cb   a,b                        ; CP B              ; ...
        jne  !                          ; JP Z,53333        ; ...then load A with direction index for room D, restore registers and return
-       b    @_53333                    ;                   
+       b    @find_direction_to_room_6                    ;
 !
-       .call @_53317                   ; CALL 53317        ; If room B already has an entry in Pathfinding Data Table...
-       jeq  _53271                     ; JR Z,53271        ; ...then skip ahead to #R53271
+       bl   @find_pathfinding_entry    ; CALL 53317        ; If room B already has an entry in Pathfinding Data Table...
+       jeq  find_direction_to_room_4   ; JR Z,53271        ; ...then skip ahead to #R53271
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with current entry's direction index (room B must lie in same direction as room D)
-       .call @_53309                   ; CALL 53309        ; Add entry to Pathfinding Data Table for room B lying in direction A
-_53271:
-       .call @_54508                   ; CALL 54508        ; Load B with index of room to right of room D...
-       jeq  _53292                     ; JR Z,53292        ; ...and if there is no such room then skip ahead to #R53292
+       bl   @add_pathfinding_entry     ; CALL 53309        ; Add entry to Pathfinding Data Table for room B lying in direction A
+find_direction_to_room_4:
+       bl   @get_right_room_index_1    ; CALL 54508        ; Load B with index of room to right of room D...
+       jeq  find_direction_to_room_5                     ; JR Z,53292        ; ...and if there is no such room then skip ahead to #R53292
        movb @e,a                       ; LD A,E            ; If room to right of room D is the target room...
        cb   a,b                        ; CP B              ; ...
        jne  !                          ; JP Z,53333        ; ...then load A with direction index for room D, restore registers and return
-       b    @_53333                    ;                   
+       b    @find_direction_to_room_6                    ;
 !
-       .call @_53317                   ; CALL 53317        ; If room B already has an entry in Pathfinding Data Table...
-       jeq  _53292                     ; JR Z,53292        ; ...then skip ahead to #R53292
+       bl   @find_pathfinding_entry    ; CALL 53317        ; If room B already has an entry in Pathfinding Data Table...
+       jeq  find_direction_to_room_5   ; JR Z,53292        ; ...then skip ahead to #R53292
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with current entry's direction index (room B must lie in same direction as room D)
-       .call @_53309                   ; CALL 53309        ; Add entry to Pathfinding Data Table for room B lying in direction A
-_53292:
+       bl   @add_pathfinding_entry     ; CALL 53309        ; Add entry to Pathfinding Data Table for room B lying in direction A
+find_direction_to_room_5:
        inc  ix                         ; INC IX            ; Advance IX by two bytes to next entry in Pathfinding Data Table...
        inc  ix                         ; INC IX            ; ...
        movb *ix,a                      ; LD A,(IX+0)       ; If byte at this location is not 255 (End Marker)...
        cb   a,@bytes+255               ; CP 255            ; ...
-       jeq  !                          ; JP NZ,53247       ; ...then loop back to #R53247
-       b    @_53247                    ;                   
-!
+       jne  find_direction_to_room_3   ; JP NZ,53247       ; ...then loop back to #R53247
 * At this point, the search has checked all rooms and not found the target room.
+       sb   a,a                        ; XOR A             ; Set A to zero
+                                       ; POP IX            ; Restore IX
+                                       ; POP HL            ; Restore HL
+       jmp  find_direction_to_room_7   ; RET               ; Return
+* Load A with Direction Index in Pathfinding Data Table entry at Address in IX, Restore Registers and Return
+* 
+* Used by the routine at #R53194. Input:  IX  Address of an entry in Pathfinding Data Table
+find_direction_to_room_6:
+       movb *ix,a                      ; LD A,(IX+0)       ; Load A with direction index for entry at IX
+* This entry point is used by the routine at #R53194.
+find_direction_to_room_7:
        .pop ix                         ; POP IX            ; Restore IX
        .pop hl                         ; POP HL            ; Restore HL
-       sb   a,a                        ; XOR A             ; Set A to zero
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Add Entry to Pathfinding Data Table for Room B in Direction A
 * 
 * B contains the room the pathfinding routine is currently looking at, and A contains a value that denotes which
 * direction this room lies in relative to Drutt's current room. Input:  A  Direction index (1 or 2) B  Index of room
 * being examined HL  Current address of end of Pathfinding Data Table
-_53309:
-       movb a,*hl                      ; LD (HL),A         ; Store direction index
-       inc  hl                         ; INC HL            ; Advance by one byte
+add_pathfinding_entry:
+       movb a,*hl+                     ; LD (HL),A         ; Store direction index
+                                       ; INC HL            ; Advance by one byte
        movb b,a                        ; LD A,B            ; Store index of room being examined...
-       movb a,*hl                      ; LD (HL),A         ; ...
-       inc  hl                         ; INC HL            ; Advance by one byte
+       movb a,*hl+                     ; LD (HL),A         ; ...
+                                       ; INC HL            ; Advance by one byte
        movb @bytes+255,*hl             ; LD (HL),255       ; Store 255 (End Marker)
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 * Set Zero Flag if Room B Has an Entry in Pathfinding Data Table, Otherwise Reset
 * 
 * Used by the routine at #R53194. Input:  HL  Address of end of Pathfinding Data Table B  Index of room to check
 * table for Output: F  (Zero Flag) Set if room B is already stored in Pathfinding Data Table, reset otherwise
-_53317:
+find_pathfinding_entry:
        .push hl                        ; PUSH HL           ; Store HL (address of end of Pathfinding Data Table)
-_53318:
+find_pathfinding_entry_1:
        dec  hl                         ; DEC HL            ; Move HL back to previous entry's room index...
        movb *hl,a                      ; LD A,(HL)         ; ...load into A...
        cb   a,@bytes+255               ; CP 255            ; ...and if this is 255 (Start Marker, so room B not found)...
-       jeq  _53330                     ; JR Z,53330        ; ...then skip ahead to #R53330
+       jeq  find_pathfinding_entry_2   ; JR Z,53330        ; ...then skip ahead to #R53330
        dec  hl                         ; DEC HL            ; Move HL back to entry's direction index
        cb   a,b                        ; CP B              ; If room to search for not the same as current entry's room...
-       jne  _53318                     ; JR NZ,53318       ; ...then loop back to #R53318 to test next entry
+       jne  find_pathfinding_entry_1   ; JR NZ,53318       ; ...then loop back to #R53318 to test next entry
 * At this point, the room we're looking for (in B) is already stored in the Pathfinding Data Table and the Zero Flag
 * is set.
        .pop hl                         ; POP HL            ; Restore HL (address of end of Pathfinding Data Table)
-       .ret                            ; RET               ; Return
-_53330:
+       cb   a,a                                            ; Set zero flag
+       jmp  find_pathfinding_entry_3   ; RET               ; Return
+find_pathfinding_entry_2:
        .pop hl                         ; POP HL            ; Restore HL (address of end of Pathfinding Data Table)
        sb   one,a                      ; DEC A             ; Reset Zero Flag
-       .ret                            ; RET               ; Return
-
-* Load A with Direction Index in Pathfinding Data Table entry at Address in IX, Restore Registers and Return
-* 
-* Used by the routine at #R53194. Input:  IX  Address of an entry in Pathfinding Data Table
-_53333:
-       movb *ix,a                      ; LD A,(IX+0)       ; Load A with direction index for entry at IX
-* This entry point is used by the routine at #R53194.
-_53336:
-       .pop ix                         ; POP IX            ; Restore IX
-       .pop hl                         ; POP HL            ; Restore HL
-       .ret                            ; RET               ; Return
+find_pathfinding_entry_3:
+       rt                              ; RET               ; Return
 
 * Cycle Attributes (Long, Full-Screen) and Clear Display Buffers
 * 
@@ -7951,12 +7951,12 @@ move_into_new_room:
        movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of right side (+100) of entity is not less than 102...
        cb   a,@bytes+102               ; CP 102            ; ...
        jhe  move_into_new_room_1       ; RET NC            ; ...then return
-       .call @_54539                   ; CALL 54539        ; Load B with index of room to left of entity's current room
+       bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room
        .call @_54419                   ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
                                                            ; if moving entity is Berk
        jmp  move_into_new_room_1       ; RET               ; Return
 _54306:
-       .call @_54505                   ; CALL 54505        ; Load B with index of room to right of current character's current room
+       bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room
        .call @_54383                   ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
                                                            ; entity if moving entity is Berk
 move_into_new_room_1:
@@ -7989,7 +7989,7 @@ _54332:
        jhe  !                          ; RET C             ; ...then return
        .ret                            ;                   
 !
-       .call @_54505                   ; CALL 54505        ; Load B with index of room to right of current character's current room
+       bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room
        jeq  _54381                     ; JR Z,54381        ; If there is no room to the right, then jump to #R54381
        .call @_54383                   ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
                                                            ; entity if moving entity is Berk
@@ -8030,7 +8030,7 @@ _54363:
 !
 _54369:
        equ  $
-       .call @_54539                   ; CALL 54539        ; Load B with index of room to left of entity's current room
+       bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room
        jeq  _54381                     ; JR Z,54381        ; If there is no room to the left, then jump to #R54381
        .call @_54419                   ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
                                                            ; if moving entity is Berk
@@ -8163,7 +8163,7 @@ _54480:
 * horizontal (forward-back) connectivity.
 ;_54499:
 ;       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
-;       jmp  _54512                     ; JR 54512          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
+;       jmp  get_right_room_index_2                     ; JR 54512          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
 
 * Load B with Index of Room to Right of an Entity's Current Room
 * 
@@ -8171,27 +8171,27 @@ _54480:
 * entity IY  (entry at #R54512 only) An entry in a room connectivity table D  (entry at #R54508 and #R54512 only)
 * Index of base room for check Output: B  Index of room found if there is one, undefined otherwise F  Zero Flag set
 * if there is no room to the right, reset otherwise
-_54505:
+get_right_room_index:
        movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity pointed to by IX into D
 * This entry point is used by the routine at #R53194.
-_54508:
+get_right_room_index_1:
        mov  @_34250,iy                 ; LD IY,(34250)     ; Load start address of current level's Horizontal Room Connectivity Data into IY
 * This entry point is used by the routine at #R54499.
-_54512:
+get_right_room_index_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Load first byte (left room index) of current entry into A
        cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+       jeq  get_right_room_index_3     ; RET Z             ; ...then return
        cb   a,d                        ; CP D              ; If byte is not the same as the room index in D...
        jne  _54527                     ; JR NZ,54527       ; ...then skip ahead to #R54527
        movb @1(iy),b                   ; LD B,(IY+1)       ; Load second byte (right room index) of current entry into B
        cb   a,@bytes+255               ; CP 255            ; Reset zero flag (as current room cannot be 255)
-       .ret                            ; RET               ; Return
+       jmp  get_right_room_index_3     ; RET               ; Return
 _54527:
-       inc  iy                         ; INC IY            ; Advance by two bytes to the next entry...
-       inc  iy                         ; INC IY            ; ...
-       jmp  _54512                     ; JR 54512          ; Loop back to #R54512
+       inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
+                                       ; INC IY            ; ...
+       jmp  get_right_room_index_2                         ; JR 54512          ; Loop back to #R54512
+get_right_room_index_3:
+       rt
 
 * Unused routine
 * 
@@ -8201,7 +8201,7 @@ _54527:
 * horizontal (forward-back) connectivity.
 ;_54533:
 ;       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
-;       jmp  _54546                     ; JR 54546          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
+;       jmp  get_left_room_index_0      ; JR 54546          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
 
 * Load B with Index of Room to Left of an Entity's Current Room
 * 
@@ -8209,29 +8209,30 @@ _54527:
 * entity IY  (entry at #R54546 only) An entry in a room connectivity table D  (entry at #R54542 and #R54546 only)
 * Index of base room for check Output: B  Index of room found if there is one, undefined otherwise F  Zero Flag set
 * if there is no room to the left, reset otherwise
-_54539:
+get_left_room_index:
        movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity pointed to by IX into D
 * This entry point is used by the routine at #R53194.
-_54542:
+get_left_room_index_1:
        mov  @_34250,iy                 ; LD IY,(34250)     ; Load start address of current level's Horizontal Room Connectivity Data into IY
+       movb @bytes+255,b                                   ; Init result to not found
 * This entry point is used by the routine at #R54533.
-_54546:
+get_left_room_index_0:
        inc  iy                         ; INC IY            ; Advance by one byte to second byte (right room index) of first entry
-_54548:
+get_left_room_index_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Load second byte (right room index) of current entry into A
        cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+       jeq  get_left_room_index_4      ; RET Z             ; ...then return
        cb   a,d                        ; CP D              ; If byte is not the same as the room index in D...
-       jne  _54563                     ; JR NZ,54563       ; ...then skip ahead to #R54563
+       jne  get_left_room_index_3      ; JR NZ,54563       ; ...then skip ahead to #R54563
        movb @-1(iy),b                  ; LD B,(IY-1)       ; Load first byte (left room index) of current entry into B
        cb   a,@bytes+255               ; CP 255            ; Reset zero flag (as current room cannot be 255)
-       .ret                            ; RET               ; Return
-_54563:
-       inc  iy                         ; INC IY            ; Advance by two bytes to the next entry...
-       inc  iy                         ; INC IY            ; ...
-       jmp  _54548                     ; JR 54548          ; Loop back to #R54548
+       jmp  get_left_room_index_4      ; RET               ; Return
+get_left_room_index_3:
+       inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
+                                       ; INC IY            ; ...
+       jmp  get_left_room_index_2                          ; JR 54548          ; Loop back to #R54548
+get_left_room_index_4:
+       rt
 
 * Check Entity at IX for Collision With Another (Impassable / Pushable) Entity Immediately to the Right
 * 
