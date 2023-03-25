@@ -598,7 +598,7 @@ init_level_data_2:
 * Script Routine (48, 49) Return
 * 
 * This script routine terminates the script data currently under execution until the next game cycle.
-_34901:
+script_routine_48_49:
        .ret                            ; RET               ; Return
 
 * Unused routine
@@ -1248,14 +1248,14 @@ _36367:
 
 * Script Routine (59) Have Berk Interact Appropriately with a Door Behind Him Output: BC  Address of script data to
 * execute upon arrival of new level
-_36385:
+script_routine_59:
        li   bc,_35113                  ; LD BC,35113       ; Load BC with address of script data for Berk facing into screen, ready to respond to control
                                                            ; input
        jmp  _36393                     ; JR 36393          ; Have Berk interact appropriately with a door
 
 * Script Routine (58) Have Berk Interact Appropriately with a Door in Front of Him Input:  BC  (entry at #R36393
 * only) Address of script data to execute upon arrival of new level
-_36390:
+script_routine_58:
        li   bc,_35081                  ; LD BC,35081       ; Load BC with address of script data for Berk facing out of screen, ready to respond to
                                                            ; control input
 * This entry point is used by the routine at #R36385.
@@ -1310,7 +1310,7 @@ _36462:
 
 * Script Routine (56) Give Berk Power Corresponding to Entity Eaten Input:  IX  Address of complex state data
 * (current level) for Berk
-_36471:
+script_routine_56:
        .call @_48417                   ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
                                                            ; original state
        movb @_34221,a                  ; LD A,(34221)      ; Set current power value to class of entity currently held by Berk...
@@ -1383,11 +1383,11 @@ _36596:
 !
        movb one,a                      ; LD A,1            ; Set remaining power duration to 1...
        movb a,@_34225                  ; LD (34225),A      ; ...
-       b    @_48212                    ; JP 48212          ; Reset Berk's Walking Left and Walking Right flags, advance HL to next script instruction and
+       b    @script_routine_10                    ; JP 48212          ; Reset Berk's Walking Left and Walking Right flags, advance HL to next script instruction and
                                                            ; execute
 
 * Script Routine (57) Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside Current Room
-_36610:
+script_routine_57:
        .call @_36616                   ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
                                                            ; room
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
@@ -1547,14 +1547,14 @@ _36947:
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (36) Remove Boni from Level 1
-_36950:
+script_routine_36:
        sb   a,a                        ; XOR A             ; Set Boni's room (Level 1) to zero...
        movb a,@_43606                  ; LD (43606),A      ; ...
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (37) Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing Input:  IX
 * Address of complex state data for an entity
-_36957:
+script_routine_37:
        sb   a,a                        ; XOR A             ; Set current room of Flying Skeleton Creature (Level 1) to zero...
        movb a,@_43619                  ; LD (43619),A      ; ...
        socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set Flying Skeleton Creature's Inactive Flag
@@ -1578,12 +1578,12 @@ _36966:
        jmp  _36996                     ; JR 36996          ; Close the Trap Door and return
 
 * Script Routine (38) Close the Trap Door
-_36984:
+script_routine_38:
        .call @_36996                   ; CALL 36996        ; Close the Trap Door
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (39) Open the Trap Door
-_36990:
+script_routine_39:
        .call @_37004                   ; CALL 37004        ; Open the Trap Door
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
@@ -1686,14 +1686,14 @@ _37183:
        movb @7(ix),a                   ; LD A,(IX+7)       ; If the x-coordinate of the Bat's right side is less than 130...
        cb   a,@bytes+130               ; CP 130            ; ...
        jhe  !                          ; JP C,48615        ; ...then move Bat right by one character
-       b    @_48615                    ;                   
+       b    @script_routine_03                    ;                   
 !
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 _37194:
        movb @bytes+101,a               ; LD A,101          ; If the x-coordinate of the Bat's left side is greater than 101...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...
        jhe  !                          ; JP C,48660        ; ...then move Bat left by one character
-       b    @_48660                    ;                   
+       b    @script_routine_02                    ;                   
 !
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
@@ -1787,11 +1787,11 @@ _37685:
 
 * Script Routine (41) Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait Input:  IX Address
 * of complex state data for an entity Output: HL  Address of next script instruction to execute
-_37718:
+script_routine_41:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of bottom of entity IX (spider) is not 106...
        cb   a,@bytes+106               ; CP 106            ; ...
        jeq  !                          ; JP NZ,48541       ; ...then move entity up one character and return
-       b    @_48541                    ;                   
+       b    @script_routine_34                    ;                   
 !
        movb @bytes+20,@c               ; LD C,20           ; Load C with 20
        movb @8(ix),a                   ; LD A,(IX+8)       ; If entity class is not 27 (right-most spider, Level 1)...
@@ -1811,7 +1811,7 @@ _37744:
 
 * Script Routine (42) Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent Input:  IX
 * Address of complex state data for an entity Output: HL  Address of next script instruction to execute
-_37753:
+script_routine_42:
        movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If spider's Must Process Current Script Data Flag is reset...
        andi tmp0,1*256                 ;                   
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -1828,11 +1828,11 @@ _37772:
 
 * Script Routine (40) Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode Input:
 * IX  Address of complex state data for an entity Output: HL  Address of next script instruction to execute
-_37778:
+script_routine_40:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If entity's bottom y-coordinate is less than 119...
        cb   a,@bytes+119               ; CP 119            ; ...
        jhe  !                          ; JP C,48567        ; ...then move entity down one character and process next script data
-       b    @_48567                    ;                   
+       b    @script_routine_35                    ;                   
 !
        li   hl,_37816                  ; LD HL,37816       ; Point HL at script data for bounce / climb up mode...
        b    @execute_script                    ; JP 48098          ; ...and execute
@@ -1931,7 +1931,7 @@ _38155:
 * immediately before being picked up, then his Being Carried Flag will be set by the time execution reaches this
 * routine. Input:  IX  Address of complex state data for Bubo (Level 2) IY  Address of complex state data for Bubo's
 * projectile
-_38165:
+script_routine_61:
        socb @bits+1,@9(iy)             ; SET 1,(IY+9)      ; Set projectile's Fired Flag
        movb @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Bubo is being carried...
        andi tmp0,32*256                ;                   
@@ -2144,7 +2144,7 @@ _38540:
 
 * Script Routine (60) Check Position of Apebeast and Turn If Appropriate Input:  IX  Address of complex state data
 * for an entity Output: HL  Address of next script instruction to execute
-_38554:
+script_routine_60:
        movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Apebeast's Walking Right Flag is set...
        andi tmp0,1*256                 ;                   
        jne  _38575                     ; JR NZ,38575       ; ...then skip ahead to #R38575
@@ -3045,7 +3045,7 @@ _41513:
 * the Skeleton's state data at #R45404, in which the x-coordinates of his left and right edges do not match his
 * apparent position or width graphically. Input:  IX  Address of complex state data for an entity Output: HL Address
 * of next script instruction to execute
-_41550:
+script_routine_63:
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is 3 (Skeleton's room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
@@ -3079,7 +3079,7 @@ _41597:
        b    @execute_script                    ; JP 48098          ; ...and execute
 
 * Script Routine (64) Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
-_41617:
+script_routine_64:
        movb @bytes+10,a                ; LD A,10           ; Load A with a random number, 1-10...
        bl   @rnd_no                    ; CALL 54222        ; ...
        ab   one,a                      ; INC A             ; ...
@@ -5640,76 +5640,75 @@ wait_keypress:
 
 * Table of Script Routine Start Addresses
 script_routines_table:
-       data 0                                                        ; (00) - Unused
-       data _48285                                                   ; (01) - Load HL (Script Data Pointer) with New Address
-       data _48660                                                   ; (02) - Move Entity at IX (and if Berk, Carried Entity) Left One Character
-       data _48615                                                   ; (03) - Move Entity at IX (and if Berk, Carried Entity) Right One Character
-       data _48133                                                   ; (04) - If Current Character and Target Entity are in the Same Room then Set Pending Sound
-       data 0                                                        ; (05) - Unused
-       data _48238                                                   ; (06) - Set Berk's Facing Into Screen Flag, and Reset his Facing Left and Facing Right flags
-       data _48234                                                   ; (07) - Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags
-       data _48267                                                   ; (08) - Set Must Process Current Script Data Flag for Entity at IX
-       data _48260                                                   ; (09) - Reset Must Process Current Script Data Flag for Entity at IX
-       data _48212                                                   ; (10) - Reset Entity's Walking Left and Walking Right flags
-       data _48220                                                   ; (11) - Set Entity Walking Left Flag
-       data _48216                                                   ; (12) - Set Entity Walking Right Flag
-       data _48242                                                   ; (13) - Set Berk's Facing Left Flag, and Reset his Facing Into Screen and Facing Right Flags
-       data _48246                                                   ; (14) - Set Berk's Facing Right Flag, and Reset his Facing Into Screen and Facing Left Flags
-       data _48274                                                   ; (15) - Jump to New Address if Berk Is Carrying Something
-       data _48148                                                   ; (16) - Have Berk Hold an Entity, and Position it Appropriately Between his Hands
-       data _48154                                                   ; (17) - Have Berk Put Down an Entity in Front of Him, if Appropriate
-       data _48158                                                   ; (18) - Have Berk Put Down an Entity Behind Him, if Appropriate
-       data _48698                                                   ; (19) - Move Carried Entity to Berk's Left as he Faces Left
-       data _48704                                                   ; (20) - Move Carried Entity to Berk's Right as he Faces Right
-       data _48692                                                   ; (21) - Move Carried Entity in Front of Berk as he Faces Out of Screen
-       data _48686                                                   ; (22) - Move Carried Entity Behind Berk as he Faces Into Screen
-       data _48295                                                   ; (23) - Start Loop (1 / 3)
-       data _48307                                                   ; (24) - End Loop (1 / 3)
-       data _48324                                                   ; (25) - Start Loop (2 / 3)
-       data _48336                                                   ; (26) - End Loop (2 / 3)
-       data _48353                                                   ; (27) - Start Loop (3 / 3)
-       data _48365                                                   ; (28) - End Loop (3 / 3)
-       data _48920                                                   ; (29) - Make Berk Start Falling, and Drop his Carried Entity if Appropriate
-_48026:
-       data _48934                                                   ; (30) - Check Berk's Fall Velocity, and React to Landing
-       data _48976                                                   ; (31) - React to Berk's Landing
-       data _48487                                                   ; (32) - Update Berk's Position and State (Flying) Depending Upon Control Input
-       data _49010                                                   ; (33) - Advance Berk's Jump and Select Next Phase if Current Phase Complete
-       data _48541                                                   ; (34) - Move Entity at IX (and if Berk, Carried Entity) Up One Character
-       data _48567                                                   ; (35) - Move Entity at IX (and if Berk, Carried Entity) Down One Character
-       data _36950                                                   ; (36) - Set Boni's Room (Level 1) to Zero
-       data _36957                                                   ; (37) - Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing
-       data _36984                                                   ; (38) - Close the Trap Door
-       data _36990                                                   ; (39) - Open the Trap Door
-       data _37778                                                   ; (40) - Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode
-       data _37718                                                   ; (41) - Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait
-       data _37753                                                   ; (42) - Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent
-       data _51779                                                   ; (43) - Select Next Action for Drutt Depending Upon Control Input
-       data _52029                                                   ; (44) - Move Entity Up One Character
-       data _52038                                                   ; (45) - Move Entity Down One Character
-       data _52047                                                   ; (46) - Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling
-                                                                     ; if Appropriate
-       data _52142                                                   ; (47) - Move Drutt, or Entity he is Pushing Right One Character and Start Pushed Entity
-                                                                     ; Falling if Appropriate
-       data _34901                                                   ; (48) - Return
-       data _34901                                                   ; (49) - Return
-       data _52243                                                   ; (50) - Advance Drutt's Jump and Select Next Phase if Current Phase Complete
-       data _52309                                                   ; (51) - Swap Drutt's Current Depth Level if Possible
-       data _52967                                                   ; (52) - Increase Worm's Age and Decrease Time Until Direction Change, or React to Drutt's
-                                                                     ; Presence
-       data _52870                                                   ; (53) - Move Worm Left if Possible, Otherwise Choose New Direction
-       data _52889                                                   ; (54) - Move Worm Right if Possible, Otherwise Choose New Direction
-       data _52914                                                   ; (55) - Choose New Direction and Start Crawling (Worm)
-       data _36471                                                   ; (56) - Give Berk Power Corresponding to Entity Eaten
-       data _36610                                                   ; (57) - Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside
-                                                                     ; Current Room
-       data _36390                                                   ; (58) - Have Berk Interact Appropriately with a Door in Front of Him
-       data _36385                                                   ; (59) - Have Berk Interact Appropriately with a Door Behind Him
-       data _38554                                                   ; (60) - Check Position of Apebeast and Turn If Appropriate
-       data _38165                                                   ; (61) - Fire Bubo's Projectile
-       data _48142                                                   ; (62) - Move Entity at IX into Room to the Left, if Appropriate
-       data _41550                                                   ; (63) - Have Skeleton Advance or Retreat Based Upon Positions of Berk and Fake Boni
-       data _41617                                                   ; (64) - Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
+       data 0                                              ; (00) - Unused
+       data script_routine_01                              ; (01) - Load HL (Script Data Pointer) with New Address
+       data script_routine_02                              ; (02) - Move Entity at IX (and if Berk, Carried Entity) Left One Character
+       data script_routine_03                              ; (03) - Move Entity at IX (and if Berk, Carried Entity) Right One Character
+       data script_routine_04                              ; (04) - If Current Character and Target Entity are in the Same Room then Set Pending Sound
+       data 0                                              ; (05) - Unused
+       data script_routine_06                              ; (06) - Set Berk's Facing Into Screen Flag, and Reset his Facing Left and Facing Right flags
+       data script_routine_07                              ; (07) - Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags
+       data script_routine_08                              ; (08) - Set Must Process Current Script Data Flag for Entity at IX
+       data script_routine_09                              ; (09) - Reset Must Process Current Script Data Flag for Entity at IX
+       data script_routine_10                              ; (10) - Reset Entity's Walking Left and Walking Right flags
+       data script_routine_11                              ; (11) - Set Entity Walking Left Flag
+       data script_routine_12                              ; (12) - Set Entity Walking Right Flag
+       data script_routine_13                              ; (13) - Set Berk's Facing Left Flag, and Reset his Facing Into Screen and Facing Right Flags
+       data script_routine_14                              ; (14) - Set Berk's Facing Right Flag, and Reset his Facing Into Screen and Facing Left Flags
+       data script_routine_15                              ; (15) - Jump to New Address if Berk Is Carrying Something
+       data script_routine_16                              ; (16) - Have Berk Hold an Entity, and Position it Appropriately Between his Hands
+       data script_routine_17                              ; (17) - Have Berk Put Down an Entity in Front of Him, if Appropriate
+       data script_routine_18                              ; (18) - Have Berk Put Down an Entity Behind Him, if Appropriate
+       data script_routine_19                              ; (19) - Move Carried Entity to Berk's Left as he Faces Left
+       data script_routine_20                              ; (20) - Move Carried Entity to Berk's Right as he Faces Right
+       data script_routine_21                              ; (21) - Move Carried Entity in Front of Berk as he Faces Out of Screen
+       data script_routine_22                              ; (22) - Move Carried Entity Behind Berk as he Faces Into Screen
+       data script_routine_23                              ; (23) - Start Loop (1 / 3)
+       data script_routine_24                              ; (24) - End Loop (1 / 3)
+       data script_routine_25                              ; (25) - Start Loop (2 / 3)
+       data script_routine_26                              ; (26) - End Loop (2 / 3)
+       data script_routine_27                              ; (27) - Start Loop (3 / 3)
+       data script_routine_28                              ; (28) - End Loop (3 / 3)
+       data script_routine_29                              ; (29) - Make Berk Start Falling, and Drop his Carried Entity if Appropriate
+       data script_routine_30                              ; (30) - Check Berk's Fall Velocity, and React to Landing
+       data script_routine_31                              ; (31) - React to Berk's Landing
+       data script_routine_32                              ; (32) - Update Berk's Position and State (Flying) Depending Upon Control Input
+       data script_routine_33                              ; (33) - Advance Berk's Jump and Select Next Phase if Current Phase Complete
+       data script_routine_34                              ; (34) - Move Entity at IX (and if Berk, Carried Entity) Up One Character
+       data script_routine_35                              ; (35) - Move Entity at IX (and if Berk, Carried Entity) Down One Character
+       data script_routine_36                              ; (36) - Set Boni's Room (Level 1) to Zero
+       data script_routine_37                              ; (37) - Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing
+       data script_routine_38                              ; (38) - Close the Trap Door
+       data script_routine_39                              ; (39) - Open the Trap Door
+       data script_routine_40                              ; (40) - Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode
+       data script_routine_41                              ; (41) - Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait
+       data script_routine_42                              ; (42) - Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent
+       data script_routine_43                              ; (43) - Select Next Action for Drutt Depending Upon Control Input
+       data script_routine_44                              ; (44) - Move Entity Up One Character
+       data script_routine_45                              ; (45) - Move Entity Down One Character
+       data script_routine_46                              ; (46) - Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling
+                                                           ; if Appropriate
+       data script_routine_47                              ; (47) - Move Drutt, or Entity he is Pushing Right One Character and Start Pushed Entity
+                                                           ; Falling if Appropriate
+       data script_routine_48_49                           ; (48) - Return
+       data script_routine_48_49                           ; (49) - Return
+       data script_routine_50                              ; (50) - Advance Drutt's Jump and Select Next Phase if Current Phase Complete
+       data script_routine_51                              ; (51) - Swap Drutt's Current Depth Level if Possible
+       data script_routine_52                              ; (52) - Increase Worm's Age and Decrease Time Until Direction Change, or React to Drutt's
+                                                           ; Presence
+       data script_routine_53                              ; (53) - Move Worm Left if Possible, Otherwise Choose New Direction
+       data script_routine_54                              ; (54) - Move Worm Right if Possible, Otherwise Choose New Direction
+       data script_routine_55                              ; (55) - Choose New Direction and Start Crawling (Worm)
+       data script_routine_56                              ; (56) - Give Berk Power Corresponding to Entity Eaten
+       data script_routine_57                              ; (57) - Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside
+                                                           ; Current Room
+       data script_routine_58                              ; (58) - Have Berk Interact Appropriately with a Door in Front of Him
+       data script_routine_59                              ; (59) - Have Berk Interact Appropriately with a Door Behind Him
+       data script_routine_60                              ; (60) - Check Position of Apebeast and Turn If Appropriate
+       data script_routine_61                              ; (61) - Fire Bubo's Projectile
+       data script_routine_62                              ; (62) - Move Entity at IX into Room to the Left, if Appropriate
+       data script_routine_63                              ; (63) - Have Skeleton Advance or Retreat Based Upon Positions of Berk and Fake Boni
+       data script_routine_64                              ; (64) - Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
 
 * Advance HL to Next Script Instruction and Execute
 * 
@@ -5720,8 +5719,8 @@ _48026:
 * #R52243, #R52309, #R52860, #R52870, #R52889 and #R52967. Input:  IX  (Entry at #R48096 and #R48098) Address of
 * complex state data for an entity Output: HL  Current position in script data
 inct_execute_script:                   ; Always branch here
-       inc  hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
-       inc  hl                         ; INC HL            ; ...
+       inct hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
+                                       ; INC HL            ; ...
 * This entry point is used by the routines at #R35577, #R35735, #R36008, #R36036, #R36116, #R36367, #R36390,
 * #R36471, #R36638, #R37085, #R37639, #R37718, #R37753, #R37778, #R38074, #R38554, #R41550, #R48285, #R48295,
 * #R48307, #R48324, #R48336, #R48353, #R48365, #R48388, #R48934, #R48976, #R49010, #R51765, #R51779, #R51904,
@@ -5760,7 +5759,7 @@ execute_script_2:
 
 * Script Routine (04) If Current Character and Target Entity are in the Same Room then Set Pending Sound Input:  HL
 * Current position in script data IX  Address of complex state data for an entity
-_48133:
+script_routine_04:
        inc  hl                         ; INC HL            ; Advance HL to parameter (sound index)...
        inc  hl                         ; INC HL            ; ...
        movb *hl,a                      ; LD A,(HL)         ; Load A with sound index
@@ -5768,24 +5767,24 @@ _48133:
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (62) Move Entity at IX into Room to the Left, if Appropriate
-_48142:
+script_routine_62:
        bl   @move_into_left_room       ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (16) Have Berk Hold an Entity, and Position it Appropriately Between his Hands
-_48148:
+script_routine_16:
        .call @_48850                   ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (17) Have Berk Put Down an Entity in Front of Him, if Appropriate Output: D  Depth offset for
 * entity being put down
-_48154:
+script_routine_17:
        movb @bytes+0,d                 ; LD D,0            ; Load D with depth offset of 0 (as Berk is putting down an entity in front of him)
        jmp  _48160                     ; JR 48160          ; Have Berk put down an entity, if appropriate
 
 * Script Routine (18) Have Berk Put Down an Entity Behind Him, if Appropriate Input:  D  (Entry at #R48160 only)
 * Depth offset for entity being put down IX  Address of complex state data (current level) for Berk
-_48158:
+script_routine_18:
        movb @bytes+255,d               ; LD D,255          ; Load D with depth offset of -1 (as Berk is putting down an entity behind him)
 * This entry point is used by the routine at #R48154.
 _48160:
@@ -5825,18 +5824,18 @@ _48198:
 * Script Routine (10) Reset Walking Left and Walking Right Flags
 * 
 * Used by the routine at #R36542. Output: E  Combination of flags to (re)set
-_48212:
+script_routine_10:
        movb @bytes+0,@e                ; LD E,0            ; Reset Entity Walking Left and Entity Walking Right flags...
        jmp  _48222                     ; JR 48222          ; ...and advance HL to next script instruction and execute
 
 * Script Routine (12) Reset Walking Left Flag and Set Walking Right Flag Output: E  Combination of flags to (re)set
-_48216:
+script_routine_12:
        movb one,@e                     ; LD E,1            ; Set Entity Walking Right Flag, reset Entity Walking Left Flag...
        jmp  _48222                     ; JR 48222          ; ...and advance HL to next script instruction and execute
 
 * Script Routine (11) Set Walking Left Flag and Reset Walking Right Flag Input:  E  (Entry at #R48222 only)
 * Combination of flags to (re)set IX  Address of complex state data for an entity
-_48220:
+script_routine_11:
        movb @bytes+2,@e                ; LD E,2            ; Prepare to set Entity Walking Left Flag and reset Entity Walking Right Flag
 * This entry point is used by the routines at #R48212 and #R48216.
 _48222:
@@ -5848,25 +5847,25 @@ _48222:
 
 * Script Routine (07) Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags Output: B  Combination of
 * flags to (re)set
-_48234:
+script_routine_07:
        sb   b,b                        ; LD B,0            ; Reset Berk's Facing Into Screen, Facing Left and Facing Right flags...
        jmp  _48248                     ; JR 48248          ; ...and advance HL to next script instruction and execute
 
 * Script Routine (06) Set Berk's Facing Into Screen Flag, and Reset his Facing Left and Facing Right Flags Output: B
 * Combination of flags to (re)set
-_48238:
+script_routine_06:
        movb @bytes+2,b                 ; LD B,2            ; Set Berk's Facing Into Screen Flag, and reset his Facing Left and Facing Right flags...
        jmp  _48248                     ; JR 48248          ; ...and advance HL to next script instruction and execute
 
 * Script Routine (13) Set Berk's Facing Left Flag, and Reset his Facing Into Screen and Facing Right Flags Output: B
 * Combination of flags to (re)set
-_48242:
+script_routine_13:
        movb @bytes+4,b                 ; LD B,4            ; Set Berk's Facing Left Flag, and reset his Facing Into Screen and Facing Right flags...
        jmp  _48248                     ; JR 48248          ; ...and advance HL to next script instruction and execute
 
 * Script Routine (14) Set Berk's Facing Right Flag, and Reset his Facing Into Screen and Facing Left Flags Input:  B
 * (Entry at #R48248 only) Combination of flags to (re)set IX  Address of complex state data (current level) for Berk
-_48246:
+script_routine_14:
        movb @bytes+8,b                 ; LD B,8            ; Prepare to set Berk's Facing Right Flag, and reset his Facing Into Screen and Facing Left
                                                            ; flags
 * This entry point is used by the routines at #R48234, #R48238 and #R48242.
@@ -5879,19 +5878,19 @@ _48248:
 
 * Script Routine (09) Reset Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
-_48260:
+script_routine_09:
        szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Must Process Current Script Data Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (08) Set Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
-_48267:
+script_routine_08:
        socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Must Process Current Script Data Flag
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (15) Jump to New Address if Berk Is Carrying Something Input:  HL  Current position in script data
 * IX  Address of complex state data for an entity
-_48274:
+script_routine_15:
        inc  hl                         ; INC HL            ; Advance HL to parameter for current instruction...
        inc  hl                         ; INC HL            ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If Berk is carrying an entity...
@@ -5903,7 +5902,7 @@ _48274:
 * 
 * Functionality analogous to JP instruction. Input:  HL  Address in script data Output: HL  New address in script
 * data
-_48285:
+script_routine_01:
        inc  hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
        inc  hl                         ; INC HL            ; ...
 * This entry point is used by the routine at #R48274.
@@ -5921,14 +5920,14 @@ _48287:
 * disregarded. The current value of the repeat counter is stored at #R34285 and the address of the next instruction
 * (i.e. the first instruction that is processed in each loop) is stored at #R34285. Output: HL  Address of next
 * script instruction to execute
-_48295:
+script_routine_23:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
        movb a,@script_23_24_loop_count ; LD (34285),A      ; Store repeat count at #R34285
        mov  hl,@script_23_24_loop_addr ; LD (34286),HL     ; Store address to return to (i.e. first instruction in loop) at #R34285...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (24) End Loop (1 / 3) Output: HL  Address of next script instruction to execute
-_48307:
+script_routine_24:
        movb @script_23_24_loop_count,a ; LD A,(34285)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -5945,14 +5944,14 @@ _48307:
 * disregarded. The current value of the repeat counter is stored at #R34288 and the address of the next instruction
 * (i.e. the first instruction that is processed in each loop) is stored at #R34288. Output: HL  Address of next
 * script instruction to execute
-_48324:
+script_routine_25:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
        movb a,@script_25_26_loop_count ; LD (34288),A      ; Store repeat count at #R34288
        mov  hl,@script_25_26_loop_addr ; LD (34289),HL     ; Store address to return to (i.e. first instruction in loop) at #R34288...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (26) End Loop (2 / 3) Output: HL  Address of next script instruction to execute
-_48336:
+script_routine_26:
        movb @script_25_26_loop_count,a ; LD A,(34288)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -5969,14 +5968,14 @@ _48336:
 * disregarded. The current value of the repeat counter is stored at #R34291 and the address of the next instruction
 * (i.e. the first instruction that is processed in each loop) is stored at #R34291. Output: HL  Address of next
 * script instruction to execute
-_48353:
+script_routine_27:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
        movb a,@script_27_28_loop_count ; LD (34291),A      ; Store repeat count at #R34291
        mov  hl,@script_27_28_loop_addr ; LD (34292),HL     ; Store address to return to (i.e. first instruction in loop) at #R34291...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (28) End Loop (3 / 3) Output: HL  Address of next script instruction to execute
-_48365:
+script_routine_28:
        movb @script_27_28_loop_count,a ; LD A,(34291)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -6068,7 +6067,7 @@ _48474:
 * See pokes Input:  IX  (Entry at #R48487 only) Address of complex state data (current level) for Berk IX  (Entry at
 * #R48541 only) Address of complex state data for an entity Output: HL  Address of next script instruction to
 * execute
-_48487:
+script_routine_32:
        .call @_48388                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
@@ -6105,7 +6104,7 @@ _48527:
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37718. It is also the start of the routine triggered by instruction
 * 34 in script data.
-_48541:
+script_routine_34:
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Decrease y-coordinates of entity's top and bottom edges by one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity is Berk and his Carrying Something Flag is reset...
@@ -6121,7 +6120,7 @@ _48541:
 * Script Routine (35) Move Entity at IX (and if Berk, Carried Entity) Down One Character
 * 
 * Used by the routine at #R37778. Input:  IX  Address of complex state data for an entity
-_48567:
+script_routine_35:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Increase y-coordinates of entity's top and bottom edges by one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity is Berk and his Carrying Something Flag is reset...
@@ -6143,7 +6142,7 @@ _48593:
        movb a,@e                       ; LD E,A            ; ...
        movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of Berk's right side is less than x-coordinate of right of current room...
        cb   a,@e                       ; CP E              ; ...
-       jl   _48615                     ; JR C,48615        ; ...then skip ahead to #R48615 (move Berk right by one character
+       jl   script_routine_03                     ; JR C,48615        ; ...then skip ahead to #R48615 (move Berk right by one character
        bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room...
        jne  !                          ; JP Z,48096        ; ...and if there is no room to the right, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script       ;                   ; instruction and execute)
@@ -6153,7 +6152,7 @@ _48593:
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37085. It is also the start of the routine triggered by instruction
 * 03 in script data.
-_48615:
+script_routine_03:
        ab   one,@5(ix)                 ; INC (IX+5)        ; Increase x-coordinates of entity's left and right edges by one character...
        ab   one,@7(ix)                 ; INC (IX+7)        ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity is Berk and his Carrying Something Flag is reset...
@@ -6173,7 +6172,7 @@ _48615:
 _48641:
        movb @bytes+100,a               ; LD A,100          ; If Berk's left-side x-coordinate is greater than 100 (x-coordinate of left side of room)...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...
-       jl   _48660                     ; JR C,48660        ; ...then skip ahead to #R48660 (move Berk left by one character)
+       jl   script_routine_02                     ; JR C,48660        ; ...then skip ahead to #R48660 (move Berk left by one character)
        bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room...
        jne  !                          ; JP Z,48096        ; ...and if there is no room to the left, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script       ;                   ; instruction and execute)              
@@ -6183,7 +6182,7 @@ _48641:
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37085. It is also the start of the routine triggered by instruction
 * 02 in script data.
-_48660:
+script_routine_02:
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Decrease x-coordinates of entity's left and right edges by one character...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity is Berk and his Carrying Something Flag is reset...
@@ -6197,22 +6196,22 @@ _48660:
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (22) Move Carried Entity Behind Berk as he Faces Into Screen
-_48686:
+script_routine_22:
        .call @_48715                   ; CALL 48715        ; Move carried entity behind Berk as he faces into screen
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (21) Move Carried Entity in Front of Berk as he Faces Out of Screen
-_48692:
+script_routine_21:
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (19) Move Carried Entity to Berk's Left as he Faces Left
-_48698:
+script_routine_19:
        .call @_48738                   ; CALL 48738        ; Move carried entity to Berk's left as he faces left
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (20) Move Carried Entity to Berk's Right as he Faces Right
-_48704:
+script_routine_20:
        .call @_48727                   ; CALL 48727        ; Move carried entity to Berk's right as he faces right
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
@@ -6379,7 +6378,7 @@ _48916:
 
 * Script Routine (29) Make Berk Start Falling, and Drop his Carried Entity if Appropriate Input:  IX  Address of
 * complex state data for an entity
-_48920:
+script_routine_29:
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set Berk's initial velocity factor to 2
        socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
        .call @_36296                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
@@ -6389,7 +6388,7 @@ _48920:
 * 
 * See trivia and pokes Input:  IX  Address of complex state data (current level) for Berk Output: HL  Address of
 * next script instruction to execute
-_48934:
+script_routine_30:
        movb @10(ix),tmp0               ; BIT 6,(IX+10)     ; If Berk's "Can Fall" Flag is reset (i.e. Berk has landed)...
        andi tmp0,64*256                ;                   
        jeq  _48958                     ; JR Z,48958        ; ...then skip ahead to #R48958
@@ -6415,7 +6414,7 @@ _48970:
 * 
 * See trivia Input:  IX  Address of complex state data for an entity Output: HL  Address of next script instruction
 * to execute
-_48976:
+script_routine_31:
        movb @12(ix),tmp0               ; BIT 3,(IX+12)     ; If bit 3 of Berk's velocity factor is set (i.e. Berk has a velocity factor of 8)...
        andi tmp0,8*256                 ;                   
        jne  _48988                     ; JR NZ,48988       ; ...then skip ahead to #R48988
@@ -6438,7 +6437,7 @@ _48994:
 
 * Script Routine (33) Advance Berk's Jump and Select Next Phase if Current Phase Complete Output: HL  Address of
 * next script instruction to execute
-_49010:
+script_routine_33:
        .call @_55041                   ; CALL 55041        ; Handle Berk's jump, and load A with Jump State Index as appropriate...
        movb @e,a                       ; LD A,E            ; ...
        socb a,a                        ; OR A              ; If Jump State Index is zero...
@@ -6498,14 +6497,14 @@ update_drutt_state:
 
 * Script Routine (43) Select Next Action for Drutt Depending Upon Control Input Input:  IX  Address of complex state
 * data (current level) for Drutt Output: HL  Address of next script instruction to execute
-_51779:
+script_routine_43:
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check Drutt for collision with another entity at same depth whose Interaction (11,6) Flag is
                                                            ; set...
        cb   a,@bytes+129               ; CP 129            ; ...and if collision was not with entity of class 129 (causes other entities to start
                                                            ; falling)...
        jne  _51792                     ; JR NZ,51792       ; ...then skip ahead to #R51792
        .call @_55516                   ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
-       b    @_52038                    ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
+       b    @script_routine_45                    ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
 _51792:
        mov  @worm_state_addr,iy        ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
        movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset...
@@ -6668,7 +6667,7 @@ _52023:
 * Script Routine (44) Move Entity Up One Character
 * 
 * Used by the routine at #R48026. Input:  IX  Address of complex state data for an entity
-_52029:
+script_routine_44:
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Move entity up one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
@@ -6676,14 +6675,14 @@ _52029:
 * Script Routine (45) Move Entity Down One Character
 * 
 * Used by the routine at #R51779. Input:  IX  Address of complex state data for an entity
-_52038:
+script_routine_45:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Move entity down one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (46) Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling if
 * Appropriate
-_52047:
+script_routine_46:
        .call @_52053                   ; CALL 52053        ; Move Drutt, or entity he is pushing left one character and start pushed entity falling if
                                                            ; appropriate
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
@@ -6762,7 +6761,7 @@ _52134:
 
 * Script Routine (47) Move Drutt, or Entity he is Pushing Right One Character and Start Pushed Entity Falling if
 * Appropriate
-_52142:
+script_routine_47:
        .call @_52148                   ; CALL 52148        ; Move Drutt, or entity he is pushing right one character and start pushed entity falling if
                                                            ; appropriate
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
@@ -6847,7 +6846,7 @@ _52235:
 * 
 * The CALL at #R52243 will be RETurned from if Drutt's Is Jumping Flag is reset. Otherwise, E will be loaded with
 * Drutt's jump state index (see #R55041). Output: HL  Address of next script instruction to execute
-_52243:
+script_routine_50:
        .call @_55023                   ; CALL 55023        ; Handle Drutt's jump, and load A with Jump State Index as appropriate
        movb @e,a                       ; LD A,E            ; If jump state index is zero...
        socb a,a                        ; OR A              ; ...
@@ -6895,7 +6894,7 @@ _52295:
        b    @execute_script                    ; JP 48098          ; ...and execute
 
 * Script Routine (51) Swap Drutt's Current Depth Level if Possible
-_52309:
+script_routine_51:
        .call @_52315                   ; CALL 52315        ; Swap Drutt's current depth level if possible
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
@@ -6989,7 +6988,7 @@ update_worm_state_1:
 
 * Script Routine (53) Move Worm Left if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
 * state data for an entity
-_52870:
+script_routine_53:
        bl    @chk_coll_left            ; CALL 54666        ; Check worm for collision with another impassable / pushable entity immediately to the left...
        jnc  _52908                     ; JR NC,52908       ; ...and if a collision occurred, then have worm choose new direction
        bl   @move_into_left_room       ; CALL 54348        ; Move worm into room to the left, if appropriate...
@@ -7000,7 +6999,7 @@ _52870:
 
 * Script Routine (54) Move Worm Right if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
 * state data for an entity
-_52889:
+script_routine_54:
        bl   @chk_coll_right            ; CALL 54569        ; Check worm for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  _52908                     ; JR NC,52908       ; ...and if a collision occurred, then have worm choose new direction
@@ -7019,7 +7018,7 @@ _52908:
 
 * Script Routine (55) Choose New Direction and Start Crawling (Worm) Input:  IX  Address of complex state data for
 * an entity
-_52914:
+script_routine_55:
        .call @_53057                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
        movb @bytes+20,a                ; LD A,20           ; Load A with a random number, 5-24...
        bl   @rnd_no                    ; CALL 54222        ; ...
@@ -7055,7 +7054,7 @@ _52961:
 * same room as the worm, and within the "alerting" distance, the worm will continue fleeing in the same direction,
 * and its Time Until Direction Change will be frozen. Input:  IX  Address of complex state data for an entity
 * Output: HL  Address of next script instruction to execute
-_52967:
+script_routine_52:
        .call @_53057                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
        mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
        movb *ix,a                      ; LD A,(IX+0)       ; If Drutt and the worm are in the same room...
