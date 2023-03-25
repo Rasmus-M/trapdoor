@@ -335,12 +335,11 @@ main_loop:
        bl   @check_berk_killed         ; CALL 53723        ; If Berk has been killed then reset his state, flash screen and decrease time / lives
        bl   @update_berk_state         ; CALL 35689        ; Update state of Berk and store current position in script data
        bl   @update_drutt_worm_state   ; CALL 51739        ; Update states of Drutt and worm and store current positions in script data
-*      OK UNTIL HERE
        movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 1...
        cb   a,one                      ; CP 1              ; ...
        jne  main_check_level_2         ; JR NZ,34527       ; ...then skip ahead to #R34527
 * Level 1
-       .call @_36791                   ; CALL 36791        ; Update states of all Level 1 entities
+       bl   @update_level_1_entities   ; CALL 36791        ; Update states of all Level 1 entities
        mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of complex state data (current level) for Berk
        movb @10(ix),tmp0               ; BIT 2,(IX+10)     ; If "Back to Level 1" Flag is reset...
        andi tmp0,4*256                 ;                   
@@ -364,19 +363,19 @@ main_check_level_2:
        cb   a,@bytes+2                 ; CP 2              ; ...
        jne  main_check_level_3         ; JR NZ,34537       ; ...then skip ahead to #R34537
 * Level 2
-       .call @_38009                   ; CALL 38009        ; Update states of all Level 2 entities
+       bl   @update_level_2_entities   ; CALL 38009        ; Update states of all Level 2 entities
 main_check_level_3:
        movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 3...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jne  main_check_level_4         ; JR NZ,34547       ; ...then skip ahead to #R34547
 * Level 3
-       .call @_39137                   ; CALL 39137        ; Update states of all Level 3 entities
+       bl @update_level_3_entities     ; CALL 39137        ; Update states of all Level 3 entities
 main_check_level_4:
        movb @current_level,a           ; LD A,(34207)      ; If current level is not Level 4...
        cb   a,@bytes+4                 ; CP 4              ; ...
        jne  main_all_levels            ; JR NZ,34557       ; ...then skip ahead to #R34557
 * Level 4
-       .call @_41211                   ; CALL 41211        ; Update states of all Level 4 entities
+       bl   @update_level_4_entities   ; CALL 41211        ; Update states of all Level 4 entities
 * All levels
 main_all_levels:
 ;       .call @_47893                   ; CALL 47893        ; Check for control input and store at #R34219
@@ -395,13 +394,13 @@ main_all_levels:
        jne  _34658                     ; JR NZ,34658       ; ...then skip ahead to #R34658
        bl   @update_timer              ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
                                                            ; timer figure blinking
-;       li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
-;       movb *hl,tmp0                   ; BIT 5,(HL)        ; ...
-;       andi tmp0,32*256                ;
-;       jeq  _34606                     ; JR Z,34606        ; ...then skip ahead to #R34606
-;       szcb @bits+5,*hl                ; RES 5,(HL)        ; Reset Update Scores and Display Flag
-;       .call @_47499                   ; CALL 47499        ; Update scores and display
-;_34606:
+       li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
+       movb *hl,tmp0                   ; BIT 5,(HL)        ; ...
+       andi tmp0,32*256                ;
+       jeq  skip_update_score          ; JR Z,34606        ; ...then skip ahead to #R34606
+       szcb @bits+5,*hl                ; RES 5,(HL)        ; Reset Update Scores and Display Flag
+;      bl   @update_scores_and_display ; CALL 47499        ; Update scores and display
+skip_update_score:
        li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
        movb @_34271,a                  ; LD A,(34271)      ; Invert "Display Buffer 2 is Primary" Flag...
@@ -425,14 +424,14 @@ _34623:
        b    @_34438                    ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
 time_out:
-       .call @_47499                   ; CALL 47499        ; Update scores and display
-       .call @_47185                   ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
+       bl   @update_scores_and_display ; CALL 47499        ; Update scores and display
+       .call @print_times_up                   ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
        jmp  _34666                     ; JR 34666          ; Skip ahead to #R34666
 * "All Home" Flag is set
 _34658:
-       .call @_47213                   ; CALL 47213        ; Print "HOME SWEET HOME" string
+       .call @print_home_sweet_home                   ; CALL 47213        ; Print "HOME SWEET HOME" string
        movb @bytes+3,a                 ; LD A,3            ; Set sound 3 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
 _34666:
@@ -655,7 +654,7 @@ _34960:
        movb *hl,tmp0                   ; BIT 7,(HL)        ; ...
        andi tmp0,128*256               ;                   
        jeq  !                          ; JP NZ,47628       ; ...then print SCORE / TOTAL / HI-SC string in current character's colours and return
-       b    @_47628                    ;                   
+       b    @print_score_strings_0     ;
 !
        b    @draw_timer_bar_0          ; JP 47241          ; Reset Show Score Flag, draw timer figures bar and return
 
@@ -1487,11 +1486,12 @@ _36778:
 * Update States of All Level 1 Entities
 * 
 * Used by the routine at #R34438.
-_36791:
-       .call @_36887                   ; CALL 36887        ; Execute script data for Boni's kidnap and handle Trap Door opening and closing
+update_level_1_entities:
+       .proc
+       .call @execute_bonis_kidnap     ; CALL 36887        ; Execute script data for Boni's kidnap and handle Trap Door opening and closing
        .call @_37062                   ; CALL 37062        ; Update state of Bat (Level 1) and store current position in script data
        .call @_37586                   ; CALL 37586        ; Update states of the Spiders (Level 1) and store current positions in script data
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Current Position in Script Data for Boni's Kidnap
 _36801:
@@ -1500,7 +1500,7 @@ _36801:
 * Execute Script Data for Boni's Kidnap and Handle Trap Door Opening and Closing
 * 
 * Used by the routine at #R36791.
-_36887:
+execute_bonis_kidnap:
        li   ix,_43619                  ; LD IX,43619       ; Load IX with address of complex state data for Flying Skeleton Creature
        movb @_43619+9,a                ; LD A,(43628)      ; If Berk and Drutt Through Trap Door Flag is set...
        movb a,tmp0                     ; BIT 3,A           ; ...
@@ -1840,12 +1840,13 @@ script_routine_40:
 * Update States of All Level 2 Entities
 * 
 * Used by the routine at #R34438.
-_38009:
+update_level_2_entities:
+       .proc
        .call @_38592                   ; CALL 38592        ; Update states of stalactites (Level 2)
        .call @_38480                   ; CALL 38480        ; Update states of apebeasts (Level 2) and store current positions in script data
        .call @_38054                   ; CALL 38054        ; Update state of Bubo (Level 2) and store current position in script data
        .call @_38219                   ; CALL 38219        ; Update state of Bubo's projectile
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Current Position in Bubo's Script Data
 _38022:
@@ -2273,12 +2274,13 @@ _38756:
 * Update States of All Level 3 Entities
 * 
 * Used by the routine at #R34438.
-_39137:
+update_level_3_entities:
+       .proc
        .call @_39776                   ; CALL 39776        ; Update state of Large Yellow Creature
        .call @_39601                   ; CALL 39601        ; Update states of coloured creatures
        .call @_39278                   ; CALL 39278        ; Update state of Clawed Foot
        .call @_39151                   ; CALL 39151        ; Update state of Hatch
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Hatch State Index (Level 3)
 _39150:
@@ -2914,14 +2916,15 @@ _40033:
 * Update States of All Level 4 Entities
 * 
 * Used by the routine at #R34438.
-_41211:
+update_level_4_entities:
+       .proc
        .call @_42266                   ; CALL 42266        ; Update state of Flying Skeleton Creature
        .call @_42381                   ; CALL 42381        ; Update state of Snake
        .call @_42064                   ; CALL 42064        ; Update states of drips
        .call @_41767                   ; CALL 41767        ; Update state of Cannon and Projectile
        .call @_41633                   ; CALL 41633        ; Update state of Ghost
        .call @_41381                   ; CALL 41381        ; Update state of Skeleton (Level 4) and store current position in script data
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Current Position in Skeleton's Script Data
 _41230:
@@ -4825,9 +4828,9 @@ main_menu:
        movb a,@border_color            ; LD (34217),A      ; Store at #R34217 and...
        bl   @set_border_color          ; OUT (254),A       ; ...set border to this value (blue)
        movb @bytes+9,a                 ; LD A,9            ; Fill top 22 rows of Attribute File with blue PAPER & blue INK...
-       .call @_53649                   ; CALL 53649        ; ...
-       .call @_47140                   ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
-       .call @_47628                   ; CALL 47628        ; Print SCORE / TOTAL / HI-SC string in current character's colours
+       bl   @fill_screen               ; CALL 53649        ; ...
+       bl   @print_title               ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
+       bl   @print_score_strings       ; CALL 47628        ; Print SCORE / TOTAL / HI-SC string in current character's colours
        li   ix,_46690                  ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
        li   iy,main_menu_strings       ; LD IY,46710       ; Point IY at start of Table of Main Menu Strings
        movb @bytes+112,a               ; LD A,112          ; Load A with 112 (black INK on yellow PAPER)
@@ -5021,18 +5024,19 @@ _47097:
        .endproc                        ; RET               ; Return
 
 * "THROUGH the TRAPDOOR" String
-_47120:
+title_text:
        text 'THROUGH the TRAPDOOR'
 
 * Print "THROUGH the TRAPDOOR" String
 * 
 * Used by the routine at #R46830.
-_47140:
+print_title:
+       .proc
        movb @bytes+20,b                ; LD B,20           ; Load B with 20 (length of string to print)
        li   hl,22566                   ; LD HL,22566       ; Point HL at position to start printing text in Attribute File
        movb @bytes+79,a                ; LD A,79           ; Load A with 79, for blue PAPER, white INK, BRIGHT
-       li   ix,_47120                  ; LD IX,47120       ; Point IX to text to print
-       jmp  _47224                     ; JR 47224          ; Print the text and return
+       li   ix,title_text              ; LD IX,47120       ; Point IX to text to print
+       jmp  print_text                 ; JR 47224          ; Print the text and return
 
 * "SORRY BERK,  BUT YOUR TIME IS UP" String
 _47153:
@@ -5041,13 +5045,13 @@ _47153:
 * Print "SORRY BERK,  BUT YOUR TIME IS UP" String
 * 
 * Used by the routine at #R34438.
-_47185:
+print_times_up:
        movb @bytes+32,b                ; LD B,32           ; Load B with 32 (length of string to print)
        movb @bytes+199,a               ; LD A,199          ; Load A with 199, for black PAPER, white INK, BRIGHT, FLASH
        li   ix,_47153                  ; LD IX,47153       ; Point IX to text to print
        li   hl,23232                   ; LD HL,23232       ; Point HL at position at which to start printing text in Attribute File (start of second-last
                                                            ; row)
-       jmp  _47224                     ; JR 47224          ; Print the text and return
+       jmp  print_text                 ; JR 47224          ; Print the text and return
 
 * "HOME SWEET HOME" String
 _47198:
@@ -5056,24 +5060,24 @@ _47198:
 * Print "HOME SWEET HOME" String
 * 
 * Used by the routine at #R34438.
-_47213:
+print_home_sweet_home:
        movb @bytes+15,b                ; LD B,15           ; Set string length to 15
        movb @bytes+68,a                ; LD A,68           ; Set attribute to green INK on black PAPER, BRIGHT
        li   ix,_47198                  ; LD IX,47198       ; Point IX at "HOME SWEET HOME" text
        li   hl,22792                   ; LD HL,22792       ; Point HL at Attribute File address at which to print text
 * This entry point is used by the routines at #R47140 and #R47185.
-_47224:
+print_text:
        movb a,@print_attr              ; LD (34269),A      ; Store attribute at #R34269
-_47227:
+print_text_1:
        .push bc                        ; PUSH BC           ; Store BC (B=remaining length of text)
-       movb *ix,@e                     ; LD E,(IX+0)       ; Load character of text to print into E
+       movb *ix+,@e                    ; LD E,(IX+0)       ; Load character of text to print into E
        bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
-       inct ix                         ; INC IX            ; Advance IX to next text character to print
-                                       ; INC HL            ; Advance HL to next Attribute File address at which to print
+                                       ; INC IX            ; Advance IX to next text character to print
+       inc  hl                         ; INC HL            ; Advance HL to next Attribute File address at which to print
        .pop bc                         ; POP BC            ; Restore BC (B = remaining length of text)
        sb   one,b                      ; DJNZ 47227        ; Decrease remaining length of text by one and repeat loop for next character
-       jne  _47227                     ;                   
-       .ret                            ; RET               ; Return
+       jne  print_text_1               ;
+       .endproc                        ; RET               ; Return
 
 * Reset Show Score Flag and Draw Timer Figures Bar
 * 
@@ -5307,11 +5311,12 @@ reduce_remaining_time_1:
 * Update Scores and Display
 * 
 * Used by the routine at #R34438.
-_47499:
-       li   hl,game_flags                  ; LD HL,34208       ; Set Show Score Flag...
+update_scores_and_display:
+       .proc
+       li   hl,game_flags              ; LD HL,34208       ; Set Show Score Flag...
        socb @bits+7,*hl                ; SET 7,(HL)        ; ...
        li   hl,0                       ; LD HL,0           ; Set HL to zero
-       movb @time_left,a                  ; LD A,(34210)      ; If no time / lives remain...
+       movb @time_left,a               ; LD A,(34210)      ; If no time / lives remain...
        socb a,a                        ; OR A              ; ...
        jeq  _47526                     ; JR Z,47526        ; ...then skip ahead to #R47526
        movb a,b                        ; LD B,A            ; Load HL with 1000 x current remaining time / lives...
@@ -5335,7 +5340,7 @@ _47526:
        mov  hl,@_34299                 ; LD (34299),HL     ; ...and store as new high score
 _47551:
        movb @bytes+16,a                ; LD A,16           ; Set time / lives to 16...
-       movb a,@time_left                  ; LD (34210),A      ; ...
+       movb a,@time_left               ; LD (34210),A      ; ...
        li   iy,_47589+7                ; LD IY,47596       ; Point IY at "numeric (score)" part of string at 47589
        mov  @_34213,hl                 ; LD HL,(34213)     ; Load HL with current score...
        .call @_47741                   ; CALL 47741        ; ...and convert to string at IY
@@ -5345,7 +5350,7 @@ _47551:
        li   iy,_47589+33               ; LD IY,47622       ; Point IY at "numeric (high score)" part of string at 47589
        mov  @_34299,hl                 ; LD HL,(34299)     ; Load HL with current high score...
        .call @_47741                   ; CALL 47741        ; ...and convert to string at IY
-       b    @_47628                    ; JP 47628          ; Print SCORE / TOTAL / HI-SC string in current character's colours and return
+       b    @print_score_strings_0     ; JP 47628          ; Print SCORE / TOTAL / HI-SC string in current character's colours and return
 
 * Score / Total / High Score String
 _47589:
@@ -5354,39 +5359,41 @@ _47589:
 * Print Score / Total / High Score String in Current Character's Colours
 * 
 * Used by the routines at #R34916, #R46830 and #R47499.
-_47628:
+print_score_strings:
+       .proc
+print_score_strings_0
        li   iy,_47589                  ; LD IY,47589       ; Point IY at SCORE / TOTAL / HI-SC text
        li   hl,23232                   ; LD HL,23232       ; Set Attribute File address at which to print text to start of second-last character row
-_47635:
+print_score_strings_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load a character from the string into A
        cb   a,@bytes+36                ; CP 36             ; If the character is 36 (end marker)...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+       jeq  print_score_strings_6      ; RET Z             ; ...then return
        cb   a,@bytes+42                ; CP 42             ; If character is not 42 ("set attribute to current character's colours" marker)...
-       jne  _47660                     ; JR NZ,47660       ; ...then skip ahead to #R47660
+       jne  print_score_strings_3      ; JR NZ,47660       ; ...then skip ahead to #R47660
        movb @current_character_attr,a  ; LD A,(34226)      ; Load current character's attribute into A (blue for Berk, yellow for Drutt)
        cb   a,one                      ; CP 1              ; If blue (Berk)...
-       jeq  _47656                     ; JR Z,47656        ; ...then skip ahead to #R47656
+       jeq  print_score_strings_2      ; JR Z,47656        ; ...then skip ahead to #R47656
        movb @bytes+112,a               ; LD A,112          ; Load A with value for black INK, yellow PAPER, BRIGHT (Drutt's colours)
-       jmp  _47666                     ; JR 47666          ; Skip ahead to #R47666
-_47656:
+       jmp  print_score_strings_4      ; JR 47666          ; Skip ahead to #R47666
+print_score_strings_2:
        movb @bytes+79,a                ; LD A,79           ; Load A with value for white INK, blue PAPER, BRIGHT (Berk's colours)
-       jmp  _47666                     ; JR 47666          ; Skip ahead to #R47666
-_47660:
+       jmp  print_score_strings_4      ; JR 47666          ; Skip ahead to #R47666
+print_score_strings_3:
        cb   a,@bytes+35                ; CP 35             ; If character is not 35 ("set attribute to standard" marker)...
-       jne  _47673                     ; JR NZ,47673       ; ...then skip ahead to #R47673
+       jne  print_score_strings_5      ; JR NZ,47673       ; ...then skip ahead to #R47673
        movb @bytes+71,a                ; LD A,71           ; Load A with value for white INK, black PAPER, BRIGHT
-_47666:
+print_score_strings_4:
        movb a,@print_attr              ; LD (34269),A      ; Store this value as the attribute to print text
        inc  iy                         ; INC IY            ; Advance IY to next character in string to print
-       jmp  _47635                     ; JR 47635          ; Loop back to #R47635 for next character
-_47673:
+       jmp  print_score_strings_1      ; JR 47635          ; Loop back to #R47635 for next character
+print_score_strings_5:
        movb a,@e                       ; LD E,A            ; Load character to print into E
        bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
        inc  hl                         ; INC HL            ; Advance HL to next Attribute File address
        inc  iy                         ; INC IY            ; Advance IY to next character to process
-       jmp  _47635                     ; JR 47635          ; Loop back to #R47635 for next character
+       jmp  print_score_strings_1      ; JR 47635          ; Loop back to #R47635 for next character
+print_score_strings_6
+       .endproc
 
 * Print a Double-Height Text Character
 * 
@@ -7375,7 +7382,8 @@ clear_display_buffers:
 * Fill Top 22 Rows of Attribute File with Attribute Value in A
 * 
 * Used by the routines at #R46830 and #R53723. Input:  A  Attribute
-_53649:
+fill_screen:
+       .proc
        bl   @ti_color
        mov  tmp0,r1
        li   r0,color_table
@@ -7390,7 +7398,7 @@ _53649:
 ;       .ldir                           ; LDIR              ; ...and repeat for remaining 703 bytes
 ;       movb @bytes+3,b                 ; LD B,3            ; Pause for three iterations...
 ;       .call @_34675                   ; CALL 34675        ; ...
-       .ret                            ; RET               ; Return
+       .endproc                         ; RET               ; Return
 
 * Set "Berk Has Been Killed" Flag
 * 
@@ -7446,7 +7454,7 @@ check_berk_killed:
        mov  hl,@berk_script_data_pos                 ; LD (35687),HL     ; ...and store at #R35687 (as current position in Berk's script data)
        .call @_53577                   ; CALL 53577        ; Cycle attributes (long, full-screen) and clear display buffers
        movb @bytes+127,a               ; LD A,127          ; Fill top 22 rows of Attribute File with white PAPER and white INK, BRIGHT...
-       .call @_53649                   ; CALL 53649        ; ...
+       .call @fill_screen                   ; CALL 53649        ; ...
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .call @_47485                   ; CALL 47485        ; Decrease current time / lives by one if greater than zero and redraw Timer Figures
 check_berk_killed_1:
