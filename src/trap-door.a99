@@ -8161,9 +8161,9 @@ _54480:
 * routine was also intended to deal with room connectivity. As there are routines to deal with vertical and
 * horizontal (left-right) connectivity, it is possible that this routine was originally intended to handle
 * horizontal (forward-back) connectivity.
-_54499:
-       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
-       jmp  _54512                     ; JR 54512          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
+;_54499:
+;       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
+;       jmp  _54512                     ; JR 54512          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
 
 * Load B with Index of Room to Right of an Entity's Current Room
 * 
@@ -8199,9 +8199,9 @@ _54527:
 * routine was also intended to deal with room connectivity. As there are routines to deal with vertical and
 * horizontal (left-right) connectivity, it is possible that this routine was originally intended to handle
 * horizontal (forward-back) connectivity.
-_54533:
-       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
-       jmp  _54546                     ; JR 54546          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
+;_54533:
+;       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
+;       jmp  _54546                     ; JR 54546          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
 
 * Load B with Index of Room to Left of an Entity's Current Room
 * 
