@@ -416,12 +416,14 @@ rand   li   tmp1,28643                 ; A prime number to multiply by
 *
 return_with_carry:
        .pop  r11
+return_with_carry_1:
        seto tmp0
        inc  tmp0
        rt
 
 return_without_carry:
        .pop  r11
+return_without_carry_1:
        clr  tmp0
        inc  tmp0
        rt
