@@ -2895,7 +2895,8 @@ _51630:
        byte 44,0                                                     ; ...
        byte _52417%256,_52417/256                                    ; #R52417 (Drutt, facing out of screen, legs fully extended, eyes and mouth animated)
        byte 44,0                                                     ; Move Drutt up one character
-       byte 51,0                                                     ; Swap Drutt's current depth level if possible
+;      TODO
+;       byte 51,0                                                     ; Swap Drutt's current depth level if possible
        byte _52417%256,_52417/256                                    ; #R52417 (Drutt, facing out of screen, legs fully extended, eyes and mouth animated)
        byte 45,0                                                     ; Move Drutt down one character
        byte _52417%256,_52417/256                                    ; #R52417 (Drutt, facing out of screen, legs fully extended, eyes and mouth animated)
