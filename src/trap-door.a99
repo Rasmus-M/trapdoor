@@ -415,7 +415,7 @@ _34623:
 ;       movb a,tmp0                     ; BIT 6,A           ; If Restart hasn't been pressed...
 ;       andi tmp0,64*256                ;
 ;       jne  !                          ; JP Z,34466        ; ...then jump to #R34466 (start of main loop)
-       b    @main_loop                 ;
+       jmp  main_loop                 ;
 !
 * Restart has been pressed
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
