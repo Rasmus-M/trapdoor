@@ -291,6 +291,7 @@ public class SkoolConverter {
                         if (isWord) {
                             tms9900Line.setInstruction("li   " + getTMS9900Equivalent(opr1) + "," + getTMS9900Equivalent(opr2, isWord));
                         } else {
+                            // TODO: special code for zeros
                             tms9900Line.setInstruction("movb " + getTMS9900Equivalent(opr2) + "," + getTMS9900Equivalent(opr1));
                         }
                     } else {
