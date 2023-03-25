@@ -859,7 +859,7 @@ _35827:
        .call @_36008                   ; CALL 36008        ; If Berk is holding an edible entity them make him eat it, process appropriate script data
                                                            ; and return to calling routine
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Temporarily decrease y-coordinate of Berk's top edge
-       .call @_54890                   ; CALL 54890        ; Check entity at IX for collision with another entity (in reverse order) at next depth level
+       .call @check_collision_next_depth_reverse                   ; CALL 54890        ; Check entity at IX for collision with another entity (in reverse order) at next depth level
                                                            ; into screen whose Interaction (11,7) Flag is set
        .push af                        ; PUSH AF           ; Store AF
        ab   one,@4(ix)                 ; INC (IX+4)        ; Restore y-coordinate of Berk's top edge
@@ -1005,7 +1005,7 @@ _36036:
 _36049:
        li   de,0                       ; LD DE,0           ; Clear pointer to complex state data for entity involved in last collision check...
        mov  de,@_34258                 ; LD (34258),DE     ; ...
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        joc  _36103                     ; JR C,36103        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R36103
 * Collision occurred
@@ -1077,11 +1077,11 @@ _36137:
        jne  _36200                     ; JR NZ,36200       ; ...then skip ahead to #R36200
 * Attempt to move Berk left (not flying) (see bugs)
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
-       .call @_54666                   ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
+       .call @check_collision_left     ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
        jnc  _36171                     ; JR NC,36171       ; TODO: check code. ...and if a collision occurred, then skip ahead to #R36171
 * No collision
-       .call @_54348                   ; CALL 54348        ; Move Berk into room to the left, if appropriate...
-       joc  !                          ; JP NC,35786       ; TODO: check code. ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
+       bl   @move_into_left_room       ; CALL 54348        ; Move Berk into room to the left, if appropriate...
+       joc  !                          ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
        b    @_35786                    ;                   
 !
                                                            ; him (turn to) face out of screen as appropriate)
@@ -1114,7 +1114,7 @@ _36184:
                                                            ; appropriate)
 * Attempt to move Berk left (flying)
 _36200:
-       .call @_54666                   ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
+       .call @check_collision_left                   ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
        jnc  !                          ; JP C,48096        ; TODO: check code. ...and if a collision has not occurred, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script                    ;                   
 !
@@ -1134,11 +1134,11 @@ _36214:
 !
 * Attempt to move Berk right (not flying) (see bugs)
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
-       .call @_54569                   ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right                   ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  _36249                     ; JR NC,36249       ; TODO: check code. ...and if a collision occurred, then skip ahead to #R36249
 * No collision
-       .call @_54313                   ; CALL 54313        ; Move Berk into room to the right, if appropriate...
+       bl   @move_into_right_room                   ; CALL 54313        ; Move Berk into room to the right, if appropriate...
        joc  !                          ; JP NC,35786       ; TODO: check code. ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
        b    @_35786                    ;                   
 !
@@ -1173,7 +1173,7 @@ _36266:
                                                            ; appropriate)
 * Attempt to move Berk right (flying)
 _36282:
-       .call @_54569                   ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right                   ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  !                          ; JP C,48096        ; TODO: check code. ...and if a collision has not occurred, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script                    ;                   
@@ -1346,7 +1346,7 @@ _36536:
 * 
 * Used by the routine at #R35735. Input:  IX  Address of complex state data (current level) for Berk
 update_berk_floating_power:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+130               ; CP 130            ; ...and if collision was with entity of class 130 (causes Berk and Drutt to bounce off or bang
                                                            ; head)...
@@ -1364,22 +1364,22 @@ _36558:
        jne  _36576                     ; JR NZ,36576       ; ...then skip ahead to #R36576
        .call @_48388                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 * Berk's Walking Right Flag is set (i.e. Drutt has pushed Berk right)
 _36576:
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move Berk's left and right sides right by one character...
        ab   one,@7(ix)                 ; INC (IX+7)        ; ...
-       .call @_54313                   ; CALL 54313        ; Move Berk at IX into room to the right, if appropriate
+       bl   @move_into_right_room      ; CALL 54313        ; Move Berk at IX into room to the right, if appropriate
        jmp  _36596                     ; JR 36596          ; Skip ahead to #R36596
 * Berk's Walking Left Flag is set (i.e. Drutt has pushed Berk left)
 _36587:
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move Berk's left and right sides left by one character...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
-       .call @_54348                   ; CALL 54348        ; Move Berk at IX into room to the left, if appropriate
+       bl   @move_into_left_room       ; CALL 54348        ; Move Berk at IX into room to the left, if appropriate
 _36596:
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease remaining horizontal distance from Drutt's push...
        jeq  !                          ; JP NZ,48096       ; ...and if not zero then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;
 !
        movb one,a                      ; LD A,1            ; Set remaining power duration to 1...
        movb a,@_34225                  ; LD (34225),A      ; ...
@@ -1631,7 +1631,7 @@ _37062:
 * Used by the routine at #R37062. Input:  IX  (always #R43463, entry in Level 1 complex state data for Bat) HL
 * Current position in Bat's script data
 _37085:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        joc  _37104                     ; JR C,37104        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R37104
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
@@ -1642,7 +1642,7 @@ _37100:
        cb   a,@bytes+18                ; CP 18             ; If collision was with entity of class 18 (Drutt)...
        jeq  _37111                     ; JR Z,37111        ; ...then skip ahead to #R37111
 _37104:
-       .call @_54890                   ; CALL 54890        ; Check entity at IX for collision with another entity (in reverse order) at next depth level
+       .call @check_collision_next_depth_reverse                   ; CALL 54890        ; Check entity at IX for collision with another entity (in reverse order) at next depth level
                                                            ; into screen whose Interaction (11,7) Flag is set...
        cb   a,@bytes+18                ; CP 18             ; ...and if collision was not with entity of class 18 (Drutt)...
        jne  _37128                     ; JR NZ,37128       ; ...then skip ahead to #R37128
@@ -1755,7 +1755,7 @@ _37662:
        jeq  !                          ; RET NZ            ; ...then return
        .ret                            ;                   
 !
-       .call @_54764                   ; CALL 54764        ; Check entity at IX for collision with another entity at next depth level out of screen whose
+       .call @check_collision_next_depth                   ; CALL 54764        ; Check entity at IX for collision with another entity at next depth level out of screen whose
                                                            ; Interaction (11,6) Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _37685                     ; JR NZ,37685       ; ...then skip ahead to #R37685
@@ -1876,7 +1876,7 @@ _38074:
        socb @bits+3,@9(ix)             ; SET 3,(IX+9)      ; Set Bubo's Harmless Flag
        jmp  _38101                     ; JR 38101          ; Skip ahead to #R38101
 _38093:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was with entity of class 31 (Berk)...
        jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
@@ -1992,7 +1992,7 @@ _38277:
        movb a,b                        ; LD B,A            ; Load B with velocity value
 _38278:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining velocity value)
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        joc  _38328                     ; JR C,38328        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R38328
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
@@ -2130,7 +2130,7 @@ _38523:
 * 
 * Used by the routine at #R38480.
 _38540:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        jnc  !                          ; JP C,48096        ; TODO: check code. ...and if no collision occurred, then jump to #R48096 (advance HL to next script instruction
        b    @inct_execute_script                    ;                   
@@ -2236,7 +2236,7 @@ _38699:
        socb a,a                        ; OR A              ; ...and if this is not zero (199 in 200 chance)...
        jne  _38748                     ; JR NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
 _38707:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _38718                     ; JR NZ,38718       ; ...then skip ahead to #R38718 (start stalactite falling)
@@ -2529,7 +2529,7 @@ _39532:
        jeq  _39552                     ; JR Z,39552        ; ...then skip ahead to #R39552
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move Berk one character left...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
-       .call @_54348                   ; CALL 54348        ; Move Berk into room to the left, if appropriate
+       bl   @move_into_left_room       ; CALL 54348        ; Move Berk into room to the left, if appropriate
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's room is 5 (room to the left of the Coloured Creatures' Room)...
        cb   a,@bytes+5                 ; CP 5              ; ...then set Zero Flag
        jmp  _39569                     ; JR 39569          ; Skip ahead to #R39569
@@ -2542,7 +2542,7 @@ _39552:
 !
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move Berk one character right...
        ab   one,@7(ix)                 ; INC (IX+7)        ; ...
-       .call @_54313                   ; CALL 54313        ; Move Berk into room to the right, if appropriate
+       bl   @move_into_right_room      ; CALL 54313        ; Move Berk into room to the right, if appropriate
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's room is 7 (room to the right of the Coloured Creatures' Room)...
        cb   a,@bytes+7                 ; CP 7              ; ...then set Zero Flag
 _39569:
@@ -3006,7 +3006,7 @@ _41479:
 * 
 * See trivia Input:  IX  Address of complex state data for Skeleton (Level 4) (#R45404)
 _41498:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        joc  _41513                     ; JR C,41513        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R41513
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
@@ -3095,7 +3095,7 @@ _41617:
 * Used by the routine at #R41211.
 _41633:
        li   ix,_45794                  ; LD IX,45794       ; Load IX with address of complex state data for Ghost (Level 4)
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _41653                     ; JR NZ,41653       ; ...then skip ahead to #R41653
@@ -3313,13 +3313,13 @@ _41991:
 * Projectile flying left
        .call @_42447                   ; CALL 42447        ; Move entity left two characters...
        .call @_42447                   ; CALL 42447        ; ...
-       .call @_54348                   ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
+       bl   @move_into_left_room       ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
        jmp  _42015                     ; JR 42015          ; Skip ahead to #R42015
 * Projectile flying right
 _42006:
        .call @_42505                   ; CALL 42505        ; Move entity right two characters...
        .call @_42505                   ; CALL 42505        ; ...
-       .call @_54313                   ; CALL 54313        ; Move entity at IX into room to the right, if appropriate
+       bl   @move_into_right_room      ; CALL 54313        ; Move entity at IX into room to the right, if appropriate
 * Update Projectile's vertical velocity
 _42015:
        movb @12(ix),a                  ; LD A,(IX+12)      ; Load Projectile's velocity into A and E...
@@ -3337,7 +3337,7 @@ _42015:
        li   bc,_51483                  ; LD BC,51483       ; Set Projectile's graphic layout data address to that of explosion (Bubo's Projectile / fallen
                                                            ; drips, Level 4)...
        .call @_42512                   ; CALL 42512        ; ...
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        jnc  !                          ; RET C             ; TODO: check code. ...and if no collision occurred, then return
        .ret                            ;                   
@@ -3420,7 +3420,7 @@ _42140:
        movb @bytes+20,@12(iy)          ; LD (IY+12),20     ; Set Cannon's Fire Timer to 20
        jmp  _42084                     ; JR 42084          ; Reset current drip's state and loop back to #R42070 for next drip
 _42190:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _42215                     ; JR NZ,42215       ; ...then skip ahead to #R42215
@@ -3462,7 +3462,7 @@ _42251:
 * Used by the routine at #R41211.
 _42266:
        li   ix,_45482                  ; LD IX,45482       ; Load IX with address of complex state data for Flying Skeleton Creature (Level 4)
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _42285                     ; JR NZ,42285       ; ...then skip ahead to #R42285
@@ -3490,7 +3490,7 @@ _42285:
 _42309:
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move creature right one character...
        ab   one,@7(ix)                 ; INC (IX+7)        ; ...
-       .call @_54313                   ; CALL 54313        ; ...and move into room to the right, if appropriate
+       bl   @move_into_right_room      ; CALL 54313        ; ...and move into room to the right, if appropriate
        jmp  _42346                     ; JR 42346          ; Skip ahead to #R42346
 * Horizontal Direction Flag set (moving left)
 _42320:
@@ -3505,7 +3505,7 @@ _42320:
 _42337:
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move creature left one character...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
-       .call @_54348                   ; CALL 54348        ; ...and move into room to the left, if appropriate
+       bl   @move_into_left_room       ; CALL 54348        ; ...and move into room to the left, if appropriate
 _42346:
        movb @4(ix),a                   ; LD A,(IX+4)       ; Load A with y-coordinate of creature's top edge
        movb *hl,tmp0                   ; BIT 1,(HL)        ; If creature's Vertical Direction Flag is set (moving up)...
@@ -3620,7 +3620,7 @@ _42480:
 _42486:
        li   bc,_42703                  ; LD BC,42703       ; Set Snake's graphic layout data address to #R42703...
        .call @_42512                   ; CALL 42512        ; ...(Snake, mouth open, attacking)
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jeq  !                          ; RET NZ            ; ...then return
@@ -5762,17 +5762,17 @@ _48133:
        inc  hl                         ; INC HL            ; ...
        movb *hl,a                      ; LD A,(HL)         ; Load A with sound index
        .call @request_entity_sound     ; CALL 59601        ; If current character is in same room as target entity at IX then set pending sound to A
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (62) Move Entity at IX into Room to the Left, if Appropriate
 _48142:
-       .call @_54348                   ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       bl   @move_into_left_room       ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (16) Have Berk Hold an Entity, and Position it Appropriately Between his Hands
 _48148:
        .call @_48850                   ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (17) Have Berk Put Down an Entity in Front of Him, if Appropriate Output: D  Depth offset for
 * entity being put down
@@ -6068,7 +6068,7 @@ _48474:
 _48487:
        .call @_48388                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+130               ; CP 130            ; ...and if collision was not with entity of class 130 (causes Berk and Drutt to bounce off or
                                                            ; bang head)...
@@ -6143,10 +6143,9 @@ _48593:
        jl   _48615                     ; JR C,48615        ; ...then skip ahead to #R48615 (move Berk right by one character
        bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room...
        jne  !                          ; JP Z,48096        ; ...and if there is no room to the right, then jump to #R48096 (advance HL to next script
-       b    @inct_execute_script       ;                   
+       b    @inct_execute_script       ;                   ; instruction and execute)
 !
-                                                           ; instruction and execute)
-       .call @_54383                   ; CALL 54383        ; Move Berk into room to right of its current room and update position of carried entity if
+       bl    @do_move_into_right_room  ; CALL 54383        ; Move Berk into room to right of its current room and update position of carried entity if
                                                            ; moving entity is Berk
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37085. It is also the start of the routine triggered by instruction
@@ -6174,10 +6173,9 @@ _48641:
        jl   _48660                     ; JR C,48660        ; ...then skip ahead to #R48660 (move Berk left by one character)
        bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room...
        jne  !                          ; JP Z,48096        ; ...and if there is no room to the left, then jump to #R48096 (advance HL to next script
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;                   ; instruction and execute)              
 !
-                                                           ; instruction and execute)
-       .call @_54419                   ; CALL 54419        ; Move Berk into room to left of its current room and update position of carried entity if
+       bl   @do_move_into_left_room   ; CALL 54419        ; Move Berk into room to left of its current room and update position of carried entity if
                                                            ; moving entity is Berk
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37085. It is also the start of the routine triggered by instruction
@@ -6498,7 +6496,7 @@ update_drutt_state:
 * Script Routine (43) Select Next Action for Drutt Depending Upon Control Input Input:  IX  Address of complex state
 * data (current level) for Drutt Output: HL  Address of next script instruction to execute
 _51779:
-       .call @_54768                   ; CALL 54768        ; Check Drutt for collision with another entity at same depth whose Interaction (11,6) Flag is
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check Drutt for collision with another entity at same depth whose Interaction (11,6) Flag is
                                                            ; set...
        cb   a,@bytes+129               ; CP 129            ; ...and if collision was not with entity of class 129 (causes other entities to start
                                                            ; falling)...
@@ -6692,7 +6690,7 @@ _52047:
 * Drutt will only push other entities when he is under player control. If he is not, then he will just pass through
 * pushable entities. Input:  IX  Address of complex state data (current level) for Drutt
 _52053:
-       .call @_54666                   ; CALL 54666        ; Check entity at IX for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_left                   ; CALL 54666        ; Check entity at IX for collision with another impassable / pushable entity immediately to the
                                                            ; left...
        joc  _52087                     ; JR C,52087        ; TODO: check code. ...and if a collision has not occurred, then skip ahead to #R52087
 * At this point, a collision has occurred, so IY points to the complex state data entry of the entity with which
@@ -6716,8 +6714,8 @@ _52076:
        b    @execute_script                    ; JP 48098          ; ...and execute
 * No collision, not under player control or collision with entity of class 129
 _52087:
-       .call @_54348                   ; CALL 54348        ; Move Drutt into room to the left, if appropriate...
-       joc  !                          ; RET NC            ; TODO: check code. ...and if Drutt can't enter new room then return
+       bl   @move_into_left_room       ; CALL 54348        ; Move Drutt into room to the left, if appropriate...
+       joc  !                          ; RET NC            ; ...and if Drutt can't enter new room then return
        .ret                            ;                   
 !
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move Drutt left one character...
@@ -6730,7 +6728,7 @@ _52087:
 _52098:
        .push iy                        ; PUSH IY           ; Transfer address of complex state data for pushed entity from IY...
        .pop ix                         ; POP IX            ; ...to IX
-       .call @_54666                   ; CALL 54666        ; Check pushed entity for collision with another impassable / pushable entity immediately to
+       .call @check_collision_left                   ; CALL 54666        ; Check pushed entity for collision with another impassable / pushable entity immediately to
                                                            ; the left...
        joc  _52112                     ; JR C,52112        ; TODO: check code. ...and if a collision has not occurred, then skip ahead to #R52112
        cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
@@ -6745,8 +6743,8 @@ _52112:
        jne  !                          ; RET Z             ; ...and if there is no room to the left then return
        .ret                            ;                   
 !
-       .call @_54348                   ; CALL 54348        ; Move pushed entity into room to the left, if appropriate...
-       joc  !                          ; RET NC            ; TODO: check code. ...and if pushed entity can't enter new room then return
+       bl   @move_into_left_room       ; CALL 54348        ; Move pushed entity into room to the left, if appropriate...
+       joc  !                          ; RET NC            ; ...and if pushed entity can't enter new room then return
        .ret                            ;                   
 !
 _52127:
@@ -6771,7 +6769,7 @@ _52142:
 * Drutt will only push other entities when he is under player control. If he is not, then he will just pass through
 * pushable entities. Input:  IX  Address of complex state data (current level) for Drutt
 _52148:
-       .call @_54569                   ; CALL 54569        ; Check Drutt for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right                   ; CALL 54569        ; Check Drutt for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        joc  _52182                     ; JR C,52182        ; TODO: check code. ...and if a collision has not occurred, then skip ahead to #R52182
 * At this point, a collision has occurred, so IY points to the complex state data entry of the entity with which
@@ -6795,8 +6793,8 @@ _52171:
        b    @execute_script                    ; JP 48098          ; ...and execute
 * No collision, not under player control or collision with entity of class 129
 _52182:
-       .call @_54313                   ; CALL 54313        ; Move Drutt into room to the right, if appropriate...
-       joc  !                          ; RET NC            ; TODO: check code. ...and if Drutt can't enter new room then return
+       bl   @move_into_right_room      ; CALL 54313        ; Move Drutt into room to the right, if appropriate...
+       joc  !                          ; RET NC            ; ...and if Drutt can't enter new room then return
        .ret                            ;                   
 !
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move Drutt right one character...
@@ -6809,7 +6807,7 @@ _52182:
 _52193:
        .push iy                        ; PUSH IY           ; Transfer address of complex state data for pushed entity from IY...
        .pop ix                         ; POP IX            ; ...to IX
-       .call @_54569                   ; CALL 54569        ; Check pushed entity for collision with another impassable / pushable entity immediately to
+       .call @check_collision_right                   ; CALL 54569        ; Check pushed entity for collision with another impassable / pushable entity immediately to
                                                            ; the right...
        joc  _52207                     ; JR C,52207        ; TODO: check code. ...and if a collision has not occurred, then skip ahead to #R52207
        cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
@@ -6827,8 +6825,8 @@ _52207:
        jne  !                          ; RET Z             ; ...and if there is no room to the right then return
        .ret                            ;                   
 !
-       .call @_54313                   ; CALL 54313        ; Move pushed entity into room to the right, if appropriate...
-       joc  !                          ; RET NC            ; TODO: check code. ...and if pushed entity can't enter new room then return
+       bl   @move_into_right_room      ; CALL 54313        ; Move pushed entity into room to the right, if appropriate...
+       joc  !                          ; RET NC            ; ...and if pushed entity can't enter new room then return
        .ret                            ;                   
 !
 _52227:
@@ -6913,14 +6911,14 @@ _52315:
 !
 * The following collision check is usually only satisfied by Berk. This prevents Drutt from jumping back a depth
 * level while in front of (at same depth level as) Berk.
-       .call @_54878                   ; CALL 54878        ; Check Drutt for collision with another entity (only those defined before, and in reverse
+       .call @check_collision_same_depth_reverse                   ; CALL 54878        ; Check Drutt for collision with another entity (only those defined before, and in reverse
                                                            ; order) at same depth level whose Interaction (11,7) Flag is set...
        joc  !                          ; RET NC            ; TODO: check code. ...and if a collision occurred, then return
        .ret                            ;                   
 !
 * The following collision check prevents Drutt from jumping back when there is an obstruction (e.g. the brick
 * columns in the pit room, level 1) behind him.
-       .call @_54890                   ; CALL 54890        ; Check Drutt for collision with another entity (in reverse order) at next depth level into
+       .call @check_collision_next_depth_reverse                   ; CALL 54890        ; Check Drutt for collision with another entity (in reverse order) at next depth level into
                                                            ; screen whose Interaction (11,7) Flag is set...
        joc  _52341                     ; JR C,52341        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R52341
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of 22 or greater (can't be picked up)...
@@ -6942,7 +6940,7 @@ _52351:
 !
 * The following collision check prevents Drutt from jumping forward a depth level while in behind an obstruction
 * (e.g. Berk).
-       .call @_54764                   ; CALL 54764        ; Check Drutt for collision with another entity at next depth level out of screen whose
+       .call @check_collision_next_depth                   ; CALL 54764        ; Check Drutt for collision with another entity at next depth level out of screen whose
                                                            ; Interaction (11,6) Flag is set...
        joc  !                          ; RET NC            ; TODO: check code. ...and if a collision occurred, then return
        .ret                            ;                   
@@ -6989,10 +6987,10 @@ update_worm_state_1:
 * Script Routine (53) Move Worm Left if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
 * state data for an entity
 _52870:
-       .call @_54666                   ; CALL 54666        ; Check worm for collision with another impassable / pushable entity immediately to the left...
+       .call @check_collision_left     ; CALL 54666        ; Check worm for collision with another impassable / pushable entity immediately to the left...
        jnc  _52908                     ; JR NC,52908       ; TODO: check code. ...and if a collision occurred, then have worm choose new direction
-       .call @_54348                   ; CALL 54348        ; Move worm into room to the left, if appropriate...
-       jnc  _52908                     ; JR NC,52908       ; TODO: check code. ...and if worm can't enter new room then have worm choose new direction
+       bl   @move_into_left_room       ; CALL 54348        ; Move worm into room to the left, if appropriate...
+       jnc  _52908                     ; JR NC,52908       ; ...and if worm can't enter new room then have worm choose new direction
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move worm left one character...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
@@ -7000,21 +6998,21 @@ _52870:
 * Script Routine (54) Move Worm Right if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
 * state data for an entity
 _52889:
-       .call @_54569                   ; CALL 54569        ; Check worm for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right    ; CALL 54569        ; Check worm for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  _52908                     ; JR NC,52908       ; TODO: check code. ...and if a collision occurred, then have worm choose new direction
-       .call @_54313                   ; CALL 54313        ; Move worm into room to the right, if appropriate...
-       jnc  _52908                     ; JR NC,52908       ; TODO: check code. ...and if worm can't enter new room then have worm choose new direction
+       bl   @move_into_right_room      ; CALL 54313        ; Move worm into room to the right, if appropriate...
+       jnc  _52908                     ; JR NC,52908       ; ...and if worm can't enter new room then have worm choose new direction
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move worm right one character...
        ab   one,@7(ix)                 ; INC (IX+7)        ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Execute Script Data for Worm Choosing Next Direction
 * 
 * Used by the routines at #R52870 and #R52889.
 _52908:
        li   hl,_52747                  ; LD HL,52747       ; Point HL at script data for worm, choosing next direction...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Script Routine (55) Choose New Direction and Start Crawling (Worm) Input:  IX  Address of complex state data for
 * an entity
@@ -7029,23 +7027,23 @@ _52914:
        socb a,a                        ; OR A              ; ...and if zero (1 in 2 chance)...
        jne  _52951                     ; JR NZ,52951       ; ...then skip ahead to #R52951
 * Have worm move left
-       .call @_54666                   ; CALL 54666        ; Check worm for collision with another impassable / pushable entity immediately to the left...
+       .call @check_collision_left     ; CALL 54666        ; Check worm for collision with another impassable / pushable entity immediately to the left...
        jnc  _52961                     ; JR NC,52961       ; TODO: check code. ...and if a collision occurred, then start worm crawling right
-       .call @_54348                   ; CALL 54348        ; Move worm into room to the left, if appropriate...
-       jnc  _52961                     ; JR NC,52961       ; TODO: check code. ...and if worm can't enter new room then start worm crawling right
+       bl   @move_into_left_room       ; CALL 54348        ; Move worm into room to the left, if appropriate...
+       jnc  _52961                     ; JR NC,52961       ; ...and if worm can't enter new room then start worm crawling right
 _52945:
        li   hl,_52765                  ; LD HL,52765       ; Point HL at script data for worm, crawling left...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Have worm move right
 _52951:
-       .call @_54569                   ; CALL 54569        ; Check worm for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right    ; CALL 54569        ; Check worm for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  _52945                     ; JR NC,52945       ; TODO: check code. ...and if a collision occurred, then start worm crawling left
-       .call @_54313                   ; CALL 54313        ; Move worm into room to the right, if appropriate...
-       jnc  _52945                     ; JR NC,52945       ; TODO: check code. ...and if worm can't enter new room then start worm crawling left
+       bl   @move_into_right_room      ; CALL 54313        ; Move worm into room to the right, if appropriate...
+       jnc  _52945                     ; JR NC,52945       ; ...and if worm can't enter new room then start worm crawling left
 _52961:
        li   hl,_52781                  ; LD HL,52781       ; Point HL at script data for worm, crawling right...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Script Routine (52) Increase Worm's Age and Decrease Time Until Direction Change, or React to Drutt's Presence
 * 
@@ -7153,7 +7151,7 @@ spawn_new_worm:
        movb a,@6(ix)                   ; LD (IX+6),A       ; ...and assign
        .push af                        ; PUSH AF           ; Store AF (A = bottom y-coordinate of worm)
        movb @bytes+121,@4(ix)          ; LD (IX+4),121     ; Set worm's top y-coordinate to 121
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set
        .pop bc                         ; POP BC            ; Store AF (B = bottom y-coordinate of worm)
        jnc  _53154                     ; JR NC,53154       ; TODO: check code. If a collision occurred then set worm's depth to zero and return
@@ -7952,12 +7950,12 @@ move_into_new_room:
        cb   a,@bytes+102               ; CP 102            ; ...
        jhe  move_into_new_room_1       ; RET NC            ; ...then return
        bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room
-       .call @_54419                   ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
+       bl   @do_move_into_left_room    ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
                                                            ; if moving entity is Berk
        jmp  move_into_new_room_1       ; RET               ; Return
 _54306:
        bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room
-       .call @_54383                   ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
+       bl    @do_move_into_right_room  ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
                                                            ; entity if moving entity is Berk
 move_into_new_room_1:
        .endproc                        ; RET               ; Return
@@ -7973,30 +7971,33 @@ move_into_new_room_1:
 * complex state data for an entity Output: A  Zero if no room exists to the right, otherwise, x-coordinate of
 * character's appropriate edge F  (Carry Flag) Set if entity is not at edge of current room, or has moved into new
 * room and has not collided. Reset otherwise (i.e. can't enter new room).
-_54313:
+move_into_right_room:
+       .proc
        movb @_34235,a                  ; LD A,(34235)      ; Load C with width of entity's current room (chars) + 99...
        movb a,@c                       ; LD C,A            ; ...
-       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
-       jeq  _54329                     ; JR Z,54329        ; ...then skip ahead to #R54329
+       jeq  move_into_right_room_1     ; JR Z,54329        ; ...then skip ahead to #R54329
        movb @5(ix),a                   ; LD A,(IX+5)       ; Load A with x-coordinate of Drutt's left edge
-       jmp  _54332                     ; JR 54332          ; Skip ahead to #R54332
-_54329:
+       jmp  move_into_right_room_2     ; JR 54332          ; Skip ahead to #R54332
+move_into_right_room_1:
        movb @7(ix),a                   ; LD A,(IX+7)       ; Load A with x-coordinate of Berk's right edge
-_54332:
+move_into_right_room_2:
        cb   a,@c                       ; CP C              ; If x-coordinate of room's right edge is greater than x-coordinate in A...
-       jhe  !                          ; RET C             ; ...then return
-       .ret                            ;                   
-!
+       jl   move_into_right_room_3     ; RET C             ; ...then return
        bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room
-       jeq  _54381                     ; JR Z,54381        ; If there is no room to the right, then jump to #R54381
-       .call @_54383                   ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
+       jeq  move_into_right_room_4     ; JR Z,54381        ; If there is no room to the right, then jump to #R54381
+       bl    @do_move_into_right_room  ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
                                                            ; entity if moving entity is Berk
-       .call @_54569                   ; CALL 54569        ; Check entity at IX for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right    ; CALL 54569        ; Check entity at IX for collision with another impassable / pushable entity immediately to the
                                                            ; right...
-       jnc  _54381                     ; JR NC,54381       ; TODO: check code. ...and if a collision occurred, then jump to #R54381
-       .ret                            ; RET               ; Return
+       jnc  move_into_right_room_4     ; JR NC,54381       ; ...and if a collision occurred, then jump to #R54381
+move_into_right_room_3:
+       b    @return_with_carry         ; RET               ; Return
+move_into_right_room_4:
+       sb   a,a
+       b    @return_without_carry
 
 * Move Entity at IX into Room to the Left, If Appropriate
 * 
@@ -8009,54 +8010,50 @@ _54332:
 * complex state data for an entity Output: A  Zero if no room exists to the left, otherwise, x-coordinate of
 * character's appropriate edge F  (Carry Flag) Set if entity is not at edge of current room, or has moved into new
 * room and has not collided. Reset otherwise (i.e. can't enter new room).
-_54348:
-       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+move_into_left_room:
+       .proc
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
-       jeq  _54363                     ; JR Z,54363        ; ...then skip ahead to #R54363
+       jeq  move_into_left_room_1      ; JR Z,54363        ; ...then skip ahead to #R54363
        movb @bytes+100,a               ; LD A,100          ; If x-coordinate of Drutt's right edge is greater than 100 (x-coordinate of left-edge of
                                                            ; room)...
        cb   a,@7(ix)                   ; CP (IX+7)         ; ...
-       jhe  !                          ; RET C             ; ...then return
-       .ret                            ;                   
-!
-       jmp  _54369                     ; JR 54369          ; Skip ahead to #R54369
-_54363:
+       jl   move_into_left_room_3      ; RET C             ; ...then return
+       jmp  move_into_left_room_2      ; JR 54369          ; Skip ahead to #R54369
+move_into_left_room_1:
        movb @bytes+100,a               ; LD A,100          ; If x-coordinate of Berk's left edge is greater than 100 (x-coordinate of left-edge of
                                                            ; room)...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...
-       jhe  !                          ; RET C             ; ...then return
-       .ret                            ;                   
-!
-_54369:
-       equ  $
+       jl   move_into_left_room_3      ; RET C             ; ...then return
+move_into_left_room_2:
        bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room
-       jeq  _54381                     ; JR Z,54381        ; If there is no room to the left, then jump to #R54381
-       .call @_54419                   ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
+       jeq  move_into_left_room_4      ; JR Z,54381        ; If there is no room to the left, then jump to #R54381
+       bl   @do_move_into_left_room    ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
                                                            ; if moving entity is Berk
-       .call @_54666                   ; CALL 54666        ; Set Carry Flag if entity at IX has not collided with another impassable / pushable entity
+       .call @check_collision_left     ; CALL 54666        ; Set Carry Flag if entity at IX has not collided with another impassable / pushable entity
                                                            ; immediately to the left, reset otherwise
-       .ret                            ; RET               ; Return
-* This entry point is used by the routine at #R54313.
-_54381:
+move_into_left_room_3:
+       bl   @return_with_carry         ; RET               ; Return
+move_into_left_room_4:
        sb   a,a                        ; XOR A             ; Set A to zero
-       .ret                            ; RET               ; Return
+       bl   @return_without_carry      ; RET               ; Return
 
 * Move Entity at IX into Room to Right of its Current Room and Update Position of Carried Entity if Moving Entity is
 * Berk
 * 
 * Used by the routines at #R48593, #R54283 and #R54313. Input:  IX  Address of complex state data for an entity
-_54383:
+do_move_into_right_room:
+       .proc
        .call @_54398                   ; CALL 54398        ; Set character's position to be left-hand side of new room to right
        .call @_54456                   ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
        movb @9(ix),tmp0                ; BIT 7,(IX+9)      ; If entity is Berk and his Moving Upwards Flag (floating) is set...
        andi tmp0,128*256               ;                   
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
+       jne  do_move_into_right_room_1  ; RET NZ            ; ...then return
        .call @_48727                   ; CALL 48727        ; If entity is Berk then move carried entity to Berk's right as he faces right
-       .ret                            ; RET               ; Return
+do_move_into_right_room_1:
+       .endproc                        ; RET               ; Return
 
 * Set Entity's Position to be Left-Hand Side of New Room to Right
 * 
@@ -8081,17 +8078,17 @@ _54398:
 * Berk
 * 
 * Used by the routines at #R48641, #R54283 and #R54348.
-_54419:
+do_move_into_left_room:
+       .proc
        .call @_54434                   ; CALL 54434        ; Set entity's position to be right-hand side of new room to left
        .call @_54456                   ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
        movb @9(ix),tmp0                ; BIT 7,(IX+9)      ; If entity is Berk and his Moving Upwards Flag (floating) is set...
        andi tmp0,128*256               ;                   
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
+       jne  do_move_into_left_room_1   ; RET NZ            ; ...then return
        .call @_48738                   ; CALL 48738        ; If entity is Berk then move carried entity to Berk's left as he faces left
-       .ret                            ; RET               ; Return
+do_move_into_left_room_1:
+       .endproc                        ; RET               ; Return
 
 * Set Entity's Position to be Right-Hand Side of New Room to Left
 * 
@@ -8239,7 +8236,8 @@ get_left_room_index_4:
 * Used by the routines at #R36116, #R52148, #R52193, #R52889, #R52914, #R54313 and #R55041. Input:  IX  Address of
 * complex state data for an entity Output: F  Carry Flag set if no entity found, reset otherwise A  Class of entity,
 * if found, otherwise 255 IY  Address of complex state data for colliding entity
-_54569:
+; TODO: Carry flag
+check_collision_right:
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries in complex state data are 13 bytes wide)
        mov  @_34238,iy                 ; LD IY,(34238)     ; Load start address of current level's complex state data into IY
 _54576:
@@ -8295,7 +8293,8 @@ _54662:
 * Used by the routines at #R36116, #R52053, #R52098, #R52870, #R52914, #R54348 and #R55041. Input:  IX  Address of
 * complex state data for an entity Output: F  Carry Flag set if no entity found, reset otherwise A  Class of entity,
 * if found, otherwise 255 IY  Address of complex state data for colliding entity
-_54666:
+; TODO: Carry flag
+check_collision_left:
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries in complex state data are 13 bytes wide)
        mov  @_34238,iy                 ; LD IY,(34238)     ; Load start address of current level's complex state data into IY
 _54673:
@@ -8354,7 +8353,8 @@ _54760:
 * Used by the routines at #R37639 and #R52315. Input:  IX  Address of complex state data for an entity Output: F
 * Carry Flag set if no entity found, reset otherwise A  Class of entity, if found, otherwise 255 IY  Address of
 * complex state data for colliding entity
-_54764:
+; TODO: Carry flag
+check_collision_next_depth:
        movb one,@c                     ; LD C,1            ; Set depth offset to 1 (i.e. check entities at next depth level out of screen)
        jmp  _54770                     ; JR 54770          ; Jump to collision detection routine
 
@@ -8364,7 +8364,8 @@ _54764:
 * #R42064, #R42266, #R42486, #R48487, #R51779, #R53083, #R55196 and #R55525. Input:  IX  Address of complex state
 * data for an entity C  (Entry at #R54770 only) Depth offset Output: F  Carry Flag set if no entity found, reset
 * otherwise A  Class of entity, if found, otherwise 255 IY  Address of complex state data for colliding entity
-_54768:
+; TODO: Carry flag
+check_collision_same_depth:
        movb @bytes+0,@c                ; LD C,0            ; Set depth offset to 0 (i.e. check entities at same depth)
 * This entry point is used by the routine at #R54764.
 _54770:
@@ -8430,7 +8431,8 @@ _54874:
 * Used by the routine at #R52315. Input:  IX  Address of complex state data for an entity Output: F  Carry Flag set
 * if no entity found, reset otherwise A  Class of entity, if found, otherwise 254 IY  Address of complex state data
 * for colliding entity
-_54878:
+; TODO: Carry flag
+check_collision_same_depth_reverse:
        movb @bytes+0,@c                ; LD C,0            ; Set depth offset to 0 (i.e. check entities at same depth)
        .push ix                        ; PUSH IX           ; Load IY with address in IX...
        .pop iy                         ; POP IY            ; ...
@@ -8448,7 +8450,8 @@ _54878:
 * spiders, webs and arches are excluded from certain collision checks. Input:  IX  Address of complex state data for
 * an entity C  (Entry at #R54899 only) Depth offset Output: F  Carry Flag set if no entity found, reset otherwise A
 * Class of entity, if found, otherwise 254 IY  Address of complex state data for colliding entity
-_54890:
+; TODO: Carry flag
+check_collision_next_depth_reverse:
        movb one,@c                     ; LD C,1            ; Set depth offset to 1 (i.e. check entities at next depth level into screen)
        li   de,65523                   ; LD DE,65523       ; Load DE with -13 (as entries in complex state data are 13 bytes wide)
        mov  @_34246,iy                 ; LD IY,(34246)     ; Load IY with current level's start address for reverse-order collision checks
@@ -8511,14 +8514,14 @@ _55000:
 * 
 * This routine seems to be involved with the relative positioning of two different entities, assuming that IX
 * contains a complex state data address.
-       mov  @_34258,iy                 ; LD IY,(34258)     ; Load IY with address of complex state data for entity involved in last collision check
-       movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with width of this entity, minus one...
-       sb   @5(iy),a                   ; SUB (IY+5)        ; ...
-       srl  a,1                        ; SRL A             ; Divide result by two, clearing remainder...
-       sb   one,a                      ; DEC A             ; ...and subtract one
-       ab   @5(iy),a                   ; ADD A,(IY+5)      ; Add x-coordinate of entity's left edge
-       cb   a,@5(ix)                   ; CP (IX+5)         ; 
-       .ret                            ; RET               ; Return
+;       mov  @_34258,iy                 ; LD IY,(34258)     ; Load IY with address of complex state data for entity involved in last collision check
+;       movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with width of this entity, minus one...
+;       sb   @5(iy),a                   ; SUB (IY+5)        ; ...
+;       srl  a,1                        ; SRL A             ; Divide result by two, clearing remainder...
+;       sb   one,a                      ; DEC A             ; ...and subtract one
+;       ab   @5(iy),a                   ; ADD A,(IY+5)      ; Add x-coordinate of entity's left edge
+;       cb   a,@5(ix)                   ; CP (IX+5)         ; 
+;       .ret                            ; RET               ; Return
 
 * Cached Control Input
 * 
@@ -8586,7 +8589,7 @@ _55066:
        movb @bytes+2,b                 ; LD B,2            ; Load B with 2 (as Berk and Drutt jump right by two characters)
 _55077:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of characters to move)
-       .call @_54569                   ; CALL 54569        ; Check jumper for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_right                   ; CALL 54569        ; Check jumper for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        joc  _55108                     ; JR C,55108        ; TODO: check code. ...and if a collision has not occurred, then skip ahead to #R55108
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class less than 22 (can be picked up)...
@@ -8605,7 +8608,7 @@ _55077:
        jmp  _55124                     ; JR 55124          ; Skip ahead to #R55124
 * No collision, or collision with entity of class 50, 129 or less than 22
 _55108:
-       .call @_54313                   ; CALL 54313        ; Move jumper into room to the right, if appropriate...
+       bl   @move_into_right_room                   ; CALL 54313        ; Move jumper into room to the right, if appropriate...
        jnc  _55124                     ; JR NC,55124       ; TODO: check code. ...and if jumper can't enter new room then skip ahead to #R55124
        ab   one,@5(ix)                 ; INC (IX+5)        ; Move jumper right by one character...
        ab   one,@7(ix)                 ; INC (IX+7)        ; ...
@@ -8628,7 +8631,7 @@ _55128:
        movb @bytes+2,b                 ; LD B,2            ; Load B with 2 (as Berk and Drutt jump left by two characters)
 _55136:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of characters to move)
-       .call @_54666                   ; CALL 54666        ; Check jumper for collision with another impassable / pushable entity immediately to the
+       .call @check_collision_left                   ; CALL 54666        ; Check jumper for collision with another impassable / pushable entity immediately to the
                                                            ; left...
        joc  _55167                     ; JR C,55167        ; TODO: check code. ...and if a collision has not occurred, then skip ahead to #R55167
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class less than 22 (can be picked up)...
@@ -8647,8 +8650,8 @@ _55136:
        jmp  _55183                     ; JR 55183          ; Skip ahead to #R55183
 * No collision, or collision with entity of class 50, 129 or less than 22
 _55167:
-       .call @_54348                   ; CALL 54348        ; Move jumper into room to the left, if appropriate...
-       jnc  _55183                     ; JR NC,55183       ; TODO: check code. ...and if jumper can't enter new room then skip ahead to #R55183
+       bl   @move_into_left_room       ; CALL 54348        ; Move jumper into room to the left, if appropriate...
+       jnc  _55183                     ; JR NC,55183       ; ...and if jumper can't enter new room then skip ahead to #R55183
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Move jumper left by one character...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of characters to move)
@@ -8704,7 +8707,7 @@ _55234:
 _55235:
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Move jumper up one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        joc  _55258                     ; JR C,55258        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R55258
        cb   a,@bytes+130               ; CP 130            ; If collision was not with entity of class 130 (causes Berk and Drutt to bounce off or bang
@@ -8738,7 +8741,7 @@ _55284:
 _55285:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Move jumper down one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-       .call @_54768                   ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is
                                                            ; set...
        joc  _55300                     ; JR C,55300        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R55300
        cb   a,@bytes+35                ; CP 35             ; If collision was with an entity of class 35 (platform, Level 1 or Level 3)...
@@ -8758,7 +8761,7 @@ _55300:
        .ret                            ; RET               ; Return
 * Jumper is at the bottom of the screen
 _55320:
-       .call @_54768                   ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is
                                                            ; set...
 _55323:
        joc  _55363                     ; JR C,55363        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R55363
@@ -8960,7 +8963,7 @@ _55592:
        jmp  _55532                     ; JR 55532          ; Loop back to #R55532
 * Entity's position is such that sum of y-coordinate of bottom + depth = 122 (i.e. at ground-level)
 _55596:
-       .call @_54768                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       .call @check_collision_same_depth                   ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
 _55599:
        joc  _55610                     ; JR C,55610        ; TODO: check code. ...and if no collision occurred, then skip ahead to #R55610
