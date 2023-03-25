@@ -44,7 +44,7 @@ time_left:
        byte 16
 
 * Score Data
-_34211:
+timer_tick:
        data 0                                                        ; Timer Tick Counter / Score penalty (current level)
 _34213:
        data 0                                                        ; Score (Current Level)
@@ -107,6 +107,7 @@ _34223:
 * 
 * For each game-cycle that a power is in use, the byte at #R34224 is increased. When this reaches 16, it is reset to
 * zero and the value at #R34225 is decreased by one.
+       even
 _34224:
        byte 0                                                        ; Number of elapsed game-cycles in current group of 16
 _34225:
@@ -219,12 +220,18 @@ draw_coordinates:
        byte 0,0
 
 * Store for Script Instruction Loop Data
-script_instr_loop_data:
-       byte 0,0,1                                                    ; Repeat count and loop start address for script instructions 23 and 24
-_34288:
-       byte 0,0,1                                                    ; Repeat count and loop start address for script instructions 25 and 26
-_34291:
-       byte 0,0,1                                                    ; Repeat count and loop start address for script instructions 27 and 28
+script_23_24_loop_count:
+       byte 0
+script_23_24_loop_addr:
+       data 1                                                        ; Repeat count and loop start address for script instructions 23 and 24
+script_25_26_loop_count:
+       byte 0
+script_25_26_loop_addr:
+       data 1                                                        ; Repeat count and loop start address for script instructions 25 and 26
+script_27_28_loop_count:
+       byte 0
+script_27_28_loop_addr:
+       data 1                                                        ; Repeat count and loop start address for script instructions 27 and 28
 
 * Store for Graphic Layout Loop Data
 loop_address:
@@ -578,7 +585,7 @@ init_level_data_1:
        li   de,current_data_addrs      ; LD DE,34236       ; Copy this level's data block start addresses to #R34236...
        .ldir                           ; LDIR              ; ...
        li   bc,9                       ; LD B,9            ; Clear Store for Script Instruction Loop Data...
-       li   hl,script_instr_loop_data  ; LD HL,34285       ; ...
+       li   hl,script_23_24_loop_count ; LD HL,34285       ; ...
 init_level_data_2:
        movb a,*hl+                     ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
@@ -666,7 +673,7 @@ change_berk_direction:
        andi a,240*256                  ; AND 240           ; ...
        movb a,@11(ix)                  ; LD (IX+11),A      ; ...
        movb @9(ix),@e                  ; LD E,(IX+9)       ; Load Berk's Flags into E
-       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of complex state data (current level) for Drutt
+       mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of complex state data (current level) for Drutt
        movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with x-coordinate of Drutt's right side...
        ab   one,a                      ; INC A             ; ...and increase by one
        cb   a,@5(ix)                   ; CP (IX+5)         ; If x-coordinate of Berk's left side is greater than this (i.e. Drutt is to the left of
@@ -747,10 +754,10 @@ update_berk_state:
        andi tmp0,32*256                ;                   
        jne  update_berk_state_1        ; RET NZ            ; ...then return
        mov  @berk_script_data_pos,hl   ; LD HL,(35687)     ; Load current position in Berk's script data from #R35687 into HL...
-       mov  hl,@current_script_addr                 ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
+       mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
        .call @update_berk_state_2      ; CALL 35735        ; Update state of Berk depending upon currently selected character, control input and currently
                                                            ; active power
-       mov  @current_script_addr,hl                 ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
+       mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
        mov  hl,@berk_script_data_pos   ; LD (35687),HL     ; ...at #R35687 as current position in Berk's script data
        movb @_34220,a                  ; LD A,(34220)      ; If Berk's current power is not invisibility (level 3)...
        cb   a,@bytes+11                ; CP 11             ; ...
@@ -1254,7 +1261,7 @@ _36390:
 * This entry point is used by the routine at #R36385.
 _36393:
        mov  bc,@_34266                 ; LD (34266),BC     ; Store script data address in BC at #R34266
-       movb @game_flags,a                  ; LD A,(34208)      ; Load E with Game Flags...
+       movb @game_flags,a              ; LD A,(34208)      ; Load E with Game Flags...
        movb a,@e                       ; LD E,A            ; ...
        movb @_34221,a                  ; LD A,(34221)      ; Load A with class of entity currently held by Berk...
        cb   a,@bytes+17                ; CP 17             ; ... and if this is not 17 (Key)...
@@ -1294,7 +1301,7 @@ _36448:
                                                            ; falling
 * New level is not Level 1
        mov  @_34266,hl                 ; LD HL,(34266)     ; Load HL with script data address stored at #R34266...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Door is locked or Berk is not holding the correct character
 _36462:
        .call @_36296                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
@@ -1406,9 +1413,9 @@ _36625:
 * 
 * Used by the routine at #R36390.
 _36638:
-       movb @game_flags,a                  ; LD A,(34208)      ; Set Update Scores and Display Flag...
+       movb @game_flags,a              ; LD A,(34208)      ; Set Update Scores and Display Flag...
        socb @bits+5,a                  ; SET 5,A           ; ...
-       movb a,@game_flags                  ; LD (34208),A      ; ...
+       movb a,@game_flags              ; LD (34208),A      ; ...
        mov  @_34256,iy                 ; LD IY,(34256)     ; Load IY with address of complex state data for Door just interacted with
        movb @9(iy),a                   ; LD A,(IY+9)       ; Load A with destination level from Door's state data...
        movb a,@current_level           ; LD (34207),A      ; ...and set current level to this value
@@ -1439,7 +1446,7 @@ _36638:
 * Destination level is not Level 1
 _36725:
        .call @_36753                   ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
-       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
+       mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
        mov  iy,@_34256                 ; LD (34256),IY     ; ...and store at #R34256
        .call @_48850                   ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
 _36739:
@@ -1455,11 +1462,11 @@ _36739:
 * 
 * Used by the routine at #R36638.
 _36753:
-       bl   @init_level_data                   ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
+       bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        movb @bytes+33,a                ; LD A,33           ; Load IY with address of complex state data for first entity that has class of 33 (Entry
                                                            ; Door)...
        .call @_54019                   ; CALL 54019        ; ...
-       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with start address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with start address of current level's complex state data for Berk
        movb @5(iy),a                   ; LD A,(IY+5)       ; Load A with x-coordinate of left of Entry Door...
        ab   one,a                      ; INC A             ; ...and add one
        movb a,@5(ix)                   ; LD (IX+5),A       ; Adjust Berk's horizontal position so that his left side is at coordinate in A...
@@ -1652,14 +1659,14 @@ _37128:
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script                    ;                   
 !
-       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is set...
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is set...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jne  _37148                     ; JR NZ,37148       ; ...then skip ahead to #R37148
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        jmp  _37152                     ; JR 37152          ; Skip ahead to #R37152
 _37148:
-       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
+       mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
 * At this point, IY points to the complex state data entry for the current character.
 _37152:
        movb *iy,a                      ; LD A,(IY+0)       ; If current character's current room is not the same as the Bat's...
@@ -1756,9 +1763,9 @@ _37662:
        movb @_34223,a                  ; LD A,(34223)      ; Increase count of number of times a spider has killed Berk...
        ab   one,a                      ; INC A             ; ...
        movb a,@_34223                  ; LD (34223),A      ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 _37685:
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If spider's Must Process Current Script Data Flag is set...
        andi tmp0,1*256                 ;                   
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -2193,7 +2200,7 @@ _38635:
        jne  _38707                     ; JR NZ,38707       ; ...then check for collision with Berk killing him if so, ensure stalactite is falling and
                                                            ; update its vertical position (#R38707)
        movb @5(ix),@e                  ; LD E,(IX+5)       ; Load E with x-coordinate of left of stalactite
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is not the same as the stalactite's...
        cb   a,*ix                      ; CP (IX+0)         ; ...
        jne  _38679                     ; JR NZ,38679       ; ...then skip ahead to #R38679 to check Drutt's position
@@ -2281,7 +2288,7 @@ _39150:
 * 
 * Used by the routine at #R39137.
 _39151:
-       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        li   hl,_39150                  ; LD HL,39150       ; If Hatch State Index is zero...
        movb *hl,a                      ; LD A,(HL)         ; ...
        socb a,a                        ; OR A              ; ...
@@ -2347,7 +2354,7 @@ _39227:
        movb @l,@2(ix)                  ; LD (IX+2),L       ; ...(Berk being thrown left)...
        movb h,@3(ix)                   ; LD (IX+3),H       ; ...
        li   hl,_35523                  ; LD HL,35523       ; Set current position in Berk's script data to #R35523...
-       mov  hl,@berk_script_data_pos                 ; LD (35687),HL     ; (Berk being thrown left by Hatch)
+       mov  hl,@berk_script_data_pos   ; LD (35687),HL     ; (Berk being thrown left by Hatch)
 * Hatch State Index is 10 (Berk was thrown 9 cycles ago)
 _39259:
        li   hl,_41115                  ; LD HL,41115       ; Load HL with graphic layout data address of Hatch half open with Bat (Animated)
@@ -2438,7 +2445,7 @@ _39386:
 * Make Clawed Foot grab Berk (Clawed Foot is one or two characters to the right of Berk's left edge)
 _39391:
        li   bc,_35515                  ; LD BC,35515       ; Set current position in Berk's script data to...
-       mov  bc,@berk_script_data_pos                 ; LD (35687),BC     ; ...Berk in floating position
+       mov  bc,@berk_script_data_pos   ; LD (35687),BC     ; ...Berk in floating position
        socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
        movb @bytes+12,a                ; LD A,12           ; Set Clawed Foot's Moving Up Flag and Holding Berk Flag...
        movb a,@9(iy)                   ; LD (IY+9),A       ; ...
@@ -2507,7 +2514,7 @@ _39501:
        socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set Berk's velocity factor to 2
        li   bc,_35359                  ; LD BC,35359       ; Set current position in Berk's script data to...
-       mov  bc,@berk_script_data_pos                 ; LD (35687),BC     ; ...Berk starting to fall downwards
+       mov  bc,@berk_script_data_pos   ; LD (35687),BC     ; ...Berk starting to fall downwards
        li   bc,_40320                  ; LD BC,40320       ; Set Clawed Foot's graphic layout data address to point to #R40320 (Reaching, Open)...
        .call @_39410                   ; CALL 39410        ; ...make Berk drop the entity he is holding and load IY with its complex state data address
 * Reset Clawed Foot to inactive state
@@ -2703,7 +2710,7 @@ _39760:
 * Used by the routine at #R39137.
 _39776:
        li   iy,_44868                  ; LD IY,44868       ; Load IY with address of complex state data for Large Yellow Creature (Level 3)
-       mov  @berk_state_addr,ix                 ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        li   hl,_44868+9                ; LD HL,44877       ; Load HL with address of Large Yellow Creature's flags...
        movb *hl,a                      ; LD A,(HL)         ; ...and load flags into A
        cb   a,@bytes+2                 ; CP 2              ; If creature is in "Rising From Floor" mode...
@@ -3008,7 +3015,7 @@ _41498:
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 * The instructions below do a "manual" check for a collision between the Skeleton and Berk. See trivia
 _41513:
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is not 3 (Skeleton's room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -3039,7 +3046,7 @@ _41513:
 * apparent position or width graphically. Input:  IX  Address of complex state data for an entity Output: HL Address
 * of next script instruction to execute
 _41550:
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is 3 (Skeleton's room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jeq  _41580                     ; JR Z,41580        ; ...then jump to #R41580
@@ -3204,7 +3211,7 @@ _41805:
        movb @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Cannon has its Is Being Carried Flag set...
        andi tmp0,32*256                ;                   
        jne  _41799                     ; JR NZ,41799       ; ...then jump to #R41799 (Cannon dormant)
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is the same as the Cannon's room...
        cb   a,*iy                      ; CP (IY+0)         ; ...
        jeq  _41833                     ; JR Z,41833        ; ...then skip ahead to #R41833
@@ -3531,7 +3538,7 @@ _42374:
 * Used by the routine at #R41211.
 _42381:
        li   ix,_45495                  ; LD IX,45495       ; Point IX at start of state data for Snake (Level 4)
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        li   hl,_45495+12               ; LD HL,45507       ; Load HL with address of Snake's Attack Progress Index
        movb *hl,a                      ; LD A,(HL)         ; If Snake's Attack Progress Index is not zero...
        socb a,a                        ; OR A              ; ...
@@ -5275,14 +5282,14 @@ update_rnd_timer_figure_1:
 * Used by the routine at #R47363.
 reduce_remaining_time:
        .proc
-       mov  @_34211,hl                 ; LD HL,(34211)     ; Increase Timer Tick Counter by one...
+       mov  @timer_tick,hl             ; LD HL,(34211)     ; Increase Timer Tick Counter by one...
        inc  hl                         ; INC HL            ; ...
-       mov  hl,@_34211                 ; LD (34211),HL     ; ...
+       mov  hl,@timer_tick             ; LD (34211),HL     ; ...
        movb h,a                        ; LD A,H            ; If Timer Tick Counter is less than 768 (i.e. 3 x 256)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jl   reduce_remaining_time_1    ; RET C             ; ...then return
        li   hl,0                       ; LD HL,0           ; Reset Timer Tick Counter to zero...
-       mov  hl,@_34211                 ; LD (34211),HL     ; ...
+       mov  hl,@timer_tick             ; LD (34211),HL     ; ...
 * This entry point is used by the routine at #R53723.
 _47485:
        movb @time_left,a               ; LD A,(34210)      ; If no time / lives remain...
@@ -5312,7 +5319,7 @@ _47517:
        a    de,hl                      ; ADD HL,DE         ; ...
        sb   one,b                      ; DJNZ 47517        ; ...
        jne  _47517                     ;                   
-       mov  @_34211,de                 ; LD DE,(34211)     ; Subtract value of Timer Tick Counter (i.e. Score Penalty) from current level's score...
+       mov  @timer_tick,de             ; LD DE,(34211)     ; Subtract value of Timer Tick Counter (i.e. Score Penalty) from current level's score...
        s    de,hl                      ; SBC HL,DE         ; ...
 _47526:
        mov  hl,@_34213                 ; LD (34213),HL     ; Set score for current level
@@ -5913,21 +5920,21 @@ _48287:
 * script instruction to execute
 _48295:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
-       movb a,@script_instr_loop_data  ; LD (34285),A      ; Store repeat count at #R34285
-       mov  hl,@script_instr_loop_data+1 ; LD (34286),HL     ; Store address to return to (i.e. first instruction in loop) at #R34285...
+       movb a,@script_23_24_loop_count ; LD (34285),A      ; Store repeat count at #R34285
+       mov  hl,@script_23_24_loop_addr ; LD (34286),HL     ; Store address to return to (i.e. first instruction in loop) at #R34285...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (24) End Loop (1 / 3) Output: HL  Address of next script instruction to execute
 _48307:
-       movb @script_instr_loop_data,a                  ; LD A,(34285)      ; Load A with current repeat count
+       movb @script_23_24_loop_count,a ; LD A,(34285)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script                    ;                   
 !
        sb   one,a                      ; DEC A             ; Decrease repeat count...
-       movb a,@script_instr_loop_data                  ; LD (34285),A      ; ...and store
-       mov  @script_instr_loop_data+1,hl               ; LD HL,(34286)     ; Load HL with address of first instruction in loop...
-       b    @execute_script                    ; JP 48098          ; ...and execute script instruction at this location
+       movb a,@script_23_24_loop_count ; LD (34285),A      ; ...and store
+       mov  @script_23_24_loop_addr,hl ; LD HL,(34286)     ; Load HL with address of first instruction in loop...
+       b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (25) Start Loop (2 / 3)
 * 
@@ -5937,21 +5944,21 @@ _48307:
 * script instruction to execute
 _48324:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
-       movb a,@_34288                  ; LD (34288),A      ; Store repeat count at #R34288
-       mov  hl,@_34288+1               ; LD (34289),HL     ; Store address to return to (i.e. first instruction in loop) at #R34288...
-       b    @execute_script                    ; JP 48098          ; ...and execute script instruction at this location
+       movb a,@script_25_26_loop_count ; LD (34288),A      ; Store repeat count at #R34288
+       mov  hl,@script_25_26_loop_addr ; LD (34289),HL     ; Store address to return to (i.e. first instruction in loop) at #R34288...
+       b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (26) End Loop (2 / 3) Output: HL  Address of next script instruction to execute
 _48336:
-       movb @_34288,a                  ; LD A,(34288)      ; Load A with current repeat count
+       movb @script_25_26_loop_count,a ; LD A,(34288)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script        ;
 !
        sb   one,a                      ; DEC A             ; Decrease repeat count...
-       movb a,@_34288                  ; LD (34288),A      ; ...and store
-       mov  @_34288+1,hl               ; LD HL,(34289)     ; Load HL with address of first instruction in loop...
-       b    @execute_script                    ; JP 48098          ; ...and execute script instruction at this location
+       movb a,@script_25_26_loop_count ; LD (34288),A      ; ...and store
+       mov  @script_25_26_loop_addr,hl ; LD HL,(34289)     ; Load HL with address of first instruction in loop...
+       b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (27) Start Loop (3 / 3)
 * 
@@ -5961,21 +5968,21 @@ _48336:
 * script instruction to execute
 _48353:
        .call @_48382                   ; CALL 48382        ; Load A with script instruction parameter, and advance HL to next instruction
-       movb a,@_34291                  ; LD (34291),A      ; Store repeat count at #R34291
-       mov  hl,@_34291+1               ; LD (34292),HL     ; Store address to return to (i.e. first instruction in loop) at #R34291...
-       b    @execute_script                    ; JP 48098          ; ...and execute script instruction at this location
+       movb a,@script_27_28_loop_count ; LD (34291),A      ; Store repeat count at #R34291
+       mov  hl,@script_27_28_loop_addr ; LD (34292),HL     ; Store address to return to (i.e. first instruction in loop) at #R34291...
+       b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (28) End Loop (3 / 3) Output: HL  Address of next script instruction to execute
 _48365:
-       movb @_34291,a                  ; LD A,(34291)      ; Load A with current repeat count
+       movb @script_27_28_loop_count,a ; LD A,(34291)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script                    ;                   
 !
        sb   one,a                      ; DEC A             ; Decrease repeat count...
-       movb a,@_34291                  ; LD (34291),A      ; ...and store
-       mov  @_34291+1,hl               ; LD HL,(34292)     ; Load HL with address of first instruction in loop...
-       b    @execute_script                    ; JP 48098          ; ...and execute script instruction at this location
+       movb a,@script_27_28_loop_count ; LD (34291),A      ; ...and store
+       mov  @script_27_28_loop_addr,hl ; LD HL,(34292)     ; Load HL with address of first instruction in loop...
+       b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Load A with Script Instruction Parameter then Advance HL to Next Instruction
 * 
@@ -6186,22 +6193,22 @@ _48660:
        mov  @_34260,iy                 ; LD IY,(34260)     ; Load IY with address of complex state data for entity held by Berk...
        sb   one,@5(iy)                 ; DEC (IY+5)        ; ...and decrease its left and right x-coordinates by one character...
        sb   one,@7(iy)                 ; DEC (IY+7)        ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (22) Move Carried Entity Behind Berk as he Faces Into Screen
 _48686:
        .call @_48715                   ; CALL 48715        ; Move carried entity behind Berk as he faces into screen
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (21) Move Carried Entity in Front of Berk as he Faces Out of Screen
 _48692:
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (19) Move Carried Entity to Berk's Left as he Faces Left
 _48698:
        .call @_48738                   ; CALL 48738        ; Move carried entity to Berk's left as he faces left
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (20) Move Carried Entity to Berk's Right as he Faces Right
 _48704:
@@ -6499,14 +6506,14 @@ _51779:
        .call @_55516                   ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
        b    @_52038                    ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
 _51792:
-       mov  @worm_state_addr,iy                 ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
-       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset...
+       mov  @worm_state_addr,iy        ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  _51841                     ; JR Z,51841        ; ...then skip ahead to #R51841
 * Drutt Mode Flag is set (i.e. Drutt Mode)
        socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set Drutt's Under Player Control Flag
-       movb @control_input,a                  ; LD A,(34219)      ; Load A with control input
+       movb @control_input,a           ; LD A,(34219)      ; Load A with control input
        movb a,tmp0                     ; BIT 0,A           ; If right has been pressed...
        andi tmp0,1*256                 ;                   
        jne  _51904                     ; JR NZ,51904       ; ...then randomly select script data for rightward hop of size three or four, and execute
@@ -6537,7 +6544,7 @@ _51841:
        jeq  !                          ; JP NZ,51960       ; ...then move Drutt closer to the worm and eat it if close enough
        b    @_51960                    ;                   
 !
-       mov  @berk_state_addr,iy                 ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Drutt is in the same room as Berk...
        cb   a,*ix                      ; CP (IX+0)         ; ...
        jeq  _51875                     ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
@@ -7049,7 +7056,7 @@ _52961:
 * Output: HL  Address of next script instruction to execute
 _52967:
        .call @_53057                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
-       mov  @drutt_state_addr,iy                 ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
+       mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
        movb *ix,a                      ; LD A,(IX+0)       ; If Drutt and the worm are in the same room...
        cb   a,*iy                      ; CP (IY+0)         ; ...
        jeq  _53004                     ; JR Z,53004        ; ...then skip ahead to #R53004
@@ -7494,7 +7501,7 @@ _53814:
 * Used by the routines at #R34916 and #R53887. Input:  IX  (Entry at #R53848 only) Address of complex state data for
 * an entity
 copy_room_dim_data_to_tmp:
-       movb @game_flags,a                  ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  copy_room_dim_data_to_tmp_1 ; JR Z,53838        ; ...then skip ahead to #R53838
