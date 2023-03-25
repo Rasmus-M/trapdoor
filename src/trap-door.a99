@@ -46,9 +46,9 @@ time_left:
 * Score Data
 timer_tick:
        data 0                                                        ; Timer Tick Counter / Score penalty (current level)
-_34213:
+score_level:
        data 0                                                        ; Score (Current Level)
-_34215:
+score_total:
        data 0                                                        ; Current Total Score
 
 * Current Border Colour
@@ -252,7 +252,7 @@ _34298:
        byte 0
 
 * Current High Score
-_34299:
+high_score:
        data 999
 
 * Table of Data Addresses (Level 1)
@@ -399,7 +399,7 @@ main_all_levels:
        andi tmp0,32*256                ;
        jeq  skip_update_score          ; JR Z,34606        ; ...then skip ahead to #R34606
        szcb @bits+5,*hl                ; RES 5,(HL)        ; Reset Update Scores and Display Flag
-;      bl   @update_scores_and_display ; CALL 47499        ; Update scores and display
+;       bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
 skip_update_score:
        li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
@@ -424,14 +424,14 @@ _34623:
        b    @_34438                    ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
 time_out:
-       bl   @update_scores_and_display ; CALL 47499        ; Update scores and display
-       .call @print_times_up                   ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
+       bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
+       .call @print_times_up           ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
        jmp  _34666                     ; JR 34666          ; Skip ahead to #R34666
 * "All Home" Flag is set
 _34658:
-       .call @print_home_sweet_home                   ; CALL 47213        ; Print "HOME SWEET HOME" string
+       .call @print_home_sweet_home    ; CALL 47213        ; Print "HOME SWEET HOME" string
        movb @bytes+3,a                 ; LD A,3            ; Set sound 3 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
 _34666:
@@ -5311,49 +5311,49 @@ reduce_remaining_time_1:
 * Update Scores and Display
 * 
 * Used by the routine at #R34438.
-update_scores_and_display:
+update_and_print_score:
        .proc
        li   hl,game_flags              ; LD HL,34208       ; Set Show Score Flag...
        socb @bits+7,*hl                ; SET 7,(HL)        ; ...
        li   hl,0                       ; LD HL,0           ; Set HL to zero
        movb @time_left,a               ; LD A,(34210)      ; If no time / lives remain...
-       socb a,a                        ; OR A              ; ...
-       jeq  _47526                     ; JR Z,47526        ; ...then skip ahead to #R47526
+                                       ; OR A              ; ...
+       jeq  update_and_print_score_2 ; JR Z,47526          ; ...then skip ahead to #R47526
        movb a,b                        ; LD B,A            ; Load HL with 1000 x current remaining time / lives...
        li   de,1000                    ; LD DE,1000        ; ...
-_47517:
+update_and_print_score_1:
        a    de,hl                      ; ADD HL,DE         ; ...
        sb   one,b                      ; DJNZ 47517        ; ...
-       jne  _47517                     ;                   
+       jne  update_and_print_score_1                       ;                   
        mov  @timer_tick,de             ; LD DE,(34211)     ; Subtract value of Timer Tick Counter (i.e. Score Penalty) from current level's score...
        s    de,hl                      ; SBC HL,DE         ; ...
-_47526:
-       mov  hl,@_34213                 ; LD (34213),HL     ; Set score for current level
-       mov  @_34215,de                 ; LD DE,(34215)     ; Load DE with current total score
+update_and_print_score_2:
+       mov  hl,@score_level            ; LD (34213),HL     ; Set score for current level
+       mov  @score_total,de            ; LD DE,(34215)     ; Load DE with current total score
        a    de,hl                      ; ADD HL,DE         ; Add score for current level to total score...
-       mov  hl,@_34215                 ; LD (34215),HL     ; ...and store
-       mov  @_34299,de                 ; LD DE,(34299)     ; Load current high score into DE
+       mov  hl,@score_total            ; LD (34215),HL     ; ...and store
+       mov  @high_score,de             ; LD DE,(34299)     ; Load current high score into DE
        s    de,hl                      ; SBC HL,DE         ; Subtract high score from current total score...
-       jlt  _47551                     ; JR C,47551        ; TODO: check code. ...and if this is less than zero (i.e. high score is higher than current total score) then
+       jlt  update_and_print_score_3   ; JR C,47551        ; ...and if this is less than zero (i.e. high score is higher than current total score) then
                                                            ; skip ahead to #R47551
-       mov  @_34215,hl                 ; LD HL,(34215)     ; Load current total score into HL...
-       mov  hl,@_34299                 ; LD (34299),HL     ; ...and store as new high score
-_47551:
+       mov  @score_total,hl            ; LD HL,(34215)     ; Load current total score into HL...
+       mov  hl,@high_score             ; LD (34299),HL     ; ...and store as new high score
+update_and_print_score_3:
        movb @bytes+16,a                ; LD A,16           ; Set time / lives to 16...
        movb a,@time_left               ; LD (34210),A      ; ...
-       li   iy,_47589+7                ; LD IY,47596       ; Point IY at "numeric (score)" part of string at 47589
-       mov  @_34213,hl                 ; LD HL,(34213)     ; Load HL with current score...
-       .call @_47741                   ; CALL 47741        ; ...and convert to string at IY
-       li   iy,_47589+20               ; LD IY,47609       ; Point IY at "numeric (total)" part of string at 47589
-       mov  @_34215,hl                 ; LD HL,(34215)     ; Load HL with current total score...
-       .call @_47741                   ; CALL 47741        ; ...and convert to string at IY
-       li   iy,_47589+33               ; LD IY,47622       ; Point IY at "numeric (high score)" part of string at 47589
-       mov  @_34299,hl                 ; LD HL,(34299)     ; Load HL with current high score...
-       .call @_47741                   ; CALL 47741        ; ...and convert to string at IY
+       li   iy,score_text+7            ; LD IY,47596       ; Point IY at "numeric (score)" part of string at 47589
+       mov  @score_level,hl            ; LD HL,(34213)     ; Load HL with current score...
+       bl   @num_to_str                ; CALL 47741        ; ...and convert to string at IY
+       li   iy,score_text+20           ; LD IY,47609       ; Point IY at "numeric (total)" part of string at 47589
+       mov  @score_total,hl            ; LD HL,(34215)     ; Load HL with current total score...
+       bl   @num_to_str                ; CALL 47741        ; ...and convert to string at IY
+       li   iy,score_text+33           ; LD IY,47622       ; Point IY at "numeric (high score)" part of string at 47589
+       mov  @high_score,hl             ; LD HL,(34299)     ; Load HL with current high score...
+       bl   @num_to_str                ; CALL 47741        ; ...and convert to string at IY
        b    @print_score_strings_0     ; JP 47628          ; Print SCORE / TOTAL / HI-SC string in current character's colours and return
 
 * Score / Total / High Score String
-_47589:
+score_text:
        text '*SCORE#00000* TOTAL#00000* HI-SC#00999$'
 
 * Print Score / Total / High Score String in Current Character's Colours
@@ -5362,7 +5362,7 @@ _47589:
 print_score_strings:
        .proc
 print_score_strings_0
-       li   iy,_47589                  ; LD IY,47589       ; Point IY at SCORE / TOTAL / HI-SC text
+       li   iy,score_text                  ; LD IY,47589       ; Point IY at SCORE / TOTAL / HI-SC text
        li   hl,23232                   ; LD HL,23232       ; Set Attribute File address at which to print text to start of second-last character row
 print_score_strings_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load a character from the string into A
@@ -5482,37 +5482,38 @@ print_half_dbl_height:
 * 
 * Used by the routine at #R47499. Input:  HL  A number to convert to string IY  A location in memory to store a
 * number converted to a string
-_47741:
+num_to_str:
+       .proc
        li   de,10000                   ; LD DE,10000       ; Convert the ten thousands to a character...
-       .call @_47772                   ; CALL 47772        ; ...
+       bl   @digit_to_str              ; CALL 47772        ; ...
        li   de,1000                    ; LD DE,1000        ; Convert the thousands to a character...
-       .call @_47772                   ; CALL 47772        ; ...
+       bl   @digit_to_str              ; CALL 47772        ; ...
        li   de,100                     ; LD DE,100         ; Convert the hundreds to a character...
-       .call @_47772                   ; CALL 47772        ; ...
+       bl   @digit_to_str              ; CALL 47772        ; ...
        li   de,10                      ; LD DE,10          ; Convert the tens to a character...
-       .call @_47772                   ; CALL 47772        ; ...
+       bl   @digit_to_str              ; CALL 47772        ; ...
        movb @l,a                       ; LD A,L            ; Load remainder (units) into L
        ab   @bytes+48,a                ; ADD A,48          ; Add as offset to 48 (ASCII code for "0")
        movb a,*iy                      ; LD (IY+0),A       ; Load ASCII character code into units position in string
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Convert a Digit of Numeric Data to its String Equivalent
 * 
 * Used by the routine at #R47741. Input:  DE  Current power of ten HL  A number to convert to string IY  A location
 * in memory to store a current digit converted to a string
-_47772:
+digit_to_str:
        movb @bytes+47,*iy              ; LD (IY+0),47      ; Set character in string to "/" (character immediately before "0")
-       ; AND A                         ; AND A             ; Reset Carry Flag
-_47777:
+                                       ; AND A             ; Reset Carry Flag
+digit_to_str_1:
        ab   one,*iy                    ; INC (IY+0)        ; Advance character at current string position to next numeric character up
        s    de,hl                      ; SBC HL,DE         ; Subtract current power of ten from number to convert
-       jgt  _47777                     ; JR NC,47777       ; TODO: check code. If number to convert has not dropped below 0 (i.e. we have not yet subtracted too many of the
+       jgt  digit_to_str_1             ; JR NC,47777       ; TODO: check code. If number to convert has not dropped below 0 (i.e. we have not yet subtracted too many of the
                                                            ; current power of ten) then loop back to #R47777
        a    de,hl                      ; ADD HL,DE         ; We have subtracted one too many of the current power of ten, so add it back to make the
                                                            ; remainder positive
        inc  iy                         ; INC IY            ; Advance to next character in the string as we are finished dealing with the current power of
                                                            ; ten
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 * Read Keyboard and Load Pressed Key Character into A
 * 
