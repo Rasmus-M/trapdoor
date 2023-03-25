@@ -6453,7 +6453,7 @@ script_routine_33:
 !
        sb   one,a                      ; DEC A             ; Decrease Jump State Index
        li   de,_48994                  ; LD DE,48994       ; Load DE with start address of Table of Addresses of Berk's Jump Script Data
-       .call @_53814                   ; CALL 53814        ; Advance DE by 2xA Bytes, load WORD at this location into HL...
+       bl   @load_table_addr           ; CALL 53814        ; Advance DE by 2xA Bytes, load WORD at this location into HL...
        .ex_de_hl                       ; EX DE,HL          ; ...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
@@ -6569,7 +6569,7 @@ _51875:
        movb @bytes+7,a                 ; LD A,7            ; Load A with a random number, 0-6...
        bl   @rnd_no                    ; CALL 54222        ; ...
        li   de,_51890                  ; LD DE,51890       ; Point DE at Table of Addresses of Script Data for Drutt's Actions...
-       .call @_53814                   ; CALL 53814        ; ...and load DE with entry of index A in this table
+       bl   @load_table_addr           ; CALL 53814        ; ...and load DE with entry of index A in this table
        .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (now contains address of randomly selected script data)
        b    @execute_script                    ; JP 48098          ; Execute script data at address in HL
 
@@ -7413,6 +7413,7 @@ _53667:
 * Table of Berk's Reset Complex State Data Addresses
 * 
 * Addresses of complex state data reverted to by Berk after he is "killed"
+berk_reset_table:
        data _53684                                                   ; Level 1
        data _53710                                                   ; Level 2
        data _53697                                                   ; Level 3
@@ -7442,9 +7443,9 @@ check_berk_killed:
        socb @bits+3,*hl                ; SET 3,(HL)        ; Set "Reset Spiders to Initial State" Flag
        mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
        .call @_36296                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
-       li   de,_53667+7                ; LD DE,53674       ; Point DE at location two bytes (1 WORD) before start of Table of Addresses of Berk Reset Data
+       li   de,berk_reset_table-2      ; LD DE,53674       ; Point DE at location two bytes (1 WORD) before start of Table of Addresses of Berk Reset Data
        movb @current_level,a           ; LD A,(34207)      ; Load current level number into A
-       .call @_53814                   ; CALL 53814        ; Load DE with that level's address (from table at #R53676) for complex state data to revert
+       bl   @load_table_addr           ; CALL 53814        ; Load DE with that level's address (from table at #R53676) for complex state data to revert
                                                            ; Berk to after he is killed
        .ex_de_hl                       ; EX DE,HL          ; Swap HL (now address of complex state data to revert to) and DE
        mov  @berk_state_addr,de                 ; LD DE,(34240)     ; Load DE with address of current level's complex state data for Berk
@@ -7494,17 +7495,18 @@ clear_prim_disp_buf_area_3:
 * 
 * Used by the routines at #R49010, #R51779 and #R53723. Input:  A  Index DE  Base address Output: DE  WORD value at
 * DE (input) + 2 x A (input)
-_53814:
-       .push hl                        ; PUSH HL           ; Store HL
+load_table_addr:
+                                       ; PUSH HL           ; Store HL
        ab   a,a                        ; ADD A,A           ; Load HL with double index...
+       clr  tmp0
        movb a,@l                       ; LD L,A            ; ...
-       movb @bytes+0,h                 ; LD H,0            ; ...
-       a    de,hl                      ; ADD HL,DE         ; Add HL to DE as offset, in HL
-       movb *hl,@e                     ; LD E,(HL)         ; Load address at HL into DE...
-       inc  hl                         ; INC HL            ; ...
-       movb *hl,d                      ; LD D,(HL)         ; ...
-       .pop hl                         ; POP HL            ; Restore HL
-       .ret                            ; RET               ; Return
+                                       ; LD H,0            ; ...
+       a    de,tmp0                    ; ADD HL,DE         ; Add HL to DE as offset, in HL
+       mov  *tmp0,de                   ; LD E,(HL)         ; Load address at HL into DE...
+                                       ; INC HL            ; ...
+                                       ; LD D,(HL)         ; ...
+                                       ; POP HL            ; Restore HL
+       rt                              ; RET               ; Return
 
 * Copy Room Dimension Data Entry for Current Character / Entity's Current Room to Temporary Store Location (34230)
 * 
