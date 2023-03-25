@@ -2,15 +2,15 @@
 * Macros
 *
        .defm call
-       li   tmp0,$+10
-       mov  tmp0,*sp+
+       li   r11,$+10
+       mov  r11,*sp+
        b    #1
        .endm
 
        .defm ret
        dect sp
-       mov  *sp,tmp0
-       b    *tmp0
+       mov  *sp,r11
+       b    *r11
        .endm
 
        .defm proc

@@ -205,17 +205,14 @@ loop_counter_value_2:
        byte 0
 
 * Position (Address) in Script Data Currently Running
-current_script_addr:
+current_script_addr:                   ; High endian
        data 0
 
 * Data for Drawing to Display
 prim_disp_buffer_addr:
-       data 0                                                        ; Start address of Primary Display Buffer
+       data display_buffer_1                                         ; Start address of Primary Display Buffer
 draw_coordinates:
-       equ  $
-draw_coordinates_y:
        byte 0                                                        ; Base y-coordinate for graphic drawing
-draw_coordinates_x:
        byte 0                                                        ; Base x-coordinate for graphic drawing
 
 * Unused
@@ -382,15 +379,15 @@ main_all_levels:
        bl   @populate_prim_disp_buf     ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
        bl   @draw_display_buffer        ; CALL 54034        ; Draw contents of Primary Display Buffer to display
 ;       .call @play_sound               ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
-;       movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
-;       socb a,a                        ; OR A              ; If no time / lives are left...
-;       jeq  _34645                     ; JR Z,34645        ; ...then jump to #R34645
-;       movb @_43593+10,a               ; LD A,(43603)      ; If "All Home" Flag is set...
-;       movb a,tmp0                     ; BIT 3,A           ; ...
-;       andi tmp0,8*256                 ;
-;       jne  _34658                     ; JR NZ,34658       ; ...then skip ahead to #R34658
-;       .call @_47363                   ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
-;                                                           ; timer figure blinking
+       movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
+       socb a,a                        ; OR A              ; If no time / lives are left...
+       jeq  time_out                   ; JR Z,34645        ; ...then jump to #R34645
+       movb @_43593+10,a               ; LD A,(43603)      ; If "All Home" Flag is set...
+       movb a,tmp0                     ; BIT 3,A           ; ...
+       andi tmp0,8*256                 ;
+       jne  _34658                     ; JR NZ,34658       ; ...then skip ahead to #R34658
+       bl   @update_timer              ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
+                                                           ; timer figure blinking
 ;       li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
 ;       movb *hl,tmp0                   ; BIT 5,(HL)        ; ...
 ;       andi tmp0,32*256                ;
@@ -420,7 +417,7 @@ _34623:
        .call @_34751                   ; CALL 34751        ; Reset all game data in preparation for new game
        b    @_34438                    ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
-_34645:
+time_out:
        .call @_47499                   ; CALL 47499        ; Update scores and display
        .call @_47185                   ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
@@ -4123,7 +4120,7 @@ _45895:
 * Used by the routine at #R34438.
 populate_prim_disp_buf:
        .proc
-       mov  @prim_disp_buffer_addr,@self_mod_instr+2       ; LD HL,(34279)     ; Modify instruction at #R46045 with address of Primary Display Buffer..
+       ; LD HL,(34279)                 ; Modify instruction at #R46045 with address of Primary Display Buffer..
                                        ; LD (46046),HL     ; ...
        movb @tmp_room_dim_data,@c      ; LD A,(34230)      ; Load C with depth of current character's current room...
                                        ; LD C,A            ; ...
@@ -4201,57 +4198,60 @@ inc_and_process_data:
 process_data_in_ix:
        movb *ix,a                      ; LD A,(IX+0)       ; If first byte of graphic layout data entry is at least 236...
        cb   a,@bytes+236               ; CP 236            ; ...i.e. IX points to an instruction...
-       jl   !                          ; JP NC,46218       ; ...then jump to appropriate graphic layout routine
+       jl   draw_graphics              ; JP NC,46218       ; ...then jump to appropriate graphic layout routine
        b    @jump_to_graphics_routine                    ;
-!
 * At this point, the graphic layout data pointed to by IX is graphical data, not an instruction. We only draw the
 * graphics if they lie within the display area (i.e. have x- and y-coordinates less than 32 and 24 respectively, see
 * trivia).
+draw_graphics:
        movb h,a                        ; LD A,H            ; If x-coordinate of graphic to draw is 32 or more...
        cb   a,@bytes+32                ; CP 32             ; ...
-       jl   !                          ; JP NC,46151       ; ...then skip ahead to #R46151
-       b    @_46151                    ;                   
-!
+       jhe  draw_graphics_9            ; JP NC,46151       ; ...then skip ahead to #R46151
        movb @l,a                       ; LD A,L            ; If y-coordinate of graphic to draw is 24 or more...
        cb   a,@bytes+24                ; CP 24             ; ...
-       jl   !                          ; JP NC,46151       ; ...then skip ahead to #R46151
-       b    @_46151                    ;                   
-!
+       jhe  draw_graphics_9            ; JP NC,46151       ; ...then skip ahead to #R46151
        .push hl                        ; PUSH HL           ; Store HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
        sb   one,b                      ; DEC B             ; Decrease value of Don't Recalculate Display Buffer Address Flag
-       jne  !                          ; JP Z,46051        ; If B is zero (i.e. we don't need to recalculate current position in display buffer), then
-       b    @_46051                    ;                   ; skip ahead to #R46051
-!
-
+       jeq  draw_graphics_1            ; JP Z,46051        ; If B is zero (i.e. we don't need to recalculate current position in display buffer), then
+                                       ;                   ; skip ahead to #R46051
 * If B was 1, then we need to load DE with the address of the current position in the Primary Display Buffer.
-                                       ; TODO use mul
-       movb h,a                        ; LD A,H            ; Load C with three times entity's x-coordinate...
-       ab   a,a                        ; ADD A,A           ; ...
-       ab   h,a                        ; ADD A,H           ; ...
-       movb a,@c                       ; LD C,A            ; ...
-       movb @l,a                       ; LD A,L            ; Load DE with double entity's y-coordinate...
-       ab   a,a                        ; ADD A,A           ; ...
-       movb a,@e                       ; LD E,A            ; ...
-       sb   d,d                        ; LD D,0            ; ...
-       movb d,b                        ; LD B,D            ; Set B to zero (BC now holds three times x-coordinate)
-       li   hl,multiples_of_96         ; LD HL,46170       ; Point HL at start of Table of Multiples of 96
-       a    de,hl                      ; ADD HL,DE         ; Add double y-coordinate as offset
-       mov  *hl,de                     ; LD E,(HL)         ; Load DE with corresponding multiple of 96...
-                                       ; INC HL            ; ...
-                                       ; LD D,(HL)         ; ...
+       clr  de
+       movb h,@e
+       mov  de,tmp0
+       a    tmp0,tmp0
+       a    tmp0,de
+       mov  hl,tmp0
+       andi tmp0,>00ff
+       li   tmp1,96
+       mpy  tmp1,tmp0
+       a    tmp1,de
+;       movb h,a                        ; LD A,H            ; Load C with three times entity's x-coordinate...
+;       ab   a,a                        ; ADD A,A           ; ...
+;       ab   h,a                        ; ADD A,H           ; ...
+;       movb a,@c                       ; LD C,A            ; ...
+;       movb @l,a                       ; LD A,L            ; Load DE with double entity's y-coordinate...
+;       ab   a,a                        ; ADD A,A           ; ...
+;       movb a,@e                       ; LD E,A            ; ...
+;       sb   d,d                        ; LD D,0            ; ...
+;       movb d,b                        ; LD B,D            ; Set B to zero (BC now holds three times x-coordinate)
+;       li   hl,multiples_of_96         ; LD HL,46170       ; Point HL at start of Table of Multiples of 96
+;       a    de,hl                      ; ADD HL,DE         ; Add double y-coordinate as offset
+;       mov  *hl,de                     ; LD E,(HL)         ; Load DE with corresponding multiple of 96...
+;                                       ; INC HL            ; ...
+;                                       ; LD D,(HL)         ; ...
 * The operand of the instruction at #R46045 represents the address of the Primary Display Buffer. This is modified
 * by the instruction at #R45902.
-self_mod_instr:
-       li   hl,0                       ; LD HL,0           ; Load HL with start address of Primary Display Buffer
-       a    de,hl                      ; ADD HL,DE         ; Move HL to position in Primary Display Buffer corresponding to x- and y-coordinates of
-                                                           ; entity...
-       a    bc,hl                      ; ADD HL,BC         ; ...
-       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now points to position in Primary Display Buffer for current entity) and HL
-_46051:
+       a    @prim_disp_buffer_addr,de
+;       li   hl,0                       ; LD HL,0           ; Load HL with start address of Primary Display Buffer
+;       a    de,hl                      ; ADD HL,DE         ; Move HL to position in Primary Display Buffer corresponding to x- and y-coordinates of
+;                                                           ; entity...
+;       a    bc,hl                      ; ADD HL,BC         ; ...
+;       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now points to position in Primary Display Buffer for current entity) and HL
+draw_graphics_1:
        movb *de,a                      ; LD A,(DE)         ; Load A with Graphic Set Index plus one from this entry in Primary Display Buffer...
        ab   one,a                      ; INC A             ; ...and if value is now zero (i.e. old value was 255 corresponding to a block outside
                                                            ; dimensions of room)...
-       jeq  _46150                     ; JP Z,46150        ; ...then skip ahead to #R46150
+       jeq  draw_graphics_8            ; JP Z,46150        ; ...then skip ahead to #R46150
        movb @graphic_set_index,a       ; LD A,(34268)      ; Load current Graphic Set Index into this location in Primary Display Buffer...
        movb a,*de+                     ; LD (DE),A         ; ...
                                        ; INC DE            ; Advance to Graphic Index in current character block's entry in Primary Display Buffer
@@ -4260,7 +4260,7 @@ _46051:
                                        ; INC DE            ; Advance to next byte in current character block's display buffer entry (Attribute)
        movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
                                        ; OR A              ; ...and if not zero...
-       jne  _46077                     ; JR NZ,46077       ; ...then skip ahead to #R46077
+       jne  draw_graphics_2            ; JR NZ,46077       ; ...then skip ahead to #R46077
 * Current Attribute is zero (i.e. not set) so DE points to attribute data
        inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)...
        movb *ix,a                      ; LD A,(IX+0)       ; ...and load into A
@@ -4269,19 +4269,16 @@ _46051:
 * graphic layout data) is pointing to either the graphic index (if the Current Attribute at #R34270 is set) or the
 * attribute data (if the Current Attribute is not set). In either case, IX+1 is the address of the Cursor Shift
 * byte. Bit 7 of the Cursor Shift byte is the Override Attribute Flag.
-_46077:
+draw_graphics_2:
        movb @1(ix),tmp0                ; BIT 7,(IX+1)      ; If bit 7 (Override Attribute Flag) is set...
        andi tmp0,128*256               ;                   
-       jeq  !                          ; JP NZ,46111       ; ...then skip ahead to #R46111
-       b    @_46111                    ;                   
-!
+       jne  draw_graphics_4            ; JP NZ,46111       ; ...then skip ahead to #R46111
 * Override Attribute Flag reset
        movb a,@l                       ; LD L,A            ; Load L with attribute value
        movb a,tmp0
        andi tmp0,56*256                ; AND 56            ; Check PAPER bits
                                        ; LD A,L            ; Restore attribute value to A
-
-       jne  _46111                     ; JP NZ,46111       ; If PAPER is not zero (i.e. black) then skip ahead to #R46111
+       jne  draw_graphics_4            ; JP NZ,46111       ; If PAPER is not zero (i.e. black) then skip ahead to #R46111
 * The instructions between #R46091 and #R46110 (inclusive) are executed only when the PAPER component of the
 * attribute in A (and L) is black. If the Preserve INK Flag is reset in the attribute value loaded (at #R46098) from
 * the Display Buffer, then the instruction at #R46107 will leave the reset (i.e. black) PAPER bits in A. If the
@@ -4296,16 +4293,16 @@ _46077:
        movb *de,a                      ; LD A,(DE)         ; Load value currently in Display Buffer into A...
        movb a,tmp0                     ; BIT 6,A           ; ...and if Preserve INK Flag is reset...
        andi tmp0,64*256                ;
-       jeq  _46107                     ; JP Z,46107        ; ...then skip ahead to #R46107
+       jeq  draw_graphics_3            ; JP Z,46107        ; ...then skip ahead to #R46107
 * Preserve INK Flag set in Display Buffer
        ab   a,a                        ; ADD A,A           ; Shift INK bits into PAPER bits...
        ab   a,a                        ; ADD A,A           ; ...
        ab   a,a                        ; ADD A,A           ; ...
-_46107:
+draw_graphics_3:
        andi a,56*256                   ; AND 56            ; Reset all except PAPER bits
        socb b,a                        ; OR B              ; (Re)set Preserve INK and Mirror flags as stored in B previously
        socb @c,a                       ; OR C              ; Set INK bits as stored in C previously (PAPER was black)
-_46111:
+draw_graphics_4:
        movb a,*de                      ; LD (DE),A         ; Load attribute in A into Display Buffer
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
 * Read Cursor Shift byte. Bits 0-6 of this byte control where the cursor to write to Primary Display Buffer is moved
@@ -4319,68 +4316,67 @@ _46111:
 !
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33, and if remaining value is 0 (i.e. original value was 33)...
-       jeq  _46140                     ; JP Z,46140        ; ...then skip ahead to #R46140...
-_46128:
-       jgt  _46132                    ; JP NC,46132       ; TODO: check code. ...else, if value was greater than 33 then skip ahead to #R46132
+       jeq  draw_graphics_7            ; JP Z,46140        ; ...then skip ahead to #R46140...
+draw_graphics_5:
+       jgt  draw_graphics_6            ; JP NC,46132       ; TODO: check code. ...else, if value was greater than 33 then skip ahead to #R46132
 * Cursor Shift byte was less than 33 (move the cursor down a character row, and left by 33-(n+1) characters)
        ab   one,@l                     ; INC L             ; Increase y-coordinate
-_46132:
+draw_graphics_6:
        ab   one,a                      ; INC A             ; Increase A (x-coordinate offset) and add to x-coordinate...
        ab   h,a                        ; ADD A,H           ; ...
        movb a,h                        ; LD H,A            ; ...
-_46135:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address as change in coordinates is non-trivial
        b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * Cursor Shift byte was 33 (move the cursor right by one character)
-_46140:
+draw_graphics_7:
        inc  de                         ; INC DE            ; Advance pointer to start of next entry in Primary Display Buffer
        ab   one,h                      ; INC H             ; Increase x-coordinate by one
                                        ; JP Z,46135        ; If x-coordinate is zero then jump back to #R46135 (see trivia)
        movb one,b                      ; LD B,1            ; Prepare to skip over recalculation of Display Buffer address as we moved right one character
        b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * First byte in Primary Display Buffer entry for current position is 255 (i.e. outside dimensions of room)
-_46150:
+draw_graphics_8:
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
-_46151:
+draw_graphics_9:
        movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
                                        ; OR A              ; ...and if not zero...
-       jne  _46160                     ; JP NZ,46160       ; ...then skip ahead to #R46160
+       jne  draw_graphics_10           ; JP NZ,46160       ; ...then skip ahead to #R46160
        inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)
-_46160:
+draw_graphics_10:
        movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33...
-       b    @_46128                    ; JP 46128          ; ...and jump back to #R46128 to update current drawing position
+       b    @draw_graphics_5           ; JP 46128          ; ...and jump back to #R46128 to update current drawing position
 
 * Table of Multiples of 96
 * 
 * Used in calculating position in Display Buffer data for a given y-coordinate (as Display Buffer data is 3 bytes
 * per character block, so 1 character row's worth of data is 3 x 32 = 96 bytes
-multiples_of_96:
-       data 0
-       data 96
-       data 192
-       data 288
-       data 384
-       data 480
-       data 576
-       data 672
-       data 768
-       data 864
-       data 960
-       data 1056
-       data 1152
-       data 1248
-       data 1344
-       data 1440
-       data 1536
-       data 1632
-       data 1728
-       data 1824
-       data 1920
-       data 2016
-       data 2112
-       data 2208
+;multiples_of_96:
+;       data 0
+;       data 96
+;       data 192
+;       data 288
+;       data 384
+;       data 480
+;       data 576
+;       data 672
+;       data 768
+;       data 864
+;       data 960
+;       data 1056
+;       data 1152
+;       data 1248
+;       data 1344
+;       data 1440
+;       data 1536
+;       data 1632
+;       data 1728
+;       data 1824
+;       data 1920
+;       data 2016
+;       data 2112
+;       data 2208
 
 * Jump to Appropriate Graphic Layout Routine
 * 
@@ -4551,7 +4547,6 @@ reset_timer_1:
 graphics_routine_255:
        sb   a,a                        ; XOR A             ; Set Current Attribute to zero...
        movb a,@current_attr            ; LD (34270),A      ; ...
-_46422:
        mov  @draw_coordinates,hl       ; LD HL,(34281)     ; Load HL with base x- and y-coordinates
        swpb hl                         ; Little endian
        movb a,b                        ; LD B,A            ; Set B to zero
@@ -5088,7 +5083,7 @@ draw_timer_bar_0:
        movb a,b                        ; LD B,A            ; Load number of lives into B
 draw_timer_bar_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of pairs of open eyes to draw)
-       bl   @draw_open_eyes           ; CALL 47315        ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       bl   @draw_open_eyes           ; CALL 47315         ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address in IX and advance by two bytes
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of pairs of open eyes to draw)
        sb   one,b                      ; DJNZ 47260        ; Decrease B (remaining number of pairs of open eyes to draw) and loop back to #R47260 if not
@@ -5142,6 +5137,7 @@ draw_closed_eyes:
 * eyes Output: IX  Attribute File address two bytes on from initial IX
 draw_open_eyes:
        .proc
+draw_open_eyes_0:
        bl  @ret_if_show_score_flag     ; CALL 47355        ; If Show Score Flag is set then return, else proceed ahead to #R47318
        bl  @draw_eye                   ; CALL 47323        ; Draw Timer Figure's left eye (random frame) at Attribute File address in IX and advance IX by
                                                            ; one byte
@@ -5200,34 +5196,29 @@ ret_if_show_score_flag:
 * Update Eyes of a Randomly Selected Timer Figure, Increase Timer Tick Counter and Process Timer Figure Blinking
 * 
 * Used by the routine at #R34438.
-_47363:
-       .call @_47431                   ; CALL 47431        ; Select a remaining Timer Figure at random and update its eyes to a random (open-eyed) frame
-       .call @_47468                   ; CALL 47468        ; Increase Timer Tick Counter and reduce remaining time if Counter > 767
+update_timer:
+       .proc
+       bl   @update_rnd_timer_figure   ; CALL 47431        ; Select a remaining Timer Figure at random and update its eyes to a random (open-eyed) frame
+       bl   @reduce_remaining_time     ; CALL 47468        ; Increase Timer Tick Counter and reduce remaining time if Counter > 767
        movb @_34227,a                  ; LD A,(34227)      ; If Blink Duration Counter is zero...
        socb a,a                        ; OR A              ; ...
-       jeq  _47388                     ; JR Z,47388        ; ...then skip ahead to #R47388
+       jeq  update_timer_1             ; JR Z,47388        ; ...then skip ahead to #R47388
        sb   one,a                      ; DEC A             ; Decrease Blink Duration Counter by one...
        movb a,@_34227                  ; LD (34227),A      ; ...
        socb a,a                        ; OR A              ; If decreased Blink Duration Counter is not zero...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
+       jne  update_timer_2             ; RET NZ            ; ...then return
        mov  @_34264,ix                 ; LD IX,(34264)     ; Restore Attribute File address of eyes of currently blinking timer figure into IX
-       b    @draw_open_eyes            ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       b    @draw_open_eyes_0          ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address IX, advance IX by two bytes then return
 * Make a randomly chosen timer figure blink
-_47388:
+update_timer_1:
        movb @bytes+10,a                ; LD A,10           ; Load A with a random number, 0-9...
        bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; If A is not zero (9 in 10 chance)...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
+       jne  update_timer_2             ; RET NZ            ; ...then return
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
        cb   a,@bytes+2                 ; CP 2              ; If less than two time / lives remain...
-       jhe  !                          ; RET C             ; ...then return
-       .ret                            ;                   
-!
+       jl   update_timer_2             ; RET C             ; ...then return
        bl   @rnd_no                    ; CALL 54222        ; Load A with a random number, 0-(x-1) (where x is remaining time / lives)
        ab   a,a                        ; ADD A,A           ; Double A...
        movb a,@c                       ; LD C,A            ; ...and load into BC...
@@ -5235,23 +5226,23 @@ _47388:
        li   ix,23232                   ; LD IX,23232       ; Point IX to start of second-last row of Attribute File
        a    bc,ix                      ; ADD IX,BC         ; Add BC as offset to IX (i.e. point to a random "awake" timer figure)
        mov  ix,@_34264                 ; LD (34264),IX     ; Store Attribute File address of eyes of currently blinking timer figure at 34264
-       .call @draw_closed_eyes         ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
+       bl   @draw_closed_eyes          ; CALL 47302        ; If Show Score Flag reset then draw pair of Timer Figure eyes (closed) at Attribute File
                                                            ; address IX and advance IX by two bytes
        movb @bytes+10,a                ; LD A,10           ; Set Blink Duration Counter to a random number, 1-9...
        bl   @rnd_no                    ; CALL 54222        ; ...
        ab   one,a                      ; INC A             ; ...
        movb a,@_34227                  ; LD (34227),A      ; ...
-       .ret                            ; RET               ; Return
+update_timer_2:
+       .endproc                        ; RET               ; Return
 
 * Select a Remaining Timer Figure at Random and Update its Eyes to a Random (Open-Eyed) Frame
 * 
 * Used by the routine at #R47363.
-_47431:
+update_rnd_timer_figure:
+       .proc
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A...
        socb a,a                        ; OR A              ; ...and if none remain...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+       jeq  update_rnd_timer_figure_1  ; RET Z             ; ...then return
        movb a,@e                       ; LD E,A            ; Load remaining time / lives into E
        movb @bytes+18,a                ; LD A,18           ; Load A with 18 minus remaining time / lives (i.e. number in range 2 to 18)...
        sb   @e,a                       ; SUB E             ; ...
@@ -5260,50 +5251,50 @@ _47431:
 * updated remains roughly constant.
        bl   @rnd_no                    ; CALL 54222        ; Load A with a random number, 0-(17 minus remaining time / lives)
        cb   a,@bytes+2                 ; CP 2              ; If generated number is 2 or more...
-       jl   !                          ; RET NC            ; ...then return
-       .ret                            ;                   
-!
+       jhe  update_rnd_timer_figure_1  ; RET NC            ; ...then return
        li   ix,23232                   ; LD IX,23232       ; Point IX to start of second-last row of Attribute File
        movb @e,a                       ; LD A,E            ; Load remaining time / lives into A
 * If remaining time / lives is one, then there is only one Timer Figure to update
        cb   a,one                      ; CP 1              ; If this is 1...
        jne  !                          ; JP Z,47315        ; ...then jump to #R47315 (If Show Score Flag reset then draw pair of Timer Figure eyes and
-       b    @draw_open_eyes                    ;                   
+       b    @draw_open_eyes_0          ;                   ; return)
 !
-                                                           ; return)
 * Otherwise, randomly select one of the remaining Timer Figures to update
        bl   @rnd_no                    ; CALL 54222        ; Load A with random number between 0 and (x-1) where x is remaining time / lives
        ab   a,a                        ; ADD A,A           ; Double A...
        movb a,@c                       ; LD C,A            ; ...and load into BC...
        sb   b,b                        ; LD B,0            ; ...
        a    bc,ix                      ; ADD IX,BC         ; Add BC as offset to IX (i.e. advance IX to point to left eye of randomly chosen Timer Figure)
-       b    @draw_open_eyes            ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       b    @draw_open_eyes_0          ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address IX, advance IX by two bytes then return
+update_rnd_timer_figure_1:
+       .endproc
 
 * Increase Timer Tick Counter and Reduce Remaining Time if Counter > 767
 * 
 * Used by the routine at #R47363.
-_47468:
+reduce_remaining_time:
+       .proc
        mov  @_34211,hl                 ; LD HL,(34211)     ; Increase Timer Tick Counter by one...
        inc  hl                         ; INC HL            ; ...
        mov  hl,@_34211                 ; LD (34211),HL     ; ...
        movb h,a                        ; LD A,H            ; If Timer Tick Counter is less than 768 (i.e. 3 x 256)...
        cb   a,@bytes+3                 ; CP 3              ; ...
-       jhe  !                          ; RET C             ; ...then return
-       .ret                            ;                   
-!
+       jl   reduce_remaining_time_1    ; RET C             ; ...then return
        li   hl,0                       ; LD HL,0           ; Reset Timer Tick Counter to zero...
        mov  hl,@_34211                 ; LD (34211),HL     ; ...
 * This entry point is used by the routine at #R53723.
 _47485:
-       movb @time_left,a                  ; LD A,(34210)      ; If no time / lives remain...
+       movb @time_left,a               ; LD A,(34210)      ; If no time / lives remain...
        socb a,a                        ; OR A              ; ...
        jne  !                          ; JP Z,47241        ; ...then reset Show Score Flag, draw timer figures bar and return
-       b    @draw_timer_bar                    ;                   
+       b    @draw_timer_bar_0          ;
 !
        sb   one,a                      ; DEC A             ; Decrease current time / lives by one...
-       movb a,@time_left                  ; LD (34210),A      ; ...
-       b    @draw_timer_bar                    ; JP 47241          ; Reset Show Score Flag, and draw timer figures bar and return
+       movb a,@time_left               ; LD (34210),A      ; ...
+       b    @draw_timer_bar_0          ; JP 47241          ; Reset Show Score Flag, and draw timer figures bar and return
+reduce_remaining_time_1:
+       .endproc
 
 * Update Scores and Display
 * 
@@ -5718,14 +5709,14 @@ _48026:
 * #R48641, #R48686, #R48692, #R48698, #R48704, #R48920, #R49010, #R51765, #R52029, #R52038, #R52047, #R52142,
 * #R52243, #R52309, #R52860, #R52870, #R52889 and #R52967. Input:  IX  (Entry at #R48096 and #R48098) Address of
 * complex state data for an entity Output: HL  Current position in script data
-inct_execute_script:
+inct_execute_script:                   ; Always branch here
        inc  hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
        inc  hl                         ; INC HL            ; ...
 * This entry point is used by the routines at #R35577, #R35735, #R36008, #R36036, #R36116, #R36367, #R36390,
 * #R36471, #R36638, #R37085, #R37639, #R37718, #R37753, #R37778, #R38074, #R38554, #R41550, #R48285, #R48295,
 * #R48307, #R48324, #R48336, #R48353, #R48365, #R48388, #R48934, #R48976, #R49010, #R51765, #R51779, #R51904,
 * #R51924, #R51944, #R51954, #R51960, #R52053, #R52148, #R52243, #R52908, #R52914, #R52967 and #R53083.
-execute_script:
+execute_script:                        ; Always branch here
        inc  hl                         ; INC HL            ; Advance Script Data Pointer by one byte
        movb *hl,a                      ; LD A,(HL)         ; Load byte at this location into A
        dec  hl                         ; DEC HL            ; Move HL back one byte
@@ -5843,7 +5834,7 @@ _48222:
        andi a,240*256                  ; AND 240           ; ...and reset Unused (11,2) and Unused (11,3) flags...
        ab   @e,a                       ; ADD A,E           ; ...
        movb a,@11(ix)                  ; LD (IX+11),A      ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (07) Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags Output: B  Combination of
 * flags to (re)set
@@ -5874,13 +5865,13 @@ _48248:
        andi a,241*256                  ; AND 241           ; ...clearing Facing Into Screen, Facing Left and Facing Right flags
        ab   b,a                        ; ADD A,B           ; Combine with flags in B...
        movb a,@9(ix)                   ; LD (IX+9),A       ; ...and store
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (09) Reset Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
 _48260:
        szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Must Process Current Script Data Flag
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (08) Set Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
@@ -6077,7 +6068,7 @@ _48487:
        jne  _48507                     ; JR NZ,48507       ; ...then skip ahead to #R48507
        szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset entity's Is Flying Flag
        li   hl,_35359                  ; LD HL,35359       ; Load HL with script data address for Berk starting to fall downwards
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 _48507:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of Berk's bottom edge is 121 or greater...
        cb   a,@bytes+121               ; CP 121            ; ...
@@ -6098,7 +6089,7 @@ _48527:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of Berk's bottom edge is less than 98...
        cb   a,@bytes+98                ; CP 98             ; ...
        jhe  !                          ; JP C,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;
 !
        .call @_55433                   ; CALL 55433        ; Change Berk's room up one if appropriate
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
@@ -6115,7 +6106,7 @@ _48541:
        mov  @_34260,iy                 ; LD IY,(34260)     ; Load IY with address of complex state data for entity held by Berk...
        sb   one,@4(iy)                 ; DEC (IY+4)        ; ...and decrease its top and bottom y-coordinates by one character...
        sb   one,@6(iy)                 ; DEC (IY+6)        ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (35) Move Entity at IX (and if Berk, Carried Entity) Down One Character
 * 
@@ -7873,7 +7864,7 @@ draw_character_block_3:
 
 * Data for Pseudo-Random Number Generator
 rnd_seed:
-       data 23                                                       ; Seed
+       data 0                                                        ; Seed
 rnd_range:
        byte 0                                                        ; Temporary store for range value
 
