@@ -3253,7 +3253,7 @@ _53403:
 _53454:
        byte 244,7                                                    ; Set current graphic set to 7
        byte 7,7,33
-       byte 248,219,208                                              ; Jump to #R53464
+       byte 248,_53464%256,_53464/256                                ; Jump to #R53464
 * Crawling Left (Frame 1 / 2)
 _53462:
        byte 244,7                                                    ; Set current graphic set to 7
