@@ -73,13 +73,13 @@ main_check_level_4:
        bl   @update_level_4_entities   ; CALL 41211        ; Update states of all Level 4 entities
 * All levels
 main_all_levels:
-;       .call @_47893                   ; CALL 47893        ; Check for control input and store at #R34219
-;       .call @_55525                   ; CALL 55525        ; Move all falling entities down by distances appropriate to their current velocity factors
-;       .call @_34916                   ; CALL 34916        ; If Fire Pressed, or Character Swap Pending Flag set, then swap characters
-       bl   @clear_prim_disp_buf_area   ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
-       bl   @populate_prim_disp_buf     ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
-       bl   @draw_display_buffer        ; CALL 54034        ; Draw contents of Primary Display Buffer to display
-;       .call @play_sound               ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
+       bl   @check_control_input       ; CALL 47893        ; Check for control input and store at #R34219
+       bl   @move_falling_entities     ; CALL 55525        ; Move all falling entities down by distances appropriate to their current velocity factors
+       bl   @swap_characters           ; CALL 34916        ; If Fire Pressed, or Character Swap Pending Flag set, then swap characters
+       bl   @clear_prim_disp_buf_area  ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
+       bl   @populate_prim_disp_buf    ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
+       bl   @draw_display_buffer       ; CALL 54034        ; Draw contents of Primary Display Buffer to display
+;       .call @play_sound              ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
        socb a,a                        ; OR A              ; If no time / lives are left...
        jeq  time_out                   ; JR Z,34645        ; ...then jump to #R34645
@@ -94,7 +94,7 @@ main_all_levels:
        andi tmp0,32*256                ;
        jeq  skip_update_score          ; JR Z,34606        ; ...then skip ahead to #R34606
        szcb @bits+5,*hl                ; RES 5,(HL)        ; Reset Update Scores and Display Flag
-;       bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
+       bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
 skip_update_score:
        li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
@@ -303,44 +303,45 @@ script_routine_48_49:
 * If Fire Pressed, or Character Swap Pending Flag Set, then Swap Characters
 * 
 * Used by the routine at #R34438.
-_34916:
-       li   hl,game_flags                  ; LD HL,34208       ; If Character Swap Pending Flag is reset...
+swap_characters:
+       .proc
+       li   hl,game_flags              ; LD HL,34208       ; If Character Swap Pending Flag is reset...
        movb *hl,tmp0                   ; BIT 6,(HL)        ; ...
        andi tmp0,64*256                ;                   
-       jeq  _34927                     ; JR Z,34927        ; ...then skip ahead to #R34927
+       jeq  swap_characters_1          ; JR Z,34927        ; ...then skip ahead to #R34927
        szcb @bits+6,*hl                ; RES 6,(HL)        ; Reset Character Swap Pending Flag
-       jmp  _34944                     ; JR 34944          ; Skip ahead to #R34944
-_34927:
-       movb @control_input,a                  ; LD A,(34219)      ; Load A with control input
+       jmp  swap_characters_4                     ; JR 34944          ; Skip ahead to #R34944
+swap_characters_1:
+       movb @control_input,a           ; LD A,(34219)      ; Load A with control input
        movb a,tmp0                     ; BIT 4,A           ; If fire was pressed...
        andi tmp0,16*256                ;                   
-       jne  _34940                     ; JR NZ,34940       ; ...then skip ahead to #R34940
+       jne  swap_characters_3          ; JR NZ,34940       ; ...then skip ahead to #R34940
        szcb @bits+1,*hl                ; RES 1,(HL)        ; Reset Characters Already Swapped Flag
-_34936:
+swap_characters_2:
        bl   @copy_room_dim_data_to_tmp ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
                                                            ; location (#R34230)
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 * [Fire pressed]
-_34940:
+swap_characters_3:
        movb *hl,tmp0                   ; BIT 1,(HL)        ; If Characters Already Swapped Flag set (i.e. FIRE hasn't been released since last swap)...
        andi tmp0,2*256                 ;                   
-       jne  _34936                     ; JR NZ,34936       ; ...then jump back to #R34936
-_34944:
+       jne  swap_characters_2          ; JR NZ,34936       ; ...then jump back to #R34936
+swap_characters_4:
        socb @bits+1,*hl                ; SET 1,(HL)        ; Set Characters Already Swapped Flag
        movb *hl,a                      ; LD A,(HL)         ; Load Game Flags into A
        xor  one,a                      ; XOR 1             ; Flip bit 7 (Berk / Drutt flag)...
        movb a,*hl                      ; LD (HL),A         ; ...
        movb *hl,tmp0                   ; BIT 0,(HL)        ; If current character is now Berk (0)...
        andi tmp0,1*256                 ;                   
-       jeq  _34958                     ; JR Z,34958        ; ...then jump ahead to #R34958
+       jeq  swap_characters_5          ; JR Z,34958        ; ...then jump ahead to #R34958
        movb @bytes+6,a                 ; LD A,6            ; Load A with 6 (attribute for Drutt's timer indicator figures)
-       jmp  _34960                     ; JR 34960          ; Skip ahead to #R34960
-_34958:
+       jmp  swap_characters_6          ; JR 34960          ; Skip ahead to #R34960
+swap_characters_5:
        movb one,a                      ; LD A,1            ; Load A with 1 (attribute for Berk's timer indicator figures)
-_34960:
+swap_characters_6:
        movb a,@current_character_attr  ; LD (34226),A      ; Set attribute of timer indicator figures to value in A
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       li   hl,game_flags                  ; LD HL,34208       ; If Show Score Flag is set...
+       li   hl,game_flags              ; LD HL,34208       ; If Show Score Flag is set...
        movb *hl,tmp0                   ; BIT 7,(HL)        ; ...
        andi tmp0,128*256               ;                   
        jeq  !                          ; JP NZ,47628       ; ...then print SCORE / TOTAL / HI-SC string in current character's colours and return
@@ -4608,48 +4609,70 @@ _47850:
 * Check for Control Key Press and Store at 34219
 * 
 * Used by the routine at #R34438.
-_47893:
+check_control_input:
+       .proc
        sb   a,a                        ; XOR A             ; Clear previously stored control input...
-       movb a,@control_input                  ; LD (34219),A      ; ...
-       .call @_47788                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
-       socb a,a                        ; OR A              ; If no key was pressed...
-       jeq  _47930                     ; JR Z,47930        ; ...then read joystick input and return
-       movb one,@e                     ; LD E,1            ; Set least significant bit of E as we are testing the first keyboard control first
-       movb @bytes+7,b                 ; LD B,7            ; Set B to 7 as there are 7 keyboard controls to check (loop counter)
-       li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at Table of Current Keyboard Controls
-_47910:
-       cb   a,*hl                      ; CP (HL)           ; If pressed key is the same as the current keyboard control...
-       jeq  _47921                     ; JR Z,47921        ; ...then skip ahead to #R47921
-       inc  hl                         ; INC HL            ; Advance HL to next keyboard control
-       ; SLA E                         ; SLA E             ; Shift E left
-       sb   one,b                      ; DJNZ 47910        ; Loop back to #R47910 for next keyboard control
-       jne  _47910                     ;                   
-       sb   a,a                        ; XOR A             ; Set A to zero
-       jmp  _47926                     ; JR 47926          ; Skip ahead to #R47926
-_47921:
-       movb @e,a                       ; LD A,E            ; Load input bitmap into A (bit that is set represents the control that has been pressed)
-       movb a,tmp0                     ; BIT 5,A           ; If bit 5 is set (i.e. Berk / Drutt key has been pressed)...
-       andi tmp0,32*256                ;                   
-       jne  _47942                     ; JR NZ,47942       ; ...then jump to #R47942 (Wait for current key to be released and another to be pressed,
-                                                           ; storing in A) and return
-* This entry point is used by the routine at #R47930.
-_47926:
-       movb a,@control_input                  ; LD (34219),A      ; Store control input at #R34219
-       .ret                            ; RET               ; Return
+       li   r0,JOY_RT
+       bl   @check_key
+       jeq  !
+       socb @bits+0,a
+!      li   r0,JOY_LT
+       bl   @check_key
+       jeq  !
+       socb @bits+1,a
+!      li   r0,JOY_DN
+       bl   @check_key
+       jeq  !
+       socb @bits+2,a
+!      li   r0,JOY_UP
+       bl   @check_key
+       jeq  !
+       socb @bits+3,a
+!      li   r0,JOY_FI
+       bl   @check_key
+       jeq  !
+       socb @bits+4,a
+!
+;       movb a,@control_input           ; LD (34219),A      ; ...
+;       .call @_47788                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
+;       socb a,a                        ; OR A              ; If no key was pressed...
+;       jeq  _47930                     ; JR Z,47930        ; ...then read joystick input and return
+;       movb one,@e                     ; LD E,1            ; Set least significant bit of E as we are testing the first keyboard control first
+;       movb @bytes+7,b                 ; LD B,7            ; Set B to 7 as there are 7 keyboard controls to check (loop counter)
+;       li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at Table of Current Keyboard Controls
+;_47910:
+;       cb   a,*hl                      ; CP (HL)           ; If pressed key is the same as the current keyboard control...
+;       jeq  _47921                     ; JR Z,47921        ; ...then skip ahead to #R47921
+;       inc  hl                         ; INC HL            ; Advance HL to next keyboard control
+;       ; SLA E                         ; SLA E             ; Shift E left
+;       sb   one,b                      ; DJNZ 47910        ; Loop back to #R47910 for next keyboard control
+;       jne  _47910                     ;
+;       sb   a,a                        ; XOR A             ; Set A to zero
+;       jmp  _47926                     ; JR 47926          ; Skip ahead to #R47926
+;_47921:
+;       movb @e,a                       ; LD A,E            ; Load input bitmap into A (bit that is set represents the control that has been pressed)
+;       movb a,tmp0                     ; BIT 5,A           ; If bit 5 is set (i.e. Berk / Drutt key has been pressed)...
+;       andi tmp0,32*256                ;
+;       jne  _47942                     ; JR NZ,47942       ; ...then jump to #R47942 (Wait for current key to be released and another to be pressed,
+;                                                           ; storing in A) and return
+;* This entry point is used by the routine at #R47930.
+;_47926:
+       movb a,@control_input           ; LD (34219),A      ; Store control input at #R34219
+       .endproc                        ; RET               ; Return
 
 * If Joystick Mode is On, then Read Joystick Input
 * 
 * Used by the routine at #R47893.
 _47930:
-       movb @_34298,a                  ; LD A,(34298)      ; If Joystick Mode is Off...
-       socb a,a                        ; OR A              ; ...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
-       ; IN A,(31)                     ; IN A,(31)         ; Read state of Kempston joystick into A
-       andi a,31*256                   ; AND 31            ; If joystick input is non-zero...
-       jne  _47926                     ; JR NZ,47926       ; ...then jump to #R47926
-       .ret                            ; RET               ; Return
+;       movb @_34298,a                  ; LD A,(34298)      ; If Joystick Mode is Off...
+;       socb a,a                        ; OR A              ; ...
+;       jne  !                          ; RET Z             ; ...then return
+;       .ret                            ;
+;!
+;       ; IN A,(31)                     ; IN A,(31)         ; Read state of Kempston joystick into A
+;       andi a,31*256                   ; AND 31            ; If joystick input is non-zero...
+;       jne  _47926                     ; JR NZ,47926       ; ...then jump to #R47926
+;       .ret                            ; RET               ; Return
 
 * Wait for Current Key to Be Released and Another to Be Pressed, Storing in A
 * 
@@ -7792,14 +7815,15 @@ _55516:
 * 
 * If an entity's "velocity factor" is equal to its height in characters plus 3 (a proxy for its mass), then it has
 * reached its terminal velocity.
-_55525:
+move_falling_entities:
+       .proc
        mov  @cmplx_state_data_addr,ix  ; LD IX,(34238)     ; Load IX with start address of current level's complex state data
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries in complex state data are 13 bytes wide)
 _55532:
        movb *ix,a                      ; LD A,(IX+0)       ; If first byte of entry is 255 (i.e. End Marker)...
        cb   a,@bytes+255               ; CP 255            ; ...
        jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
+       .endproc                        ;
 !
        movb @10(ix),tmp0               ; BIT 6,(IX+10)     ; If current entity's "Can Fall" flag is reset...
        andi tmp0,64*256                ;                   
