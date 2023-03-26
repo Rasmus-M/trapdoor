@@ -382,7 +382,7 @@ _35523:
        byte 1,0,_35371%256,_35371/256                                ; Jump to #R35371 (Berk lying on floor stunned and getting up)
 
 * Script Data Boni's Kidnap
-_36803:
+boni_kidnap_script:
        byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
        byte 25,0,6,0                                                 ; Start loop (2) for 6 iterations
        byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
@@ -422,9 +422,9 @@ _36803:
 * Script Data Bat (Level 1)
 *
 * Stationary (off top of screen)
-_37018:
+bat_script:
        byte _37205%256,_37205/256                                    ; #R37205 (Flying, full wing flap)
-       byte 1,0,_37018%256,_37018/256                                ; Jump to #R37018
+       byte 1,0,bat_script%256,bat_script/256                        ; Jump to #R37018
 * Attacking
 _37024:
        byte 8,0                                                      ; Set Must Process Current Script Data Flag
@@ -441,7 +441,7 @@ _37024:
        byte 34,0                                                     ; Move Bat up one character
        byte 28,0                                                     ; End loop (3)
        byte 9,0                                                      ; Reset Must Process Current Script Data Flag
-       byte 1,0,_37018%256,_37018/256                                ; Jump to #R37018
+       byte 1,0,bat_script%256,bat_script/256                                ; Jump to #R37018
 
 * Graphic Layout Data Bat (Level 1) Flying, full wing flap - 3 stages, i.e. hovering at floor-level / going up
 _37205:
@@ -1413,10 +1413,10 @@ _41175:
        byte 255                                                      ; End Marker
 
 * Script Data Skeleton (Level 4) Idling
-_41232:
+skeleton_idling_script:
        byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 63,0                                                     ; Have Skeleton advance or retreat based upon positions of Berk and Fake Boni
-       byte 1,0,_41232%256,_41232/256                                ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256 ; Jump to #R41232 (Skeleton Idling)
 
 * Unused
 *
@@ -1438,7 +1438,7 @@ _41232:
        byte 28,0                                                     ; End loop (3)
        byte 3,0                                                      ; Move Skeleton right two characters...
        byte 3,0                                                      ; ...
-       byte 1,0,_41232%256,_41232/256                                ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
 
 * Script Data Skeleton (Level 4) Stepping Forward (Left)
 _41280:
@@ -1457,7 +1457,7 @@ _41280:
        byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
        byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 28,0                                                     ; End loop (3)
-       byte 1,0,_41232%256,_41232/256                                ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
 
 * Script Data Skeleton (Level 4) Stepping Back (Right)
 _41318:
@@ -1475,7 +1475,7 @@ _41318:
        byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
        byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 28,0                                                     ; End loop (3)
-       byte 1,0,_41232%256,_41232/256                                ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
 
 * Table of Addresses of Attribute Data in Skeleton's Graphic Layout Data Blocks
 *
@@ -2788,7 +2788,7 @@ _51520:
        byte 43,0                                                     ; Select next action for Drutt depending upon control input
 
 * Script Data Drutt Facing Out of Screen
-_51524:
+drutt_facing_out_script:
        byte _52379%256,_52379/256                                    ; #R52379 (Drutt, facing out of screen, legs bent, eyes and mouth animated)
        byte _52392%256,_52392/256                                    ; #R52392 (Drutt, facing out of screen, legs partially extended, eyes and mouth animated)
        byte _52392%256,_52392/256                                    ; #R52392 (Drutt, facing out of screen, legs partially extended, eyes and mouth animated)
