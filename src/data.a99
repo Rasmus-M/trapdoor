@@ -1,0 +1,1139 @@
+* Index of Current Level
+current_level:
+       byte 1
+
+* Game Flags
+*
+* #TABLE(default,centre,:w)
+* { =h Bit | =h Effect }
+* { 0 | Drutt Mode Flag (Set = Drutt mode / Reset = Berk mode) }
+* { 1 | Characters Already Swapped Flag }
+* { 2 | "Berk Has Been Killed" Flag }
+* { 3 | "Reset Spiders to Initial State" Flag }
+* { 4 | Level Exit Door Unlocked Flag }
+* { 5 | Update Scores and Display Flag (Reset = draw timer figures / Set = calculate/update scores and display) }
+* { 6 | Character Swap Pending Flag }
+* { 7 | Show Score Flag (Reset = draw Timer Figures / Set = Display Score / Hi Score) }
+* TABLE#
+game_flags:
+       byte 0
+
+* Cannon's (Level 4) Ammunition Counter
+*
+* Number of shots Cannon can fire before returning to its dormant state. Increases by 10 for each drip the Cannon
+* catches.
+_34209:
+       byte 0
+
+* Current Time / Lives
+time_left:
+       byte 16
+
+* Score Data
+timer_tick:
+       data 0                                                        ; Timer Tick Counter / Score penalty (current level)
+score_level:
+       data 0                                                        ; Score (Current Level)
+score_total:
+       data 0                                                        ; Current Total Score
+
+* Current Border Colour
+border_color:
+       byte 1
+
+* Index of Current Character's Current Room
+current_characters_room:
+       byte 0
+
+* Control Input Bitmap
+* 3
+* #TABLE(default,centre,:w)
+* { =h Bit | =h Effect }
+* { 0 | Right }
+* { 1 | Left }
+* { 2 | Forward (i.e. DOWN - makes Drutt swap depth levels) }
+* { 3 | Back (i.e. UP - makes Drutt jump higher) }
+* { 4 | Berk / Drutt }
+* { 5 | Pause }
+* { 6 | Restart }
+* { 7 | Unused }
+* TABLE#
+control_input:
+       byte 0
+
+* Berk's Current Power
+*
+* #TABLE(default,centre,:w)
+* { =h Value | =h Effect }
+* { 0 | None }
+* { 1 | Jumping (Level 1) }
+* { 2 | Jumping (Level 2) }
+* { 3 | Jumping (Level 4) }
+* { 4 | Flying (Level 1) }
+* { 5 | Flying (Level 3, 1) }
+* { 6 | Flying (Level 3, 2) }
+* { 7 | Flying (Level 4, 1) }
+* { 8 | Flying (Level 4, 2) }
+* { 9 | Immunity to Bubo (Level 2) }
+* { 10 | Floating (Level 3) }
+* { 11 | Invisibility (Level 3) }
+* TABLE#
+_34220:
+       byte 0
+
+* Interaction Data for Berk
+_34221:
+       byte 0                                                        ; Class of entity currently held by Berk (e.g. Drutt = 18), or zero for none
+_34222:
+       byte 0                                                        ; y-coordinate minus one for top edge of coloured creature slot with which Berk is interacting
+_34223:
+       byte 0                                                        ; Number of times Berk has been killed by a spider on Level 1
+
+* Remaining Duration of Berk's Current Power
+*
+* For each game-cycle that a power is in use, the byte at #R34224 is increased. When this reaches 16, it is reset to
+* zero and the value at #R34225 is decreased by one.
+       even
+remaining_power_cycles:
+       byte 0                                                        ; Number of elapsed game-cycles in current group of 16
+remaining_power_groups:
+       byte 0                                                        ; Number of groups of 16 game-cycles remaining
+
+* Attribute of Current Character
+*
+* This is 1 (blue) for Berk, or 6 (yellow) for Drutt.
+current_character_attr:
+       byte 1
+
+* Timer Figure Blink Duration Counter
+_34227:
+       byte 0
+
+* Data for Clawed Foot (Level 3)
+*
+* Location #R34229 holds the index of the action performed by Clawed Foot after it picks Berk up. This value is
+* incremented when the Clawed Foot reaches the top of its vertical range of travel while carrying Berk. If the
+* incremented value exceeds six, then it is reset to one. After incrementing (and resetting if appropriate), the
+* value is used to determine what the Clawed Foot does with Berk:
+_34228:
+       byte 0                                                        ; Time (cycles) until Clawed Foot (Level 3) attacks
+_34229:
+       byte 0                                                        ; Clawed Foot's Action Index
+
+* Temporary Store for Room Dimension Data
+*
+* Contains an entry from one of the room dimension data blocks (at #R43815, #R44436, #R45116 or #R45860) for the
+* current room of interest (see also #R34262).
+tmp_room_dim_data:
+       byte 0,0,0,0,0
+
+* Temporary Store for Width of Entity's Current Room
+*
+* This location holds the width of an entity's current room (in characters, plus + 99).
+_34235:
+       byte 0
+
+* Table of Data Addresses (Current Level)
+current_data_addrs:
+       data 99                                                       ; State Data for Simple Entities
+cmplx_state_data_addr:
+       data 99                                                       ; State Data for Complex Entities
+berk_state_addr:
+       data 99                                                       ; Address of Berk's state data
+drutt_state_addr:
+       data 99                                                       ; Address of Drutt's state data
+worm_state_addr:
+       data 99                                                       ; Address of worm's state data
+_34246:
+       data 99                                                       ; Start address for reverse-order collision checks
+room_dim_data:
+       data 99                                                       ; Room Dimension Data
+_34250:
+       data 99                                                       ; Horizontal Room Connectivity Map
+_34252:
+       data 99                                                       ; Unused Data Block (09)
+_34254:
+       data 99                                                       ; Vertical Room Connectivity Map
+
+* Miscellaneous Data 1
+bert_interaction_state:
+       data 0                                                        ; Address of complex state data for entity Berk is interacting with
+coll_entity_addr:
+       data 0                                                        ; Address of complex state data for entity involved in last collision check
+bert_held_state:
+       data 0                                                        ; Address of complex state data for entity last held by Berk
+room_dim_data_addr:
+       data 0                                                        ; Pointer to entry in room dimension data for an entity's room (See also data in this entry
+                                                                     ; copied to #R34230)
+blinking_eye_attr_addr:
+       data 0                                                        ; Attribute File address of eyes of currently blinking timer figure
+_34266:
+       data 0                                                        ; Temporary store for script data to execute upon arrival on new level
+graphic_set_index:
+       byte 0                                                        ; Current Graphic Set Index
+print_attr:
+       byte 0                                                        ; Attribute for text printing
+current_attr:
+       byte 0                                                        ; Current Attribute
+_34271:
+       byte 0                                                        ; "Display Buffer 2 is Primary" Flag
+_34272:
+       byte 0                                                        ; Width of entity carried by Berk (characters), minus 1
+_34273:
+       byte 0                                                        ; Index of pending sound (used by playback routine at #R59722)
+loop_counter_value_1:
+       byte 0                                                        ; Store for current value of loop counter in graphic layout data processing (instructions 238
+                                                                     ; and 239)
+loop_counter_value_2:
+       byte 0                                                        ; Store for current value of loop counter in graphic layout data processing (instructions 240
+                                                                     ; and 241)
+
+* Unused
+      byte 0
+
+* Position (Address) in Script Data Currently Running
+current_script_addr:                   ; High endian
+       data 0
+
+* Data for Drawing to Display
+prim_disp_buffer_addr:
+       data display_buffer_1                                         ; Start address of Primary Display Buffer
+draw_coordinates:
+       byte 0                                                        ; Base y-coordinate for graphic drawing
+       byte 0                                                        ; Base x-coordinate for graphic drawing
+
+* Unused
+       byte 0,0
+
+* Store for Script Instruction Loop Data
+script_23_24_loop_count:
+       byte 0
+script_23_24_loop_addr:
+       data 1                                                        ; Repeat count and loop start address for script instructions 23 and 24
+script_25_26_loop_count:
+       byte 0
+script_25_26_loop_addr:
+       data 1                                                        ; Repeat count and loop start address for script instructions 25 and 26
+script_27_28_loop_count:
+       byte 0
+script_27_28_loop_addr:
+       data 1                                                        ; Repeat count and loop start address for script instructions 27 and 28
+
+* Store for Graphic Layout Loop Data
+loop_address:
+       data 0                                                        ; Store for address of start of current loop in graphic layout data processing (instructions
+                                                                     ; 238 and 239)
+loop_start:
+       data 0                                                        ; Store for address of start of current loop in graphic layout data processing (instructions
+                                                                     ; 240 and 241)
+
+* Joystick Mode Flag
+*
+* #TABLE(default,centre,:w)
+* { =h Value | =h Effect }
+* { 0 | Joystick Mode off }
+* { 1 | Joystick Mode on }
+* TABLE#
+_34298:
+       byte 0
+
+* Current High Score
+high_score:
+       data 999
+
+* Table of Data Addresses (Level 1)
+data_addresses_1:
+       data _43146                                                   ; State Data for Simple Entities (Level 1)
+       data _43333                                                   ; State Data for Complex Entities (Level 1)
+       data _43593                                                   ; Address of Berk's state data (Level 1)
+       data _43671                                                   ; Address of Drutt's state data (Level 1)
+       data _43684                                                   ; Address of worm's state data (Level 1)
+       data _43736                                                   ; Start address for reverse-order collision checks (Level 1)
+       data room_dim_data_1                                          ; Room Dimension Data (Level 1)
+       data _43871                                                   ; Horizontal Room Connectivity Map (Level 1)
+       data _43881                                                   ; Unused Data Block (09) (Level 1)
+       data _43882                                                   ; Vertical Room Connectivity Map (Level 1)
+
+* Table of Data Addresses (Level 2)
+data_addresses_2:
+       data _43896                                                   ; State Data for Simple Entities (Level 2)
+       data _43993                                                   ; State Data for Complex Entities (Level 2)
+       data _44149                                                   ; Address of Berk's state data (Level 2)
+       data _44396                                                   ; Address of Drutt's state data (Level 2)
+       data _44409                                                   ; Address of Worm's state data (Level 2)
+       data _44422                                                   ; Start address for reverse-order collision checks (Level 2)
+       data room_dim_data_2                                          ; Room Dimension Data (Level 2)
+       data _44472                                                   ; Horizontal Room Connectivity Map (Level 2)
+       data _44482                                                   ; Unused Data Block (09) (Level 2)
+       data _44483                                                   ; Vertical Room Connectivity Map (Level 2)
+
+* Table of Data Addresses (Level 3)
+data_addresses_3:
+       data _44487                                                   ; State Data for Simple Entities (Level 3)
+       data _44608                                                   ; State Data for Complex Entities (Level 3)
+       data _44855                                                   ; Address of Berk's state data (Level 3)
+       data _44998                                                   ; Address of Drutt's state data (Level 3)
+       data _45024                                                   ; Address of worm's state data (Level 3)
+       data _45102                                                   ; Start address for reverse-order collision checks (Level 3)
+       data room_dim_data_3                                          ; Room Dimension Data (Level 3)
+       data _45152                                                   ; Horizontal Room Connectivity Map (Level 3)
+       data _45164                                                   ; Unused Data Block (09) (Level 3)
+       data _45165                                                   ; Vertical Room Connectivity Map (Level 3)
+
+* Table of Data Addresses (Level 4)
+data_addresses_4:
+       data _45171                                                   ; State Data for Simple Entities (Level 4)
+       data _45274                                                   ; State Data for Complex Entities (Level 4)
+       data _45391                                                   ; Address of Berk's state data (Level 4)
+       data _45443                                                   ; Address of Drutt's state data (Level 4)
+       data _45469                                                   ; Address of worm's state data (Level 4)
+       data _45846                                                   ; Start address for reverse-order collision checks (Level 4)
+       data room_dim_data_4                                          ; Room Dimension Data (Level 4)
+       data _45886                                                   ; Horizontal Room Connectivity Map (Level 4)
+       data _45894                                                   ; Unused Data Block (09) (Level 4)
+       data _45895                                                   ; Vertical Room Connectivity Map (Level 4)
+
+* Table of Start Addresses of Levels' State Data for Complex Entities
+level_state_data_table:
+       data _43333                                                   ; Level 1
+       data _43993                                                   ; Level 2
+       data _44608                                                   ; Level 3
+       data _45274                                                   ; Level 4
+
+* Current Position in Berk's Script Data
+berk_script_pos:
+       data _35081                                                   ; Berk facing out of screen, ready to respond to control input
+
+* State Data for Drutt Upon Returning to Level 1
+*
+* After completing Level 4, the data here is written into Drutt's slot in Level 1's State Data for Complex Entities
+* block (#R43333). This ensures that Drutt follows Berk and Boni through the final door.
+_36625:
+       byte 10,1,193,204,30,119,30,119,18,0,192,192,2
+
+* Current Position in Script Data for Boni's Kidnap
+boni_kidnap_script_pos:
+       data boni_kidnap_script
+
+* Current Position in Bat's Script Data
+bat_script_pos:
+       data bat_script
+
+* Table of Current Positions in Spiders' Script Data
+_37580:
+       data _37792                                                   ; Spider 1
+       data _37792                                                   ; Spider 2
+       data _37792                                                   ; Spider 3
+
+* Current Position in Bubo's Script Data
+bubo_script_pos:
+       data _38024
+
+* Table of Current Positions in Apebeasts' Script Data
+_38424:
+       data _38432                                                   ; Apebeast 1 (Level 2)
+       data _38450                                                   ; Apebeast 2 (Level 2)
+       data _38432                                                   ; Apebeast 3 (Level 2)
+       data _38450                                                   ; Apebeast 4 (Level 2)
+
+* Hatch State Index (Level 3)
+_39150:
+       byte 0
+
+* Table of Coloured Creatures' Properties
+*
+* This data is used to periodically change the identities of the three coloured creatures. Upon switching, a random
+* number (i.e. a "Sequence ID") between 0 and 2 is generated. This Sequence ID is the index of the record, in the
+* following table, whose data (entity class and graphic layout data address) will overwrite that of the first
+* coloured creature at #R44894, as defined in the complex state data table. The second and third creatures' data
+* will be likewise overwritten by the data from the following two records, respectively. As three records are always
+* used, starting with the record whose index matches the generated Sequence ID, there will always be one red, one
+* yellow and one white creature.
+_39584:
+       byte 13,62,157                                                ; Red Coloured Creature
+       byte 14,77,157                                                ; Yellow Coloured Creature
+       byte 15,92,157                                                ; White Coloured Creature
+       byte 13,62,157                                                ; Red Coloured Creature
+       byte 14,77,157                                                ; Yellow Coloured Creature
+
+* Miscellaneous Data (Coloured Creatures)
+_39599:
+       byte 0                                                        ; Creatures' current Sequence ID
+_39600:
+       byte 0                                                        ; Cycles elapsed since last swap of creatures
+
+* Current Position in Skeleton's Script Data
+skeleton_script_pos:
+       data skeleton_idling_script                                                   ; (#R41232, Skeleton Idling)
+
+* State Data for Simple Entities (Level 1)
+*
+* #TABLE(default,centre,:w)
+* { =h Offset | =h Meaning }
+* { 0 | Room index }
+* { 1 | Depth (distance from screen) }
+* { 2 & 3 | Address of graphic layout data }
+* { 4 | y-coordinate + 100 (chars) }
+* { 5 | x-coordinate + 100 (chars) }
+* TABLE#
+_43146:
+       byte 1,2,_50389%256,_50389/256,107,100                        ; (#R50389) Left brickwork
+       byte 1,2,_50389%256,_50389/256,106,117                        ; (#R50389) Right brickwork
+       byte 1,0,_50479%256,_50479/256,107,107                        ; (#R50479) "Home Sweet Home" brick border
+       byte 1,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
+       byte 1,2,_50018%256,_50018/256,100,100                        ; (#R50018) Spider's web
+       byte 1,1,_50238%256,_50238/256,121,100                        ; (#R50238) Left part of floor
+       byte 1,1,_50211%256,_50211/256,121,120                        ; (#R50211) Right part of floor
+_43188:
+       byte 1,2,_50267%256,_50267/256,121,112                        ; (#R50267) Closed Trap Door
+       byte 1,2,_50147%256,_50147/256,112,115                        ; (#R50147) Boni's shelf
+       byte 2,1,_50359%256,_50359/256,100,100                        ; (#R50359) Left wall
+       byte 2,1,_50359%256,_50359/256,99,109                         ; (#R50359) Right wall
+       byte 3,1,_50359%256,_50359/256,100,100                        ; (#R50359) Left wall
+       byte 3,1,_50359%256,_50359/256,99,115                         ; (#R50359) Right wall
+       byte 4,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
+       byte 4,2,_50126%256,_50126/256,101,100                        ; (#R50126) Single arch, left
+       byte 4,2,_50126%256,_50126/256,101,124                        ; (#R50126) Single arch, right
+       byte 4,2,_50359%256,_50359/256,97,108                         ; (#R50359) Wall, vertical bricks, single row, left
+       byte 4,2,_50359%256,_50359/256,97,123                         ; (#R50359) Wall, vertical bricks, single row, right
+       byte 5,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 6,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 6,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
+       byte 6,2,_50579%256,_50579/256,107,99                         ; (#R50579) Wall, horizontal bricks
+       byte 7,1,_50238%256,_50238/256,121,94                         ; (#R50238) Left part of floor
+       byte 7,1,_50211%256,_50211/256,121,126                        ; (#R50211) Right part of floor
+       byte 7,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
+       byte 8,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 8,1,_50359%256,_50359/256,101,100                        ; (#R50359) Wall, vertical bricks, single row, left
+       byte 8,1,_50359%256,_50359/256,101,131                        ; (#R50359) Wall, vertical bricks, single row, right
+       byte 9,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 9,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
+       byte 9,2,_50609%256,_50609/256,111,123                        ; (#R50609) Row of five horizontal bricks
+       byte 254                                                      ; End Marker
+
+* State Data for Complex Entities (Level 1)
+*
+* For more details on individual bits, see trivia.
+_43333:
+       byte 10,2,_50663%256,_50663/256,100,112,108,119,33,0,0,0,0    ; (#R50663) Entry door (above Trap Door Room, where Berk
+                                                                     ; emerges at the end of the game)
+       byte 10,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 11,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 9,2,_50663%256,_50663/256,112,124,120,131,33,2,0,192,0   ; (#R50663) Exit door
+       byte 9,2,_50579%256,_50579/256,107,123,120,124,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
+       byte 9,2,_50579%256,_50579/256,107,131,120,132,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
+       byte 6,2,_50579%256,_50579/256,107,107,120,108,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
+       byte 6,1,_50800%256,_50800/256,121,102,121,102,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+_43437:
+       byte 0,1,_50283%256,_50283/256,114,112,121,119,129,0,0,240,0  ; (#R50283) Open Trap Door (also acts as marker, makes Berk
+                                                                     ; and Drutt fall)
+_43450:
+       byte 1,1,_50800%256,_50800/256,114,120,121,120,128,0,0,48,0   ; (#R50800) Marker (prevents Berk and Drutt passing)
+_43463:
+       byte 6,1,_37205%256,_37205/256,93,115,98,118,30,0,128,192,0   ; (#R37205) Bat
+       byte 7,1,_50800%256,_50800/256,120,106,121,125,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 8,1,_50609%256,_50609/256,100,96,100,105,130,0,0,240,0   ; (#R50609) Ceiling (left section)
+       byte 8,1,_50609%256,_50609/256,100,126,100,135,130,0,0,240,0  ; (#R50609) Ceiling (right section)
+       byte 8,2,_50642%256,_50642/256,107,119,108,122,35,0,0,240,0   ; (#R50642) Pit Platform
+       byte 8,2,_50800%256,_50800/256,107,114,108,118,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 8,2,_50800%256,_50800/256,107,123,108,127,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 8,2,_50800%256,_50800/256,109,119,109,122,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 8,2,_50579%256,_50579/256,101,104,120,105,30,0,0,240,0   ; (#R50579) Wall, horizontal bricks
+       byte 8,2,_50579%256,_50579/256,101,126,120,127,30,0,0,240,0   ; (#R50579) Wall, horizontal bricks
+_43593:
+       byte 1,1,_56804%256,_56804/256,115,123,121,128,31,0,128,192,0 ; (#R56804) Berk
+_43606:
+       byte 1,2,_50317%256,_50317/256,108,115,111,116,19,0,128,0,0   ; (#R50317) Boni
+_43619:
+       byte 1,2,_51314%256,_51314/256,124,115,128,116,30,0,128,192,0 ; (#R51314) Flying Skeleton Creature
+       byte 6,2,_50792%256,_50792/256,105,103,105,104,17,0,128,240,0 ; (#R50792) Key
+       byte 9,2,_50560%256,_50560/256,105,103,105,104,4,0,131,240,0  ; (#R50560) Red Sweet (Flying, duration = 3)
+       byte 8,1,_50565%256,_50565/256,121,104,121,105,1,0,128,240,0  ; (#R50565) Green Sweet (Jumping, duration = permanent)
+_43671:
+       byte 1,1,_52417%256,_52417/256,121,129,121,129,18,0,128,192,0 ; (#R52417) Drutt
+_43684:
+       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+       byte 2,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 3,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 4,1,_50609%256,_50609/256,100,99,100,108,130,0,0,240,0   ; (#R50609) Ceiling, left section
+_43736:
+       byte 4,1,_50609%256,_50609/256,100,123,100,132,130,0,0,240,0  ; (#R50609) Ceiling, right section
+_43749:
+       byte 5,2,_37888%256,_37888/256,103,118,106,120,27,0,128,0,0   ; (#R37888) Spider
+_43762:
+       byte 5,2,_37888%256,_37888/256,103,110,106,112,28,0,128,0,0   ; (#R37888) Spider
+_43775:
+       byte 5,2,_37888%256,_37888/256,103,102,106,104,29,0,128,0,0   ; (#R37888) Spider
+       byte 5,2,_50008%256,_50008/256,100,100,0,0,30,0,0,0,0         ; (#R50008) Spiders' Webs
+       byte 5,2,_50116%256,_50116/256,100,100,0,0,30,0,0,0,0         ; (#R50116) Spiders' Arches
+       byte 255                                                      ; End Marker
+
+* Room Dimension Data (Level 1)
+*
+* #TABLE(default,centre,:w)
+* { =h Offset | =h Meaning }
+* { 0 | Room depth (number of depth levels) }
+* { 1 | Position of left edge of room (chars) }
+* { 2 | Position of right edge of room (chars) }
+* { 3 | Position of top edge of room (chars) }
+* { 4 | Position of bottom edge of room (chars) }
+* TABLE#
+room_dim_data_1:
+       byte 2,0,31,0,21                                              ; (01) Trap Door Room
+       byte 2,11,20,0,21                                             ; (02) 1st room below Trap Door
+       byte 2,8,23,0,21                                              ; (03) 2nd room below Trap Door
+       byte 2,0,31,0,21                                              ; (04) Room at bottom of Trap Door Shaft
+       byte 2,0,31,0,21                                              ; (05) Spider Room
+       byte 2,0,31,0,21                                              ; (06) Bat Room
+       byte 2,0,31,0,21                                              ; (07) Room at top of Pit
+       byte 2,0,31,0,21                                              ; (08) Pit
+       byte 2,0,31,0,21                                              ; (09) Door Room
+       byte 2,0,31,0,21                                              ; (10) Entry Room
+       byte 2,0,31,0,21                                              ; (11) Room above Trap Door Room
+       byte 255                                                      ; End Marker
+
+* Horizontal Room Connectivity Map (Level 1)
+*
+* Each entry represents a link between two rooms. The first byte in the entry is the index of the room to the left
+* and the second byte is the index of the room to the right.
+_43871:
+       byte 6,5                                                      ; Bat Room and Spider Room
+       byte 5,4                                                      ; Spider Room and room at bottom of Trap Door Shaft
+       byte 4,7                                                      ; Room at bottom of Trap Door Shaft and room at top of Pit
+       byte 7,9                                                      ; Room at top of Pit and Door Room
+       byte 255,255                                                  ; End Marker
+
+* Unused
+*
+* Data Block (09) (Level 1)
+_43881:
+       byte 255
+
+* Vertical Room Connectivity Map (Level 1)
+_43882:
+       byte 1,2                                                      ; Trap Door Room and 1st room below Trap Door
+       byte 2,3                                                      ; 1st room below Trap Door and 2nd room below Trap Door
+       byte 3,4                                                      ; 2nd room below Trap Door and room at bottom of Trap Door Shaft
+       byte 7,8                                                      ; Room at top of Pit and Pit
+       byte 10,11                                                    ; Entry Room and room above Trap Door Room
+       byte 11,1                                                     ; Room above Trap Door Room and Trap Door Room
+       byte 255,255                                                  ; End Marker
+
+* State Data for Simple Entities (Level 2)
+_43896:
+       byte 1,2,_51187%256,_51187/256,100,112                        ; (#R51187) Sides of ceiling gap
+       byte 1,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 1,2,_51253%256,_51253/256,100,103                        ; (#R51253) Stalactite
+       byte 1,2,_51253%256,_51253/256,100,110                        ; (#R51253) Stalactite
+       byte 1,2,_51253%256,_51253/256,100,120                        ; (#R51253) Stalactite
+       byte 2,2,_50908%256,_50908/256,100,100                        ; (#R50908) Left wall
+       byte 2,2,_50893%256,_50893/256,100,108                        ; (#R50893) Right wall
+       byte 2,2,_50923%256,_50923/256,100,100                        ; (#R50923) Ceiling section (half)
+       byte 3,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 3,2,_51202%256,_51202/256,101,92                         ; (#R51202) Seven stalactites at various heights
+       byte 4,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 4,2,_51202%256,_51202/256,101,95                         ; (#R51202) Seven stalactites at various heights
+       byte 5,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor (see trivia)
+       byte 6,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 7,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 7,2,_51202%256,_51202/256,100,92                         ; (#R51202) Seven stalactites at various heights
+       byte 254                                                      ; End Marker
+
+* State Data for Complex Entities (Level 2)
+_43993:
+       byte 1,2,_50893%256,_50893/256,100,130,122,131,128,0,0,240,0  ; (#R50893) Right wall
+       byte 1,2,_50923%256,_50923/256,100,96,101,112,130,0,0,192,0   ; (#R50923) Ceiling section (half)
+       byte 1,2,_50923%256,_50923/256,100,120,101,131,130,0,0,192,0  ; (#R50923) Ceiling section (half)
+       byte 1,2,_50800%256,_50800/256,120,99,120,114,50,0,0,48,0     ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 1,2,_50800%256,_50800/256,120,117,120,132,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 2,1,_50800%256,_50800/256,120,100,121,109,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 3,2,_50875%256,_50875/256,100,100,101,131,130,0,0,192,0  ; (#R50875) Ceiling (complete 1)
+       byte 4,2,_50884%256,_50884/256,100,100,101,131,130,0,0,192,0  ; (#R50884) Ceiling (complete 2)
+       byte 5,2,_50875%256,_50875/256,100,100,101,131,130,0,0,192,0  ; (#R50875) Ceiling (complete 1) (see trivia)
+       byte 6,2,_50884%256,_50884/256,100,100,101,131,130,0,0,192,0  ; (#R50884) Ceiling (complete 2)
+       byte 7,2,_50875%256,_50875/256,100,100,101,131,130,0,0,192,0  ; (#R50875) Ceiling (complete 1)
+       byte 7,2,_50908%256,_50908/256,101,100,121,101,128,0,0,240,0  ; (#R50908) Left wall
+_44149:
+       byte 1,1,_57428%256,_57428/256,115,125,121,130,31,18,128,192,0 ; (#R57428) Berk
+_44162:
+       byte 3,1,_38766%256,_38766/256,120,100,121,102,25,0,128,241,100 ; (#R38766) Green Apebeast
+       byte 3,1,_38766%256,_38766/256,120,129,121,131,25,0,128,242,115 ; (#R38766) Green Apebeast
+       byte 4,1,_38766%256,_38766/256,120,100,121,102,25,0,128,241,100 ; (#R38766) Green Apebeast
+       byte 4,1,_38766%256,_38766/256,120,129,121,131,25,0,128,242,115 ; (#R38766) Green Apebeast
+_44214:
+       byte 7,0,_39131%256,_39131/256,0,0,0,0,30,0,0,0,0             ; (#R39131) Bubo's projectile
+_44227:
+       byte 7,1,_38996%256,_38996/256,119,115,121,117,16,0,128,192,0 ; (#R38996) Bubo
+_44240:
+       byte 2,2,_50792%256,_50792/256,103,104,103,105,17,0,128,240,0 ; (#R50792) Key
+       byte 2,2,_51271%256,_51271/256,119,104,120,105,2,0,128,240,0  ; (#R51271) Mushroom (Jumping, duration = permanent)
+       byte 7,2,_50800%256,_50800/256,120,100,120,103,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 7,1,_50800%256,_50800/256,121,100,121,103,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 7,2,_51271%256,_51271/256,104,104,105,105,9,0,128,240,0  ; (#R51271) Mushroom (Immunity to Bubo, duration =
+                                                                     ; permanent)
+_44305:
+       byte 6,1,_51253%256,_51253/256,98,111,98,111,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,104,98,104,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,113,98,113,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,116,98,116,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,121,98,121,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,123,98,123,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,124,98,124,34,0,0,240,0     ; (#R51253) Stalactite
+_44396:
+       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,128,192,0 ; (#R52417) Drutt
+_44409:
+       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+_44422:
+       byte 1,1,_50668%256,_50668/256,113,122,121,129,33,3,0,192,0   ; (#R50668) Level 2 Door
+       byte 255                                                      ; End Marker
+
+* Room Dimension Data (Level 2)
+room_dim_data_2:
+       byte 2,0,31,0,21                                              ; (01) Door Room
+       byte 2,11,20,0,21                                             ; (02) Key Room
+       byte 2,0,31,0,21                                              ; (03) First Apebeast Room
+       byte 2,0,31,0,21                                              ; (04) Second Apebeast Room
+       byte 2,0,31,0,21                                              ; (05) Unused (see trivia)
+       byte 2,0,31,0,21                                              ; (06) Stalactite Room
+       byte 2,0,31,0,21                                              ; (07) Bubo's Room
+       byte 255                                                      ; End Marker
+
+* Horizontal Room Connectivity Map (Level 2)
+_44472:
+       byte 7,4                                                      ; Bubo's Room and Second Apebeast Room
+       byte 4,3                                                      ; Second Apebeast Room and First Apebeast Room
+       byte 3,6                                                      ; First Apebeast Room and Stalactite Room
+       byte 6,1                                                      ; Stalactite Room and Door Room
+       byte 255,255                                                  ; End Marker
+
+* Unused
+*
+* Data Block (09) (Level 2)
+_44482:
+       byte 255
+
+* Vertical Room Connectivity Map (Level 2)
+_44483:
+       byte 2,1                                                      ; Key Room and Door Room
+       byte 255,255                                                  ; End Marker
+
+* State Data for Simple Entities (Level 3)
+_44487:
+       byte 1,2,_49781%256,_49781/256,100,100                        ; (#R49781) Fifteen glowing tangleweeds
+       byte 1,2,_40073%256,_40073/256,111,101                        ; (#R40073) Door Archway
+       byte 1,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
+       byte 2,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
+       byte 2,2,_49789%256,_49789/256,100,96                         ; (#R49789) Six glowing tangleweeds
+       byte 2,2,_49781%256,_49781/256,100,121                        ; (#R49781) Fifteen glowing tangleweeds
+       byte 3,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
+       byte 3,2,_49797%256,_49797/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 4,1,_50801%256,_50801/256,121,79                         ; (#R50801) Floor
+       byte 4,1,_50801%256,_50801/256,121,119                        ; (#R50801) Floor
+       byte 4,2,_49789%256,_49789/256,100,100                        ; (#R49789) Six glowing tangleweeds
+       byte 4,2,_49781%256,_49781/256,100,119                        ; (#R49781) Fifteen glowing tangleweeds
+       byte 5,2,_49797%256,_49797/256,100,99                         ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 5,1,_50801%256,_50801/256,121,73                         ; (#R50801) Floor
+       byte 5,1,_50801%256,_50801/256,121,121                        ; (#R50801) Floor
+       byte 6,2,_49797%256,_49797/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 6,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
+       byte 7,2,_49797%256,_49797/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 7,1,_50801%256,_50801/256,121,119                        ; (#R50801) Floor
+       byte 7,1,_50801%256,_50801/256,121,79                         ; (#R50801) Floor
+       byte 254                                                      ; End Marker
+
+* State Data for Complex Entities (Level 3)
+_44608:
+       byte 1,2,_50673%256,_50673/256,112,102,120,109,33,4,0,192,0   ; (#R50673) Level 3 Door
+       byte 2,1,_49711%256,_49711/256,100,89,100,104,130,0,0,240,0   ; (#R49711) Ceiling (left section)
+       byte 2,1,_49711%256,_49711/256,100,121,100,131,130,0,0,240,0  ; (#R49711) Ceiling (right section)
+       byte 2,2,_40110%256,_40110/256,107,118,108,122,35,0,0,240,0   ; (#R40110) Platform
+       byte 2,2,_50800%256,_50800/256,107,113,108,117,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 2,2,_50800%256,_50800/256,107,123,108,127,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 2,2,_50800%256,_50800/256,108,118,109,122,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 2,2,_40040%256,_40040/256,100,104,121,104,30,0,0,48,0    ; (#R40040) Vertical wall
+       byte 3,1,_49705%256,_49705/256,100,100,100,131,130,0,0,240,0  ; (#R49705) Ceiling (full width)
+       byte 4,1,_49711%256,_49711/256,100,95,100,110,130,0,0,240,0   ; (#R49711) Ceiling (left section)
+       byte 4,1,_49711%256,_49711/256,100,119,100,131,130,0,0,240,0  ; (#R49711) Ceiling (right section)
+       byte 4,2,_40040%256,_40040/256,100,119,121,119,30,0,0,48,0    ; (#R40040) Vertical wall
+       byte 5,1,_50800%256,_50800/256,120,105,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 5,1,_49705%256,_49705/256,100,102,100,131,130,0,0,240,0  ; (#R49705) Ceiling (full width)
+hatch:
+       byte 4,1,_41090%256,_41090/256,121,111,121,118,30,0,0,0,0     ; (#R41090) Hatch (closed)
+       byte 6,2,_40138%256,_40138/256,115,106,115,110,32,0,0,128,0   ; (#R40138) Red coloured creature's slot (see trivia)
+       byte 6,2,_40143%256,_40143/256,115,113,115,117,32,0,0,128,0   ; (#R40143) Yellow coloured creature's slot (see trivia)
+       byte 6,2,_40148%256,_40148/256,115,120,115,124,32,0,0,128,0   ; (#R40148) White coloured creature's slot (see trivia)
+       byte 7,1,_50800%256,_50800/256,120,111,121,118,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+_44855:
+       byte 1,1,_57058%256,_57058/256,115,102,121,107,31,18,128,192,0 ; (#R57058) Berk
+_44868:
+       byte 3,2,_40451%256,_40451/256,122,113,135,118,26,0,128,0,0   ; (#R40451) Large yellow creature
+_44881:
+       byte 6,1,_40320%256,_40320/256,93,125,95,29,30,0,128,240,0    ; (#R40320) Clawed foot
+_44894:
+       byte 6,1,_40284%256,_40284/256,118,108,121,108,15,0,128,192,0 ; (#R40284) White coloured creature
+       byte 6,1,_40254%256,_40254/256,118,115,121,115,13,0,128,192,0 ; (#R40254) Red coloured creature
+       byte 6,1,_40269%256,_40269/256,118,122,121,122,14,0,128,192,0 ; (#R40269) Yellow coloured creature
+       byte 2,2,_41175%256,_41175/256,118,121,120,123,12,0,128,240,0 ; (#R41175) Weight (see trivia)
+       byte 3,2,_40192%256,_40192/256,120,109,120,110,10,0,148,240,0 ; (#R40192) Edible eyes (Floating, duration = 20)
+       byte 7,2,_40192%256,_40192/256,120,126,120,127,5,0,130,240,0  ; (#R40192) Edible eyes (Flying, duration = 2)
+_44972:
+       byte 6,1,_40192%256,_40192/256,90,127,90,128,6,0,131,240,0    ; (#R40192) Edible eyes (Flying, duration = 3)
+       byte 4,2,_40192%256,_40192/256,120,122,120,123,11,0,131,240,0 ; (#R40192) Edible eyes (Invisibility, duration = 3)
+_44998:
+       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
+       byte 4,2,_50792%256,_50792/256,108,127,108,128,17,0,128,240,0 ; (#R50792) Key
+_45024:
+       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+       byte 5,1,_40040%256,_40040/256,100,100,121,100,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 1,1,_40040%256,_40040/256,100,100,121,100,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 4,1,_40040%256,_40040/256,100,131,121,131,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 4,2,_50800%256,_50800/256,120,129,120,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 4,1,_50800%256,_50800/256,121,129,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+_45102:
+       byte 7,1,_40040%256,_40040/256,100,131,121,131,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 255                                                      ; End Marker
+
+* Room Dimension Data (Level 3)
+room_dim_data_3:
+       byte 2,16,31,0,21                                             ; (01) Door Room
+       byte 2,0,31,0,21                                              ; (02) Weight Room
+       byte 2,0,31,0,21                                              ; (03) Large Yellow Creature Room
+       byte 2,0,31,0,21                                              ; (04) Hatch Room
+       byte 2,0,31,0,21                                              ; (05) Room above Weight Room
+       byte 2,0,31,0,21                                              ; (06) Coloured Creatures' Room
+       byte 2,0,31,0,21                                              ; (07) Room above Hatch Room
+       byte 255                                                      ; End Marker
+
+* Horizontal Room Connectivity Map (Level 3)
+_45152:
+       byte 1,2                                                      ; Door Room and Weight Room
+       byte 2,3                                                      ; Weight Room and Large Yellow Creature Room
+       byte 3,4                                                      ; Large Yellow Creature Room and Hatch Room
+       byte 5,6                                                      ; Room above Weight Room and Coloured Creatures' Room
+       byte 6,7                                                      ; Coloured Creatures' Room and room above Hatch Room
+       byte 255,255                                                  ; End Marker
+
+* Unused
+*
+* Data Block (09) (Level 3)
+_45164:
+       byte 255
+
+* Vertical Room Connectivity Map (Level 3)
+_45165:
+       byte 5,2                                                      ; Room above Weight Room and Weight Room
+       byte 7,4                                                      ; Room above Hatch Room and Hatch Room
+       byte 255,255                                                  ; End Marker
+
+* State Data for Simple Entities (Level 4)
+_45171:
+       byte 1,2,_49178%256,_49178/256,100,126                        ; (#R49178) Left brickwork
+       byte 1,2,240,195,121,100                                      ; (#R50126) Single arch
+       byte 2,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 2,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 2,2,_49178%256,_49178/256,100,107                        ; (#R49178) Left brickwork
+       byte 2,2,_49178%256,_49178/256,100,125                        ; (#R49178) Left brickwork
+       byte 3,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 3,2,_49178%256,_49178/256,100,114                        ; (#R49178) Left brickwork
+       byte 3,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 4,2,_49413%256,_49413/256,117,123                        ; (#R49413) Single wide brick
+       byte 4,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 4,1,_50238%256,_50238/256,121,99                         ; (#R50238) Left part of floor
+       byte 4,1,_50211%256,_50211/256,121,121                        ; (#R50211) Right part of floor
+       byte 5,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 5,1,_49584%256,_49584/256,97,100                         ; (#R49584) Vertical red bar (outside normal game area)
+       byte 5,1,_49584%256,_49584/256,102,127                        ; (#R49584) Vertical red bar (outside normal game area)
+       byte 5,1,_49489%256,_49489/256,117,100                        ; (#R49489) Snake's Brickwork
+       byte 254                                                      ; End Marker
+
+* State Data for Complex Entities (Level 4)
+_45274:
+       byte 1,1,_50800%256,_50800/256,100,100,101,111,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 1,1,_50800%256,_50800/256,100,119,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 5,1,_49104%256,_49104/256,100,95,101,110,130,0,0,240,0   ; (#R49104) Two rows of horizontal brickwork (half-width, 1)
+       byte 5,1,_49035%256,_49035/256,100,121,101,131,130,0,0,240,0  ; (#R49035) Two rows of horizontal brickwork (half-width, 2)
+       byte 5,1,_50800%256,_50800/256,120,100,121,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,1,_50800%256,_50800/256,121,122,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,2,_50800%256,_50800/256,120,107,120,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,2,_50800%256,_50800/256,120,120,120,124,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 4,1,_50800%256,_50800/256,121,127,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+_45391:
+       byte 1,1,_57428%256,_57428/256,115,102,121,107,31,18,128,192,0 ; (#R57428) Berk
+_45404:
+       byte 3,1,_42901%256,_42901/256,110,128,121,129,36,0,128,192,0 ; (#R42901) Skeleton
+_45417:
+       byte 3,0,_50317%256,_50317/256,0,0,0,0,19,0,128,240,2         ; (#R50317) Boni
+_45430:
+       byte 4,2,_50304%256,_50304/256,113,125,116,126,21,0,128,240,0 ; (#R50304) Fake Boni
+_45443:
+       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
+       byte 4,2,_50792%256,_50792/256,114,118,114,119,17,0,128,240,0 ; (#R50792) Key
+_45469:
+       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+_45482:
+       byte 3,1,_51314%256,_51314/256,110,108,114,110,30,0,0,48,0    ; (#R51314) Flying Skeleton Creature
+_45495:
+       byte 5,1,_42648%256,_42648/256,119,83,119,101,30,0,128,0,0    ; (#R42648) Snake
+_45508:
+       byte 1,1,_42530%256,_42530/256,118,122,121,124,20,0,128,240,0 ; (#R42530) Cannon
+_45521:
+       byte 2,2,_50800%256,_50800/256,104,107,104,107,40,0,128,0,0   ; (#R50800) 1st drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,105,110,105,110,41,0,128,0,0   ; (#R50800) 2nd drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,102,115,102,115,43,0,128,0,0   ; (#R50800) 3rd drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,103,120,103,120,44,0,128,0,0   ; (#R50800) 4th drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,104,128,104,128,45,0,128,0,0   ; (#R50800) 5th drip from left (Red Sausage Room)
+       byte 3,2,_50800%256,_50800/256,104,113,104,113,46,0,128,0,0   ; (#R50800) Drip (Skeleton's Room)
+_45599:
+       byte 0,0,_50800%256,_50800/256,0,0,0,0,30,0,128,0,0           ; (#R50800) Cannon's Projectile
+       byte 2,1,_43128%256,_43128/256,121,110,121,111,3,0,128,240,0  ; (#R43128) Red Sausage (Jumping, duration = permanent)
+       byte 4,1,_43137%256,_43137/256,121,124,121,125,7,0,134,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 6)
+       byte 5,2,_43137%256,_43137/256,120,111,120,112,8,0,131,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 3)
+       byte 1,1,_50678%256,_50678/256,113,102,121,109,33,1,0,192,0   ; (#R50678) Door
+       byte 1,1,_49173%256,_49173/256,100,100,121,101,128,0,0,240,0  ; (#R49173) Yellow brick column
+       byte 1,1,_49173%256,_49173/256,110,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 1,1,_49571%256,_49571/256,112,102,112,102,30,0,0,0,0     ; (#R49571) Long yellow brick
+       byte 2,1,_49392%256,_49392/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
+       byte 3,1,_49392%256,_49392/256,115,99,118,100,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
+       byte 3,1,_49392%256,_49392/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
+       byte 4,1,_49392%256,_49392/256,115,99,118,101,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
+       byte 4,1,_50800%256,_50800/256,120,111,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 4,1,_49173%256,_49173/256,102,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 4,1,_49173%256,_49173/256,101,131,121,132,30,0,0,0,0     ; (#R49173) Yellow brick column
+_45794:
+       byte 4,1,_42754%256,_42754/256,111,121,114,122,30,0,0,0,0     ; (#R42754) Ghost
+       byte 5,1,_50800%256,_50800/256,100,100,101,110,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 5,1,_50800%256,_50800/256,100,121,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 5,1,_49535%256,_49535/256,102,104,121,106,128,0,0,16,0   ; (#R49535) Left wall, short
+_45846:
+       byte 5,1,_49553%256,_49553/256,102,125,121,127,128,0,0,32,0   ; (#R49553) Right wall, long
+       byte 255                                                      ; End Marker
+
+* Room Dimension Data (Level 4)
+room_dim_data_4:
+       byte 2,0,31,0,21                                              ; (01) Door Room
+       byte 2,0,31,0,21                                              ; (02) Five Drips Room
+       byte 2,0,31,0,21                                              ; (03) Skeleton's Room
+       byte 2,0,31,0,21                                              ; (04) Fake Boni's Room
+       byte 2,0,31,0,21                                              ; (05) Pit
+       byte 255                                                      ; End Marker
+
+* Horizontal Room Connectivity Map (Level 4)
+_45886:
+       byte 1,2                                                      ; Door Room and Five Drips Room
+       byte 2,3                                                      ; Five Drips Room and Skeleton's Room
+       byte 3,4                                                      ; Skeleton's Room and Fake Boni's Room
+       byte 255,255                                                  ; End Marker
+
+* Unused
+*
+* Data Block (09) (Level 4)
+_45894:
+       byte 255
+
+* Vertical Room Connectivity Map (Level 4)
+_45895:
+       byte 4,5                                                      ; Fake Boni's Room and Pit
+       byte 255,255                                                  ; End Marker
+
+* Current Keyboard Controls
+current_keyboard_ctrls:
+       text 'X'                                                      ; Right
+       text 'Z'                                                      ; Left
+       text 'A'                                                      ; Forward
+       text 'Q'                                                      ; Back
+       text 'C'                                                      ; Berk / Drutt
+       text 'P'                                                      ; Pause
+       text 'R'                                                      ; Restart
+
+* Table of Attribute File Addresses for Main Menu Strings
+_46690:
+       data 22666                                                    ; "S   START   "
+       data 22762                                                    ; "K NEW KEYS  "
+_46694:
+       data 22851                                                    ; "J +KEMPSTON "
+_46696:
+       data 22947                                                    ; "   RIGHT    "
+       data 23043                                                    ; "   LEFT     "
+       data 23139                                                    ; "   FORWARD  "
+       data 22865                                                    ; "   BACK     "
+       data 22961                                                    ; "   BERK/DRUT"
+       data 23057                                                    ; "   PAUSE    "
+       data 23153                                                    ; "   RESTART  "
+
+* Table of Main Menu Strings
+main_menu_strings:
+       text 'S   START   '
+       text 'K NEW KEYS  '
+       text 'J +KEMPSTON '
+       text '   RIGHT    '
+       text '   LEFT     '
+       text '   FORWARD  '
+       text '   BACK     '
+       text '   BERK/DRUT'                                           ; (see bugs)
+       text '   PAUSE    '
+       text '   RESTART  '
+
+* "THROUGH the TRAPDOOR" String
+title_text:
+       text 'THROUGH the TRAPDOOR'
+
+* "SORRY BERK,  BUT YOUR TIME IS UP" String
+_47153:
+       text 'SORRY BERK,  BUT YOUR TIME IS UP'
+
+* "HOME SWEET HOME" String
+_47198:
+       text 'HOME SWEET HOME'
+
+* Score / Total / High Score String
+score_text:
+       text '*SCORE#00000* TOTAL#00000* HI-SC#00999$'
+
+* Return Values from Keyboard Reading Routine
+_47853:
+       text 'cZXCVASDFGQWERT1234509876POIUYeLKJH yMNB'
+
+* Table of Addresses of Graphic Layout Data Handling Routines
+*
+* Graphic layout data is stored in the form of encoded instructions. Generally an instruction is simply to display a
+* graphic of given index with a given attribute and then to advance the position of the drawing "cursor". If the
+* first byte (normally the graphic index) is 236 or greater, however, then we are dealing with a special
+* instruction; the values 236 and above can be considered to be opcodes. These opcodes correspond to calls/jumps to
+* routines at addresses stored in this table. The opcodes all take different combinations of parameters.
+graphic_routine_jmp_tbl:
+       data graphics_routine_236                                                   ; (236)
+       data graphics_routine_237                                                   ; (237)
+       data graphics_routine_238                                                   ; (238)
+       data graphics_routine_239                                                   ; (239)
+       data graphics_routine_240                                                   ; (240)
+       data graphics_routine_241                                                   ; (241)
+       data graphics_routine_242                                                   ; (242)
+       data graphics_routine_243                                                   ; (243)
+       data graphics_routine_244                                                   ; (244)
+       data graphics_routine_245                                                   ; (245)
+       data graphics_routine_246                                                   ; (246)
+       data graphics_routine_247                                                   ; (247)
+       data graphics_routine_248                                                   ; (248)
+       data graphics_routine_249                                                   ; (249)
+       data graphics_routine_250                                                   ; (250)
+       data graphics_routine_251                                                   ; (251)
+       data graphics_routine_252                                                   ; (252)
+       data graphics_routine_253                                                   ; (253)
+       data graphics_routine_254                                                   ; (254)
+       data graphics_routine_255                                                   ; (255)
+
+* Table of Script Routine Start Addresses
+script_routines_table:
+       data 0                                              ; (00) - Unused
+       data script_routine_01                              ; (01) - Load HL (Script Data Pointer) with New Address
+       data script_routine_02                              ; (02) - Move Entity at IX (and if Berk, Carried Entity) Left One Character
+       data script_routine_03                              ; (03) - Move Entity at IX (and if Berk, Carried Entity) Right One Character
+       data script_routine_04                              ; (04) - If Current Character and Target Entity are in the Same Room then Set Pending Sound
+       data 0                                              ; (05) - Unused
+       data script_routine_06                              ; (06) - Set Berk's Facing Into Screen Flag, and Reset his Facing Left and Facing Right flags
+       data script_routine_07                              ; (07) - Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags
+       data script_routine_08                              ; (08) - Set Must Process Current Script Data Flag for Entity at IX
+       data script_routine_09                              ; (09) - Reset Must Process Current Script Data Flag for Entity at IX
+       data script_routine_10                              ; (10) - Reset Entity's Walking Left and Walking Right flags
+       data script_routine_11                              ; (11) - Set Entity Walking Left Flag
+       data script_routine_12                              ; (12) - Set Entity Walking Right Flag
+       data script_routine_13                              ; (13) - Set Berk's Facing Left Flag, and Reset his Facing Into Screen and Facing Right Flags
+       data script_routine_14                              ; (14) - Set Berk's Facing Right Flag, and Reset his Facing Into Screen and Facing Left Flags
+       data script_routine_15                              ; (15) - Jump to New Address if Berk Is Carrying Something
+       data script_routine_16                              ; (16) - Have Berk Hold an Entity, and Position it Appropriately Between his Hands
+       data script_routine_17                              ; (17) - Have Berk Put Down an Entity in Front of Him, if Appropriate
+       data script_routine_18                              ; (18) - Have Berk Put Down an Entity Behind Him, if Appropriate
+       data script_routine_19                              ; (19) - Move Carried Entity to Berk's Left as he Faces Left
+       data script_routine_20                              ; (20) - Move Carried Entity to Berk's Right as he Faces Right
+       data script_routine_21                              ; (21) - Move Carried Entity in Front of Berk as he Faces Out of Screen
+       data script_routine_22                              ; (22) - Move Carried Entity Behind Berk as he Faces Into Screen
+       data script_routine_23                              ; (23) - Start Loop (1 / 3)
+       data script_routine_24                              ; (24) - End Loop (1 / 3)
+       data script_routine_25                              ; (25) - Start Loop (2 / 3)
+       data script_routine_26                              ; (26) - End Loop (2 / 3)
+       data script_routine_27                              ; (27) - Start Loop (3 / 3)
+       data script_routine_28                              ; (28) - End Loop (3 / 3)
+       data script_routine_29                              ; (29) - Make Berk Start Falling, and Drop his Carried Entity if Appropriate
+       data script_routine_30                              ; (30) - Check Berk's Fall Velocity, and React to Landing
+       data script_routine_31                              ; (31) - React to Berk's Landing
+       data script_routine_32                              ; (32) - Update Berk's Position and State (Flying) Depending Upon Control Input
+       data script_routine_33                              ; (33) - Advance Berk's Jump and Select Next Phase if Current Phase Complete
+       data script_routine_34                              ; (34) - Move Entity at IX (and if Berk, Carried Entity) Up One Character
+       data script_routine_35                              ; (35) - Move Entity at IX (and if Berk, Carried Entity) Down One Character
+       data script_routine_36                              ; (36) - Set Boni's Room (Level 1) to Zero
+       data script_routine_37                              ; (37) - Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing
+       data script_routine_38                              ; (38) - Close the Trap Door
+       data script_routine_39                              ; (39) - Open the Trap Door
+       data script_routine_40                              ; (40) - Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode
+       data script_routine_41                              ; (41) - Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait
+       data script_routine_42                              ; (42) - Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent
+       data script_routine_43                              ; (43) - Select Next Action for Drutt Depending Upon Control Input
+       data script_routine_44                              ; (44) - Move Entity Up One Character
+       data script_routine_45                              ; (45) - Move Entity Down One Character
+       data script_routine_46                              ; (46) - Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling
+                                                           ; if Appropriate
+       data script_routine_47                              ; (47) - Move Drutt, or Entity he is Pushing Right One Character and Start Pushed Entity
+                                                           ; Falling if Appropriate
+       data script_routine_48_49                           ; (48) - Return
+       data script_routine_48_49                           ; (49) - Return
+       data script_routine_50                              ; (50) - Advance Drutt's Jump and Select Next Phase if Current Phase Complete
+       data script_routine_51                              ; (51) - Swap Drutt's Current Depth Level if Possible
+       data script_routine_52                              ; (52) - Increase Worm's Age and Decrease Time Until Direction Change, or React to Drutt's
+                                                           ; Presence
+       data script_routine_53                              ; (53) - Move Worm Left if Possible, Otherwise Choose New Direction
+       data script_routine_54                              ; (54) - Move Worm Right if Possible, Otherwise Choose New Direction
+       data script_routine_55                              ; (55) - Choose New Direction and Start Crawling (Worm)
+       data script_routine_56                              ; (56) - Give Berk Power Corresponding to Entity Eaten
+       data script_routine_57                              ; (57) - Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside
+                                                           ; Current Room
+       data script_routine_58                              ; (58) - Have Berk Interact Appropriately with a Door in Front of Him
+       data script_routine_59                              ; (59) - Have Berk Interact Appropriately with a Door Behind Him
+       data script_routine_60                              ; (60) - Check Position of Apebeast and Turn If Appropriate
+       data script_routine_61                              ; (61) - Fire Bubo's Projectile
+       data script_routine_62                              ; (62) - Move Entity at IX into Room to the Left, if Appropriate
+       data script_routine_63                              ; (63) - Have Skeleton Advance or Retreat Based Upon Positions of Berk and Fake Boni
+       data script_routine_64                              ; (64) - Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
+
+* Table of Addresses of Berk's Jump Script Data
+_48994:
+       data _35441                                                   ; (1) - Berk starting to jump straight up
+       data _35447                                                   ; (2) - Unused
+       data _35457                                                   ; (3) - Berk landing (after jump)
+       data _35469                                                   ; (4) - Berk jumping left
+       data _35481                                                   ; (5) - Berk jumping right
+       data _35283                                                   ; (6) - Berk banging head
+       data _35339                                                   ; (7) - Berk falling to the right
+       data _35303                                                   ; (8) - Berk falling to the left
+
+* Current Position in Drutt's Script Data
+drutts_script_pos:
+       data drutt_facing_out_script
+
+* Table of Addresses of Script Data for Drutt's Actions
+*
+* When Drutt is neither under player control nor seeking a target (a worm or Berk) then his actions are determined
+* by randomly selecting a script data address from this table and executing. There is:
+_51890:
+       data _51538                                                   ; Move Drutt and any pushed entity right by a hop of size four
+       data _51608                                                   ; Move Drutt and any pushed entity left by a hop of size three
+       data _51630                                                   ; Drutt swapping depth levels
+       data drutt_facing_out_script                                                   ; Drutt facing out of screen
+       data drutt_facing_out_script                                                   ; Drutt facing out of screen
+       data drutt_facing_out_script                                                   ; Drutt facing out of screen
+       data drutt_facing_out_script                                                   ; Drutt facing out of screen
+
+* Current Position in Worm's Script Data
+worms_script_data_pos:
+       data _52729
+
+* Worm's Age
+worms_age:
+       byte 0
+
+* Pathfinding Data Table
+*
+* When built, this table has a header and a main data block. The header is three bytes long and contains the values:
+pathfinding_data_table:
+       byte 0,0,0
+pathfinding_1st_entry:
+       byte 0,0
+       byte 0,0
+       byte 0,0
+       byte 0,0
+       byte 0
+
+* Table of Berk's Reset Complex State Data Addresses
+*
+* Addresses of complex state data reverted to by Berk after he is "killed"
+berk_reset_table:
+       data _53684                                                   ; Level 1
+       data _53710                                                   ; Level 2
+       data _53697                                                   ; Level 3
+       data _53710                                                   ; Level 4
+
+* Berk's Reset Complex State Data
+*
+* Complex state data reverted to by Berk after he is "killed"
+_53684:
+       byte 4,1,103,231,85,113,91,118,31,1,192,192,10                ; Level 1
+_53697:
+       byte 1,1,103,231,85,107,91,112,31,1,192,192,10                ; Level 3
+_53710:
+       byte 1,1,103,231,85,113,91,118,31,1,192,192,10                ; Levels 2 & 4
+
+* Data for Pseudo-Random Number Generator
+rnd_seed:
+       data 0                                                        ; Seed
+rnd_range:
+       byte 0                                                        ; Temporary store for range value
+
+* Cached Control Input
+*
+* This value is set by the instruction at #R55066. It holds a value read from control input when handling
+* characters' jumps.
+_55022:
+       byte 0
+
+* Table of Sound Parameters
+*
+* #TABLE(default,centre,:w)
+* { =h Offset | =h Meaning }
+* { 0 | Index (unused) }
+* { 1 | Outer repeat counter }
+* { 2 | Inner repeat counter }
+* { 3 | Delay constant (controls speed, higher value is slower) }
+* { 4 | Delay constant (controls speed / pitch, higher value is slower / lower) }
+* { 5 | Increment for delay constant D }
+* { 6 | Increment for delay constant E }
+* { 7 | Most significant byte of pseudo-random address plus No Pause Flag }
+* TABLE#
+sound_table:
+       byte 1,4,168,29,167,254,3,1                                   ; (01) - Out of time
+       byte 2,3,160,57,6,1,0,128                                     ; (02) - Main Menu sound (three blips)
+       byte 3,15,141,214,46,1,253,128                                ; (03) - Unused
+       byte 4,1,40,82,59,253,1,6                                     ; (04) - Explosion
+_59666:
+       byte 5,1,84,93,115,4,251,11                                   ; (05) - Berk landing
+       byte 6,1,190,58,25,0,250,128                                  ; (06) - Berk/Drutt banging head on ceiling
+       byte 7,1,30,180,12,0,252,128                                  ; (07) - Spider sound
+       byte 8,1,134,55,58,251,4,128                                  ; (08) - Drutt eating a worm
+       byte 9,1,10,60,187,253,247,128                                ; (09) - Drutt hopping
+       byte 10,1,68,160,79,254,254,128                               ; (10) - Unused
+       byte 11,1,122,123,102,205,0,128                               ; (11) - Unused
+
+* Table of Multiples of 96
+*
+* Used in calculating position in Display Buffer data for a given y-coordinate (as Display Buffer data is 3 bytes
+* per character block, so 1 character row's worth of data is 3 x 32 = 96 bytes
+;multiples_of_96:
+;       data 0
+;       data 96
+;       data 192
+;       data 288
+;       data 384
+;       data 480
+;       data 576
+;       data 672
+;       data 768
+;       data 864
+;       data 960
+;       data 1056
+;       data 1152
+;       data 1248
+;       data 1344
+;       data 1440
+;       data 1536
+;       data 1632
+;       data 1728
+;       data 1824
+;       data 1920
+;       data 2016
+;       data 2112
+;       data 2208
+

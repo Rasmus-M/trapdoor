@@ -2,3 +2,4 @@
 
        copy "trap-door.a99"
        copy "vdp.a99"
+       copy "data.a99"
