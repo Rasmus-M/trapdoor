@@ -1084,7 +1084,7 @@ script_routine_57:
 * Used by the routines at #R36610, #R39584 and #R39760.
 _36616:
        .push hl                        ; PUSH HL           ; Store HL
-       .call @_53581                   ; CALL 53581        ; Cycle Attributes (Full-Screen) and Clear Display Buffers
+       bl   @cycle_attributes_short    ; CALL 53581        ; Cycle Attributes (Full-Screen) and Clear Display Buffers
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .pop hl                         ; POP HL            ; Restore HL
        .ret                            ; RET               ; Return
@@ -3296,9 +3296,9 @@ populate_prim_disp_buf_1:
 populate_prim_disp_buf_2:
        movb *ix,a                      ; LD A,(IX+0)       ; Load first byte of current simple state data entry into A
        cb   a,@bytes+255               ; CP 255            ; If this is 255 (end marker for complex state data)...
-       jeq  populate_prim_disp_buf_5                       ; JR Z,45961        ; ...then skip ahead to #R45961
+       jeq  populate_prim_disp_buf_5   ; JR Z,45961        ; ...then skip ahead to #R45961
        cb   a,@bytes+254               ; CP 254            ; If it is not 254 (end marker for level's simple state data)...
-       jne  populate_prim_disp_buf_3                       ; JR NZ,45939       ; ...then skip ahead to #R45939
+       jne  populate_prim_disp_buf_3   ; JR NZ,45939       ; ...then skip ahead to #R45939
 * At this point, we have passed the end marker for the simple state data block and are now at the start of the
 * complex state data block whose entries are 13 bytes wide.
        movb @bytes+13,@e               ; LD E,13           ; Load DE with 13
@@ -3307,10 +3307,10 @@ populate_prim_disp_buf_2:
 * At this point, A holds the index of the room to which the simple or complex entity belongs
 populate_prim_disp_buf_3:
        cb   a,b                        ; CP B              ; If entity's room is not the same as the current character's current room...
-       jne  populate_prim_disp_buf_4                       ; JR NZ,45957       ; ...then skip ahead to #R45957
+       jne  populate_prim_disp_buf_4   ; JR NZ,45957       ; ...then skip ahead to #R45957
        movb @c,a                       ; LD A,C            ; If entity's depth is not the same as current depth in C...
        cb   a,@1(ix)                   ; CP (IX+1)         ; ...
-       jne  populate_prim_disp_buf_4                       ; JR NZ,45957       ; ...then skip ahead to #R45957
+       jne  populate_prim_disp_buf_4   ; JR NZ,45957       ; ...then skip ahead to #R45957
        .exx                            ; EXX               ; Switch registers
        .push ix                        ; PUSH IX           ; Store IX (pointer to current entry in simple/complex state data)
        bl   @populate_disp_buf_with_entity ; CALL 45965   ; Load Primary Display Buffer with graphic layout data for current entity
@@ -3366,11 +3366,11 @@ process_data_in_ix:
 * graphics if they lie within the display area (i.e. have x- and y-coordinates less than 32 and 24 respectively, see
 * trivia).
 draw_graphics:
-       movb h,a                        ; LD A,H            ; If x-coordinate of graphic to draw is 32 or more...
-       cb   a,@bytes+32                ; CP 32             ; ...
+                                       ; LD A,H            ; If x-coordinate of graphic to draw is 32 or more...
+       cb   h,@bytes+32                ; CP 32             ; ...
        jhe  draw_graphics_9            ; JP NC,46151       ; ...then skip ahead to #R46151
-       movb @l,a                       ; LD A,L            ; If y-coordinate of graphic to draw is 24 or more...
-       cb   a,@bytes+22                ; CP 24             ; ...
+                                       ; LD A,L            ; If y-coordinate of graphic to draw is 24 or more...
+       cb   @l,@bytes+22               ; CP 24             ; ...
        jhe  draw_graphics_9            ; JP NC,46151       ; ...then skip ahead to #R46151
        .push hl                        ; PUSH HL           ; Store HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
        sb   one,b                      ; DEC B             ; Decrease value of Don't Recalculate Display Buffer Address Flag
@@ -3457,9 +3457,9 @@ draw_graphics_2:
        andi tmp0,64*256                ;
        jeq  draw_graphics_3            ; JP Z,46107        ; ...then skip ahead to #R46107
 * Preserve INK Flag set in Display Buffer
-       ab   a,a                        ; ADD A,A           ; Shift INK bits into PAPER bits...
-       ab   a,a                        ; ADD A,A           ; ...
-       ab   a,a                        ; ADD A,A           ; ...
+       sla  a,3                        ; ADD A,A           ; Shift INK bits into PAPER bits...
+                                       ; ADD A,A           ; ...
+                                       ; ADD A,A           ; ...
 draw_graphics_3:
        andi a,56*256                   ; AND 56            ; Reset all except PAPER bits
        socb b,a                        ; OR B              ; (Re)set Preserve INK and Mirror flags as stored in B previously
@@ -6258,63 +6258,78 @@ find_pathfinding_entry_3:
 * Cycle Attributes (Long, Full-Screen) and Clear Display Buffers
 * 
 * Used by the routine at #R53723.
-_53577:
+cycle_attributes_long:
+       .proc
        movb @bytes+21,b                ; LD B,21           ; Set repeat counter to 21
-       jmp  _53583                     ; JR 53583          ; Flash screen when Berk is "killed"
+       jmp  cycle_attributes           ; JR 53583          ; Flash screen when Berk is "killed"
 
 * Cycle Attributes (Short, Full-Screen) and Clear Display Buffers
 * 
 * Used by the routine at #R36616.
-_53581:
+cycle_attributes_short:
+       .proc
        movb @bytes+7,b                 ; LD B,7            ; Set repeat counter to 7
+       jmp  cycle_attributes
+
 * This entry point is used by the routine at #R53577.
-_53583:
-       .push bc                        ; PUSH BC           ; Store BC (B = remaining number of iterations required)
-       li   hl,22528                   ; LD HL,22528       ; Point HL at start of Attribute File
-       li   bc,704                     ; LD BC,704         ; Set BC to 704 (i.e. gap between start of Attribute File and start of second-last row (timer
-                                                           ; figures))
-_53590:
-       movb *hl,a                      ; LD A,(HL)         ; Load current attribute at memory location HL into A
-       andi a,7*256                    ; AND 7             ; Strip out other components to leave only INK component
-       jeq  _53602                     ; JR Z,53602        ; If value is zero (black INK) then skip ahead to #R53602
-       ab   one,a                      ; INC A             ; Increase INK value to next colour
-       andi a,7*256                    ; AND 7             ; Strip out other components to leave only INK component
-       jne  _53602                     ; JR NZ,53602       ; If value is not zero (black INK) then skip ahead to #R53602
-       movb one,a                      ; LD A,1            ; INK value was zero, so set now to blue INK
-_53602:
-       movb a,@e                       ; LD E,A            ; Load new INK value into E
-       movb *hl,a                      ; LD A,(HL)         ; Load current attribute at memory location HL into A
-       andi a,56*256                   ; AND 56            ; Strip out other components to leave only PAPER component
-       jeq  _53616                     ; JR Z,53616        ; If black PAPER, then skip ahead to #R53616
-       ab   @bytes+8,a                 ; ADD A,8           ; Increase to next PAPER colour
-       andi a,56*256                   ; AND 56            ; Strip out other components to leave only PAPER component
-       jne  _53616                     ; JR NZ,53616       ; If PAPER component is not black then skip ahead to #R53616
-       movb @bytes+8,a                 ; LD A,8            ; PAPER value was zero, so set now to blue PAPER
-_53616:
-       socb @e,a                       ; OR E              ; Add INK component back in
-       socb @bytes+64,a                ; OR 64             ; Set BRIGHT flag
-       movb a,*hl                      ; LD (HL),A         ; Paint new attribute back to current position in Attribute File
-       andi a,16*256                   ; AND 16            ; Set / reset speaker bit
-       socb @bytes+2,a                 ; OR 2              ; Set RED bit to maintain red border
-       ; OUT (254),A                   ; OUT (254),A       ; Set border and set / reset speaker state
-       inc  hl                         ; INC HL            ; Advance to next byte of Attribute File
-       dec  bc                         ; DEC BC            ; Decrease remaining number of character blocks to process
-       movb b,a                        ; LD A,B            ; If number of remaining character blocks is not zero...
-       socb @c,a                       ; OR C              ; ...
-       jne  _53590                     ; JR NZ,53590       ; ...then loop back to #R53590
-       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of iterations required)
+cycle_attributes:
+       li   r0,color_table
+       li   r1,>f000
+       li   r2,>1600
+       bl   @vsmw
+       li   r0,color_table
+       li   r1,>e000
+       li   r2,>1600
+       bl   @vsmw
+;       .push bc                        ; PUSH BC           ; Store BC (B = remaining number of iterations required)
+;       li   hl,zx_attributes           ; LD HL,22528       ; Point HL at start of Attribute File
+;       li   bc,704                     ; LD BC,704         ; Set BC to 704 (i.e. gap between start of Attribute File and start of second-last row (timer
+;                                                           ; figures))
+;cycle_attributes_1:
+;       movb *hl,a                      ; LD A,(HL)         ; Load current attribute at memory location HL into A
+;       andi a,7*256                    ; AND 7             ; Strip out other components to leave only INK component
+;       jeq  cycle_attributes_2         ; JR Z,53602        ; If value is zero (black INK) then skip ahead to #R53602
+;       ab   one,a                      ; INC A             ; Increase INK value to next colour
+;       andi a,7*256                    ; AND 7             ; Strip out other components to leave only INK component
+;       jne  cycle_attributes_2         ; JR NZ,53602       ; If value is not zero (black INK) then skip ahead to #R53602
+;       movb one,a                      ; LD A,1            ; INK value was zero, so set now to blue INK
+;cycle_attributes_2:
+;       movb a,@e                       ; LD E,A            ; Load new INK value into E
+;       movb *hl,a                      ; LD A,(HL)         ; Load current attribute at memory location HL into A
+;       andi a,56*256                   ; AND 56            ; Strip out other components to leave only PAPER component
+;       jeq  cycle_attributes_3         ; JR Z,53616        ; If black PAPER, then skip ahead to #R53616
+;       ab   @bytes+8,a                 ; ADD A,8           ; Increase to next PAPER colour
+;       andi a,56*256                   ; AND 56            ; Strip out other components to leave only PAPER component
+;       jne  cycle_attributes_3         ; JR NZ,53616       ; If PAPER component is not black then skip ahead to #R53616
+;       movb @bytes+8,a                 ; LD A,8            ; PAPER value was zero, so set now to blue PAPER
+;cycle_attributes_3:
+;       socb @e,a                       ; OR E              ; Add INK component back in
+;       socb @bytes+64,a                ; OR 64             ; Set BRIGHT flag
+;       movb a,*hl                      ; LD (HL),A         ; Paint new attribute back to current position in Attribute File
+;       andi a,16*256                   ; AND 16            ; Set / reset speaker bit
+;       socb @bytes+2,a                 ; OR 2              ; Set RED bit to maintain red border
+;       ; OUT (254),A                   ; OUT (254),A       ; Set border and set / reset speaker state
+;       inc  hl                         ; INC HL            ; Advance to next byte of Attribute File
+;       dec  bc                         ; DEC BC            ; Decrease remaining number of character blocks to process
+;       movb b,a                        ; LD A,B            ; If number of remaining character blocks is not zero...
+;       socb @c,a                       ; OR C              ; ...
+;       jne  cycle_attributes_1         ; JR NZ,53590       ; ...then loop back to #R53590
+;       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of iterations required)
        sb   one,b                      ; DJNZ 53583        ; Loop back for next iteration
-       jne  _53583                     ;                   
+       jne  cycle_attributes                     ;
+       jmp  !
 * This entry point is used by the routine at #R53887.
 clear_display_buffers:
-       li   hl,display_buffer_1        ; LD HL,61312       ; Clear Display Buffers 1 and 2...
-       li   bc,4224                    ; LD BC,4224        ; ...
-       movb @bytes+0,*hl               ; LD (HL),0         ; ...
-       movb h,d                        ; LD D,H            ; ...
-       movb @l,@e                      ; LD E,L            ; ...
-       inc  de                         ; INC DE            ; ...
-       .ldir                           ; LDIR              ; ...
-       .ret                            ; RET               ; Return
+       .proc
+!      li   hl,display_buffer_1        ; LD HL,61312       ; Clear Display Buffers 1 and 2...
+       li   bc,>1080                   ; LD BC,4224        ; ...
+clear_display_buffers_1:
+       clr  *hl+                       ; LD (HL),0         ; ...
+                                       ; LD D,H            ; ...
+                                       ; LD E,L            ; ...
+       dect bc                         ; INC DE            ; ...
+       jne  clear_display_buffers_1    ; LDIR              ; ...
+       .endproc                        ; RET               ; Return
 
 * Fill Top 22 Rows of Attribute File with Attribute Value in A
 * 
@@ -6371,7 +6386,7 @@ check_berk_killed:
        .ldir                           ; LDIR              ; ...with reset data from table at #R53684 for current level
        li   hl,_35363                  ; LD HL,35363       ; Load HL with address of script data for Berk starting to fall...
        mov  hl,@berk_script_pos        ; LD (35687),HL     ; ...and store at #R35687 (as current position in Berk's script data)
-       .call @_53577                   ; CALL 53577        ; Cycle attributes (long, full-screen) and clear display buffers
+       bl   @cycle_attributes_long     ; CALL 53577        ; Cycle attributes (long, full-screen) and clear display buffers
        movb @bytes+127,a               ; LD A,127          ; Fill top 22 rows of Attribute File with white PAPER and white INK, BRIGHT...
        bl   @fill_screen               ; CALL 53649        ; ...
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
@@ -6475,7 +6490,7 @@ paint_red_areas:
        bl   @copy_room_dim_data_to_tmp ; CALL 53825        ; Copy room dimension data entry for current character's current room to temporary store
                                                            ; location (#R34230)
        .push ix                        ; PUSH IX           ; Store IX
-       .call @clear_display_buffers    ; CALL 53635        ; Clear Display Buffers 1 & 2
+       bl    @clear_display_buffers    ; CALL 53635        ; Clear Display Buffers 1 & 2
        .exx                            ; EXX               ; Switch registers
        li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
