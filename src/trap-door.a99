@@ -80,7 +80,7 @@ main_all_levels:
        bl   @clear_prim_disp_buf_area  ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
        bl   @populate_prim_disp_buf    ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
        bl   @draw_display_buffer       ; CALL 54034        ; Draw contents of Primary Display Buffer to display
-;       .call @play_sound              ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
+       bl   @play_sound              ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
        socb a,a                        ; OR A              ; If no time / lives are left...
        jeq  time_out                   ; JR Z,34645        ; ...then jump to #R34645
@@ -115,21 +115,21 @@ skip_swap_buffers:
 * Restart has been pressed
 restart:
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
-       .call @_59722                   ; CALL 59722        ; ...
+       bl   @request_sound                   ; CALL 59722        ; ...
        .call @_34751                   ; CALL 34751        ; Reset all game data in preparation for new game
        b    @main                      ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
 time_out:
        bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
-       .call @print_times_up           ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
+       bl   @print_times_up           ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
-       .call @_59722                   ; CALL 59722        ; ...
+       bl   @request_sound                   ; CALL 59722        ; ...
        jmp  wait_key_and_restart       ; JR 34666          ; Skip ahead to #R34666
 * "All Home" Flag is set
 all_home:
        .call @print_home_sweet_home    ; CALL 47213        ; Print "HOME SWEET HOME" string
        movb @bytes+3,a                 ; LD A,3            ; Set sound 3 as pending if appropriate, then play and clear pending sound...
-       .call @_59722                   ; CALL 59722        ; ...
+       bl   @request_sound                   ; CALL 59722        ; ...
 wait_key_and_restart:
        .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
        .call @_34751                   ; CALL 34751        ; Reset all game data in preparation for new game
@@ -2628,7 +2628,7 @@ _41479:
        sb   one,b                      ; DJNZ 41479        ; Decrease remaining number of blocks to modify and loop back to #R41479 if not zero
        jne  _41479                     ;                   
        movb @bytes+11,a                ; LD A,11           ; Set sound 11 as pending if appropriate, then play and clear pending sound...
-       .call @_59722                   ; CALL 59722        ; ...
+       bl   @request_sound                   ; CALL 59722        ; ...
        .ret                            ; RET               ; Return
 
 * Kill Berk if He Collides with Skeleton
@@ -4021,7 +4021,7 @@ _47045:
        .ret                            ; RET               ; Return
 _47053:
        movb @bytes+6,a                 ; LD A,6            ; Set sound 6 as pending if appropriate, then play and clear pending sound...
-       .call @_59722                   ; CALL 59722        ; ...
+       bl   @request_sound           ; CALL 59722        ; ...
        ; SCF                           ; SCF               ; Set Carry Flag
        .ret                            ; RET               ; Return
 
@@ -4094,6 +4094,7 @@ print_title:
 * 
 * Used by the routine at #R34438.
 print_times_up:
+       .proc
        movb @bytes+32,b                ; LD B,32           ; Load B with 32 (length of string to print)
        movb @bytes+199,a               ; LD A,199          ; Load A with 199, for black PAPER, white INK, BRIGHT, FLASH
        li   ix,_47153                  ; LD IX,47153       ; Point IX to text to print
@@ -4700,7 +4701,7 @@ wait_keypress:
 ;       .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
 ;       .push af                        ; PUSH AF           ; Store AF (A = last pressed key)
 ;       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
-;       .call @_59722                   ; CALL 59722        ; ...
+;       bl   @request_sound_a                   ; CALL 59722        ; ...
 ;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
        .endproc                        ; RET               ; Return
 
@@ -4757,7 +4758,7 @@ script_routine_04:
        inc  hl                         ; INC HL            ; Advance HL to parameter (sound index)...
        inc  hl                         ; INC HL            ; ...
        movb *hl,a                      ; LD A,(HL)         ; Load A with sound index
-       .call @request_entity_sound     ; CALL 59601        ; If current character is in same room as target entity at IX then set pending sound to A
+       bl   @request_entity_sound      ; CALL 59601        ; If current character is in same room as target entity at IX then set pending sound to A
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (62) Move Entity at IX into Room to the Left, if Appropriate
@@ -7938,52 +7939,55 @@ _55695:
 * pending sound (i.e. lower index has higher priority). Input:  A  Index of requested sound IX  Address of complex
 * state data for target entity
 request_entity_sound:
+       .proc
        .push af                        ; PUSH AF           ; Store AF (A = index of requested sound)
-       movb @current_characters_room,a                  ; LD A,(34218)      ; If current character's current room is the same as current room of target entity...
+       movb @current_characters_room,a ; LD A,(34218)      ; If current character's current room is the same as current room of target entity...
        cb   a,*ix                      ; CP (IX+0)         ; ...
-       jeq  _59612                     ; JR Z,59612        ; ...then skip ahead to #R59612
+       jeq  request_entity_sound_1     ; JR Z,59612        ; ...then skip ahead to #R59612
        .pop af                         ; POP AF            ; Restore AF (A = index of requested sound)
-       .ret                            ; RET               ; Return
-_59612:
+       .endproc                        ; RET               ; Return
+request_entity_sound_1:
        .pop af                         ; POP AF            ; Restore AF (A = index of requested sound)
+       jmp  !
 * At this point, A will hold the index of a requested sound, and RAM address #R34273 will contain the index of a
 * pending sound. If the index of the requested sound is lower than the index of the pending sound, then the pending
 * sound's index at #R34273 will be overwritten by the index of the requested sound in A. Sounds with lower indices
 * therefore take priority over sounds with higher indices. This entry point is used by the routines at #R46284,
 * #R55196 and #R59722.
-request_sound:
-       socb a,a                        ; OR A              ; If index of requested sound is zero...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+request_sound_pri:
+       .proc
+!      socb a,a                        ; OR A              ; If index of requested sound is zero...
+       jeq  request_sound_pri_2        ; RET Z             ; ...then return
        .push de                        ; PUSH DE           ; Store DE
        movb a,@e                       ; LD E,A            ; Load E with index of requested sound
-       movb @_34273,a                  ; LD A,(34273)      ; Load index of pending sound into A...
+       movb @idx_pending_sound,a       ; LD A,(34273)      ; Load index of pending sound into A...
        socb a,a                        ; OR A              ; ...and if this is zero (i.e. no sound pending)...
-       jeq  _59628                     ; JR Z,59628        ; ...then skip ahead to #R59628
+       jeq  request_sound_pri_1        ; JR Z,59628        ; ...then skip ahead to #R59628
        cb   a,@e                       ; CP E              ; If index of requested sound is less than or equal to index of pending sound...
-       jhe  _59628                     ; JR NC,59628       ; ...then skip ahead to #R59628
+       jhe  request_sound_pri_1        ; JR NC,59628       ; ...then skip ahead to #R59628
        .pop de                         ; POP DE            ; Restore DE
-       .ret                            ; RET               ; Return
-_59628:
+       jmp  request_sound_pri_2        ; RET               ; Return
+request_sound_pri_1:
        movb @e,a                       ; LD A,E            ; Set requested sound to be new pending sound...
-       movb a,@_34273                  ; LD (34273),A      ; ...
+       movb a,@idx_pending_sound       ; LD (34273),A      ; ...
        .pop de                         ; POP DE            ; Restore DE
-       .ret                            ; RET               ; Return
+request_sound_pri_2:
+       .endproc                        ; RET               ; Return
 
 * Set Sound of Index A as Pending if Appropriate, then Play and Clear Pending Sound
-* 
+*
 * The sound with index A will become the pending sound if the currently pending sound index is either zero, or of
 * higher index than A (i.e. lower priority). Input:  A  Sound index L  Undefined, pseudo-random value
-_59722:
-       .call @request_sound            ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
+request_sound:
+       .proc
+       bl   @request_sound_pri         ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
+       jmp  !
 * This entry point is used by the routine at #R34438.
 play_sound:
-       movb @_34273,a                  ; LD A,(34273)      ; Load index of pending sound into A...
+       .proc
+!      movb @idx_pending_sound,a       ; LD A,(34273)      ; Load index of pending sound into A...
        socb a,a                        ; OR A              ; ...and if this is zero...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+       jeq  play_sound_1               ; RET Z             ; ...then return
 ;       sb   one,a                      ; DEC A             ; Decrease A to give zero-based sound index
 ;       .push ix                        ; PUSH IX           ; Store IX
 ;       li   ix,sound_table+1           ; LD IX,59635       ; Point IX at second byte of first entry in Sound Parameters Table
@@ -8047,4 +8051,5 @@ play_sound:
 ;       sb   one,@c                     ; DEC C             ; Decrease outer repeat count
 ;       jne  _59752                     ; JR NZ,59752       ; If non-zero (i.e. more repeats to process) then loop back to #R59752
 ;       .pop ix                         ; POP IX            ; Restore IX
-       .ret                            ; RET               ; Return
+play_sound_1:
+       .endproc                         ; RET               ; Return

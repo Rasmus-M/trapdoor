@@ -186,7 +186,7 @@ display_buffer_flag:
        byte 0                                                        ; "Display Buffer 2 is Primary" Flag
 carried_entity_width:
        byte 0                                                        ; Width of entity carried by Berk (characters), minus 1
-_34273:
+idx_pending_sound:
        byte 0                                                        ; Index of pending sound (used by playback routine at #R59722)
 loop_counter_value_1:
        byte 0                                                        ; Store for current value of loop counter in graphic layout data processing (instructions 238
