@@ -6,19 +6,20 @@
 * Set Up Random Seed and Disable Interrupts
 *
 start:
+       limi 0                           ; DI                ; Disable interrupts
        lwpi wrksp
-;       movb @rndsd,a                   ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
-;       movb a,@rnd_seed                ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
+       mov @rndsd,@rnd_seed             ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
+                                        ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
-       limi 0                          ; DI                ; Disable interrupts
-
-* Display Main Menu and Handle Main Game Loop
-_34438:
        li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
        bl   @graphics_mode
+
+* Display Main Menu and Handle Main Game Loop
+main:
+       li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
        bl   @reset_initial_state_data  ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
-       movb one,a                      ; LD A,1            ; Set current level to 1...
-       movb a,@current_level           ; LD (34207),A      ; ...
+       movb one,@current_level         ; LD A,1            ; Set current level to 1...
+                                       ; LD (34207),A      ; ...
        bl   @main_menu                 ; CALL 46830        ; Display and handle Main Menu
        movb @border_color,a            ; LD A,(34217)      ; Load current border colour into A
        bl   @set_border_color          ; OUT (254),A       ; Set border colour
@@ -40,17 +41,17 @@ main_loop:
        andi tmp0,4*256                 ;                   
        jeq  main_all_levels            ; JR Z,34557        ; ...then skip ahead to #R34557
 * Back to Level 1 Flag is set
-       movb @_43606+6,a                ; LD A,(43612)      ; If y-coordinate of Boni's bottom edge is not 121...
+       movb @bonis_state_data_1+6,a    ; LD A,(43612)      ; If y-coordinate of Boni's bottom edge is not 121...
        cb   a,@bytes+121               ; CP 121            ; ...
        jne  main_all_levels            ; JR NZ,34557       ; ...then skip ahead to #R34557
-       movb @drutts_state_data_1+6,a                ; LD A,(43677)      ; If y-coordinate of Drutt's bottom edge is not 121...
+       movb @drutts_state_data_1+6,a   ; LD A,(43677)      ; If y-coordinate of Drutt's bottom edge is not 121...
        cb   a,@bytes+121               ; CP 121            ; ...
        jne  main_all_levels            ; JR NZ,34557       ; ...then skip ahead to #R34557
-       movb @drutts_state_data_1,a                  ; LD A,(43671)      ; If Drutt's room is not 1...
+       movb @drutts_state_data_1,a     ; LD A,(43671)      ; If Drutt's room is not 1...
        cb   a,one                      ; CP 1              ; ...
        jne  main_all_levels            ; JR NZ,34557       ; ...then skip ahead to #R34557
        movb @bytes+2,a                 ; LD A,2            ; Set depth of "Home Sweet Home" brickwork to 2...
-       movb a,@state_data_simple_1+13               ; LD (43159),A      ; ...
+       movb a,@state_data_simple_1+13  ; LD (43159),A      ; ...
        socb @bits+3,@10(ix)            ; SET 3,(IX+10)     ; Set "All Home" Flag
        jmp  main_all_levels            ; JR 34557          ; Skip ahead to #R34557
 main_check_level_2:
@@ -86,7 +87,7 @@ main_all_levels:
        movb @berks_state_data_1+10,a   ; LD A,(43603)      ; If "All Home" Flag is set...
        movb a,tmp0                     ; BIT 3,A           ; ...
        andi tmp0,8*256                 ;
-       jne  _34658                     ; JR NZ,34658       ; ...then skip ahead to #R34658
+       jne  all_home                     ; JR NZ,34658       ; ...then skip ahead to #R34658
        bl   @update_timer              ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
                                                            ; timer figure blinking
        li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
@@ -109,30 +110,30 @@ skip_swap_buffers:
        movb @control_input,a           ; LD A,(34219)      ; Load A with control input
        movb a,tmp0                     ; BIT 6,A           ; If Restart hasn't been pressed...
        andi tmp0,64*256                ;
-;      jne  !                          ; JP Z,34466        ; ...then jump to #R34466 (start of main loop)
-       jmp  main_loop                 ;
-!
+       jne  restart                    ; JP Z,34466        ; ...then jump to #R34466 (start of main loop)
+       jmp  main_loop                  ;
 * Restart has been pressed
+restart:
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
        .call @_34751                   ; CALL 34751        ; Reset all game data in preparation for new game
-       b    @_34438                    ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
+       b    @main                      ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
 time_out:
        bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
        .call @print_times_up           ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
-       jmp  _34666                     ; JR 34666          ; Skip ahead to #R34666
+       jmp  wait_key_and_restart       ; JR 34666          ; Skip ahead to #R34666
 * "All Home" Flag is set
-_34658:
+all_home:
        .call @print_home_sweet_home    ; CALL 47213        ; Print "HOME SWEET HOME" string
        movb @bytes+3,a                 ; LD A,3            ; Set sound 3 as pending if appropriate, then play and clear pending sound...
        .call @_59722                   ; CALL 59722        ; ...
-_34666:
+wait_key_and_restart:
        .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
        .call @_34751                   ; CALL 34751        ; Reset all game data in preparation for new game
-       b    @_34438                    ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
+       b    @main                      ; JP 34438            ; Jump back to #R34438 (return to Main Menu)
 
 * Pause
 * 
@@ -1040,7 +1041,7 @@ update_berk_floating_power:
 * No collision with entity of class 130
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Move Berk up one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       .call @_55433                   ; CALL 55433        ; Change Berk's room up one if appropriate
+       .call @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
 _36558:
        movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If Berk's Walking Left Flag is set...
        andi tmp0,2*256                 ;                   
@@ -1107,7 +1108,7 @@ _36638:
        movb @bytes+10,*ix              ; LD (IX+0),10      ; Set Berk's room to 10
        movb @bytes+103,@4(ix)          ; LD (IX+4),103     ; Set y-coordinate of Berk's top edge to 103
        movb @bytes+109,@6(ix)          ; LD (IX+6),109     ; Set y-coordinate of Berk's bottom edge to 109
-       li   iy,_43606                  ; LD IY,43606       ; Load IY with address of Boni's entry in Level 1's State Data for Complex Entities...
+       li   iy,bonis_state_data_1                  ; LD IY,43606       ; Load IY with address of Boni's entry in Level 1's State Data for Complex Entities...
        mov  iy,@bert_interaction_state ; LD (34256),IY     ; ...and store at #R34256
        .call @_48850                   ; CALL 48850        ; Have Berk hold Boni, and position him appropriately between Berk's hands
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set Boni's depth to 1
@@ -1225,7 +1226,7 @@ _36947:
 * Script Routine (36) Remove Boni from Level 1
 script_routine_36:
        sb   a,a                        ; XOR A             ; Set Boni's room (Level 1) to zero...
-       movb a,@_43606                  ; LD (43606),A      ; ...
+       movb a,@bonis_state_data_1                  ; LD (43606),A      ; ...
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (37) Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing Input:  IX
@@ -5095,7 +5096,7 @@ _48527:
        jhe  !                          ; JP C,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
-       .call @_55433                   ; CALL 55433        ; Change Berk's room up one if appropriate
+       .call @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
        .call @_48710                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37718. It is also the start of the routine triggered by instruction
 * 34 in script data.
@@ -5293,38 +5294,38 @@ _48768:
 * entity at IX such that it is horizontally centred with respect to, and B characters below the entity at IY. Input:
 * IX  Address of complex state data for Entity 1 (assumed) IY  Address of complex state data for Entity 2 (assumed)
 * B  Vertical offset (assumed)
-_48791:
-       movb @6(ix),a                   ; LD A,(IX+6)       ; Load C with height of Entity 1 minus one...
-       sb   @4(ix),a                   ; SUB (IX+4)        ; ...
-       movb a,@c                       ; LD C,A            ; ...
-       movb @6(iy),a                   ; LD A,(IY+6)       ; Load A with y-coordinate of bottom edge of Entity 2 plus B...
-       ab   b,a                        ; ADD A,B           ; ...
-       movb a,@6(ix)                   ; LD (IX+6),A       ; Set y-coordinate of bottom edge of Entity 1 to A
-       sb   @c,a                       ; SUB C             ; Update y-coordinate of top edge of Entity 1 accordingly...
-       movb a,@4(ix)                   ; LD (IX+4),A       ; ...
-       movb @7(ix),a                   ; LD A,(IX+7)       ; Load B with width of Entity 1 minus one...
-       sb   @5(ix),a                   ; SUB (IX+5)        ; ...
-       movb a,b                        ; LD B,A            ; ...
-       srl  a,1                        ; SRL A             ; Load C with half of width of Entity 1 minus one...
-       movb a,@c                       ; LD C,A            ; ...
-       movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with half of width of Entity 2 minus one...
-       sb   @5(iy),a                   ; SUB (IY+5)        ; ...
-       srl  a,1                        ; SRL A             ; ...
-       ab   @5(iy),a                   ; ADD A,(IY+5)      ; ...and add x-coordinate of left edge of Entity 2
-* At this point, A holds the x-coordinate of the mid-point of Entity 2
-       sb   @c,a                       ; SUB C             ; Subtract half of width of Entity 1 minus one...
-       movb a,@5(ix)                   ; LD (IX+5),A       ; ...and set as x-coordinate of left edge of Entity 1
-       ab   b,a                        ; ADD A,B           ; Update x-coordinate of right edge of entity 2 accordingly...
-       movb a,@7(ix)                   ; LD (IX+7),A       ; ...
-       movb @8(ix),a                   ; LD A,(IX+8)       ; If Entity 1 is not Berk...
-       cb   a,@bytes+31                ; CP 31             ; ...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
-       .push hl                        ; PUSH HL           ; Store HL
-       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       .pop hl                         ; POP HL            ; Restore HL
-       .ret                            ; RET               ; Return
+;_48791:
+;       movb @6(ix),a                   ; LD A,(IX+6)       ; Load C with height of Entity 1 minus one...
+;       sb   @4(ix),a                   ; SUB (IX+4)        ; ...
+;       movb a,@c                       ; LD C,A            ; ...
+;       movb @6(iy),a                   ; LD A,(IY+6)       ; Load A with y-coordinate of bottom edge of Entity 2 plus B...
+;       ab   b,a                        ; ADD A,B           ; ...
+;       movb a,@6(ix)                   ; LD (IX+6),A       ; Set y-coordinate of bottom edge of Entity 1 to A
+;       sb   @c,a                       ; SUB C             ; Update y-coordinate of top edge of Entity 1 accordingly...
+;       movb a,@4(ix)                   ; LD (IX+4),A       ; ...
+;       movb @7(ix),a                   ; LD A,(IX+7)       ; Load B with width of Entity 1 minus one...
+;       sb   @5(ix),a                   ; SUB (IX+5)        ; ...
+;       movb a,b                        ; LD B,A            ; ...
+;       srl  a,1                        ; SRL A             ; Load C with half of width of Entity 1 minus one...
+;       movb a,@c                       ; LD C,A            ; ...
+;       movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with half of width of Entity 2 minus one...
+;       sb   @5(iy),a                   ; SUB (IY+5)        ; ...
+;       srl  a,1                        ; SRL A             ; ...
+;       ab   @5(iy),a                   ; ADD A,(IY+5)      ; ...and add x-coordinate of left edge of Entity 2
+;* At this point, A holds the x-coordinate of the mid-point of Entity 2
+;       sb   @c,a                       ; SUB C             ; Subtract half of width of Entity 1 minus one...
+;       movb a,@5(ix)                   ; LD (IX+5),A       ; ...and set as x-coordinate of left edge of Entity 1
+;       ab   b,a                        ; ADD A,B           ; Update x-coordinate of right edge of entity 2 accordingly...
+;       movb a,@7(ix)                   ; LD (IX+7),A       ; ...
+;       movb @8(ix),a                   ; LD A,(IX+8)       ; If Entity 1 is not Berk...
+;       cb   a,@bytes+31                ; CP 31             ; ...
+;       jeq  !                          ; RET NZ            ; ...then return
+;       .ret                            ;
+;!
+;       .push hl                        ; PUSH HL           ; Store HL
+;       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+;       .pop hl                         ; POP HL            ; Restore HL
+;       .ret                            ; RET               ; Return
 
 * Have Berk Hold an Entity, and Position it Appropriately Between his Hands
 * 
@@ -6487,10 +6488,10 @@ paint_red_areas:
 paint_red_areas_1:
        movb b,a                        ; LD A,B            ; Load A with current y-coordinate
        cb   a,@e                       ; CP E              ; If y-coordinate of top of room is greater than current y-coordinate...
-       jl   paint_red_areas_5                              ; JR C,53950        ; ...then skip ahead to #R53950
+       jl   paint_red_areas_5          ; JR C,53950        ; ...then skip ahead to #R53950
        movb d,a                        ; LD A,D            ; Load A with y-coordinate of bottom of room
        cb   a,b                        ; CP B              ; If y-coordinate of bottom of room is less than current y-coordinate...
-       jl   paint_red_areas_5                              ; JR C,53950        ; ...then skip ahead to #R53950
+       jl   paint_red_areas_5          ; JR C,53950        ; ...then skip ahead to #R53950
        movb @bytes+0,@c                ; LD C,0            ; Set initial x-coordinate to zero
 paint_red_areas_2:
        movb @c,a                       ; LD A,C            ; Load A with current x-coordinate
@@ -6970,7 +6971,7 @@ move_into_left_room_4:
 do_move_into_right_room:
        .proc
        .call @_54398                   ; CALL 54398        ; Set character's position to be left-hand side of new room to right
-       .call @_54456                   ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
+       bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
        movb @9(ix),tmp0                ; BIT 7,(IX+9)      ; If entity is Berk and his Moving Upwards Flag (floating) is set...
        andi tmp0,128*256               ;                   
@@ -6989,7 +6990,7 @@ _54398:
        sb   @7(ix),a                   ; SUB (IX+7)        ; ...(i.e. [negative] distance by which entity's right edge is to the right of right edge of
                                                            ; room)...
        movb a,d                        ; LD D,A            ; ...
-       .call @_54480                   ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
+       bl   @set_room_of_entity        ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
                                                            ; minus one
        movb @bytes+99,a                ; LD A,99           ; Load A with x-coordinate of left edge of current (new) room
        sb   d,a                        ; SUB D             ; Subtract D (negative)...
@@ -7005,7 +7006,7 @@ _54398:
 do_move_into_left_room:
        .proc
        .call @_54434                   ; CALL 54434        ; Set entity's position to be right-hand side of new room to left
-       .call @_54456                   ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
+       bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
        movb @9(ix),tmp0                ; BIT 7,(IX+9)      ; If entity is Berk and his Moving Upwards Flag (floating) is set...
        andi tmp0,128*256               ;                   
@@ -7023,7 +7024,7 @@ _54434:
                                                            ; entity...
        sb   @5(ix),a                   ; SUB (IX+5)        ; ...(i.e. distance by which entity's left edge is to the left of left edge of room)...
        movb a,d                        ; LD D,A            ; ...
-       .call @_54480                   ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
+       bl   @set_room_of_entity        ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
                                                            ; minus one
        movb @_34235,a                  ; LD A,(34235)      ; Load A with width of current (new) room (chars) + 99
        sb   d,a                        ; SUB D             ; Subtract D...
@@ -7037,33 +7038,34 @@ _54434:
 * 
 * Used by the routines at #R54383, #R54419, #R55433 and #R55616. Input:  IX  Address of complex state data for an
 * entity
-_54456:
-       movb @game_flags,a                  ; LD A,(34208)      ; Set Zero Flag if Drutt Mode Flag is reset...
+paint_red_areas_char:
+       .proc
+       movb @game_flags,a              ; LD A,(34208)      ; Set Zero Flag if Drutt Mode Flag is reset...
        movb a,tmp0                     ; BIT 0,A           ; ...
-       andi tmp0,1*256                 ;                   
+       andi tmp0,1*256                 ;
        movb @8(ix),a                   ; LD A,(IX+8)       ; Load Entity Class Value of entity at IX into A
-       jne  _54471                     ; JR NZ,54471       ; If Zero Flag is reset (i.e. Drutt Mode) then skip ahead to #R54471
+       mov  tmp0,tmp0
+       jne  paint_red_areas_char_1     ; JR NZ,54471       ; If Zero Flag is reset (i.e. Drutt Mode) then skip ahead to #R54471
        cb   a,@bytes+31                ; CP 31             ; If Entity Class is 31 (i.e. Berk)...
-       jeq  _54474                     ; JR Z,54474        ; ...then paint red areas outside accessible areas of current character's current room and
+       jeq  paint_red_areas_char_2     ; JR Z,54474        ; ...then paint red areas outside accessible areas of current character's current room and
                                                            ; return
-       .ret                            ; RET               ; Return
-_54471:
+       jmp  paint_red_areas_char_3     ; RET               ; Return
+paint_red_areas_char_1:
        cb   a,@bytes+18                ; CP 18             ; If Entity Class is not 18 (i.e. Drutt)...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
-_54474:
-       equ  $
+       jne  paint_red_areas_char_3     ; RET NZ            ; ...then return
+paint_red_areas_char_2:
        .push hl                        ; PUSH HL           ; Store HL
        bl @paint_red_areas             ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        .pop hl                         ; POP HL            ; Restore HL
-       .ret                            ; RET               ; Return
+paint_red_areas_char_3:
+       .endproc                        ; RET               ; Return
 
 * Set Room of Entity at IX to B, Store Room Size Data for New Room and Load E with Entity's Width Minus One
 * 
 * Used by the routines at #R54398, #R54434, #R55433 and #R55616. Input:  B  Destination room index IX  Address of
 * complex state data for an entity Output: E  Entity's width, minus one (characters)
-_54480:
+set_room_of_entity:
+       .proc
        movb b,a                        ; LD A,B            ; Set entity's current room to be destination room...
        movb a,*ix                      ; LD (IX+0),A       ; ...
        .push hl                        ; PUSH HL           ; Store HL
@@ -7074,7 +7076,7 @@ _54480:
        movb @7(ix),a                   ; LD A,(IX+7)       ; Load A with x-coordinate of entity's right...
        sb   @5(ix),a                   ; SUB (IX+5)        ; ...subtract x-coordinate of entity's left...
        movb a,@e                       ; LD E,A            ; ...and load result (entity's width minus one) into E
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 * Unused routine
 * 
@@ -7624,7 +7626,7 @@ _55258:
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set initial velocity factor of entity jumper collided with to 2...
        socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its "Can Fall" flag
 _55270:
-       .call @_55433                   ; CALL 55433        ; Change jumper's room up one if appropriate
+       .call @change_room_up                   ; CALL 55433        ; Change jumper's room up one if appropriate
        sb   one,b                      ; DJNZ 55235        ; Decrease B (remaining number of characters to move up) and loop back to #R55235 if not zero
        jne  _55235                     ;                   
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease current velocity of jumper's jump, slowing ascent
@@ -7652,7 +7654,7 @@ _55300:
        sb   one,b                      ; DJNZ 55285        ; Decrease B (remaining number of characters to move down) and loop back to #R55285 if not zero
        jne  _55285                     ;                   
        .push hl                        ; PUSH HL           ; Store HL
-       .call @_55616                   ; CALL 55616        ; Change jumper's room down one if appropriate
+       .call @change_room_down                   ; CALL 55616        ; Change jumper's room down one if appropriate
        .pop hl                         ; POP HL            ; Restore HL
        movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping downwards, no collision)
        .ret                            ; RET               ; Return
@@ -7752,7 +7754,7 @@ _55421:
 * Change Entity's Room Up One if Appropriate
 * 
 * Used by the routines at #R36542, #R48487 and #R55196. Input:  IX  Address of complex state data for an entity
-_55433:
+change_room_up:
        movb @bytes+99,a                ; LD A,99           ; If y-coordinate of top of entity is larger than 99 (i.e. top of entity is below top of
                                                            ; room)...
        cb   a,@4(ix)                   ; CP (IX+4)         ; ...
@@ -7778,7 +7780,7 @@ _55467:
        movb @-1(iy),b                  ; LD B,(IY-1)       ; Load first byte (upper room index) of current entry into B
        movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
        movb a,d                        ; LD D,A            ; ...
-       .call @_54480                   ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
+       bl   @set_room_of_entity        ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
                                                            ; minus one
        movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
        sb   d,a                        ; SUB D             ; Subtract x-coordinate of old room's left edge from x-coordinate of new room's left edge...
@@ -7794,7 +7796,7 @@ _55467:
        movb @6(ix),a                   ; LD A,(IX+6)       ; Add 22 to y-coordinate of bottom of entity...
        ab   @bytes+22,a                ; ADD A,22          ; ...
        movb a,@6(ix)                   ; LD (IX+6),A       ; ...
-       .call @_54456                   ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
+       bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
 _55512:
        .pop de                         ; POP DE            ; Restore DE
@@ -7852,7 +7854,7 @@ _55571:
 _55581:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Move entity down by one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-       .call @_55616                   ; CALL 55616        ; Change entity's room down one if appropriate
+       .call @change_room_down                   ; CALL 55616        ; Change entity's room down one if appropriate
        sb   one,b                      ; DJNZ 55571        ; Decrease B (current velocity factor, i.e. remaining number of characters to drop entity) and
        jne  _55571                     ;                   
                                                            ; if non-zero, loop back to #R55571
@@ -7880,7 +7882,7 @@ _55610:
 * Change Entity's Room Down One if Appropriate
 * 
 * Used by the routines at #R55196 and #R55525. Input:  IX  Address of complex state data for an entity
-_55616:
+change_room_down:
        movb @bytes+122,a               ; LD A,122          ; If y-coordinate of bottom of entity is smaller than 122 (i.e. bottom of entity is above
                                                            ; bottom of room)...
        cb   a,@6(ix)                   ; CP (IX+6)         ; ...
@@ -7904,7 +7906,7 @@ _55647:
        movb @1(iy),b                   ; LD B,(IY+1)       ; Load second byte (lower room index) of current entry into B
        movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
        movb a,d                        ; LD D,A            ; ...
-       .call @_54480                   ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
+       bl   @set_room_of_entity        ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
                                                            ; minus one
        movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
        sb   d,a                        ; SUB D             ; Subtract x-coordinate of old room's left edge from x-coordinate of new room's left edge...
@@ -7920,7 +7922,7 @@ _55647:
        movb @6(ix),a                   ; LD A,(IX+6)       ; Subtract 20 from y-coordinate of bottom of entity...
        sb   @bytes+20,a                ; SUB 20            ; ...
        movb a,@6(ix)                   ; LD (IX+6),A       ; ...
-       .call @_54456                   ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
+       bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
        .pop de                         ; POP DE            ; Restore DE
        .pop bc                         ; POP BC            ; Restore BC
