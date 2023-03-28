@@ -8,7 +8,7 @@
 start:
        limi 0                           ; DI                ; Disable interrupts
        lwpi wrksp
-       mov @rndsd,@rnd_seed             ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
+;       mov @rndsd,@rnd_seed             ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
                                         ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
        li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
@@ -3482,7 +3482,7 @@ draw_graphics_5:
        cb   tmp0,@bytes+33
        jhe  draw_graphics_6            ; JP NC,46132       ; ...else, if value was greater than 33 then skip ahead to #R46132
 * Cursor Shift byte was less than 33 (move the cursor down a character row, and left by 33-(n+1) characters)
-       inc  hl                         ; INC L             ; Increase y-coordinate
+       ab   one,@l                     ; INC L             ; Increase y-coordinate
 draw_graphics_6:
        ab   one,a                      ; INC A             ; Increase A (x-coordinate offset) and add to x-coordinate...
        ab   h,a                        ; ADD A,H           ; ...

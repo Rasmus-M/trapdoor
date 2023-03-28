@@ -205,6 +205,8 @@ current_script_addr:                   ; High endian
 * Data for Drawing to Display
 prim_disp_buffer_addr:
        data display_buffer_1                                         ; Start address of Primary Display Buffer
+
+       even
 draw_coordinates:
        byte 0                                                        ; Base y-coordinate for graphic drawing
        byte 0                                                        ; Base x-coordinate for graphic drawing
