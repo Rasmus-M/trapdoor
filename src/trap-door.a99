@@ -3382,10 +3382,8 @@ draw_graphics:
        mov  de,tmp0
        a    tmp0,tmp0
        a    tmp0,de
-       mov  hl,tmp0
-       andi tmp0,>00ff
-       li   tmp1,96
-       mpy  tmp1,tmp0
+       movb @l,@r0lb
+       mpy  @w96,tmp0
        a    tmp1,de
 ;       movb h,a                        ; LD A,H            ; Load C with three times entity's x-coordinate...
 ;       ab   a,a                        ; ADD A,A           ; ...
@@ -3473,17 +3471,18 @@ draw_graphics_4:
 * moves the cursor right by (n+1)-33 characters. Bit 7 is the Override Attribute Flag.
        movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
        cb   a,@bytes+255               ; CP 255            ; ...and if this is 255 (End Marker)...
-       jne  !                          ; JP Z,46418        ; ...then jump to #R46418 (load HL with stored coordinates from #R34281 and return from
+       jne  draw_graphics_4a           ; JP Z,46418        ; ...then jump to #R46418 (load HL with stored coordinates from #R34281 and return from
        b    @graphics_routine_255                          ; drawing)
-!
+draw_graphics_4a:
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
+       mov  a,tmp0
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33, and if remaining value is 0 (i.e. original value was 33)...
        jeq  draw_graphics_7            ; JP Z,46140        ; ...then skip ahead to #R46140...
 draw_graphics_5:
-;      *** This appears to be correct, jh did not work
-       jgt  draw_graphics_6            ; JP NC,46132       ; ...else, if value was greater than 33 then skip ahead to #R46132
+       cb   tmp0,@bytes+33
+       jhe  draw_graphics_6            ; JP NC,46132       ; ...else, if value was greater than 33 then skip ahead to #R46132
 * Cursor Shift byte was less than 33 (move the cursor down a character row, and left by 33-(n+1) characters)
-       ab   one,@l                     ; INC L             ; Increase y-coordinate
+       inc  hl                         ; INC L             ; Increase y-coordinate
 draw_graphics_6:
        ab   one,a                      ; INC A             ; Increase A (x-coordinate offset) and add to x-coordinate...
        ab   h,a                        ; ADD A,H           ; ...
@@ -3508,8 +3507,9 @@ draw_graphics_9:
 draw_graphics_10:
        movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
+       mov  a,tmp0                     ; required
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33...
-       b    @draw_graphics_5           ; JP 46128          ; ...and jump back to #R46128 to update current drawing position
+       jmp  draw_graphics_5            ; JP 46128          ; ...and jump back to #R46128 to update current drawing position
 
 * Jump to Appropriate Graphic Layout Routine
 * 

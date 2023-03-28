@@ -536,6 +536,13 @@ rnd_seed:
 rnd_range:
        byte 0                                                        ; Temporary store for range value
 
+w96:
+       data 96
+paper_bits:
+       data >3800
+preserve_ink_flag:
+       data >4000
+
 * Table of Sound Parameters
 *
 * #TABLE(default,centre,:w)
