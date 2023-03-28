@@ -3409,11 +3409,11 @@ draw_graphics:
 ;       .ex_de_hl                       ; EX DE,HL          ; Switch DE (now points to position in Primary Display Buffer for current entity) and HL
 draw_graphics_1:
        movb *de,a                      ; LD A,(DE)         ; Load A with Graphic Set Index plus one from this entry in Primary Display Buffer...
-       ab   one,a                      ; INC A             ; ...and if value is now zero (i.e. old value was 255 corresponding to a block outside
+                                       ; INC A             ; ...and if value is now zero (i.e. old value was 255 corresponding to a block outside
                                                            ; dimensions of room)...
-       jeq  draw_graphics_8            ; JP Z,46150        ; ...then skip ahead to #R46150
-       movb @graphic_set_index,a       ; LD A,(34268)      ; Load current Graphic Set Index into this location in Primary Display Buffer...
-       movb a,*de+                     ; LD (DE),A         ; ...
+       jlt  draw_graphics_8            ; JP Z,46150        ; ...then skip ahead to #R46150
+       movb @graphic_set_index,*de+    ; LD A,(34268)      ; Load current Graphic Set Index into this location in Primary Display Buffer...
+                                       ; LD (DE),A         ; ...
                                        ; INC DE            ; Advance to Graphic Index in current character block's entry in Primary Display Buffer
        movb *ix,*de+                   ; LD A,(IX+0)       ; Load Graphic Index into current Display Buffer location...
                                        ; LD (DE),A         ; ...
@@ -3431,12 +3431,12 @@ draw_graphics_1:
 * byte. Bit 7 of the Cursor Shift byte is the Override Attribute Flag.
 draw_graphics_2:
        movb @1(ix),tmp0                ; BIT 7,(IX+1)      ; If bit 7 (Override Attribute Flag) is set...
-       andi tmp0,128*256               ;                   
-       jne  draw_graphics_4            ; JP NZ,46111       ; ...then skip ahead to #R46111
+                                       ;
+       jlt  draw_graphics_4            ; JP NZ,46111       ; ...then skip ahead to #R46111
 * Override Attribute Flag reset
-       movb a,@l                       ; LD L,A            ; Load L with attribute value
-       movb a,tmp0
-       andi tmp0,56*256                ; AND 56            ; Check PAPER bits
+       movb a,tmp0                     ; LD L,A            ; Load L with attribute value
+       czc  @paper_bits,a
+                                       ; AND 56            ; Check PAPER bits
                                        ; LD A,L            ; Restore attribute value to A
        jne  draw_graphics_4            ; JP NZ,46111       ; If PAPER is not zero (i.e. black) then skip ahead to #R46111
 * The instructions between #R46091 and #R46110 (inclusive) are executed only when the PAPER component of the
@@ -3447,12 +3447,12 @@ draw_graphics_2:
 * instruction at #R46107 is executed.
        andi a,192*256                  ; AND 192           ; Reset all bits except Preserve INK and Mirror flags
        movb a,b                        ; LD B,A            ; Load B with Preserve INK and Mirror flags
-       movb @l,a                       ; LD A,L            ; Restore attribute value to A
-       andi a,63*256                   ; AND 63            ; Reset bits Preserve INK and Mirror flags
-       movb a,@c                       ; LD C,A            ; Load C with INK and PAPER bits of attribute value
+                                       ; LD A,L            ; Restore attribute value to A
+       andi tmp0,63*256                ; AND 63            ; Reset bits Preserve INK and Mirror flags
+                                       ; LD C,A            ; Load C with INK and PAPER bits of attribute value
        movb *de,a                      ; LD A,(DE)         ; Load value currently in Display Buffer into A...
-       movb a,tmp0                     ; BIT 6,A           ; ...and if Preserve INK Flag is reset...
-       andi tmp0,64*256                ;
+       czc  @preserve_ink_flag,a       ; BIT 6,A           ; ...and if Preserve INK Flag is reset...
+                                       ;
        jeq  draw_graphics_3            ; JP Z,46107        ; ...then skip ahead to #R46107
 * Preserve INK Flag set in Display Buffer
        sla  a,3                        ; ADD A,A           ; Shift INK bits into PAPER bits...
@@ -3461,7 +3461,7 @@ draw_graphics_2:
 draw_graphics_3:
        andi a,56*256                   ; AND 56            ; Reset all except PAPER bits
        socb b,a                        ; OR B              ; (Re)set Preserve INK and Mirror flags as stored in B previously
-       socb @c,a                       ; OR C              ; Set INK bits as stored in C previously (PAPER was black)
+       socb tmp0,a                     ; OR C              ; Set INK bits as stored in C previously (PAPER was black)
 draw_graphics_4:
        movb a,*de                      ; LD (DE),A         ; Load attribute in A into Display Buffer
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
