@@ -86,7 +86,7 @@ script_routine_62:
 
 * Script Routine (16) Have Berk Hold an Entity, and Position it Appropriately Between his Hands
 script_routine_16:
-       .call @position_carried_item                   ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
+       bl   @position_carried_item                   ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (17) Have Berk Put Down an Entity in Front of Him, if Appropriate Output: D  Depth offset for
@@ -305,7 +305,7 @@ script_routine_28:
 * #R48541 only) Address of complex state data for an entity Output: HL  Address of next script instruction to
 * execute
 script_routine_32:
-       .call @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
+       bl    @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
@@ -337,7 +337,7 @@ _48527:
        jhe  !                          ; JP C,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
-       .call @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
+       bl    @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
        .call @move_carried_to_front                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37718. It is also the start of the routine triggered by instruction
 * 34 in script data.
@@ -525,7 +525,7 @@ script_routine_43:
        cb   a,@bytes+129               ; CP 129            ; ...and if collision was not with entity of class 129 (causes other entities to start
                                                            ; falling)...
        jne  _51792                     ; JR NZ,51792       ; ...then skip ahead to #R51792
-       .call @_55516                   ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
+       bl   @prepare_falling                   ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
        b    @script_routine_45                    ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
 _51792:
        mov  @worm_state_addr,iy        ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
@@ -750,7 +750,7 @@ _52295:
        b    @inct_execute_script                    ;
 !
 * Jump state index is 6 (Drutt has banged his head on something above him)
-       .call @_55516                   ; CALL 55516        ; Set Drutt's Can Fall Flag and set initial velocity factor of 2
+       bl   @prepare_falling                   ; CALL 55516        ; Set Drutt's Can Fall Flag and set initial velocity factor of 2
        li   hl,_51520                  ; LD HL,51520       ; Point HL at script data for Drutt facing out of screen (falling)...
        b    @execute_script                    ; JP 48098          ; ...and execute
 
@@ -1253,20 +1253,18 @@ position_carried_item:
        socb @bits+5,@10(iy)            ; SET 5,(IY+10)     ; Set the entity's Is Being Carried Flag
        socb @bits+4,@9(ix)             ; SET 4,(IX+9)      ; Set Berk's Carrying Something Flag
        movb @8(iy),a                   ; LD A,(IY+8)       ; Set class of entity held by Berk to be this entity's class...
-       movb a,@berk_entity_held                  ; LD (34221),A      ; ...
-_48872:
+       movb a,@berk_entity_held        ; LD (34221),A      ; ...
        movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with the width of the entity, minus 1...
        sb   @5(iy),a                   ; SUB (IY+5)        ; ...
        movb a,@carried_entity_width                  ; LD (34272),A      ; ...and store at #R34272
        movb a,@e                       ; LD E,A            ; Load E with width of entity, minus 1
-       srl  a,1                        ; SRL A             ; Move entity defined at IY into horizontal position appropriate to its height (see notes
+       srl  a,1                                            ; SRL A             ; Move entity defined at IY into horizontal position appropriate to its height (see notes
                                                            ; above)...
        xor  one,a                      ; XOR 1             ; ...
        ab   one,a                      ; INC A             ; ...
        ab   @5(ix),a                   ; ADD A,(IX+5)      ; ...
        movb a,@5(iy)                   ; LD (IY+5),A       ; ...
        ab   @e,a                       ; ADD A,E           ; ...
-_48894:
        movb a,@7(iy)                   ; LD (IY+7),A       ; ...
 * This entry point is used by the routine at #R48760.
 position_carried_item_1:
@@ -1280,9 +1278,8 @@ position_carried_item_1:
        ab   @4(ix),a                   ; ADD A,(IX+4)      ; ...
        movb a,@4(iy)                   ; LD (IY+4),A       ; ...
        ab   @e,a                       ; ADD A,E           ; ...
-_48916:
        movb a,@6(iy)                   ; LD (IY+6),A       ; ...
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 * Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling if Appropriate
 *
@@ -1352,7 +1349,7 @@ _52127:
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
        .ret                            ; RET               ; Return
 _52134:
-       .call @_55516                   ; CALL 55516        ; Set Can Fall Flag and set initial velocity factor of 2 for pushed entity
+       bl    @prepare_falling                   ; CALL 55516        ; Set Can Fall Flag and set initial velocity factor of 2 for pushed entity
        .call @_52127                   ; CALL 52127        ; Move pushed entity left two characters...
        jmp  _52127                     ; JR 52127          ; ...and return
 
@@ -1428,7 +1425,7 @@ _52227:
        sb   a,a                        ; XOR A             ; Load A with zero (see trivia)
        .ret                            ; RET               ; Return
 _52235:
-       .call @_55516                   ; CALL 55516        ; Set Can Fall Flag and set initial velocity factor of 2 for pushed entity
+       bl    @prepare_falling          ; CALL 55516        ; Set Can Fall Flag and set initial velocity factor of 2 for pushed entity
        .call @_52227                   ; CALL 52227        ; Move pushed entity right two characters...
        jmp  _52227                     ; JR 52227          ; ...and return
 

@@ -211,8 +211,8 @@ reset_game_data_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of levels to process)
        movb *iy,@e                     ; LD E,(IY+0)       ; Load start address of current level's complex state data into DE...
        movb @1(iy),d                   ; LD D,(IY+1)       ; ...
-       inc  iy                         ; INC IY            ; Advance IY to next entry in list of addresses of complex state data...
-       inc  iy                         ; INC IY            ; ...
+       inct iy                         ; INC IY            ; Advance IY to next entry in list of addresses of complex state data...
+                                       ; INC IY            ; ...
        .push de                        ; PUSH DE           ; Transfer start address of current level's complex state data into IX...
        .pop ix                         ; POP IX            ; ...
 reset_game_data_2:
@@ -230,12 +230,12 @@ reset_game_data_2:
 reset_game_data_3:
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
        a    bc,ix                      ; ADD IX,BC         ; Advance IX to next entry in complex state data
-       jmp  reset_game_data_2                     ; JR 34774          ; Loop back to #R34774
+       jmp  reset_game_data_2          ; JR 34774          ; Loop back to #R34774
 reset_game_data_4:
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of levels to process)
        sb   one,b                      ; DJNZ 34760        ; Decrease B and loop back to #R34760 to process next level
-       jne  reset_game_data_1                     ;                   
-       li   hl,joystick_mode_flag                  ; LD HL,34298       ; Point HL at Joystick Mode Flag
+       jne  reset_game_data_1          ;
+       li   hl,joystick_mode_flag      ; LD HL,34298       ; Point HL at Joystick Mode Flag
        li   de,current_level           ; LD DE,34207       ; Point DE at store for current level number
        sb   a,a                        ; XOR A             ; Set A to zero and reset Carry Flag
        s    de,hl                      ; SBC HL,DE         ; Subtract DE from HL to leave HL = 91
@@ -346,6 +346,7 @@ swap_characters_6:
        b    @print_score_strings_0     ;
 !
        b    @draw_timer_bar_0          ; JP 47241          ; Reset Show Score Flag, draw timer figures bar and return
+*// swap_characters
 
 *********************************************************************************
 * Change Direction Berk is Facing Depending Upon Relative Position of Drutt
@@ -428,6 +429,7 @@ _35670:
 _35681:
        li   hl,_35005                  ; LD HL,35005       ; Point HL at script data for Berk facing right...
        b    @execute_script                    ; JP 48098          ; ...and execute
+*// change_berk_direction
 
 *********************************************************************************
 * Update State of Berk and Store Current Position in Script Data
@@ -453,7 +455,7 @@ update_berk_state:
        li   bc,_50800                  ; LD BC,50800       ; Load BC with address of blank graphic layout data...
        movb @c,@2(ix)                  ; LD (IX+2),C       ; ...and set this as Berk's current graphic layout data address...
        movb b,@3(ix)                   ; LD (IX+3),B       ; ...
-       .call @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
+       bl   @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
 update_berk_state_1:
        .endproc                        ; RET               ; Return
@@ -484,12 +486,12 @@ update_berk_state_2:
        movb a,tmp0                     ; BIT 0,A           ; If right has been pressed...
        andi tmp0,1*256                 ;                   
        jeq  !                          ; JP NZ,36214       ; ...then skip ahead to #R36214 (move Berk right if appropriate)
-       b    @_36214                    ;                   
+       b    @attempt_to_move_right                    ;
 !
        movb a,tmp0                     ; BIT 1,A           ; If left has been pressed...
        andi tmp0,2*256                 ;                   
        jeq  !                          ; JP NZ,36137       ; ...then skip ahead to #R36137 (move Berk left if appropriate)
-       b    @_36137                    ;                   
+       b    @move_berk_closer_1                    ;
 !
        bl   @move_into_new_room        ; CALL 54283        ; Move Berk into new room (left or right) if he is at the edge of his current room
        movb @control_input,a           ; LD A,(34219)      ; Load A with control input
@@ -557,7 +559,7 @@ update_berk_state_7:
 * Collision with door
        .call @move_berk_closer                   ; CALL 36116        ; If Berk is not horizontally aligned with door then move him closer and exit this routine
 * Berk is now horizontally aligned with door
-       .call @_36367                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
+       .call @turn_into_screen                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
                                                            ; turn into screen
        mov  iy,@bert_interaction_state ; LD (34256),IY     ; Store address of complex state data for door at #R34256
        li   hl,_35017                  ; LD HL,35017       ; Point HL at script data for Berk interacting with a door behind him...
@@ -574,7 +576,7 @@ update_berk_state_8:
 !
        .call @move_berk_closer                   ; CALL 36116        ; If Berk is not horizontally aligned with entity then move him closer and exit this routine
 * Berk is now horizontally aligned with entity pointed to by IY
-       .call @_36367                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
+       .call @turn_into_screen                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
                                                            ; turn into screen
        mov  iy,@bert_interaction_state ; LD (34256),IY     ; Store address of complex state data for entity at #R34256
        movb @6(ix),b                   ; LD B,(IX+6)       ; Load B with y-coordinate of Berk's bottom edge...
@@ -609,7 +611,7 @@ update_berk_state_11:
        .call @move_berk_closer                   ; CALL 36116        ; If Berk is not horizontally aligned with coloured creature slot then move him closer and
                                                            ; exit this routine
 * Berk is now horizontally aligned with coloured creature slot and carrying something
-       .call @_36367                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
+       .call @turn_into_screen                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
                                                            ; turn into screen
        movb @4(iy),a                   ; LD A,(IY+4)       ; Load A with y-coordinate of top edge of coloured creature slot... (see trivia)
        sb   one,a                      ; DEC A             ; ...minus 1...
@@ -639,7 +641,7 @@ update_berk_state_13:
 !
                                                            ; as appropriate)
 * Berk is carrying something
-       .call @_36367                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
+       .call @turn_into_screen                   ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
                                                            ; turn into screen
        li   hl,_35219                  ; LD HL,35219       ; Point HL at script data for Berk putting an entity down on floor behind him...
        b    @execute_script                    ; JP 48098          ; ...and execute
@@ -735,6 +737,7 @@ update_berk_state_19:
 * Berk is carrying something
        li   hl,_35205                  ; LD HL,35205       ; Point HL at script data for Berk putting an entity down on floor in front of him...
        b    @execute_script                    ; JP 48098          ; ...and execute
+*// update_berk_state - cont
 
 *********************************************************************************
 * If Berk is Not Horizontally Aligned with Entity at IY then Move Berk Closer and Exit Calling Routine
@@ -754,26 +757,26 @@ move_berk_closer:
 !
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        cb   a,@5(ix)
-       jl   _36137                     ; JP NC,36214       ; If x-coordinate in A is the less than Berk's left side x-coordinate then skip ahead to
-       b    @_36214                    ;                   ; #R36214
+       jl   move_berk_closer_1         ; JP NC,36214       ; If x-coordinate in A is the less than Berk's left side x-coordinate then skip ahead to
+       b    @attempt_to_move_right     ;                   ; #R36214
 
 * This entry point is used by the routine at #R35735. Attempt to move Berk left
-_36137:
+move_berk_closer_1:
        equ  $
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
        andi tmp0,64*256                ;                   
-       jne  _36200                     ; JR NZ,36200       ; ...then skip ahead to #R36200
+       jne  attempt_to_move_left       ; JR NZ,36200       ; ...then skip ahead to #R36200
 * Attempt to move Berk left (not flying) (see bugs)
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
        bl    @chk_coll_left            ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
-       jnc  _36171                     ; JR NC,36171       ; ...and if a collision occurred, then skip ahead to #R36171
+       jnc  move_berk_closer_3         ; JR NC,36171       ; ...and if a collision occurred, then skip ahead to #R36171
 * No collision
        bl   @move_into_left_room       ; CALL 54348        ; Move Berk into room to the left, if appropriate...
        joc  !                          ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
-       b    @update_berk_state_3                    ;
+       b    @update_berk_state_3       ;
 !
                                                            ; him (turn to) face out of screen as appropriate)
-_36158:
+move_berk_closer_2:
        equ  $
        movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If Berk's Walking Left Flag is already set...
        andi tmp0,2*256                 ;                   
@@ -783,25 +786,25 @@ _36158:
        li   hl,_35263                  ; LD HL,35263       ; Point HL at script data for Berk starting to walk left...
        b    @execute_script                    ; JP 48098          ; ...and execute
 * Collision occurred with entity to the left
-_36171:
+move_berk_closer_3:
        cb   a,@bytes+129               ; CP 129            ; If collision was not with entity of class 129 (causes other entities to start falling)...
-       jne  _36184                     ; JR NZ,36184       ; ...then skip ahead to #R36184
-       .call @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       jne  move_berk_closer_4         ; JR NZ,36184       ; ...then skip ahead to #R36184
+       .call @drop_item                ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        li   hl,_35291                  ; LD HL,35291       ; Point HL at script data for Berk starting to fall to the left...
-       b    @execute_script                    ; JP 48098          ; ...and execute
-_36184:
+       b    @execute_script            ; JP 48098          ; ...and execute
+move_berk_closer_4:
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of less than 22 (can be picked up)...
-       jl   _36158                     ; JR C,36158        ; ...then jump back to #R36158
+       jl   move_berk_closer_2         ; JR C,36158        ; ...then jump back to #R36158
        cb   a,@bytes+50                ; CP 50             ; If collision was with entity of class 50 (causes Drutt to swap depth levels)...
-       jeq  _36158                     ; JR Z,36158        ; ...then jump back to #R36158
+       jeq  move_berk_closer_2         ; JR Z,36158        ; ...then jump back to #R36158
        cb   a,@bytes+25                ; CP 25             ; If collision was with entity of class 25 (Green Apebeast, Level 2)...
        jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;                   
+       bl   @set_bert_killed           ;
 !
-       b    @update_berk_state_3                    ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
+       b    @update_berk_state_3       ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
                                                            ; appropriate)
 * Attempt to move Berk left (flying)
-_36200:
+attempt_to_move_left:
        bl    @chk_coll_left            ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
        jnc  !                          ; JP C,48096        ; ...and if a collision has not occurred, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script       ;                   
@@ -811,10 +814,10 @@ _36200:
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;                   
 !
-       b    @update_berk_state_3                    ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
+       b    @update_berk_state_3       ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
                                                            ; appropriate)
 * This entry point is used by the routine at #R35735. Attempt to move Berk right
-_36214:
+attempt_to_move_right:
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
        andi tmp0,64*256                ;                   
        jeq  !                          ; JP NZ,36282       ; ...then skip ahead to #R36282
@@ -828,9 +831,9 @@ _36214:
 * No collision
        bl   @move_into_right_room      ; CALL 54313        ; Move Berk into room to the right, if appropriate...
        joc  !                          ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
-       b    @update_berk_state_3                    ;
+       b    @update_berk_state_3                           ; him (turn to) face out of screen as appropriate)
 !
-                                                           ; him (turn to) face out of screen as appropriate)
+
 _36236:
        equ  $
        movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Berk's Walking Right Flag is already set...
@@ -839,15 +842,15 @@ _36236:
        b    @inct_execute_script                    ;                   
 !
        li   hl,_35251                  ; LD HL,35251       ; Point HL at script data for Berk starting to walk right...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Collision occurred with entity to the right
 _36249:
        cb   a,@bytes+129               ; CP 129            ; If collision was not with entity of class 129 (causes other entities to start falling)...
        jne  _36266                     ; JR NZ,36266       ; ...then skip ahead to #R36266
-       .call @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       .call @drop_item                ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk (see trivia)
        li   hl,_35327                  ; LD HL,35327       ; Point HL at script data for Berk starting to fall to the right...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 _36266:
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of less than 22 (can be picked up)...
        jl   _36236                     ; JR C,36236        ; ...then jump back to #R36236
@@ -855,9 +858,9 @@ _36266:
        jeq  _36236                     ; JR Z,36236        ; ...then jump back to #R36236
        cb   a,@bytes+25                ; CP 25             ; If collision was with entity of class 25 (Green Apebeast, Level 2)...
        jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;                   
+       bl   @set_bert_killed           ;
 !
-       b    @update_berk_state_3                    ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
+       b    @update_berk_state_3       ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
                                                            ; appropriate)
 * Attempt to move Berk right (flying)
 _36282:
@@ -869,9 +872,9 @@ _36282:
                                                            ; instruction and execute)
        cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;
 !
-       b    @update_berk_state_3                    ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
+       b    @update_berk_state_3       ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
                                                            ; appropriate)
 *********************************************************************************
 * Make Berk Drop the Entity He is Holding and Load IY with its Complex State Data Address
@@ -894,33 +897,34 @@ drop_item:
        szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
        movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Berk's Walking Right Flag is reset...
        andi tmp0,1*256                 ;                   
-       jeq  _36339                     ; JR Z,36339        ; ...then skip ahead to #R36339
-_36331:
+       jeq  drop_item_2                     ; JR Z,36339        ; ...then skip ahead to #R36339
+drop_item_1:
        ab   one,@7(iy)                 ; INC (IY+7)        ; Move dropped entity right one character...
        ab   one,@5(iy)                 ; INC (IY+5)        ; ...
-       jmp  _36351                     ; JR 36351          ; Skip ahead to #R36351
-_36339:
+       jmp  drop_item_4                     ; JR 36351          ; Skip ahead to #R36351
+drop_item_2:
        movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If Berk's Walking Left Flag is reset...
        andi tmp0,2*256                 ;                   
-       jeq  _36351                     ; JR Z,36351        ; ...then skip ahead to #R36351
-_36345:
+       jeq  drop_item_4                     ; JR Z,36351        ; ...then skip ahead to #R36351
+drop_item_3:
        sb   one,@7(iy)                 ; DEC (IY+7)        ; Move dropped entity left one character...
        sb   one,@5(iy)                 ; DEC (IY+5)        ; ...
-_36351:
+drop_item_4:
        movb @5(iy),a                   ; LD A,(IY+5)       ; If entity at IY has the x-coordinate of its left side less than 100...
        cb   a,@bytes+100               ; CP 100            ; ...
-       jl   _36331                     ; JR C,36331        ; ...then move right until left x-coordinate is 100
+       jl   drop_item_1                     ; JR C,36331        ; ...then move right until left x-coordinate is 100
        movb @tmp_width_current_room,a                  ; LD A,(34235)      ; Load A with width of current room (chars) + 99
        cb   a,@7(iy)                   ; CP (IY+7)         ; If entity at IY has the x-coordinate of its right side greater than the width of the current
                                                            ; room...
-       jl   _36345                     ; JR C,36345        ; ...then move right until left x-coordinate is less than room width
+       jl   drop_item_3                     ; JR C,36345        ; ...then move right until left x-coordinate is less than room width
        .ret                            ; RET               ; Return
+*// drop_item
 
 *********************************************************************************
 * If Berk is Neither Facing into the Screen nor Walking then Exit Calling Routine and Have Berk Turn into Screen
 * 
 * Used by the routine at #R35735. Input:  IX  Address of complex state data (current level) for Berk
-_36367:
+turn_into_screen:
        movb @9(ix),tmp0                ; BIT 1,(IX+9)      ; If Berk's Facing Into Screen Flag is set...
        andi tmp0,2*256                 ;                   
        jeq  !                          ; RET NZ            ; ...then return
@@ -934,7 +938,9 @@ _36367:
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        li   hl,_35105                  ; LD HL,35105       ; Point HL at script data for Berk turning (facing out of screen to facing into screen)...
        b    @execute_script                    ; JP 48098          ; ...and execute
+*// turn_into_screen
 
+*********************************************************************************
 * Update State of Berk (Floating Power Active)
 *
 * Used by the routine at #R35735. Input:  IX  Address of complex state data (current level) for Berk
@@ -947,7 +953,7 @@ update_berk_floating_power:
 * No collision with entity of class 130
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Move Berk up one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       .call @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
+       bl   @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
 _36558:
        movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If Berk's Walking Left Flag is set...
        andi tmp0,2*256                 ;
@@ -955,7 +961,7 @@ _36558:
        movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Berk's Walking Right Flag is set...
        andi tmp0,1*256                 ;
        jne  _36576                     ; JR NZ,36576       ; ...then skip ahead to #R36576
-       .call @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
+       bl    @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 * Berk's Walking Right Flag is set (i.e. Drutt has pushed Berk right)
@@ -1011,11 +1017,11 @@ next_level:
        movb @bytes+109,@6(ix)          ; LD (IX+6),109     ; Set y-coordinate of Berk's bottom edge to 109
        li   iy,bonis_state_data_1                  ; LD IY,43606       ; Load IY with address of Boni's entry in Level 1's State Data for Complex Entities...
        mov  iy,@bert_interaction_state ; LD (34256),IY     ; ...and store at #R34256
-       .call @position_carried_item                   ; CALL 48850        ; Have Berk hold Boni, and position him appropriately between Berk's hands
+       bl   @position_carried_item                   ; CALL 48850        ; Have Berk hold Boni, and position him appropriately between Berk's hands
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set Boni's depth to 1
        movb @bytes+10,*iy              ; LD (IY+0),10      ; Set Boni's room to 10
        .call @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
-       .call @_55516                   ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
+       .call @prepare_falling                   ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
        .call @_36739                   ; CALL 36739        ; Lock Level 1's exit door and cycle attributes (full-screen)
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        li   hl,init_drutts_state_data_1 ; LD HL,36625       ; Overwrite Drutt's entry in Level 1's State Data for Complex Entities with data at #R36625...
@@ -1029,7 +1035,7 @@ _36725:
        .call @_36753                   ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
        mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
        mov  iy,@bert_interaction_state ; LD (34256),IY     ; ...and store at #R34256
-       .call @position_carried_item                   ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
+       bl   @position_carried_item                   ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
 _36739:
        li   hl,game_flags              ; LD HL,34208       ; Reset Level Exit Door Unlocked Flag...
        szcb @bits+4,*hl                ; RES 4,(HL)        ; ...
@@ -1039,6 +1045,7 @@ _36739:
                                                            ; room
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Set Berk's Horizontal Position to Match Level 1's Entry Door
 * 
 * Used by the routine at #R36638.
@@ -1055,6 +1062,7 @@ _36753:
        movb a,@7(ix)                   ; LD (IX+7),A       ; ...
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Initialise Script Data Positions for Flying Skeleton Creature and Bat (Level 1)
 * 
 * Used by the routine at #R34751.
@@ -1065,6 +1073,7 @@ _36778:
        mov  hl,@bat_script_pos         ; LD (37016),HL     ; ...and store this as the current script data position at #R37016
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Update States of All Level 1 Entities
 * 
 * Used by the routine at #R34438.
@@ -1075,6 +1084,7 @@ update_level_1_entities:
        .call @update_state_of_spiders                   ; CALL 37586        ; Update states of the Spiders (Level 1) and store current positions in script data
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Execute Script Data for Boni's Kidnap and Handle Trap Door Opening and Closing
 * 
 * Used by the routine at #R36791.
@@ -1100,6 +1110,7 @@ execute_bonis_kidnap:
        mov  hl,@boni_kidnap_script_pos ; LD (36801),HL     ; ...at #R36801 as current position in script data for Boni's kidnap
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Open Trap Door if Berk is Near the Left Side of the Trap Door Room
 * 
 * Used by the routine at #R36887. Input:  IX  Address of complex state data for Flying Skeleton Creature (Level 1)
@@ -1118,12 +1129,14 @@ open_trap_door_if_berk_is_near:
        movb a,@_43450                  ; LD (43450),A      ; ...and marker (preventing Berk and Drutt passing door lid)
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Advance HL to Next Script Instruction and Start Executing
 * 
 * Used by the routine at #R36887.
 start_executing:
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Close the Trap Door if Berk is Not in Room 1 and Drutt is in Room 4 (Level 1)
 * 
 * See bugs.
@@ -1141,6 +1154,7 @@ close_trap_door_if:
        socb @bits+3,@9(ix)             ; SET 3,(IX+9)      ; Set Berk and Drutt Through Trap Door Flag
        b    @close_trap_door                     ; JR 36996          ; Close the Trap Door and return
 
+*********************************************************************************
 * Update State of Bat (Level 1) and Store Current Position in Script Data
 * 
 * Used by the routine at #R36791.
@@ -1154,6 +1168,7 @@ update_bat_state_and_store:
        mov  hl,@bat_script_pos         ; LD (37016),HL     ; ...at #R37016 as current position in Bat's script data
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Update State of Bat (Level 1)
 * 
 * Used by the routine at #R37062. Input:  IX  (always #R43463, entry in Level 1 complex state data for Bat) HL
@@ -1488,6 +1503,7 @@ _38372:
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset projectile's Fired Flag
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Start Level 2 Key Falling if Bubo's Projectile is in Place Below it
 * 
 * Used by the routine at #R38219. Input:  IX  Address of complex state data for Bubo's projectile (Level 2)
@@ -1579,6 +1595,7 @@ _38540:
 !
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Update States of Stalactites (Level 2)
 * 
 * Used by the routine at #R38009.
@@ -1672,6 +1689,7 @@ _38748:
        a    bc,ix                      ; ADD IX,BC         ; ...
        b    @_38596                    ; JP 38596          ; ...and loop back to #R38596 for next entity
 
+*********************************************************************************
 * Move Entity at IX Down One Character
 * 
 * Used by the routines at #R38219 and #R38592. Input:  IX  Address of complex state data for an entity Output: A New
@@ -1694,6 +1712,7 @@ update_level_3_entities:
        .call @update_hatsh_state                   ; CALL 39151        ; Update state of Hatch
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Update State of Hatch (Level 3)
 * 
 * Used by the routine at #R39137.
@@ -2038,6 +2057,7 @@ _39667:
                                                            ; zero
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Count Coloured Creatures in Slots and Return if All Are Home
 * 
 * Used by the routine at #R39601. Output: H  Number of coloured creatures in correct slots L  Number of coloured
@@ -2091,7 +2111,7 @@ _39760:
        .call @cycle_colors_and_refresh                   ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
                                                            ; room
        li   ix,_44972                  ; LD IX,44972       ; Load IX with address of complex state data for edible eyes (normally hidden off-screen)...
-       .call @_55516                   ; CALL 55516        ; ...and set their "Can Fall" Flag and set initial velocity factor to 2
+       .call @prepare_falling                   ; CALL 55516        ; ...and set their "Can Fall" Flag and set initial velocity factor to 2
        movb @bytes+4,a                 ; LD A,4            ; Set Coloured Creatures' Reward Given Flag...
        movb a,@_44894+9                ; LD (44903),A      ; ...
        .ret                            ; RET               ; Return
@@ -2274,6 +2294,7 @@ _40000:
        movb @bytes+122,a               ; LD A,122          ; Move creature one step closer to x (Left) = 113, y (Top) > 122...
        jmp  _40010                     ; JR 40010          ; ...and return
 
+*********************************************************************************
 * Move Entity at IY One Step Closer to Home Position
 * 
 * This routine moves an entity (whose complex state data is pointed to by IY) one character left or right, if such a
@@ -2303,6 +2324,7 @@ _40033:
        ab   one,@7(iy)                 ; INC (IY+7)        ; ...
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Update States of All Level 4 Entities
 * 
 * Used by the routine at #R34438.
@@ -4125,26 +4147,27 @@ execute_script_2:
 * 
 * Used by the routines at #R35689, #R36542 and #R48487.
 dec_power_duration:
+       .proc
        mov  @remaining_power_cycles,de ; LD DE,(34224)     ; Load remaining power time into DE
        swpb de                         ; Little endian
        movb @e,a                       ; LD A,E            ; Increase E (number of game-cycles power has been in use in current block)...
        ab   one,a                      ; INC A             ; ...
        movb a,@e                       ; LD E,A            ; ...
        cb   a,@bytes+15                ; CP 15             ; If 16 game-cycles of power use have not yet elapsed...
-       jne  _48402                     ; JR NZ,48402       ; ...then skip ahead to #R48402
+       jne  dec_power_duration_1       ; JR NZ,48402       ; ...then skip ahead to #R48402
        movb @bytes+0,@e                ; LD E,0            ; Reset number of game-cycles power has been in use to zero...
        sb   one,d                      ; DEC D             ; ...and decrease remaining number of 16-game-cycles
-_48402:
+dec_power_duration_1:
        swpb de                         ; Big endian
        mov  de,@remaining_power_cycles ; LD (34224),DE     ; Store updated remaining power time...
-       jeq  !                          ; RET NZ            ; ...and return if this is not zero
-       .ret                            ;                   
-!
+       jne  dec_power_duration_2       ; RET NZ            ; ...and return if this is not zero
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
-       .call @remove_current_power                   ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
+       .call @remove_current_power                         ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
                                                            ; original position
        li   hl,_35275                  ; LD HL,35275       ; Point HL at script data for Berk's power expiring...
        b    @execute_script            ; JP 48098          ; ...and execute
+dec_power_duration_2:
+       .endproc
 
 * Remove Berk's Current Power and Reset Sweet / Mushroom / Edible Eyes / Sausage to its Original Position
 * 
@@ -4177,7 +4200,7 @@ _48445:
        szcb @bits+7,@8(ix)             ; RES 7,(IX+8)      ; Reset bit 7 of Berk's class value (change from 159 to 31)
        sb   one,@6(ix)                 ; DEC (IX+6)        ; Decrease Berk's bottom y-coordinate by two...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       .call @_55516                   ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
+       .call @prepare_falling                   ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
 _48474:
        movb @berks_current_power,a                  ; LD A,(34220)      ; Reset complex state data for entity responsible for Berk's current power to that stored in
                                                            ; Initial-State Table...
@@ -5190,6 +5213,7 @@ move_to_right_of_left_room:
        .endproc                        ; RET               ; Return
 *// move_to_right_of_left_room
 
+*********************************************************************************
 * Paint Red Areas Outside Current Character's Room if IX Points to Current Character's Complex State Data
 * 
 * Used by the routines at #R54383, #R54419, #R55433 and #R55616. Input:  IX  Address of complex state data for an
@@ -5216,6 +5240,7 @@ paint_red_areas_char_2:
 paint_red_areas_char_3:
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Set Room of Entity at IX to B, Store Room Size Data for New Room and Load E with Entity's Width Minus One
 * 
 * Used by the routines at #R54398, #R54434, #R55433 and #R55616. Input:  B  Destination room index IX  Address of
@@ -5234,6 +5259,7 @@ set_room_of_entity:
        movb a,@e                       ; LD E,A            ; ...and load result (entity's width minus one) into E
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Load B with Index of Room to Right of an Entity's Current Room
 * 
 * Used by the routines at #R48593, #R52193, #R54283 and #R54313. Input:  IX  Address of complex state data for an
@@ -5262,16 +5288,7 @@ _54527:
 get_right_room_index_3:
        rt
 
-* Unused routine
-* 
-* This routine is not used. It is assumed, since this routine flows into the routine at #R54539, that this unused
-* routine was also intended to deal with room connectivity. As there are routines to deal with vertical and
-* horizontal (left-right) connectivity, it is possible that this routine was originally intended to handle
-* horizontal (forward-back) connectivity.
-;_54533:
-;       mov  @_34252,iy                 ; LD IY,(34252)     ; Load IY with address of Unused Data Block (09)
-;       jmp  get_left_room_index_0      ; JR 54546          ; Load B with index of room, as related to room of index D via data in Unused Data Block (09)
-
+*********************************************************************************
 * Load B with Index of Room to Left of an Entity's Current Room
 * 
 * Used by the routines at #R48641, #R52098, #R54283 and #R54348. Input:  IX  Address of complex state data for an
@@ -5303,6 +5320,7 @@ get_left_room_index_3:
 get_left_room_index_4:
        rt
 
+*********************************************************************************
 * Check Entity at IX for Collision With Another (Impassable / Pushable) Entity Immediately to the Right
 * 
 * Used by the routines at #R36116, #R52148, #R52193, #R52889, #R52914, #R54313 and #R55041. Input:  IX  Address of
@@ -5356,6 +5374,7 @@ chk_coll_right_4:
        a    de,iy                      ; ADD IY,DE         ; Advance IY pointer to next entity in complex state data block
        jmp  chk_coll_right_1           ; JR 54576          ; Loop back to #R54576
 
+*********************************************************************************
 * Check Entity at IX for Collision With Another (Impassable / Pushable) Entity Immediately to the Left
 * 
 * Used by the routines at #R36116, #R52053, #R52098, #R52870, #R52914, #R54348 and #R55041. Input:  IX  Address of
@@ -5409,6 +5428,7 @@ chk_coll_left_4:
        a    de,iy                      ; ADD IY,DE         ; Advance IY pointer to next entity in complex state data block
        jmp  chk_coll_left_1            ; JR 54673          ; Loop back to #R54673
 
+*********************************************************************************
 * Check Entity at IX for Collision With Another Entity at Next Depth Level Out Of Screen Whose Interaction (11,6)
 * Flag is Set
 * 
@@ -5498,6 +5518,7 @@ chk_coll_same_depth_rev:
        li   de,-13                     ; LD DE,65523       ; Load DE with -13
        jmp  chk_coll_next_depth_rev_3  ; JP 54987          ; Move IY back to previous entity in complex state data and jump into collision check routine
 
+*********************************************************************************
 * Check Entity at IX for Collision With Another Entity (in Reverse Order) at Next Depth Level Into Screen Whose
 * Interaction (11,7) Flag is Set
 * 
@@ -5562,19 +5583,7 @@ chk_coll_next_depth_rev_4:
                                        ; SCF               ; Set Carry Flag
        b    @return_with_carry_1       ; RET               ; Return
 
-* Unused routine
-* 
-* This routine seems to be involved with the relative positioning of two different entities, assuming that IX
-* contains a complex state data address.
-;       mov  @_34258,iy                 ; LD IY,(34258)     ; Load IY with address of complex state data for entity involved in last collision check
-;       movb @7(iy),a                   ; LD A,(IY+7)       ; Load A with width of this entity, minus one...
-;       sb   @5(iy),a                   ; SUB (IY+5)        ; ...
-;       srl  a,1                        ; SRL A             ; Divide result by two, clearing remainder...
-;       sb   one,a                      ; DEC A             ; ...and subtract one
-;       ab   @5(iy),a                   ; ADD A,(IY+5)      ; Add x-coordinate of entity's left edge
-;       cb   a,@5(ix)                   ; CP (IX+5)         ; 
-;       .ret                            ; RET               ; Return
-
+*********************************************************************************
 * Handle Drutt's Jump, and Load E with Jump State Index As Appropriate
 * 
 * See description of routine at #R55041 for details. Output: E  (via routine at #R55041) Jump state index (see
@@ -5595,6 +5604,7 @@ _55023:
        jmp  _55060                     ; JR 55060          ; Handle Drutt's jump, and load E with jump state index as appropriate based upon current
                                                            ; control input
 
+*********************************************************************************
 * Handle Berk's Jump, and Load E with Jump State Index As Appropriate
 * 
 * This routine updates the position, direction and velocity of a jumping character (Berk if entry at #R55041 or
@@ -5718,6 +5728,7 @@ _55187:
        movb a,@game_flags              ; LD (34208),A      ; ...
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Handle Vertical Component of Character's Jump, and Load E with Jump State Index As Appropriate
 * 
 * This routine handles the vertical component of Berk's or Drutt's jumping, checking for collisions (e.g. Berk or
@@ -5772,7 +5783,7 @@ _55258:
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set initial velocity factor of entity jumper collided with to 2...
        socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its "Can Fall" flag
 _55270:
-       .call @change_room_up                   ; CALL 55433        ; Change jumper's room up one if appropriate
+       bl   @change_room_up                   ; CALL 55433        ; Change jumper's room up one if appropriate
        sb   one,b                      ; DJNZ 55235        ; Decrease B (remaining number of characters to move up) and loop back to #R55235 if not zero
        jne  _55235                     ;                   
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease current velocity of jumper's jump, slowing ascent
@@ -5800,7 +5811,7 @@ _55300:
        sb   one,b                      ; DJNZ 55285        ; Decrease B (remaining number of characters to move down) and loop back to #R55285 if not zero
        jne  _55285                     ;                   
        .push hl                        ; PUSH HL           ; Store HL
-       .call @change_room_down                   ; CALL 55616        ; Change jumper's room down one if appropriate
+       bl   @change_room_down                   ; CALL 55616        ; Change jumper's room down one if appropriate
        .pop hl                         ; POP HL            ; Restore HL
        movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping downwards, no collision)
        .ret                            ; RET               ; Return
@@ -5897,32 +5908,32 @@ _55421:
        ab   one,@12(ix)                ; INC (IX+12)       ; Increase velocity of character's jump
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Change Entity's Room Up One if Appropriate
 * 
 * Used by the routines at #R36542, #R48487 and #R55196. Input:  IX  Address of complex state data for an entity
 change_room_up:
+       .proc
        movb @bytes+99,a                ; LD A,99           ; If y-coordinate of top of entity is larger than 99 (i.e. top of entity is below top of
                                                            ; room)...
        cb   a,@4(ix)                   ; CP (IX+4)         ; ...
-       jhe  !                          ; RET C             ; ...then return
-       .ret                            ;                   
-!
+       jl   change_room_up_4           ; RET C             ; ...then return
        .push hl                        ; PUSH HL           ; Store HL
        .push bc                        ; PUSH BC           ; Store BC
        .push de                        ; PUSH DE           ; Store DE
        mov  @vert_room_connect_map,iy                 ; LD IY,(34254)     ; Load start address of current level's Vertical Room Connectivity Data into IY
        inc  iy                         ; INC IY            ; Advance by one byte to second byte (lower room index) of first entry
        movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity into D
-_55451:
+change_room_up_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load second byte (lower room index) of current entry into A
        cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
-       jeq  _55512                     ; JR Z,55512        ; ...then skip ahead to #R55512
+       jeq  change_room_up_3                     ; JR Z,55512        ; ...then skip ahead to #R55512
        cb   a,d                        ; CP D              ; If byte is the same as the entity's current room...
-       jeq  _55467                     ; JR Z,55467        ; ...then skip ahead to #R55467
+       jeq  change_room_up_2                     ; JR Z,55467        ; ...then skip ahead to #R55467
        inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
                                        ; INC IY            ; ...
-       jmp  _55451                     ; JR 55451          ; Loop back to #R55451
-_55467:
+       jmp  change_room_up_1                     ; JR 55451          ; Loop back to #R55451
+change_room_up_2:
        movb @-1(iy),b                  ; LD B,(IY-1)       ; Load first byte (upper room index) of current entry into B
        movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
        movb a,d                        ; LD D,A            ; ...
@@ -5944,21 +5955,25 @@ _55467:
        movb a,@6(ix)                   ; LD (IX+6),A       ; ...
        bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
                                                            ; state data
-_55512:
+change_room_up_3:
        .pop de                         ; POP DE            ; Restore DE
        .pop bc                         ; POP BC            ; Restore BC
        .pop hl                         ; POP HL            ; Restore HL
-       .ret                            ; RET               ; Return
+change_room_up_4:
+       .endproc                        ; RET               ; Return
+*// change_room_up
 
+*********************************************************************************
 * Set Can Fall Flag and Set Initial Velocity Factor of 2 for Entity Defined at Address in IX
 * 
 * Used by the routines at #R36638, #R39760, #R48417, #R51779, #R52098, #R52193 and #R52243. Input:  IX  Address of
 * complex state data for an entity
-_55516:
+prepare_falling:
        socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set entity's "Can Fall" flag
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set entity's initial velocity factor to 2
-       .ret                            ; RET               ; Return
+       rt                            ; RET               ; Return
 
+*********************************************************************************
 * Move All Falling Entities Down by Distances Appropriate to their Current Velocity Factors
 * 
 * If an entity's "velocity factor" is equal to its height in characters plus 3 (a proxy for its mass), then it has
@@ -5967,15 +5982,13 @@ move_falling_entities:
        .proc
        mov  @cmplx_state_data_addr,ix  ; LD IX,(34238)     ; Load IX with start address of current level's complex state data
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries in complex state data are 13 bytes wide)
-_55532:
+move_falling_entities_1:
        movb *ix,a                      ; LD A,(IX+0)       ; If first byte of entry is 255 (i.e. End Marker)...
        cb   a,@bytes+255               ; CP 255            ; ...
-       jne  !                          ; RET Z             ; ...then return
-       .endproc                        ;
-!
+       jeq  move_falling_entities_9    ; RET Z             ; ...then return
        movb @10(ix),tmp0               ; BIT 6,(IX+10)     ; If current entity's "Can Fall" flag is reset...
        andi tmp0,64*256                ;                   
-       jeq  _55592                     ; JR Z,55592        ; ...then skip ahead to #R55592 (advance to next entity)
+       jeq  move_falling_entities_5    ; JR Z,55592        ; ...then skip ahead to #R55592 (advance to next entity)
 * Current entity's "Can Fall" Flag is set
        .push de                        ; PUSH DE           ; Store DE
        bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for current entity's current room
@@ -5987,68 +6000,71 @@ _55532:
        movb @12(ix),a                  ; LD A,(IX+12)      ; Load B with velocity factor...
        movb a,b                        ; LD B,A            ; ...
        cb   a,@c                       ; CP C              ; If C is less than or equal to this (i.e. "terminal velocity" reached)...
-       jhe  _55569                     ; JR NC,55569       ; ...then skip ahead to #R55569
+       jhe  move_falling_entities_2    ; JR NC,55569       ; ...then skip ahead to #R55569
        ab   one,a                      ; INC A             ; Increase velocity factor by one and store for next pass (i.e. acceleration)...
        movb a,@12(ix)                  ; LD (IX+12),A      ; ...
-_55569:
+move_falling_entities_2:
        srl  b,1                        ; SRL B             ; Divide current (i.e. not increased) velocity factor by 2
-_55571:
+move_falling_entities_3:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If sum of y-coordinate of entity's bottom and entity's depth is 122...
        ab   @1(ix),a                   ; ADD A,(IX+1)      ; ...(i.e. entity is at ground-level)...
        cb   a,@bytes+122               ; CP 122            ; ...
-       jeq  _55596                     ; JR Z,55596        ; ...then skip ahead to #R55596
-_55581:
+       jeq  move_falling_entities_6    ; JR Z,55596        ; ...then skip ahead to #R55596
+move_falling_entities_4:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Move entity down by one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-       .call @change_room_down                   ; CALL 55616        ; Change entity's room down one if appropriate
+       bl   @change_room_down          ; CALL 55616        ; Change entity's room down one if appropriate
        sb   one,b                      ; DJNZ 55571        ; Decrease B (current velocity factor, i.e. remaining number of characters to drop entity) and
-       jne  _55571                     ;                   
+       jne  move_falling_entities_3                     ;
                                                            ; if non-zero, loop back to #R55571
-_55592:
+move_falling_entities_5:
        a    de,ix                      ; ADD IX,DE         ; Advance IX by 13 bytes to next entry
-       jmp  _55532                     ; JR 55532          ; Loop back to #R55532
+       jmp  move_falling_entities_1    ; JR 55532          ; Loop back to #R55532
 * Entity's position is such that sum of y-coordinate of bottom + depth = 122 (i.e. at ground-level)
-_55596:
+move_falling_entities_6:
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
-_55599:
-       joc  _55610                     ; JR C,55610        ; ...and if no collision occurred, then skip ahead to #R55610
+move_falling_entities_7:
+       joc  move_falling_entities_8    ; JR C,55610        ; ...and if no collision occurred, then skip ahead to #R55610
        cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
-       jeq  _55581                     ; JR Z,55581        ; ...then jump to #R55581 (entity may fall down into next room)
+       jeq  move_falling_entities_4    ; JR Z,55581        ; ...then jump to #R55581 (entity may fall down into next room)
 * Collision was not with entity of class 129, so need to resume collision check from current position in entities
 * list, i.e. entity that character did collide with
        bl   @chk_coll_same_depth_5     ; CALL 54871    ; Resume checking entity for collision with another entity at same depth whose Interaction
-                                                           ; (11,6) Flag is set...
-       jmp  _55599                     ; JR 55599          ; ...
+                                       ; (11,6) Flag is set...
+       jmp  move_falling_entities_7    ; JR 55599          ; ...
 * Entity has landed (i.e. is at ground-level and has not collided with a marker of class 129)
-_55610:
+move_falling_entities_8:
        szcb @bits+6,@10(ix)            ; RES 6,(IX+10)     ; Reset entity's "Can Fall" flag as entity has landed
-       jmp  _55592                     ; JR 55592          ; Loop back for next entity
+       jmp  move_falling_entities_5    ; JR 55592          ; Loop back for next entity
+move_falling_entities_9:
+       .endproc
+*// move_falling_entities
 
+*********************************************************************************
 * Change Entity's Room Down One if Appropriate
 * 
 * Used by the routines at #R55196 and #R55525. Input:  IX  Address of complex state data for an entity
 change_room_down:
+       .proc
        movb @bytes+122,a               ; LD A,122          ; If y-coordinate of bottom of entity is smaller than 122 (i.e. bottom of entity is above
                                                            ; bottom of room)...
        cb   a,@6(ix)                   ; CP (IX+6)         ; ...
-       jl   !                          ; RET NC            ; ...then return
-       .ret                            ;                   
-!
+       jhe  change_room_down_4         ; RET NC            ; ...then return
        .push bc                        ; PUSH BC           ; Store BC
        .push de                        ; PUSH DE           ; Store DE
        mov  @vert_room_connect_map,iy                 ; LD IY,(34254)     ; Load start address of current level's Vertical Room Connectivity Data into IY
        movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity into D
-_55631:
+change_room_down_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load first byte (upper room index) of current entry into A
        cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
-       jeq  _55695                     ; JR Z,55695        ; ...then skip ahead to #R55695
+       jeq  change_room_down_3                     ; JR Z,55695        ; ...then skip ahead to #R55695
        cb   a,d                        ; CP D              ; If byte is the same as the entity's current room...
-       jeq  _55647                     ; JR Z,55647        ; ...then skip ahead to #R55647
+       jeq  change_room_down_2                     ; JR Z,55647        ; ...then skip ahead to #R55647
        inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
                                        ; INC IY            ; ...
-       jmp  _55631                     ; JR 55631          ; Loop back to #R55631
-_55647:
+       jmp  change_room_down_1                     ; JR 55631          ; Loop back to #R55631
+change_room_down_2:
        movb @1(iy),b                   ; LD B,(IY+1)       ; Load second byte (lower room index) of current entry into B
        movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
        movb a,d                        ; LD D,A            ; ...
@@ -6073,11 +6089,14 @@ _55647:
        .pop de                         ; POP DE            ; Restore DE
        .pop bc                         ; POP BC            ; Restore BC
        .ret                            ; RET               ; Return
-_55695:
+change_room_down_3:
        .pop de                         ; POP DE            ; Restore DE
        .pop bc                         ; POP BC            ; Restore BC
-       .ret                            ; RET               ; Return
+change_room_down_4:
+       .endproc                        ; RET               ; Return
+*// change_room_down
 
+*********************************************************************************
 * If Current Character is in Same Room as Target Entity at IX then Set Pending Sound to A
 * 
 * If the requested sound has a lower index than the sound already pending then the requested sound overrides the
