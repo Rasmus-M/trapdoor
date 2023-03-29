@@ -22,7 +22,7 @@ game_flags:
 *
 * Number of shots Cannon can fire before returning to its dormant state. Increases by 10 for each drip the Cannon
 * catches.
-_34209:
+cannom_ammo_counter:
        byte 0
 
 * Current Time / Lives
@@ -89,11 +89,11 @@ berks_current_power:
        byte 0
 
 * Interaction Data for Berk
-_34221:
+berk_entity_held:
        byte 0                                                        ; Class of entity currently held by Berk (e.g. Drutt = 18), or zero for none
-_34222:
+berk_coloured_creature:
        byte 0                                                        ; y-coordinate minus one for top edge of coloured creature slot with which Berk is interacting
-_34223:
+berk_killed_by_spider:
        byte 0                                                        ; Number of times Berk has been killed by a spider on Level 1
 
 * Remaining Duration of Berk's Current Power
@@ -122,9 +122,9 @@ blink_duration_counter:
 * incremented when the Clawed Foot reaches the top of its vertical range of travel while carrying Berk. If the
 * incremented value exceeds six, then it is reset to one. After incrementing (and resetting if appropriate), the
 * value is used to determine what the Clawed Foot does with Berk:
-_34228:
+clawed_foot_tti:
        byte 0                                                        ; Time (cycles) until Clawed Foot (Level 3) attacks
-_34229:
+clawed_foot_action:
        byte 0                                                        ; Clawed Foot's Action Index
 
 * Temporary Store for Room Dimension Data
@@ -137,7 +137,7 @@ tmp_room_dim_data:
 * Temporary Store for Width of Entity's Current Room
 *
 * This location holds the width of an entity's current room (in characters, plus + 99).
-_34235:
+tmp_width_current_room:
        byte 0
 
 * Table of Data Addresses (Current Level)
@@ -151,15 +151,15 @@ drutt_state_addr:
        data 99                                                       ; Address of Drutt's state data
 worm_state_addr:
        data 99                                                       ; Address of worm's state data
-_34246:
+addr_rev_col_check:
        data 99                                                       ; Start address for reverse-order collision checks
 room_dim_data:
        data 99                                                       ; Room Dimension Data
-_34250:
+horz_room_connect_map:
        data 99                                                       ; Horizontal Room Connectivity Map
-_34252:
+unused_data_block:
        data 99                                                       ; Unused Data Block (09)
-_34254:
+vert_room_connect_map:
        data 99                                                       ; Vertical Room Connectivity Map
 
 * Miscellaneous Data 1
@@ -174,7 +174,7 @@ room_dim_data_addr:
                                                                      ; copied to #R34230)
 blinking_eye_attr_addr:
        data 0                                                        ; Attribute File address of eyes of currently blinking timer figure
-_34266:
+script_for_next_level:
        data 0                                                        ; Temporary store for script data to execute upon arrival on new level
 graphic_set_index:
        byte 0                                                        ; Current Graphic Set Index
@@ -240,7 +240,7 @@ loop_start:
 * { 0 | Joystick Mode off }
 * { 1 | Joystick Mode on }
 * TABLE#
-_34298:
+joystick_mode_flag:
        byte 0
 
 * Current High Score
@@ -260,7 +260,7 @@ bat_script_pos:
        data bat_script
 
 * Table of Current Positions in Spiders' Script Data
-_37580:
+spiders_script_data_pos:
        data _37792                                                   ; Spider 1
        data _37792                                                   ; Spider 2
        data _37792                                                   ; Spider 3
@@ -270,14 +270,14 @@ bubo_script_pos:
        data _38024
 
 * Table of Current Positions in Apebeasts' Script Data
-_38424:
+apebeasts_script_data_pos:
        data _38432                                                   ; Apebeast 1 (Level 2)
        data _38450                                                   ; Apebeast 2 (Level 2)
        data _38432                                                   ; Apebeast 3 (Level 2)
        data _38450                                                   ; Apebeast 4 (Level 2)
 
 * Hatch State Index (Level 3)
-_39150:
+hatch_state_index:
        byte 0
 
 * Table of Coloured Creatures' Properties
@@ -289,7 +289,7 @@ _39150:
 * will be likewise overwritten by the data from the following two records, respectively. As three records are always
 * used, starting with the record whose index matches the generated Sequence ID, there will always be one red, one
 * yellow and one white creature.
-_39584:
+coloured_creatures_data:
        byte 13,62,157                                                ; Red Coloured Creature
        byte 14,77,157                                                ; Yellow Coloured Creature
        byte 15,92,157                                                ; White Coloured Creature
@@ -297,9 +297,9 @@ _39584:
        byte 14,77,157                                                ; Yellow Coloured Creature
 
 * Miscellaneous Data (Coloured Creatures)
-_39599:
+coloured_creatures_curr_seq:
        byte 0                                                        ; Creatures' current Sequence ID
-_39600:
+coloured_creatures_cycles:
        byte 0                                                        ; Cycles elapsed since last swap of creatures
 
 * Current Position in Skeleton's Script Data
@@ -317,12 +317,12 @@ current_keyboard_ctrls:
        text 'R'                                                      ; Restart
 
 * Table of Attribute File Addresses for Main Menu Strings
-_46690:
+main_menu_attrs:
        data 22666                                                    ; "S   START   "
        data 22762                                                    ; "K NEW KEYS  "
-_46694:
+main_menu_attrs_kempston:
        data 22851                                                    ; "J +KEMPSTON "
-_46696:
+main_menu_attrs_dirs:
        data 22947                                                    ; "   RIGHT    "
        data 23043                                                    ; "   LEFT     "
        data 23139                                                    ; "   FORWARD  "
@@ -349,11 +349,11 @@ title_text:
        text 'THROUGH the TRAPDOOR'
 
 * "SORRY BERK,  BUT YOUR TIME IS UP" String
-_47153:
+sorry_berk_text:
        text 'SORRY BERK,  BUT YOUR TIME IS UP'
 
 * "HOME SWEET HOME" String
-_47198:
+home_sweet_home_text:
        text 'HOME SWEET HOME'
 
 * Score / Total / High Score String
@@ -361,11 +361,11 @@ score_text:
        text '*SCORE#00000* TOTAL#00000* HI-SC#00999$'
 
 * Return Values from Keyboard Reading Routine
-_47853:
+ret_val_keyboard:
        text 'cZXCVASDFGQWERT1234509876POIUYeLKJH yMNB'
 
 * Table of Addresses of Berk's Jump Script Data
-_48994:
+berks_jump_script_data:
        data _35441                                                   ; (1) - Berk starting to jump straight up
        data _35447                                                   ; (2) - Unused
        data _35457                                                   ; (3) - Berk landing (after jump)
@@ -383,7 +383,7 @@ drutts_script_pos:
 *
 * When Drutt is neither under player control nor seeking a target (a worm or Berk) then his actions are determined
 * by randomly selecting a script data address from this table and executing. There is:
-_51890:
+drutts_script_data_actions:
        data _51538                                                   ; Move Drutt and any pushed entity right by a hop of size four
        data _51608                                                   ; Move Drutt and any pushed entity left by a hop of size three
        data _51630                                                   ; Drutt swapping depth levels
