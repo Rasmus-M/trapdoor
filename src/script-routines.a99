@@ -1,0 +1,72 @@
+* Table of Script Routine Start Addresses
+script_routines_jmp_table:
+       data 0                                              ; (00) - Unused
+       data script_routine_01                              ; (01) - Load HL (Script Data Pointer) with New Address
+       data script_routine_02                              ; (02) - Move Entity at IX (and if Berk, Carried Entity) Left One Character
+       data script_routine_03                              ; (03) - Move Entity at IX (and if Berk, Carried Entity) Right One Character
+       data script_routine_04                              ; (04) - If Current Character and Target Entity are in the Same Room then Set Pending Sound
+       data 0                                              ; (05) - Unused
+       data script_routine_06                              ; (06) - Set Berk's Facing Into Screen Flag, and Reset his Facing Left and Facing Right flags
+       data script_routine_07                              ; (07) - Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags
+       data script_routine_08                              ; (08) - Set Must Process Current Script Data Flag for Entity at IX
+       data script_routine_09                              ; (09) - Reset Must Process Current Script Data Flag for Entity at IX
+       data script_routine_10                              ; (10) - Reset Entity's Walking Left and Walking Right flags
+       data script_routine_11                              ; (11) - Set Entity Walking Left Flag
+       data script_routine_12                              ; (12) - Set Entity Walking Right Flag
+       data script_routine_13                              ; (13) - Set Berk's Facing Left Flag, and Reset his Facing Into Screen and Facing Right Flags
+       data script_routine_14                              ; (14) - Set Berk's Facing Right Flag, and Reset his Facing Into Screen and Facing Left Flags
+       data script_routine_15                              ; (15) - Jump to New Address if Berk Is Carrying Something
+       data script_routine_16                              ; (16) - Have Berk Hold an Entity, and Position it Appropriately Between his Hands
+       data script_routine_17                              ; (17) - Have Berk Put Down an Entity in Front of Him, if Appropriate
+       data script_routine_18                              ; (18) - Have Berk Put Down an Entity Behind Him, if Appropriate
+       data script_routine_19                              ; (19) - Move Carried Entity to Berk's Left as he Faces Left
+       data script_routine_20                              ; (20) - Move Carried Entity to Berk's Right as he Faces Right
+       data script_routine_21                              ; (21) - Move Carried Entity in Front of Berk as he Faces Out of Screen
+       data script_routine_22                              ; (22) - Move Carried Entity Behind Berk as he Faces Into Screen
+       data script_routine_23                              ; (23) - Start Loop (1 / 3)
+       data script_routine_24                              ; (24) - End Loop (1 / 3)
+       data script_routine_25                              ; (25) - Start Loop (2 / 3)
+       data script_routine_26                              ; (26) - End Loop (2 / 3)
+       data script_routine_27                              ; (27) - Start Loop (3 / 3)
+       data script_routine_28                              ; (28) - End Loop (3 / 3)
+       data script_routine_29                              ; (29) - Make Berk Start Falling, and Drop his Carried Entity if Appropriate
+       data script_routine_30                              ; (30) - Check Berk's Fall Velocity, and React to Landing
+       data script_routine_31                              ; (31) - React to Berk's Landing
+       data script_routine_32                              ; (32) - Update Berk's Position and State (Flying) Depending Upon Control Input
+       data script_routine_33                              ; (33) - Advance Berk's Jump and Select Next Phase if Current Phase Complete
+       data script_routine_34                              ; (34) - Move Entity at IX (and if Berk, Carried Entity) Up One Character
+       data script_routine_35                              ; (35) - Move Entity at IX (and if Berk, Carried Entity) Down One Character
+       data script_routine_36                              ; (36) - Set Boni's Room (Level 1) to Zero
+       data script_routine_37                              ; (37) - Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing
+       data script_routine_38                              ; (38) - Close the Trap Door
+       data script_routine_39                              ; (39) - Open the Trap Door
+       data script_routine_40                              ; (40) - Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode
+       data script_routine_41                              ; (41) - Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait
+       data script_routine_42                              ; (42) - Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent
+       data script_routine_43                              ; (43) - Select Next Action for Drutt Depending Upon Control Input
+       data script_routine_44                              ; (44) - Move Entity Up One Character
+       data script_routine_45                              ; (45) - Move Entity Down One Character
+       data script_routine_46                              ; (46) - Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling
+                                                           ; if Appropriate
+       data script_routine_47                              ; (47) - Move Drutt, or Entity he is Pushing Right One Character and Start Pushed Entity
+                                                           ; Falling if Appropriate
+       data script_routine_48_49                           ; (48) - Return
+       data script_routine_48_49                           ; (49) - Return
+       data script_routine_50                              ; (50) - Advance Drutt's Jump and Select Next Phase if Current Phase Complete
+       data script_routine_51                              ; (51) - Swap Drutt's Current Depth Level if Possible
+       data script_routine_52                              ; (52) - Increase Worm's Age and Decrease Time Until Direction Change, or React to Drutt's
+                                                           ; Presence
+       data script_routine_53                              ; (53) - Move Worm Left if Possible, Otherwise Choose New Direction
+       data script_routine_54                              ; (54) - Move Worm Right if Possible, Otherwise Choose New Direction
+       data script_routine_55                              ; (55) - Choose New Direction and Start Crawling (Worm)
+       data script_routine_56                              ; (56) - Give Berk Power Corresponding to Entity Eaten
+       data script_routine_57                              ; (57) - Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside
+                                                           ; Current Room
+       data script_routine_58                              ; (58) - Have Berk Interact Appropriately with a Door in Front of Him
+       data script_routine_59                              ; (59) - Have Berk Interact Appropriately with a Door Behind Him
+       data script_routine_60                              ; (60) - Check Position of Apebeast and Turn If Appropriate
+       data script_routine_61                              ; (61) - Fire Bubo's Projectile
+       data script_routine_62                              ; (62) - Move Entity at IX into Room to the Left, if Appropriate
+       data script_routine_63                              ; (63) - Have Skeleton Advance or Retreat Based Upon Positions of Berk and Fake Boni
+       data script_routine_64                              ; (64) - Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
+

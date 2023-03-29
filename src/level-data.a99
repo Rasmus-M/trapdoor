@@ -61,17 +61,17 @@ _43188:
        byte 4,2,_50126%256,_50126/256,101,124                        ; (#R50126) Single arch, right
        byte 4,2,_50359%256,_50359/256,97,108                         ; (#R50359) Wall, vertical bricks, single row, left
        byte 4,2,_50359%256,_50359/256,97,123                         ; (#R50359) Wall, vertical bricks, single row, right
-       byte 5,1,240,195,121,100                                      ; (#R50126) Single arch
-       byte 6,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 5,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
+       byte 6,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
        byte 6,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
        byte 6,2,_50579%256,_50579/256,107,99                         ; (#R50579) Wall, horizontal bricks
        byte 7,1,_50238%256,_50238/256,121,94                         ; (#R50238) Left part of floor
        byte 7,1,_50211%256,_50211/256,121,126                        ; (#R50211) Right part of floor
        byte 7,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
-       byte 8,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 8,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
        byte 8,1,_50359%256,_50359/256,101,100                        ; (#R50359) Wall, vertical bricks, single row, left
        byte 8,1,_50359%256,_50359/256,101,131                        ; (#R50359) Wall, vertical bricks, single row, right
-       byte 9,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 9,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
        byte 9,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
        byte 9,2,_50609%256,_50609/256,111,123                        ; (#R50609) Row of five horizontal bricks
        byte 254                                                      ; End Marker

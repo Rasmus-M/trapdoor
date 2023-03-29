@@ -1449,7 +1449,7 @@ _37685:
        .ret                            ;                   
 !
        li   hl,_37800                  ; LD HL,37800       ; Point HL at script data for spider moving down...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Script Routine (41) Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait Input:  IX Address
 * of complex state data for an entity Output: HL  Address of next script instruction to execute
@@ -1457,7 +1457,7 @@ script_routine_41:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of bottom of entity IX (spider) is not 106...
        cb   a,@bytes+106               ; CP 106            ; ...
        jeq  !                          ; JP NZ,48541       ; ...then move entity up one character and return
-       b    @script_routine_34                    ;                   
+       b    @script_routine_34         ;
 !
        movb @bytes+20,@c               ; LD C,20           ; Load C with 20
        movb @8(ix),a                   ; LD A,(IX+8)       ; If entity class is not 27 (right-most spider, Level 1)...
@@ -1466,14 +1466,14 @@ script_routine_41:
 * The following code affects the behaviour of the right-most spider depending upon how many times Berk has been
 * killed by a spider. See (trivia) and (pokes).
        movb @_34223,a                  ; LD A,(34223)      ; Load number of times Berk has been killed by a spider into A...
-       srl  a,1                        ; SRL A             ; ...and divide by four, discarding remainder...
-       srl  a,1                        ; SRL A             ; ...
+       srl  a,2                        ; SRL A             ; ...and divide by four, discarding remainder...
+                                       ; SRL A             ; ...
        ab   @c,a                       ; ADD A,C           ; Add this value to C, in C...
        movb a,@c                       ; LD C,A            ; ...
 _37744:
        movb @c,@12(ix)                 ; LD (IX+12),C      ; Load spider's timer with this value
        li   hl,_37792                  ; LD HL,37792       ; Point HL at script data for spider waiting...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Script Routine (42) Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent Input:  IX
 * Address of complex state data for an entity Output: HL  Address of next script instruction to execute
@@ -1484,13 +1484,13 @@ script_routine_42:
        b    @inct_execute_script                    ;                   
 !
        movb @12(ix),a                  ; LD A,(IX+12)      ; If Spider's timer is zero...
-       socb a,a                        ; OR A              ; ...
+                                       ; OR A              ; ...
        jeq  _37772                     ; JR Z,37772        ; ...then skip ahead to #R37772
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease remaining time on spider's timer
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 _37772:
        li   hl,_37800                  ; LD HL,37800       ; Point HL at script data for spider moving down...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Script Routine (40) Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode Input:
 * IX  Address of complex state data for an entity Output: HL  Address of next script instruction to execute
@@ -1498,10 +1498,10 @@ script_routine_40:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If entity's bottom y-coordinate is less than 119...
        cb   a,@bytes+119               ; CP 119            ; ...
        jhe  !                          ; JP C,48567        ; ...then move entity down one character and process next script data
-       b    @script_routine_35                    ;                   
+       b    @script_routine_35         ;
 !
        li   hl,_37816                  ; LD HL,37816       ; Point HL at script data for bounce / climb up mode...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Update States of All Level 2 Entities
 * 
@@ -3536,345 +3536,6 @@ self_mod_instr_2:
 ;       b    0                          ; JP 0              ;
 
 
-* Graphic Layout Routine (237) Set New Pending Sound Input:  IX  Address of first parameter in current graphic
-* layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_237:
-       movb *ix,a                      ; LD A,(IX+0)       ; Load current byte of graphic layout data into A
-       .call @request_sound            ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inc_and_process_data      ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
-
-* Graphic Layout Routine (242) Set Current Attribute Input:  IX  Address of first parameter in current graphic
-* layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_242:
-       movb *ix,a                      ; LD A,(IX+0)       ; Load current byte of graphic layout data...
-       movb a,@current_attr            ; LD (34270),A      ; ...and set as current Attribute
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inc_and_process_data      ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
-
-* Graphic Layout Routine (244) Set Current Graphic Set Index Input:  IX  Address of first parameter in current
-* graphic layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_244:
-       movb *ix,a                      ; LD A,(IX+0)       ; Load current byte of graphic layout data...
-       movb a,@graphic_set_index       ; LD (34268),A      ; ...and set as current Graphic Set Index
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inc_and_process_data      ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
-
-* Graphic Layout Routine (236) Set Graphic Index in Next Instruction to Value Randomly Selected from List
-* 
-* Read Current Byte (n, random number cap), generate random number m (1 to n inclusive) and copy the m-th byte in
-* following list into position after end of list bytes (i.e. the graphic index field of the next graphic layout data
-* entry), then advance current position to this location. Input:  IX  Address of first parameter in current graphic
-* layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX  Address of next graphic
-* layout data instruction to process
-graphics_routine_236:
-       .push ix                        ; PUSH IX           ; Store current position in graphic layout data
-       movb *ix,a                      ; LD A,(IX+0)       ; Load current byte (Random Number Cap) from graphic layout data into A...
-       movb a,@e                       ; LD E,A            ; ...and copy into E
-       bl   @rnd_no                    ; CALL 54222        ; Load BC with a random number, 1-A...
-       ab   one,a                      ; INC A             ; ...
-       movb a,@c                       ; LD C,A            ; ...
-       sb   b,b                        ; LD B,0            ; ...
-       a    bc,ix                      ; ADD IX,BC         ; Advance IX by number of bytes stored in BC
-       movb *ix,a                      ; LD A,(IX+0)       ; Load byte at this location into A
-       .pop ix                         ; POP IX            ; Restore previous position in graphic layout data
-       movb @e,@c                      ; LD C,E            ; Load Random Number Cap into BC...
-       ab   one,@c                     ; INC C             ; ...and add one
-       a    bc,ix                      ; ADD IX,BC         ; Advance IX by this number of bytes
-       movb a,*ix                      ; LD (IX+0),A       ; Store byte previously read at current position
-       b    @process_data_in_ix        ; JP 46003          ; Read / process data at address in IX
-
-* Graphic Layout Routine (245) Decrease Timer Value, and if Zero, Reset and Write Random Graphic Index from List
-* into Next Instruction
-* 
-* Decrease timer value (1st parameter). If now zero, then reset timer to value in 2nd parameter, then load one of
-* the n (3rd parameter) following values chosen at random into the Graphic Index field of the next instruction.
-* Input:  IX  Address of first parameter in current graphic layout data instruction Output: B  Do Not Recalculate
-* Display Buffer Address Flag (0) IX  Address of next graphic layout data instruction to process
-graphics_routine_245:
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       sb   one,*ix                    ; DEC (IX+0)        ; Decrease timer value
-       jne  _46370                     ; JR NZ,46370       ; If timer is not zero, then advance IX to start of next instruction and process
-       bl  @reset_timer                ; CALL 46385        ; Reset timer to maximum, advance IX to start of next instruction and set value here (graphic
-                                                           ; index) to random value from sequence of data following previous instruction...
-       movb @e,*ix                     ; LD (IX+0),E       ; ...
-       b    @process_data_in_ix        ; JP 46003          ; Read / process data at address in IX
-
-* Graphic Layout Routine (246) Decrease Timer Value, and if Zero, Reset and Write Random Attribute from List into
-* Next Instruction
-* 
-* Decrease timer value (1st parameter). If now zero, then reset timer to value in 2nd parameter, then load one of
-* the n (3rd parameter) following values chosen at random into the Attribute field of the next instruction. Input:
-* IX  Address of first parameter in current graphic layout data instruction Output: B  Do Not Recalculate Display
-* Buffer Address Flag (0) IX  Address of next graphic layout data instruction to process
-graphics_routine_246:
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       sb   one,*ix                    ; DEC (IX+0)        ; Decrease timer value
-       jeq  _46376                     ; JR Z,46376        ; If timer is zero, then reset timer, advance to next instruction and set that instruction's
-                                                           ; attribute to random value from sequence
-* This entry point is used by the routine at #R46347.
-_46370:
-       bl   @reset_timer_1             ; CALL 46409        ; Advance to next instruction and process...
-       b    @process_data_in_ix        ; JP 46003          ; ...
-_46376:
-       bl   @reset_timer               ; CALL 46385        ; Reset timer to maximum, advance IX to start of next instruction and set second value here
-                                                           ; (attribute) to random value from sequence of data following previous instruction...
-       movb @e,@1(ix)                  ; LD (IX+1),E       ; ...
-       b    @process_data_in_ix        ; JP 46003          ; Read / process data at address in IX
-
-* Reset Timer to Initial Value then Load E with Random Value from Sequence (in Graphic Layout Data)
-* 
-* Used by the routines at #R46347 and #R46363. Input:  B  Always zero IX  Current address in graphic layout data
-reset_timer:
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Set current timer value to maximum...
-       movb a,*ix                      ; LD (IX+0),A       ; ...
-       movb @2(ix),a                   ; LD A,(IX+2)       ; Load A with number of states
-       bl   @rnd_no                    ; CALL 54222        ; Set C to a random number between 3 and (number of states + 2)...
-       ab   @bytes+3,a                 ; ADD A,3           ; ...
-       movb a,@c                       ; LD C,A            ; ...
-       .push ix                        ; PUSH IX           ; Store IX (current position in graphic layout data)
-       a    bc,ix                      ; ADD IX,BC         ; Advance IX by C bytes (BC = C, as B = 0)
-       movb *ix,@e                     ; LD E,(IX+0)       ; Load E with value at this position
-       .pop ix                         ; POP IX            ; Restore IX (old position in graphic layout data)
-* This entry point is used by the routine at #R46363.
-reset_timer_1:
-       movb @2(ix),a                   ; LD A,(IX+2)       ; Advance IX by number of states + 3 bytes to arrive at start of next data...
-       ab   @bytes+3,a                 ; ADD A,3           ; ...
-       movb a,@c                       ; LD C,A            ; ...
-       a    bc,ix                      ; ADD IX,BC         ; ...
-       rt                              ; RET               ; Return
-
-* Graphic Layout Routine (255) Load HL with Stored Coordinates from 34281 and Return from Drawing
-* 
-* Note that when returning from another block of graphic layout data, the Current Attribute stored at #R34270 (and
-* set in the called block) is not preserved. Upon returning, the Current Attribute value is cleared. Output: B  Do
-* Not Recalculate Display Buffer Address Flag (0) H  Current x-coordinate L  Current y-coordinate
-graphics_routine_255:
-       sb   a,a                        ; XOR A             ; Set Current Attribute to zero...
-       movb a,@current_attr            ; LD (34270),A      ; ...
-       mov  @draw_coordinates,hl       ; LD HL,(34281)     ; Load HL with base x- and y-coordinates
-       swpb hl                         ; Little endian
-       movb a,b                        ; LD B,A            ; Set B to zero
-       .ret                            ; RET               ; Return
-
-* Graphic Layout Routine (250) Adjust x- and y-Coordinates for Drawing Without Storing
-* 
-* Read following two bytes in graphic layout data and adjust y- and x-coordinates by these amounts respectively,
-* without storing. These new coordinates will be lost on the next draw operation, being overwritten by the values
-* stored at #R34281. Input:  IX  Address of first parameter in current graphic layout data instruction Output: B  Do
-* Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_250:
-       movb *ix,a                      ; LD A,(IX+0)       ; Read delta-y into A...
-       ab   @l,a                       ; ADD A,L           ; ...and adjust y-coordinate by this amount...
-       movb a,@l                       ; LD L,A            ; ...
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Read delta-x into A...
-       ab   h,a                        ; ADD A,H           ; ...and adjust x-coordinate by this amount...
-       movb a,h                        ; LD H,A            ; ...
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
-
-* Graphic Layout Routine (254) Adjust x- and y-Coordinates for Drawing and Set as New Base Coordinates
-* 
-* Read following two bytes in graphic layout data and adjust y- and x-coordinates by these amounts respectively,
-* storing at #R34281 as base coordinates. These new coordinates will be used as the starting position on the next
-* draw operation. Input:  H  Current x-coordinate L  Current y-coordinate IX  Address of first parameter in current
-* graphic layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_254:
-       movb *ix,a                      ; LD A,(IX+0)       ; Read delta-y into A...
-       ab   @l,a                       ; ADD A,L           ; ...and adjust y-coordinate by this amount...
-       movb a,@l                       ; LD L,A            ; ...
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Read delta-x into A...
-       ab   h,a                        ; ADD A,H           ; ...and adjust x-coordinate by this amount...
-       movb a,h                        ; LD H,A            ; ...
-       swpb hl                         ; Big endian
-       mov  hl,@draw_coordinates       ; LD (34281),HL     ; Store new coordinates at #R34281
-       swpb  hl                        ; Little endian
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
-
-* Graphic Layout Routine (251) Process Graphic Layout Data at Following Address and Return When Complete
-* 
-* Functionally equivalent to "CALL" instruction. Read current WORD (address) from graphic layout data, load graphic
-* layout data at that address into Primary Display Buffer and return to previous position. Upon returning (via
-* routine at #R46418 when a 255 is encountered), the position of the cursor (i.e. the value in HL) is reset to the
-* base coordinates as stored at #R34281 - see instruction at #R46422. Input:  IX  Address of first parameter in
-* current graphic layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_251:
-       movb *ix,@c                     ; LD C,(IX+0)       ; Load BC with destination graphic layout data address...
-       movb @1(ix),b                   ; LD B,(IX+1)       ; ...
-       .push ix                        ; PUSH IX           ; Store IX (current position in graphic layout data)
-       mov  bc,ix                      ; PUSH BC           ; Transfer address just read into BC into IX...
-                                       ; POP IX            ; ...
-       .call @process_data_in_ix       ; CALL 46003        ; Load graphic layout data from this new location into Primary Display Buffer (recursive call)
-       .pop ix                         ; POP IX            ; Restore IX (previously stored position in graphic layout data)
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
-
-* Graphic Layout Routine (248) Jump to Graphic Layout Data Address
-* 
-* Read current WORD (address) from graphic layout data and move graphic layout data Pointer to this address. Input:
-* IX  Address of first parameter in current graphic layout data instruction Output: B  Do Not Recalculate Display
-* Buffer Address Flag (0) IX  Address of next graphic layout data instruction to process
-graphics_routine_248:
-       movb *ix,@c                     ; LD C,(IX+0)       ; Load next two bytes as a WORD into IX...
-       movb @1(ix),b                   ; LD B,(IX+1)       ; ...
-       mov  bc,ix                      ; PUSH BC           ; ...
-                                       ; POP IX            ; ...
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @process_data_in_ix        ; JP 46003          ; Read / process data at address in IX
-
-* Graphic Layout Routine (249) Jump to Time-Weighted, Randomly Selected Graphic Layout Data Address in List Input:
-* IX  Address of first parameter in current graphic layout data instruction Output: B  Do Not Recalculate Display
-* Buffer Address Flag (0) IX  Address of next graphic layout data instruction to process
-graphics_routine_249:
-       .push ix                        ; PUSH IX           ; Store IX (pointer to first parameter in graphic layout data)
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with current state number
-       ab   a,a                        ; ADD A,A           ; Multiply A by four and add two...
-       ab   a,a                        ; ADD A,A           ; ...to give number of bytes of data to skip over...
-       ab   @bytes+2,a                 ; ADD A,2           ; ...
-       movb a,@c                       ; LD C,A            ; Load BC with value in A...
-       sb   b,b                        ; LD B,0            ; ...
-       a    bc,ix                      ; ADD IX,BC         ; ...and add to IX to advance to start of data for current state
-       sb   one,*ix                    ; DEC (IX+0)        ; Decrease the timer value for this state...
-       jne  _46544                     ; JR NZ,46544       ; ...and if not zero, skip ahead to #R46544
-       .pop ix                         ; POP IX            ; Restore (pointer to first parameter in graphic layout data)
-       movb *ix,a                      ; LD A,(IX+0)       ; Load A with random number...
-       bl   @rnd_no                    ; CALL 54222        ; ...from zero to one less than number of states...
-       movb a,@1(ix)                   ; LD (IX+1),A       ; ...and set this as the index of the current state
-       ab   a,a                        ; ADD A,A           ; Multiply A by four and add two...
-       ab   a,a                        ; ADD A,A           ; ...to give number of bytes of data to skip over...
-       ab   @bytes+2,a                 ; ADD A,2           ; ...
-       movb a,@c                       ; LD C,A            ; Load BC with value in A
-       a    bc,ix                      ; ADD IX,BC         ; Advance IX to start of data for (new) current state
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with random number...
-       bl   @rnd_no                    ; CALL 54222        ; ...from one to maximum timer value for state...
-       ab   one,a                      ; INC A             ; ...
-       movb a,*ix                      ; LD (IX+0),A       ; ...and set as current timer value for this state
-       jmp  _46545                     ; JR 46545          ; Skip ahead to #R46545
-_46544:
-       .pop bc                         ; POP BC            ; Restore BC (graphic layout data position, was previously in IX)
-_46545:
-       movb @2(ix),@c                  ; LD C,(IX+2)       ; Load IX with graphic layout data address...
-       movb @3(ix),b                   ; LD B,(IX+3)       ; ...in current state's data...
-       .push bc                        ; PUSH BC           ; ...
-       .pop ix                         ; POP IX            ; ...
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @process_data_in_ix                    ; JP 46003          ; Read / process data at address in IX
-
-* Graphic Layout Routine (243) Increment Index, n, and Jump to n-th Address in Following List
-* 
-* Read first parameter (n) from graphic layout data, increment (resetting to zero if it is equal to the length of
-* the list of addresses as specified by the second parameter) and jump to n-th address. Input:  IX  Address of first
-* parameter in current graphic layout data instruction Output: A  Number of bytes in graphic layout data to skip
-* over
-graphics_routine_243:
-       movb *ix,a                      ; LD A,(IX+0)       ; Load current byte of graphic layout data into A
-       ab   one,a                      ; INC A             ; Increase by one
-       cb   a,@1(ix)                   ; CP (IX+1)         ; If following byte (cap value) is greater than current byte...
-       jl   _46569                     ; JR C,46569        ; ...then skip ahead to #R46569
-       sb   a,a                        ; XOR A             ; Reset current value to zero as cap value reached
-_46569:
-       movb a,*ix                      ; LD (IX+0),A       ; Load current value back into current position in graphic layout data
-       ab   a,a                        ; ADD A,A           ; Load double current value + 2 (as we're skipping over first two bytes and subsequent data are
-                                                           ; WORD addresses) into A...
-       ab   @bytes+2,a                 ; ADD A,2           ; ...
-       jmp  _46586                     ; JR 46586          ; Jump to #R46586
-
-* Graphic Layout Routine (247) Jump to Randomly Selected Graphic Layout Data Address from List
-* 
-* Read current byte value (n) from graphic layout data, generate random number m (0 - n-1) then jump to address in
-* m-th WORD after current position. Input:  A  (Entry at #R46585) Number of words in graphic layout data to skip
-* over A  (Entry at #R46586) Number of bytes in graphic layout data to skip over IX  Address of first parameter in
-* current graphic layout data instruction Output: IX  Address of next graphic layout data instruction to process
-graphics_routine_247:
-       movb *ix+,a                     ; LD A,(IX+0)       ; Load current byte of graphic layout data into A
-                                       ; INC IX            ; Advance pointer to next byte
-       bl   @rnd_no                    ; CALL 54222        ; Load A with a random number between 0 and (A-1)
-* This entry point is used by the routine at #R46594.
-_46585:
-       ab   a,a                        ; ADD A,A           ; Double the number
-* This entry point is used by the routine at #R46559.
-_46586:
-       movb a,@c                       ; LD C,A            ; Load BC with offset value in A...
-       sb   b,b                        ; LD B,0            ; ...
-       a    bc,ix                      ; ADD IX,BC         ; Advance IX by offset value
-       b    @graphics_routine_248      ; JP 46481          ; Jump to #R46481 (set current position in graphic layout data to value of WORD at this
-                                                           ; address)
-
-* Graphic Layout Routine (253) Jump to Graphic Layout Data Address Selected from List, Based Upon Width of Berk's
-* Carried Entity Output: A  Number of words in graphic layout data to skip over
-graphics_routine_253:
-       movb @carried_entity_width,a                  ; LD A,(34272)      ; Load A with width of entity (characters) carried by Berk, minus 1
-       jmp  _46585                     ; JR 46585          ; Set current position in graphic layout data to value of A-th word in list
-
-* Unused routine
-* 
-* Graphic layout routine (252): if Berk is holding nothing then jump to address. Input:IX Address of first parameter
-* in current graphic layout data instruction Output:B Do Not Recalculate Display Buffer Address Flag (0)
-graphics_routine_252:
-       movb @_34221,a                  ; LD A,(34221)      ; If Berk is not holding anything...
-                                       ; OR A              ; ...
-       jne  !                          ; JP Z,46481        ; ...then jump to #R46481 (set current position in graphic layout data to value of WORD at this
-       b    @graphics_routine_248                    ;
-!
-                                                           ; address)
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @inct_and_process_data     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
-
-* Graphic Layout Routine (238) Start Loop (1 / 2)
-* 
-* Start a loop in graphic layout data. The parameter is the repeat count. The current value of the repeat counter is
-* stored at #R34274 and the address of the next instruction (i.e. the first instruction that is processed in each
-* loop) is stored at #R34294. Input:  IX  Address of first parameter in current graphic layout data instruction
-* Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX  Address of next graphic layout data instruction
-* to process
-graphics_routine_238:
-       movb *ix+,a                     ; LD A,(IX+0)       ; Load current byte of graphic layout data...
-       movb a,@loop_counter_value_1    ; LD (34274),A      ; ...into #R34274 (repeat counter)
-                                       ; INC IX            ; Advance IX to next position in graphic layout data...
-       mov  ix,@loop_address           ; LD (34294),IX     ; ...and store at #R34294
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @process_data_in_ix        ; JP 46003          ; Read / process data at address in IX
-
-* Graphic Layout Routine (239) End Loop (1 / 2) Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX
-* Address of next graphic layout data instruction to process
-graphics_routine_239:
-       movb @loop_counter_value_1,a    ; LD A,(34274)      ; Decrement repeat counter...
-       sb   one,a                      ; DEC A             ; ...
-       movb a,@loop_counter_value_1    ; LD (34274),A      ; ...
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       movb a,a
-       jeq  !                          ; JP Z,46003        ; If repeat counter is zero, then exit loop and process subsequent bytes...
-       mov  @loop_address,ix           ; LD IX,(34294)     ; ...else, restore stored position in graphic layout data (start of loop)...
-!      b    @process_data_in_ix        ; JP 46003          ; ...and continue processing data from this point
-
-* Graphic Layout Routine (240) Start Loop (2 / 2)
-* 
-* Start a loop in graphic layout data. The parameter is the repeat count. The current value of the repeat counter is
-* stored at #R34275 and the address of the next instruction (i.e. the first instruction that is processed in each
-* loop) is stored at #R34296. Input:  IX  Address of first parameter in current graphic layout data instruction
-* Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX  Address of next graphic layout data instruction
-* to process
-graphics_routine_240:
-       movb *ix+,a                     ; LD A,(IX+0)       ; Load current byte of graphic layout data...
-       movb a,@loop_counter_value_2    ; LD (34275),A      ; ...into #R34275 (repeat counter)
-                                       ; INC IX            ; Advance IX to next position in graphic layout data...
-       mov  ix,@loop_start             ; LD (34296),IX     ; ...and store at #R34296
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       b    @process_data_in_ix        ; JP 46003          ; Read / process data at address in IX
-
-* Graphic Layout Routine (241) End Loop (2 / 2) Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX
-* Address of next graphic layout data instruction to process
-graphics_routine_241:
-       movb @loop_counter_value_2,a    ; LD A,(34275)      ; Decrement repeat counter...
-       sb   one,a                      ; DEC A             ; ...
-       movb a,@loop_counter_value_2    ; LD (34275),A      ; ...
-       sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
-       movb a,a
-       jeq  !                          ; JP Z,46003        ; If repeat counter is zero, then exit loop and process subsequent bytes...
-       mov  @loop_start,ix             ; LD IX,(34296)     ; ...else, restore stored position in graphic layout data (start of loop)...
-!      b    @process_data_in_ix        ; JP 46003          ; ...and continue processing data from this point
-
 * Display and Handle Main Menu
 * 
 * Used by the routine at #R34438.
@@ -4784,9 +4445,9 @@ script_routine_18:
 * This entry point is used by the routine at #R48154.
 _48160:
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If Berk's Carrying Something Flag is reset...
-       andi tmp0,16*256                ;                   
+       andi tmp0,16*256                ;
        jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
+       .ret                            ;
 !
 * Berk is carrying something
        szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
@@ -4817,7 +4478,7 @@ _48198:
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (10) Reset Walking Left and Walking Right Flags
-* 
+*
 * Used by the routine at #R36542. Output: E  Combination of flags to (re)set
 script_routine_10:
        movb @bytes+0,@e                ; LD E,0            ; Reset Entity Walking Left and Entity Walking Right flags...
@@ -4889,28 +4550,28 @@ script_routine_15:
        inc  hl                         ; INC HL            ; Advance HL to parameter for current instruction...
        inc  hl                         ; INC HL            ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If Berk is carrying an entity...
-       andi tmp0,16*256                ;                   
+       andi tmp0,16*256                ;
        jne  _48287                     ; JR NZ,48287       ; ...then read parameter address into HL and execute next script instruction at that address
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (01) Load HL (Script Data Pointer) with New Address
-* 
+*
 * Functionality analogous to JP instruction. Input:  HL  Address in script data Output: HL  New address in script
 * data
 script_routine_01:
-       inc  hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
-       inc  hl                         ; INC HL            ; ...
+       inct hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
+                                       ; INC HL            ; ...
 * This entry point is used by the routine at #R48274.
 _48287:
-       movb *hl,@c                     ; LD C,(HL)         ; Read WORD at this location into HL...
-       inc  hl                         ; INC HL            ; ...(i.e. update Script Data Pointer to this address)...
+       movb *hl+,@c                    ; LD C,(HL)         ; Read WORD at this location into HL...
+                                       ; INC HL            ; ...(i.e. update Script Data Pointer to this address)...
        movb *hl,b                      ; LD B,(HL)         ; ...
-       .push bc                        ; PUSH BC           ; ...
-       .pop hl                         ; POP HL            ; ...
+       mov  bc,hl                      ; PUSH BC           ; ...
+                                       ; POP HL            ; ...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (23) Start Loop (1 / 3)
-* 
+*
 * Start a loop in script data. The first of the following two bytes is the repeat count and the second is
 * disregarded. The current value of the repeat counter is stored at #R34285 and the address of the next instruction
 * (i.e. the first instruction that is processed in each loop) is stored at #R34285. Output: HL  Address of next
@@ -4926,7 +4587,7 @@ script_routine_24:
        movb @script_23_24_loop_count,a ; LD A,(34285)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script                    ;
 !
        sb   one,a                      ; DEC A             ; Decrease repeat count...
        movb a,@script_23_24_loop_count ; LD (34285),A      ; ...and store
@@ -4934,7 +4595,7 @@ script_routine_24:
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (25) Start Loop (2 / 3)
-* 
+*
 * Start a loop in script data. The first of the following two bytes is the repeat count and the second is
 * disregarded. The current value of the repeat counter is stored at #R34288 and the address of the next instruction
 * (i.e. the first instruction that is processed in each loop) is stored at #R34288. Output: HL  Address of next
@@ -4958,7 +4619,7 @@ script_routine_26:
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
 * Script Routine (27) Start Loop (3 / 3)
-* 
+*
 * Start a loop in script data. The first of the following two bytes is the repeat count and the second is
 * disregarded. The current value of the repeat counter is stored at #R34291 and the address of the next instruction
 * (i.e. the first instruction that is processed in each loop) is stored at #R34291. Output: HL  Address of next
@@ -4974,7 +4635,7 @@ script_routine_28:
        movb @script_27_28_loop_count,a ; LD A,(34291)      ; Load A with current repeat count
        socb a,a                        ; OR A              ; If repeat count is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script                    ;
 !
        sb   one,a                      ; DEC A             ; Decrease repeat count...
        movb a,@script_27_28_loop_count ; LD (34291),A      ; ...and store
@@ -5060,7 +4721,7 @@ _48474:
        .ret                            ; RET               ; Return
 
 * Script Routine (32) Update Berk's Position and State (Flying) Depending Upon Control Input
-* 
+*
 * See pokes Input:  IX  (Entry at #R48487 only) Address of complex state data (current level) for Berk IX  (Entry at
 * #R48541 only) Address of complex state data for an entity Output: HL  Address of next script instruction to
 * execute
@@ -5081,14 +4742,14 @@ _48507:
        jhe  _48527                     ; JR NC,48527       ; ...then skip ahead to #R48527
        movb @control_input,a                  ; LD A,(34219)      ; Load A with control input
        movb a,tmp0                     ; BIT 0,A           ; If right pressed...
-       andi tmp0,1*256                 ;                   
+       andi tmp0,1*256                 ;
        jeq  !                          ; JP NZ,48593       ; ...then move Berk right one character, and into new room if appropriate
-       b    @_48593                    ;                   
+       b    @_48593                    ;
 !
        movb a,tmp0                     ; BIT 1,A           ; If left pressed...
-       andi tmp0,2*256                 ;                   
+       andi tmp0,2*256                 ;
        jeq  !                          ; JP NZ,48641       ; ...then move Berk left one character, and into new room if appropriate
-       b    @_48641                    ;                   
+       b    @_48641                    ;
 !
 _48527:
        equ  $
@@ -5105,7 +4766,7 @@ script_routine_34:
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Decrease y-coordinates of entity's top and bottom edges by one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity is Berk and his Carrying Something Flag is reset...
-       andi tmp0,16*256                ;                   
+       andi tmp0,16*256                ;
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
@@ -5115,13 +4776,13 @@ script_routine_34:
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (35) Move Entity at IX (and if Berk, Carried Entity) Down One Character
-* 
+*
 * Used by the routine at #R37778. Input:  IX  Address of complex state data for an entity
 script_routine_35:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Increase y-coordinates of entity's top and bottom edges by one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity is Berk and his Carrying Something Flag is reset...
-       andi tmp0,16*256                ;                   
+       andi tmp0,16*256                ;
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
