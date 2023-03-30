@@ -3269,9 +3269,7 @@ jump_to_graphics_routine:
                                        ; POP HL            ; Restore HL
 * The operand of the instruction at #R46241 represents the addresses of the required graphic layout data handling
 * routine. This is modified by the instruction at #R46232.
-self_mod_instr_2:
 ;       b    0                          ; JP 0              ;
-
 
 * Display and Handle Main Menu
 * 
@@ -4110,7 +4108,7 @@ wait_keypress:
 ;       .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
 ;       .push af                        ; PUSH AF           ; Store AF (A = last pressed key)
 ;       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
-;       bl   @request_sound_a                   ; CALL 59722        ; ...
+;       bl   @request_sound_a           ; CALL 59722        ; ...
 ;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
        .endproc                        ; RET               ; Return
 
@@ -4130,10 +4128,10 @@ inct_execute_script:                   ; Always branch here
 * #R48307, #R48324, #R48336, #R48353, #R48365, #R48388, #R48934, #R48976, #R49010, #R51765, #R51779, #R51904,
 * #R51924, #R51944, #R51954, #R51960, #R52053, #R52148, #R52243, #R52908, #R52914, #R52967 and #R53083.
 execute_script:                        ; Always branch here
-       inc  hl                         ; INC HL            ; Advance Script Data Pointer by one byte
-       movb *hl,a                      ; LD A,(HL)         ; Load byte at this location into A
-       dec  hl                         ; DEC HL            ; Move HL back one byte
-       socb a,a                        ; OR A              ; If byte loaded into A was zero (i.e. a script instruction)...
+                                       ; INC HL            ; Advance Script Data Pointer by one byte
+       movb @1(hl),a                   ; LD A,(HL)         ; Load byte at this location into A
+                                       ; DEC HL            ; Move HL back one byte
+                                       ; OR A              ; If byte loaded into A was zero (i.e. a script instruction)...
        jeq  execute_script_1           ; JR Z,48117        ; ...then skip ahead to #R48117
 * HL pointing to a graphic layout data address, rather than a script instruction
        mov  hl,@current_script_addr    ; LD (34277),HL     ; Store address in HL at #R34277 as position in script currently running
@@ -4143,23 +4141,22 @@ execute_script:                        ; Always branch here
                                        ; INC HL            ; ...
        movb *hl,@3(ix)                 ; LD A,(HL)         ; ...
                                        ; LD (IX+3),A       ; ...
-       jmp  execute_script_2           ; RET               ; Return
+       .endproc                        ; RET               ; Return
 * HL pointing to a script instruction
 execute_script_1:
        movb *hl,a                      ; LD A,(HL)         ; Load script "instruction" into A
-       .push hl                        ; PUSH HL           ; Store HL (pointer to current position in script data)
-       li   hl,script_routines_jmp_table   ; LD HL,47966       ; Point HL at Table of Script Routine Start Addresses
+                                       ; PUSH HL           ; Store HL (pointer to current position in script data)
+                                       ; LD HL,47966       ; Point HL at Table of Script Routine Start Addresses
        ab   a,a                        ; ADD A,A           ; Load double index of script instruction into BC...
-       clr  bc                         ; LD C,A            ; ...
-       movb a,@c                       ; LD B,0            ; ...
-       a    bc,hl                      ; ADD HL,BC         ; ...and add as offset in HL to point to start address of required script routine
-       mov  *hl,bc                     ; LD C,(HL)         ; Load address at this location into BC...
+       movb a,@c                       ; LD C,A            ; ...
+       sb   b,b                        ; LD B,0            ; ...
+                                       ; ADD HL,BC         ; ...and add as offset in HL to point to start address of required script routine
+       mov  @script_routines_jmp_table(bc),bc ; LD C,(HL)         ; Load address at this location into BC...
                                        ; INC HL            ; ...
                                        ; LD B,(HL)         ; ...
-       .pop hl                         ; POP HL            ; Restore HL (pointer to current position in script data)
-       .push bc                        ; PUSH BC           ; Push address in BC onto stack...
-execute_script_2:
-       .endproc                        ; RET               ; ...and RET to this address
+                                       ; POP HL            ; Restore HL (pointer to current position in script data)
+                                       ; PUSH BC           ; Push address in BC onto stack...
+       b    *bc                        ; RET               ; ...and RET to this address
 
 *********************************************************************************
 * Decrease Remaining Time for Current Power and if Zero, Exit Calling Routine and Run Script Data for Removal of
