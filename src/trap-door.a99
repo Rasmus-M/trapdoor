@@ -4210,28 +4210,6 @@ _48474:
        .pop ix                         ; POP IX            ; Restore IX
        .ret                            ; RET               ; Return
 
-* Load A, D and E with Positional Data for a Carried Entity or Return
-* 
-* Used by the routines at #R48710, #R48715, #R48727 and #R48738. Input:  IX  Address of complex state data for an
-* entity Output: A  Width of carried entity (characters) minus 1, divided by two D  Depth of entity at IX (Berk) E
-* Width of carried entity (characters) minus 1 IY  Address of complex state data for entity held by Berk
-load_carried_item_data:
-       movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If entity IX is Berk and his Carrying Something Flag is set...
-       andi tmp0,16*256                ;                   
-       jne  load_carried_item_data_1                     ; JR NZ,48768       ; ...then skip ahead to #R48768
-       .pop bc                         ; POP BC            ; Pop top value (return address) off stack...
-       .ret                            ; RET               ; ...and return to routine that called the calling routine
-load_carried_item_data_1:
-       mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity held by Berk
-       movb *ix,a                      ; LD A,(IX+0)       ; Set this entity's room to be same as Berk's...
-       movb a,*iy                      ; LD (IY+0),A       ; ...
-       .call @position_carried_item_1                   ; CALL 48897        ; Move carried entity into vertical position appropriate to its height
-       movb @carried_entity_width,a                  ; LD A,(34272)      ; Load A and E with width of entity (characters) carried by Berk, minus 1...
-       movb a,@e                       ; LD E,A            ; ...
-       srl  a,1                        ; SRL A             ; Divide A by two, removing remainder
-       movb @1(ix),d                   ; LD D,(IX+1)       ; Load carried entity's depth into D
-       .ret                            ; RET               ; Return
-
 * Unused routine
 * 
 * Assuming that IX and IY contain the addresses of two entities' complex state data, this routine will position the
