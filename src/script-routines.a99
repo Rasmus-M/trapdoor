@@ -459,7 +459,7 @@ script_routine_20:
 script_routine_29:
        movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set Berk's initial velocity factor to 2
        socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
-       .call @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       bl   @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (30) Check Berk's Fall Velocity, and React to Landing
@@ -505,7 +505,7 @@ _48988:
 * Script Routine (33) Advance Berk's Jump and Select Next Phase if Current Phase Complete Output: HL  Address of
 * next script instruction to execute
 script_routine_33:
-       .call @_55041                   ; CALL 55041        ; Handle Berk's jump, and load A with Jump State Index as appropriate...
+       bl   @handle_berk_jump                   ; CALL 55041        ; Handle Berk's jump, and load A with Jump State Index as appropriate...
        movb @e,a                       ; LD A,E            ; ...
        socb a,a                        ; OR A              ; If Jump State Index is zero...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -708,7 +708,7 @@ script_routine_47:
 * The CALL at #R52243 will be RETurned from if Drutt's Is Jumping Flag is reset. Otherwise, E will be loaded with
 * Drutt's jump state index (see #R55041). Output: HL  Address of next script instruction to execute
 script_routine_50:
-       .call @_55023                   ; CALL 55023        ; Handle Drutt's jump, and load A with Jump State Index as appropriate
+       bl   @handle_drutt_jump        ; CALL 55023        ; Handle Drutt's jump, and load A with Jump State Index as appropriate
        movb @e,a                       ; LD A,E            ; If jump state index is zero...
        socb a,a                        ; OR A              ; ...
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -756,7 +756,7 @@ _52295:
 
 * Script Routine (51) Swap Drutt's Current Depth Level if Possible
 script_routine_51:
-       .call @swap_drutts_depth                   ; CALL 52315        ; Swap Drutt's current depth level if possible
+       bl   @swap_drutts_depth                   ; CALL 52315        ; Swap Drutt's current depth level if possible
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (53) Move Worm Left if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
@@ -792,7 +792,7 @@ _52908:
 * Script Routine (55) Choose New Direction and Start Crawling (Worm) Input:  IX  Address of complex state data for
 * an entity
 script_routine_55:
-       .call @increase_worms_age                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
+       bl   @increase_worms_age        ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
        movb @bytes+20,a                ; LD A,20           ; Load A with a random number, 5-24...
        bl   @rnd_no                    ; CALL 54222        ; ...
        ab   @bytes+5,a                 ; ADD A,5           ; ...
@@ -828,7 +828,7 @@ _52961:
 * and its Time Until Direction Change will be frozen. Input:  IX  Address of complex state data for an entity
 * Output: HL  Address of next script instruction to execute
 script_routine_52:
-       .call @increase_worms_age                   ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
+       bl   @increase_worms_age        ; CALL 53057        ; Increase Worm's Age and, if it has expired, set its depth to zero and return
        mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
        movb *ix,a                      ; LD A,(IX+0)       ; If Drutt and the worm are in the same room...
        cb   a,*iy                      ; CP (IY+0)         ; ...
@@ -840,10 +840,10 @@ _52982:
        socb a,a                        ; OR A              ; ...
        jeq  _52998                     ; JR Z,52998        ; ...then skip ahead to #R52998 (have worm choose new direction)
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease worm's Time Until Direction Change
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 _52998:
        li   hl,_52747                  ; LD HL,52747       ; Point HL at script data for worm, choosing next direction...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt and worm in same room, so worm potentially in danger
 _53004:
        movb @5(ix),a                   ; LD A,(IX+5)       ; Load A with x-coordinate of worm's left edge...
@@ -859,7 +859,7 @@ _53004:
 !
        socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set In Danger Flag
        li   hl,_52817                  ; LD HL,52817       ; Point HL at script data for worm, fleeing right...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt's left edge more than one character to the right of worm's left edge
 _53034:
        neg a                           ; NEG               ; If worm's left edge is 11 characters or more to the left of Drutt's...
@@ -872,7 +872,7 @@ _53034:
 !
        socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set In Danger Flag
        li   hl,_52797                  ; LD HL,52797       ; Point HL at script data for worm, fleeing left...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Script Routine (48, 49) Return
 *
@@ -894,21 +894,21 @@ script_routine_58:
                                                            ; control input
 * This entry point is used by the routine at #R36385.
 _36393:
-       mov  bc,@script_for_next_level                 ; LD (34266),BC     ; Store script data address in BC at #R34266
+       mov  bc,@script_for_next_level  ; LD (34266),BC     ; Store script data address in BC at #R34266
        movb @game_flags,a              ; LD A,(34208)      ; Load E with Game Flags...
        movb a,@e                       ; LD E,A            ; ...
-       movb @berk_entity_held,a                  ; LD A,(34221)      ; Load A with class of entity currently held by Berk...
+       movb @berk_entity_held,a        ; LD A,(34221)      ; Load A with class of entity currently held by Berk...
        cb   a,@bytes+17                ; CP 17             ; ... and if this is not 17 (Key)...
        jne  _36429                     ; JR NZ,36429       ; ...then skip ahead to #R36429
 * Berk is holding a key
        movb @bytes+7,a                 ; LD A,7            ; Set door colour to 7 (white, i.e. unlocked)...
        movb a,@_50711+1                ; LD (50712),A      ; ...
-       .call @drop_item                   ; CALL 36296        ; Make Berk drop the key and load IY with its complex state data address
+       bl   @drop_item                 ; CALL 36296        ; Make Berk drop the key and load IY with its complex state data address
        movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set depth of key to 0 (i.e. out of display)
        socb @bits+4,@e                 ; SET 4,E           ; Set Level Exit Door Unlocked Flag...
        movb @e,a                       ; LD A,E            ; ...
-       movb a,@game_flags                  ; LD (34208),A      ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       movb a,@game_flags              ; LD (34208),A      ; ...
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 * Berk is not holding a key
 _36429:
        movb @e,tmp0                    ; BIT 4,E           ; If Level Exit Door Unlocked Flag is reset...
@@ -929,40 +929,40 @@ _36448:
        jne  _36462                     ; JR NZ,36462       ; If Zero Flag is not set (i.e. Berk is not holding Drutt on Levels 1-3 or Boni on Level 4)
                                                            ; then skip ahead to #R36462
 * Berk is holding the correct character
-       .call @remove_current_power                   ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
+       bl   @remove_current_power      ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
                                                            ; original state
-       .call @next_level                   ; CALL 36638        ; Advance to next level and if back to Level 1 then exit this routine and make Berk start
+       bl   @next_level                ; CALL 36638        ; Advance to next level and if back to Level 1 then exit this routine and make Berk start
                                                            ; falling
 * New level is not Level 1
-       mov  @script_for_next_level,hl                 ; LD HL,(34266)     ; Load HL with script data address stored at #R34266...
+       mov  @script_for_next_level,hl  ; LD HL,(34266)     ; Load HL with script data address stored at #R34266...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Door is locked or Berk is not holding the correct character
 _36462:
-       .call @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (56) Give Berk Power Corresponding to Entity Eaten Input:  IX  Address of complex state data
 * (current level) for Berk
 script_routine_56:
-       .call @remove_current_power                   ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
+       bl   @remove_current_power      ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
                                                            ; original state
-       movb @berk_entity_held,a                  ; LD A,(34221)      ; Set current power value to class of entity currently held by Berk...
-       movb a,@berks_current_power                  ; LD (34220),A      ; ...
+       movb @berk_entity_held,a        ; LD A,(34221)      ; Set current power value to class of entity currently held by Berk...
+       movb a,@berks_current_power     ; LD (34220),A      ; ...
        sb   a,a                        ; XOR A             ; Set class of entity held by Berk to zero (i.e. none)...
-       movb a,@berk_entity_held                  ; LD (34221),A      ; ...
+       movb a,@berk_entity_held        ; LD (34221),A      ; ...
        movb a,@remaining_power_cycles  ; LD (34224),A      ; Set number of elapsed game-cycles in current block to zero
        szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
-       mov  @bert_held_state,iy                 ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk...
+       mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk...
        movb a,@1(iy)                   ; LD (IY+1),A       ; ...and set its depth to zero (i.e. outside room)
        movb @10(iy),a                  ; LD A,(IY+10)      ; Initialise remaining duration of power to value encoded entity's complex state data (bits
                                                            ; 0-4)...
        andi a,31*256                   ; AND 31            ; ...
        movb a,@remaining_power_groups  ; LD (34225),A      ; ...
-       movb @berks_current_power,a                  ; LD A,(34220)      ; If Berk's current power is not floating (Level 3)...
+       movb @berks_current_power,a     ; LD A,(34220)      ; If Berk's current power is not floating (Level 3)...
        cb   a,@bytes+10                ; CP 10             ; ...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;
+       b    @inct_execute_script       ;
 !
 * Power is floating
        movb @bytes+12,@12(ix)          ; LD (IX+12),12     ; Set distance Berk will be pushed by Drutt while floating to 12
@@ -978,7 +978,7 @@ _36536:
 
 * Script Routine (57) Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside Current Room
 script_routine_57:
-       .call @cycle_colors_and_refresh                   ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
+       bl   @cycle_colors_and_refresh  ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
                                                            ; room
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
@@ -998,12 +998,12 @@ script_routine_37:
 
 * Script Routine (38) Close the Trap Door
 script_routine_38:
-       .call @close_trap_door                   ; CALL 36996        ; Close the Trap Door
+       bl   @close_trap_door                   ; CALL 36996        ; Close the Trap Door
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 * Script Routine (39) Open the Trap Door
 script_routine_39:
-       .call @open_trap_door                   ; CALL 37004        ; Open the Trap Door
+       bl   @open_trap_door                   ; CALL 37004        ; Open the Trap Door
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 
@@ -1473,79 +1473,69 @@ move_pushed_item_right_4:
 *
 * Used by the routine at #R52309. Input:  IX  Address of complex state data (current level) for Drutt
 swap_drutts_depth:
+       .proc
        movb @1(ix),a                   ; LD A,(IX+1)       ; If Drutt's depth is not 1...
        cb   a,one                      ; CP 1              ; ...
-       jne  _52351                     ; JR NZ,52351       ; ...then skip ahead to #R52351
+       jne  swap_drutts_depth_2                     ; JR NZ,52351       ; ...then skip ahead to #R52351
 * Drutt's depth is 1
        movb @tmp_room_dim_data,a       ; LD A,(34230)      ; If Drutt's current depth is the same as number of available depth levels in current room...
        cb   a,@1(ix)                   ; CP (IX+1)         ; ...i.e. room has depth of 1...
-       jne  !                          ; RET Z             ; ...then return (as there is no other depth level for Drutt to move to)
-       .ret                            ;
-!
+       jeq  swap_drutts_depth_3        ; RET Z             ; ...then return (as there is no other depth level for Drutt to move to)
 * The following collision check is usually only satisfied by Berk. This prevents Drutt from jumping back a depth
 * level while in front of (at same depth level as) Berk.
        bl    @chk_coll_same_depth_rev  ; CALL 54878        ; Check Drutt for collision with another entity (only those defined before, and in reverse
                                                            ; order) at same depth level whose Interaction (11,7) Flag is set...
-       joc  !                          ; RET NC            ; ...and if a collision occurred, then return
-       .ret                            ;
-!
+       jnc  swap_drutts_depth_3        ; RET NC            ; ...and if a collision occurred, then return
 * The following collision check prevents Drutt from jumping back when there is an obstruction (e.g. the brick
 * columns in the pit room, level 1) behind him.
        bl   @chk_coll_next_depth_rev   ; CALL 54890        ; Check Drutt for collision with another entity (in reverse order) at next depth level into
                                                            ; screen whose Interaction (11,7) Flag is set...
-       joc  _52341                     ; JR C,52341        ; ...and if no collision occurred, then skip ahead to #R52341
+       joc  swap_drutts_depth_1        ; JR C,52341        ; ...and if no collision occurred, then skip ahead to #R52341
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of 22 or greater (can't be picked up)...
-       jl   !                          ; RET NC            ; ...then return
-       .ret                            ;
-!
-_52341:
+       jhe  swap_drutts_depth_3        ; RET NC            ; ...then return
+swap_drutts_depth_1:
        equ  $
        ab   one,@1(ix)                 ; INC (IX+1)        ; Increase Drutt's depth (i.e. move backward away from screen)
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Decrease Drutt's top and bottom y-coordinates...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       .ret                            ; RET               ; Return
+       jmp  swap_drutts_depth_3        ; RET               ; Return
 * Drutt's depth is not 1
-_52351:
+swap_drutts_depth_2:
        movb @1(ix),a                   ; LD A,(IX+1)       ; If Drutt's current depth is 1... (see trivia)
        cb   a,one                      ; CP 1              ; ...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;
-!
+       jeq  swap_drutts_depth_3        ; RET Z             ; ...then return
 * The following collision check prevents Drutt from jumping forward a depth level while in behind an obstruction
 * (e.g. Berk).
        bl   @chk_coll_next_depth       ; CALL 54764        ; Check Drutt for collision with another entity at next depth level out of screen whose
                                                            ; Interaction (11,6) Flag is set...
-       joc  !                          ; RET NC            ; ...and if a collision occurred, then return
-       .ret                            ;
-!
+       jnc  swap_drutts_depth_3        ; RET NC            ; ...and if a collision occurred, then return
        sb   one,@1(ix)                 ; DEC (IX+1)        ; Decrease Drutt's depth (i.e. move forward towards screen)
        ab   one,@4(ix)                 ; INC (IX+4)        ; Increase Drutt's top and bottom y-coordinates...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-       .ret                            ; RET               ; Return
+swap_drutts_depth_3:
+       .endproc                        ; RET               ; Return
 
 *********************************************************************************
 * Increase Worm's Age and Set its Depth to Zero if it has Expired
 *
 * Used by the routines at #R52914 and #R52967. Input:  IX  Address of complex state data (current level) for Worm
 increase_worms_age:
-       movb @worms_age,a                  ; LD A,(52728)      ; Increase current Worm Age value...
+       .proc
+       movb @worms_age,a               ; LD A,(52728)      ; Increase current Worm Age value...
        ab   one,a                      ; INC A             ; ...
        movb a,@worms_age                  ; LD (52728),A      ; ...
        movb a,tmp0                     ; BIT 7,A           ; If Worm Age is less than 128...
        andi tmp0,128*256               ;
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;
-!
+       jeq  increase_worms_age_1       ; RET Z             ; ...then return
        movb @current_characters_room,a                  ; LD A,(34218)      ; If current character's room...
        cb   a,*ix                      ; CP (IX+0)         ; ...is the same as the worm's...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;
-!
+       jeq  increase_worms_age_1       ; RET Z             ; ...then return
        sb   a,a                        ; XOR A             ; Set the worm's depth to zero...
        movb a,@1(ix)                   ; LD (IX+1),A       ; ...
-       movb a,@worms_age                  ; LD (52728),A      ; Reset Worm Age to zero
+       movb a,@worms_age               ; LD (52728),A      ; Reset Worm Age to zero
        .pop bc                         ; POP BC            ; Remove top value from stack (return address in calling routine)
-       .ret                            ; RET               ; Return (to routine that called the calling routine)
+increase_worms_age_1:
+       .endproc                        ; RET               ; Return (to routine that called the calling routine)
 
 *********************************************************************************
 * Load A with Value Indicating Which Direction Room A Lies Relative to Room in State Data at IX
@@ -1683,16 +1673,19 @@ find_pathfinding_entry_3:
 *
 * Used by the routines at #R36966 and #R36984.
 close_trap_door:
+       .proc
+close_trap_door_1:
        movb one,a                      ; LD A,1            ; Set room of "Closed Trap Door" to 1 (i.e. Trap Door Room)...
        movb a,@_43188                  ; LD (43188),A      ; ...
        sb   one,a                      ; DEC A             ; Decrease A to zero
-       jmp  open_close_trap_door_end                     ; JR 37009          ; Set room of "Open Trap Door" to 0
+       jmp  open_close_trap_door_end   ; JR 37009          ; Set room of "Open Trap Door" to 0
 
 *********************************************************************************
 * Open the Trap Door
 *
 * Used by the routine at #R36990.
 open_trap_door:
+       .proc
        sb   a,a                        ; XOR A             ; Set room of "Closed Trap Door" to 0 (i.e. remove from Trap Door Room)...
        movb a,@_43188                  ; LD (43188),A      ; ...
        ab   one,a                      ; INC A             ; Increase A to 1 (index of Trap Door Room)
@@ -1700,6 +1693,4 @@ open_trap_door:
 open_close_trap_door_end:
        movb a,@_43437                  ; LD (43437),A      ; Set value in A as the current room of "Open Trap Door"...
        movb a,@_43450                  ; LD (43450),A      ; ...and marker (preventing Berk and Drutt passing door lid)
-       .ret                            ; RET               ; Return
-
-
+       .endproc                        ; RET               ; Return
