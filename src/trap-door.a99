@@ -86,14 +86,13 @@ main_all_levels:
        bl   @clear_prim_disp_buf_area  ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
        bl   @populate_prim_disp_buf    ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
        bl   @draw_display_buffer       ; CALL 54034        ; Draw contents of Primary Display Buffer to display
-       bl   @play_sound              ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
+       bl   @play_sound                ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
        socb a,a                        ; OR A              ; If no time / lives are left...
        jeq  time_out                   ; JR Z,34645        ; ...then jump to #R34645
        movb @berks_state_data_1+10,a   ; LD A,(43603)      ; If "All Home" Flag is set...
-       movb a,tmp0                     ; BIT 3,A           ; ...
-       andi tmp0,8*256                 ;
-       jne  all_home                     ; JR NZ,34658       ; ...then skip ahead to #R34658
+       andi a,8*256                    ; BIT 3,A           ; ...
+       jne  all_home                   ; JR NZ,34658       ; ...then skip ahead to #R34658
        bl   @update_timer              ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
                                                            ; timer figure blinking
        li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
@@ -114,32 +113,31 @@ skip_update_score:
 skip_swap_buffers:
        mov  hl,@prim_disp_buffer_addr  ; LD (34279),HL     ; Store address of Primary Display Buffer at #R34279
        movb @control_input,a           ; LD A,(34219)      ; Load A with control input
-       movb a,tmp0                     ; BIT 6,A           ; If Restart hasn't been pressed...
-       andi tmp0,64*256                ;
+       andi a,64*256                   ; BIT 6,A           ; If Restart hasn't been pressed...
        jne  restart                    ; JP Z,34466        ; ...then jump to #R34466 (start of main loop)
        jmp  main_loop                  ;
 * Restart has been pressed
 restart:
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound                   ; CALL 59722        ; ...
-       .call @reset_game_data                   ; CALL 34751        ; Reset all game data in preparation for new game
+       bl   @request_sound             ; CALL 59722        ; ...
+       bl   @reset_game_data           ; CALL 34751        ; Reset all game data in preparation for new game
        b    @main                      ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
 time_out:
        bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
-       bl   @print_times_up           ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
+       bl   @print_times_up            ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound                   ; CALL 59722        ; ...
+       bl   @request_sound             ; CALL 59722        ; ...
        jmp  wait_key_and_restart       ; JR 34666          ; Skip ahead to #R34666
 * "All Home" Flag is set
 all_home:
-       .call @print_home_sweet_home    ; CALL 47213        ; Print "HOME SWEET HOME" string
+       bl   @print_home_sweet_home     ; CALL 47213        ; Print "HOME SWEET HOME" string
        movb @bytes+3,a                 ; LD A,3            ; Set sound 3 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound                   ; CALL 59722        ; ...
+       bl   @request_sound             ; CALL 59722        ; ...
 wait_key_and_restart:
-       .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
-       .call @reset_game_data                   ; CALL 34751        ; Reset all game data in preparation for new game
-       b    @main                      ; JP 34438            ; Jump back to #R34438 (return to Main Menu)
+       bl   @wait_release_and_keypress ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
+       bl   @reset_game_data           ; CALL 34751        ; Reset all game data in preparation for new game
+       b    @main                      ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 *// main
 
 *********************************************************************************
@@ -204,6 +202,7 @@ reset_initial_state_data_4:
 * 
 * Used by the routine at #R34438.
 reset_game_data:
+       .proc
        li   iy,level_state_data_table  ; LD IY,34687       ; Point IY at start of Table of Start Addresses of Levels' State Data for Complex Entities
        li   hl,initial_entity_states   ; LD HL,59821       ; Point HL at start of Table of Initial-State Data for Complex Entities
        movb @bytes+4,b                 ; LD B,4            ; Set B to 4 (as there are 4 levels)
@@ -218,10 +217,10 @@ reset_game_data_1:
 reset_game_data_2:
        movb *ix,a                      ; LD A,(IX+0)       ; If first byte in current complex state data entry is 255 (End Marker)...
        cb   a,@bytes+255               ; CP 255            ; ...
-       jeq  reset_game_data_4                     ; JR Z,34803        ; ...then skip ahead to #R34803
+       jeq  reset_game_data_4          ; JR Z,34803        ; ...then skip ahead to #R34803
        movb @10(ix),a                  ; LD A,(IX+10)      ; If entity's Can Be Reset Flag is reset...
        andi a,128*256                  ; AND 128           ; ...
-       jeq  reset_game_data_3                     ; JR Z,34796        ; ...then advance IX by 13 bytes to next entry and loop back to #R34774
+       jeq  reset_game_data_3          ; JR Z,34796        ; ...then advance IX by 13 bytes to next entry and loop back to #R34774
        .push ix                        ; PUSH IX           ; Transfer start address of current entry in complex state data into DE...
        .pop de                         ; POP DE            ; ...
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
@@ -245,23 +244,24 @@ reset_game_data_5:
        movb a,*hl                      ; LD (HL),A         ; ...and set 91 bytes from here onwards to zero...
        inc  hl                         ; INC HL            ; ...
        sb   one,b                      ; DJNZ 34819        ; ...
-       jne  reset_game_data_5                     ;                   
+       jne  reset_game_data_5          ;
        movb @bytes+16,a                ; LD A,16           ; Set time / lives to 16...
        movb a,@time_left               ; LD (34210),A      ; ...
        movb one,a                      ; LD A,1            ; Set current level to Level 1...
        movb a,@current_level           ; LD (34207),A      ; ...
-       .call @_36778                   ; CALL 36778        ; Initialise script data positions for Flying Skeleton Creature and Bat (Level 1)
-       .call @_38468                   ; CALL 38468        ; Reset current positions in apebeasts' script data to initial values
-       .call @_41354                   ; CALL 41354        ; Reset Skeleton to initial state
-       .call @_51732                   ; CALL 51732        ; Reset Drutt to initial state
+       bl   @reset_skeleton_and_bat    ; CALL 36778        ; Initialise script data positions for Flying Skeleton Creature and Bat (Level 1)
+       bl   @reset_apebeasts           ; CALL 38468        ; Reset current positions in apebeasts' script data to initial values
+       bl   @reset_skeleton            ; CALL 41354        ; Reset Skeleton to initial state
+       bl   @reset_drutt               ; CALL 51732        ; Reset Drutt to initial state
        movb one,a                      ; LD A,1            ; Set room of "Closed Trap Door" and impassable marker to 1 (i.e. starting room)...
        movb a,@_43188                  ; LD (43188),A      ; ...
        movb a,@_43450                  ; LD (43450),A      ; ...
        movb a,@current_character_attr  ; LD (34226),A      ; Set attribute of current character to 1 (blue, Berk)
        sb   one,a                      ; DEC A             ; Set room of "Open Trap Door" and "Home Sweet Home" brickwork to 0...
        movb a,@_43437                  ; LD (43437),A      ; ...i.e. remove from game...
-       movb a,@state_data_simple_1+13               ; LD (43159),A      ; ...
-       .ret                            ; RET               ; Return
+       movb a,@state_data_simple_1+13  ; LD (43159),A      ; ...
+       .endproc                        ; RET               ; Return
+*// reset_game_data
 
 *********************************************************************************
 * Copy Start Addresses of Current Level's Data Blocks to 34236 and Clean Up Old Data
@@ -1069,12 +1069,13 @@ _36753:
 * Initialise Script Data Positions for Flying Skeleton Creature and Bat (Level 1)
 * 
 * Used by the routine at #R34751.
-_36778:
+reset_skeleton_and_bat:
        li   hl,boni_kidnap_script      ; LD HL,36803       ; Load HL with start address of script data for Boni's kidnap...
        mov  hl,@boni_kidnap_script_pos ; LD (36801),HL     ; ...and store this as the current script data position at #R36801
        li   hl,bat_script              ; LD HL,37018       ; Load HL with start address of script data for Bat (not attacking)...
        mov  hl,@bat_script_pos         ; LD (37016),HL     ; ...and store this as the current script data position at #R37016
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
+*// reset_skeleton_and_bat
 
 *********************************************************************************
 * Update States of All Level 1 Entities
@@ -1300,10 +1301,10 @@ _37662:
                                                            ; Interaction (11,6) Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _37685                     ; JR NZ,37685       ; ...then skip ahead to #R37685
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-       movb @berk_killed_by_spider,a                  ; LD A,(34223)      ; Increase count of number of times a spider has killed Berk...
+       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       movb @berk_killed_by_spider,a   ; LD A,(34223)      ; Increase count of number of times a spider has killed Berk...
        ab   one,a                      ; INC A             ; ...
-       movb a,@berk_killed_by_spider                  ; LD (34223),A      ; ...
+       movb a,@berk_killed_by_spider   ; LD (34223),A      ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 _37685:
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
@@ -1540,15 +1541,17 @@ _38377:
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set key's velocity factor to 2
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Reset Current Positions in Apebeasts' Script Data to Initial Values
 * 
 * Used by the routine at #R34751.
-_38468:
+reset_apebeasts:
        li   de,apebeasts_script_data_pos                  ; LD DE,38424       ; Point DE at Table of Current Positions in Apebeasts' Script Data
        li   hl,_38416                  ; LD HL,38416       ; Point HL at Table of Initial Positions in Apebeasts' Script Data
        li   bc,8                       ; LD BC,8           ; Load BC with 8 (as there are eight bytes to copy)
        .ldir                           ; LDIR              ; Overwrite addresses in Table of Current Positions with those from Table of Initial Positions
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
+*// reset_apebeasts
 
 *********************************************************************************
 * Update States of Apebeasts (Level 2) and Store Current Positions in Script Data
@@ -2341,23 +2344,25 @@ update_level_4_entities:
        .call @_41381                   ; CALL 41381        ; Update state of Skeleton (Level 4) and store current position in script data
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Reset Skeleton to Initial State
 * 
 * Used by the routine at #R34751.
-_41354:
+reset_skeleton:
        li   hl,skeleton_idling_script  ; LD HL,41232       ; Set current position in Skeleton's script data...
        mov  hl,@skeleton_script_pos    ; LD (41230),HL     ; ...to #R41232 (Skeleton Idling)
        li   ix,_41412                  ; LD IX,41412       ; Load IX with address of Table of Addresses of Attribute Data in Skeleton's GLD Blocks
        movb @bytes+6,b                 ; LD B,6            ; Load B with 6 (as there are six blocks of graphic layout data to modify)
-_41366:
+reset_skeleton_1:
        movb *ix,@l                     ; LD L,(IX+0)       ; Load HL with address of attribute data in current block...
        movb @1(ix),h                   ; LD H,(IX+1)       ; ...
        movb @bytes+7,*hl               ; LD (HL),7         ; Set the attribute value to 7 (white)
        inc  ix                         ; INC IX            ; Advance IX to next address...
        inc  ix                         ; INC IX            ; ...
        sb   one,b                      ; DJNZ 41366        ; Decrease remaining number of blocks to modify and loop back to #R41366 if not zero
-       jne  _41366                     ;                   
-       .ret                            ; RET               ; Return
+       jne  reset_skeleton_1           ;
+       rt                              ; RET               ; Return
+*// reset_skeleton
 
 * Update State of Skeleton (Level 4) and Store Current Position in Script Data
 * 
@@ -3451,6 +3456,7 @@ set_and_print_dbl_height:
        bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
        .endproc                            ; RET               ; Return
 
+*********************************************************************************
 * Print Keyboard Controls on Main Menu
 * 
 * Used by the routines at #R46830 and #R46968. Input:  A  Attribute for printing text
@@ -3475,6 +3481,7 @@ _47097:
        jne  _47097                     ;                   
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Print "THROUGH the TRAPDOOR" String
 * 
 * Used by the routine at #R46830.
@@ -3486,6 +3493,7 @@ print_title:
        li   ix,title_text              ; LD IX,47120       ; Point IX to text to print
        jmp  print_text                 ; JR 47224          ; Print the text and return
 
+*********************************************************************************
 * Print "SORRY BERK,  BUT YOUR TIME IS UP" String
 * 
 * Used by the routine at #R34438.
@@ -3493,19 +3501,22 @@ print_times_up:
        .proc
        movb @bytes+32,b                ; LD B,32           ; Load B with 32 (length of string to print)
        movb @bytes+199,a               ; LD A,199          ; Load A with 199, for black PAPER, white INK, BRIGHT, FLASH
-       li   ix,sorry_berk_text                  ; LD IX,47153       ; Point IX to text to print
+       li   ix,sorry_berk_text         ; LD IX,47153       ; Point IX to text to print
        li   hl,23232                   ; LD HL,23232       ; Point HL at position at which to start printing text in Attribute File (start of second-last
                                                            ; row)
        jmp  print_text                 ; JR 47224          ; Print the text and return
 
+*********************************************************************************
 * Print "HOME SWEET HOME" String
 * 
 * Used by the routine at #R34438.
 print_home_sweet_home:
+       .proc
        movb @bytes+15,b                ; LD B,15           ; Set string length to 15
        movb @bytes+68,a                ; LD A,68           ; Set attribute to green INK on black PAPER, BRIGHT
        li   ix,home_sweet_home_text                  ; LD IX,47198       ; Point IX at "HOME SWEET HOME" text
        li   hl,22792                   ; LD HL,22792       ; Point HL at Attribute File address at which to print text
+
 * This entry point is used by the routines at #R47140 and #R47185.
 print_text:
        movb a,@print_attr              ; LD (34269),A      ; Store attribute at #R34269
@@ -3520,6 +3531,7 @@ print_text_1:
        jne  print_text_1               ;
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Reset Show Score Flag and Draw Timer Figures Bar
 * 
 * Used by the routines at #R34438, #R34916 and #R47468.
@@ -3965,7 +3977,7 @@ digit_to_str_1:
 * Read Keyboard and Load Pressed Key Character into A
 * 
 * Used by the routines at #R47893 and #R47942. Output: A  Index of the key that was pressed
-_47788:
+read_keyboard:
        .exx                            ; EXX               ; Swap registers
        li   bc,65278                   ; LD BC,65278       ; Load B and C with 254
        li   hl,ret_val_keyboard                  ; LD HL,47853       ; Point HL at list of return values
@@ -4086,15 +4098,17 @@ _47930:
 * Wait for Current Key to Be Released and Another to Be Pressed, Storing in A
 * 
 * Used by the routines at #R34438, #R47893 and #R47955.
-_47942:
-       .call @_47788                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
+wait_release_and_keypress:
+       .proc
+wait_release_and_keypress_1:
+       .call @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
        socb a,a                        ; OR A              ; If a key is pressed...
-       jne  _47942                     ; JR NZ,47942       ; ...then loop back to #R47942
-_47948:
-       .call @_47788                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
+       jne  wait_release_and_keypress_1 ; JR NZ,47942       ; ...then loop back to #R47942
+wait_release_and_keypress_2:
+       .call @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
        socb a,a                        ; OR A              ; If a key is not pressed...
-       jeq  _47948                     ; JR Z,47948        ; ...then loop back to #R47948
-       .ret                            ; RET               ; Return
+       jeq  wait_release_and_keypress_2 ; JR Z,47948        ; ...then loop back to #R47948
+       .endproc                        ; RET               ; Return
 
 * Wait for Key-Press, Store Pressed Key Code in A and Play Main Menu Sound
 * 
@@ -4232,10 +4246,11 @@ remove_current_power_3:
 * Reset Drutt to Initial State
 * 
 * Used by the routine at #R34751.
-_51732:
+reset_drutt:
        li   hl,drutt_facing_out_script ; LD HL,51524       ; Set current position in Drutt's script data...
        mov  hl,@drutts_script_pos      ; LD (51518),HL     ; ...to #R51524 (Drutt facing out of screen)
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
+*// reset_drutt
 
 *********************************************************************************
 * Update States of Drutt and Worm and Store Current Positions in Script Data
@@ -4406,11 +4421,14 @@ cycle_attributes:
 ;       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of iterations required)
        sb   one,b                      ; DJNZ 53583        ; Loop back for next iteration
        jne  cycle_attributes                     ;
-       jmp  !
+       jmp  clear_display_buffers_0
+
+*********************************************************************************
 * This entry point is used by the routine at #R53887.
 clear_display_buffers:
        .proc
-!      li   hl,display_buffer_1        ; LD HL,61312       ; Clear Display Buffers 1 and 2...
+clear_display_buffers_0:
+       li   hl,display_buffer_1        ; LD HL,61312       ; Clear Display Buffers 1 and 2...
        li   bc,>1080                   ; LD BC,4224        ; ...
 clear_display_buffers_1:
        clr  *hl+                       ; LD (HL),0         ; ...
@@ -4469,7 +4487,7 @@ check_berk_killed:
        szcb @bits+2,*hl                ; RES 2,(HL)        ; Reset "Berk Has Been Killed" Flag
        socb @bits+3,*hl                ; SET 3,(HL)        ; Set "Reset Spiders to Initial State" Flag
        mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
-       bl   @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        li   de,berk_reset_table-2      ; LD DE,53674       ; Point DE at location two bytes (1 WORD) before start of Table of Addresses of Berk Reset Data
        movb @current_level,a           ; LD A,(34207)      ; Load current level number into A
        bl   @load_table_addr           ; CALL 53814        ; Load DE with that level's address (from table at #R53676) for complex state data to revert
@@ -4498,17 +4516,18 @@ clear_prim_disp_buf_area:
        mov  @prim_disp_buffer_addr,hl  ; LD HL,(34279)     ; Load HL with start address of Primary Display Buffer
        li   bc,704                     ; LD BC,704         ; Set BC to 704, as there are 704 entries in a Display Buffer
        li   de,3                       ; LD DE,3           ; Load DE with 3 as each entry in the Display Buffer is three bytes wide
+       clr  tmp0
 clear_prim_disp_buf_area_1:
        movb *hl,a                      ; LD A,(HL)         ; Read first byte in Display Buffer...
-       ab   one,a                      ; INC A             ; ...and add one
-       jeq  clear_prim_disp_buf_area_2 ; JP Z,53806        ; If value is now zero (i.e. was previously 255 and therefore outside normal play area), then
+                                       ; INC A             ; ...and add one
+       jlt  clear_prim_disp_buf_area_2 ; JP Z,53806        ; If value is now zero (i.e. was previously 255 and therefore outside normal play area), then
                                                            ; skip ahead to #R53806
-       sb   a,a                        ; XOR A             ; Set all values in current entry to zero...
-       movb a,*hl+                     ; LD (HL),A         ; ...
+                                       ; XOR A             ; Set all values in current entry to zero...
+       movb tmp0,*hl+                  ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
-       movb a,*hl+                     ; LD (HL),A         ; ...
+       movb tmp0,*hl+                  ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
-       movb a,*hl+                     ; LD (HL),A         ; ...
+       movb tmp0,*hl+                  ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
        jmp  clear_prim_disp_buf_area_3 ; JP 53807          ; Skip ahead to #R53807
 clear_prim_disp_buf_area_2:
