@@ -4768,11 +4768,11 @@ draw_display_buffer_2:
                                        ; CP 255            ; If Graphic Set Index is 255 (character block outside room's dimensions)...
        jlt  draw_display_buffer_9      ; JP Z,54140        ; ...then skip ahead to #R54140
        movb a,b                        ; LD B,A            ; Transfer Graphic Set Index into B
-       movb @bytes+0,@e                ; LD E,0            ; Set E to zero
+       clr  de                         ; LD E,0            ; Set E to zero
        cb   a,*iy                      ; CP (IY+0)         ; If Graphic Set Index in Primary Display Buffer entry is different to Graphic Set Index in
                                                            ; Secondary Display Buffer entry...
        jne  draw_display_buffer_3      ; JP NZ,54076       ; ...then skip ahead to #R54076
-       ab   one,@e                     ; INC E             ; Increase E
+       inc  de                         ; INC E             ; Increase E
 draw_display_buffer_3:
        movb *hl,a                      ; LD A,(HL)         ; Load Graphic Index from Primary Display Buffer
                                        ; OR A              ; If Graphic Index is zero...
@@ -4781,21 +4781,21 @@ draw_display_buffer_3:
        cb   a,@1(iy)                   ; CP (IY+1)         ; If Graphic Index in Primary Display Buffer is different to Graphic Index in Secondary Display
                                                            ; Buffer...
        jne  draw_display_buffer_4      ; JP NZ,54089       ; ...then skip ahead to #R54089
-       ab   one,@e                     ; INC E             ; Increase E
+       inc  de                         ; INC E             ; Increase E
 draw_display_buffer_4:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
        movb *hl,a                      ; LD A,(HL)         ; Read attribute from Primary Display Buffer
        cb   a,@2(iy)                   ; CP (IY+2)         ; If attribute in Display Buffer entry A is different to attribute in Secondary Display Buffer
                                                            ; entry...
        jne  draw_display_buffer_5      ; JP NZ,54102       ; ...then skip ahead to #R54102
-       movb @e,tmp0                    ; BIT 1,E           ; If E is 2 (i.e. both Graphic Set Index and Graphic Index are the same)...
-       andi tmp0,2*256                 ;                   
-       jne  draw_display_buffer_6      ; JP NZ,54107       ; ...then skip ahead to #R54107, over drawing instructions (no need to redraw what is already
+       ci   de,2                       ; BIT 1,E           ; If E is 2 (i.e. both Graphic Set Index and Graphic Index are the same)...
+                                       ;
+       jeq  draw_display_buffer_6      ; JP NZ,54107       ; ...then skip ahead to #R54107, over drawing instructions (no need to redraw what is already
                                                            ; there)
 draw_display_buffer_5:
-       .push hl                        ; PUSH HL           ; Store HL (pointer to current position in Primary Display Buffer)
+                                       ; PUSH HL           ; Store HL (pointer to current position in Primary Display Buffer)
        bl   @draw_character_block      ; CALL 54144        ; Draw a graphic character block to display
-       .pop hl                         ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
+                                       ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
 draw_display_buffer_6:
        inc  hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
 draw_display_buffer_7:
@@ -4845,30 +4845,30 @@ draw_character_block:
        mov  bc,tmp1
        srl  tmp1,8
        sla  tmp1,1
-       mov  @graphic_sets_table(tmp1),hl
+       mov  @graphic_sets_table(tmp1),tmp1
        mov  bc,tmp0
        andi tmp0,>00ff
        sla  tmp0,3
-       a    tmp0,hl
+       a    tmp1,tmp0
 *      Draw mirrored?
        socb @bits+6,a                  ; SET 6,A           ; Set Bright Flag
        jlt  draw_character_block_1
 *      Draw normal block
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
-       movb *hl+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
+       movb *tmp0+,*tmp2
        jmp  draw_character_block_3
 *      Draw mirrored
 draw_character_block_1:
        clr  tmp1
        li   bc,8
 draw_character_block_2:
-       movb *hl+,@r1lb
+       movb *tmp0+,@r1lb
        movb @byte_mirror_table(tmp1),*tmp2
        dec  bc
        jne  draw_character_block_2
