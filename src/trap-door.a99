@@ -1062,7 +1062,7 @@ align_with_level_1_door:
        bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        movb @bytes+33,a                ; LD A,33           ; Load IY with address of complex state data for first entity that has class of 33 (Entry
                                                            ; Door)...
-       .call @_54019                   ; CALL 54019        ; ...
+       bl   @find_1st_entity_of_class                   ; CALL 54019        ; ...
        mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with start address of current level's complex state data for Berk
        movb @5(iy),a                   ; LD A,(IY+5)       ; Load A with x-coordinate of left of Entry Door...
        ab   one,a                      ; INC A             ; ...and add one
@@ -1115,7 +1115,7 @@ execute_bonis_kidnap:
                                                            ; room)
        mov  @boni_kidnap_script_pos,hl ; LD HL,(36801)     ; Load current position in script data for Boni's kidnap from #R36801 into HL...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
-       .call @start_executing                   ; CALL 36947        ; Advance HL to next script instruction and start executing
+       bl   @start_executing                   ; CALL 36947        ; Advance HL to next script instruction and start executing
        mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
        mov  hl,@boni_kidnap_script_pos ; LD (36801),HL     ; ...at #R36801 as current position in script data for Boni's kidnap
        .ret                            ; RET               ; Return
@@ -1144,6 +1144,7 @@ open_trap_door_if_berk_is_near:
 * 
 * Used by the routine at #R36887.
 start_executing:
+       .proc
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
@@ -1173,7 +1174,7 @@ update_bat_state_and_store:
        bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Bat's room
        mov  @bat_script_pos,hl         ; LD HL,(37016)     ; Load current position in Bat's script data from #R37016 into HL...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
-       .call @update_bat_state                   ; CALL 37085        ; Update state of Bat
+       bl   @update_bat_state                   ; CALL 37085        ; Update state of Bat
        mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
        mov  hl,@bat_script_pos         ; LD (37016),HL     ; ...at #R37016 as current position in Bat's script data
        .ret                            ; RET               ; Return
@@ -1184,6 +1185,7 @@ update_bat_state_and_store:
 * Used by the routine at #R37062. Input:  IX  (always #R43463, entry in Level 1 complex state data for Bat) HL
 * Current position in Bat's script data
 update_bat_state:
+       .proc
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        joc  update_bat_state_2                     ; JR C,37104        ; ...and if no collision occurred, then skip ahead to #R37104
@@ -1339,7 +1341,7 @@ _37685:
 * Used by the routine at #R34438.
 update_level_2_entities:
        .proc
-       .call @_38592                   ; CALL 38592        ; Update states of stalactites (Level 2)
+       .call @update_stalachites_state                   ; CALL 38592        ; Update states of stalactites (Level 2)
        .call @update_apebeast_states                   ; CALL 38480        ; Update states of apebeasts (Level 2) and store current positions in script data
        .call @update_bubo_state_and_store                   ; CALL 38054        ; Update state of Bubo (Level 2) and store current position in script data
        .call @update_bupos_projectile                   ; CALL 38219        ; Update state of Bubo's projectile
@@ -1447,7 +1449,7 @@ _38252:
        movb @12(ix),a                  ; LD A,(IX+12)      ; If projectile's velocity factor is not zero...
        socb a,a                        ; OR A              ; ...
        jne  _38267                     ; JR NZ,38267       ; ...then skip ahead to #R38267
-       .call @_38377                   ; CALL 38377        ; Start level 2 key falling if Bubo's projectile is in place below it
+       .call @start_level_2_key_falling                   ; CALL 38377        ; Start level 2 key falling if Bubo's projectile is in place below it
        jmp  _38361                     ; JR 38361          ; Jump to #R38361 (increase velocity and handle landing if appropriate)
 _38267:
        movb a,tmp0                     ; BIT 7,A           ; If bit 7 of projectile's velocity factor is set (i.e. negative, moving upwards)...
@@ -1483,7 +1485,7 @@ _38293:
        .pop bc                         ; POP BC            ; Restore BC (B = current velocity factor)
        .ret                            ; RET               ; Return
 _38328:
-       .call @_38756                   ; CALL 38756        ; Move projectile down one character
+       .call @move_projectile_down     ; CALL 38756        ; Move projectile down one character
        .pop bc                         ; POP BC            ; Restore BC (B = current velocity factor)
        sb   one,b                      ; DJNZ 38278        ; Decrease remaining velocity value and loop back to #R38278 if not zero
        jne  _38278                     ;                   
@@ -1517,7 +1519,7 @@ _38372:
 * Start Level 2 Key Falling if Bubo's Projectile is in Place Below it
 * 
 * Used by the routine at #R38219. Input:  IX  Address of complex state data for Bubo's projectile (Level 2)
-_38377:
+start_level_2_key_falling:
        movb *ix,a                      ; LD A,(IX+0)       ; If room of projectile is not 1...
        cb   a,one                      ; CP 1              ; ...
        jeq  !                          ; RET NZ            ; ...then return
@@ -1575,7 +1577,7 @@ _38488:
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
        .push ix                        ; PUSH IX           ; Store IX
        .push iy                        ; PUSH IY           ; Store IY
-       .call @_38540                   ; CALL 38540        ; Update the state of the current apebeast
+       .call @update_current_apebeast                   ; CALL 38540        ; Update the state of the current apebeast
        .pop iy                         ; POP IY            ; Restore IY
        .pop ix                         ; POP IX            ; Restore IX
        mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data for current apebeast) stored at #R34277...
@@ -1594,7 +1596,7 @@ _38523:
 * Update State of an Apebeast
 * 
 * Used by the routine at #R38480.
-_38540:
+update_current_apebeast:
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        jnc  !                          ; JP C,48096        ; ...and if no collision occurred, then jump to #R48096 (advance HL to next script instruction
@@ -1611,7 +1613,7 @@ _38540:
 * Update States of Stalactites (Level 2)
 * 
 * Used by the routine at #R38009.
-_38592:
+update_stalachites_state:
        li   ix,_44305                  ; LD IX,44305       ; Load IX with address of complex state data for first of seven falling stalactites (Level 2)
 _38596:
        movb @8(ix),a                   ; LD A,(IX+8)       ; If current entity class is not 34 (Stalactite, Level 2)...
@@ -1628,7 +1630,7 @@ _38596:
        jeq  !                          ; JP NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
        b    @_38748                    ;                   
 !
-       .call @_38756                   ; CALL 38756        ; Move stalactite down one character and load A with new top y-coordinate
+       .call @move_projectile_down                   ; CALL 38756        ; Move stalactite down one character and load A with new top y-coordinate
        movb @4(ix),a                   ; LD A,(IX+4)       ; Load A with top y-coordinate of stalactite (see trivia)
        cb   a,@bytes+101               ; CP 101            ; If new top y-coordinate is not 101
        jeq  !                          ; JP NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
@@ -1686,7 +1688,7 @@ _38707:
 _38718:
        movb @12(ix),b                  ; LD B,(IX+12)      ; Load B with stalactite's velocity factor...
 _38721:
-       .call @_38756                   ; CALL 38756        ; ...and move stalactite down by this many characters...
+       .call @move_projectile_down                   ; CALL 38756        ; ...and move stalactite down by this many characters...
        sb   one,b                      ; DJNZ 38721        ; ...
        jne  _38721                     ;                   
        ab   one,@12(ix)                ; INC (IX+12)       ; Increase stalactite's velocity factor by one
@@ -1706,7 +1708,7 @@ _38748:
 * 
 * Used by the routines at #R38219 and #R38592. Input:  IX  Address of complex state data for an entity Output: A New
 * y-coordinate of entity's top
-_38756:
+move_projectile_down:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Increase y-coordinates of top and bottom of entity by one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
        movb @4(ix),a                   ; LD A,(IX+4)       ; Load new y-coordinate of entity's top into A
@@ -2016,7 +2018,7 @@ update_coloured_creature_states:
        jeq  !                          ; JP NZ,39760       ; ...then present reward for getting coloured creatures home, and return
        b    @_39760                    ;                   
 !
-       .call @_39699                   ; CALL 39699        ; Count coloured creatures in slots and return if all are home
+       .call @count_coloured_creatures_in_slots                   ; CALL 39699        ; Count coloured creatures in slots and return if all are home
        movb @l,a                       ; LD A,L            ; If all three coloured creatures are in slots...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jne  !                          ; RET Z             ; ...then return
@@ -2074,7 +2076,7 @@ _39667:
 * 
 * Used by the routine at #R39601. Output: H  Number of coloured creatures in correct slots L  Number of coloured
 * creatures in slots
-_39699:
+count_coloured_creatures_in_slots:
        li   ix,_44894                  ; LD IX,44894       ; Load IX with address of complex state data for first coloured creature (Level 3)
        li   hl,0                       ; LD HL,0           ; Load HL with zero
        movb @bytes+3,b                 ; LD B,3            ; Load B with 3 (as there are 3 creatures)
@@ -4719,19 +4721,20 @@ print_red_cell_1:
        .endproc                        ; RET               ; Return
 *// print_red_cell
 
+*********************************************************************************
 * Reset Complex State Data for First Entity of Class A to that Stored in Initial-State Table at 59821
 * 
 * Used by the routines at #R37639 and #R48417. Input:  A  Entity class value IX  (Entry at #R53994 only) Address of
 * complex state data for an entity
 reset_1st_entity_of_class:
-       .call @_54019                   ; CALL 54019        ; Load IX with address of complex state data for first entry in current level that has class
+       bl   @find_1st_entity_of_class                   ; CALL 54019        ; Load IX with address of complex state data for first entry in current level that has class
                                                            ; A...
        .push iy                        ; PUSH IY           ; ...
        .pop ix                         ; POP IX            ; ...
 * This entry point is used by the routine at #R42064.
 _53994:
        li   iy,initial_entity_states   ; LD IY,59821       ; Point IY at start of Table of Initial-State Data for Complex Entities
-       .call @_54023                   ; CALL 54023        ; Advance IY to first entry in copied complex state data that has class A
+       bl   @find_1st_entity_of_class_0                   ; CALL 54023        ; Advance IY to first entry in copied complex state data that has class A
        .push ix                        ; PUSH IX           ; Store IX (address of entry in complex state data to overwrite)
        movb @e,b                       ; LD B,E            ; Load B with 13 (DE set to 13 in routine at #R54019)
 _54004:
@@ -4744,22 +4747,24 @@ _54004:
        .pop ix                         ; POP IX            ; Restore IX (address of entry in complex state data just overwritten)
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Point IY at First Entry in Current Level's Complex State Data that has Class A
 * 
 * Used by the routines at #R36753 and #R53987. Input:  A  Value of an entity class Output: IY  Address of complex
 * state data for first entity of class A
-_54019:
+find_1st_entity_of_class:
        mov  @cmplx_state_data_addr,iy  ; LD IY,(34238)     ; Load start address of current level's complex state data into IY
 * This entry point is used by the routine at #R53987.
-_54023:
+find_1st_entity_of_class_0:
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries in complex state data are 13 bytes wide)
-_54026:
+find_1st_entity_of_class_1:
        cb   a,@8(iy)                   ; CP (IY+8)         ; If current IY entity has class A...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;                   
-!
+       jeq  find_1st_entity_of_class_2 ; RET Z             ; ...then return
        a    de,iy                      ; ADD IY,DE         ; Advance to entry for next entity
-       jmp  _54026                     ; JR 54026          ; Loop back to #R54026
+       jmp  find_1st_entity_of_class_1 ; JR 54026          ; Loop back to #R54026
+find_1st_entity_of_class_2:
+       rt
+*// find_1st_entity_of_class
 
 *********************************************************************************
 * Draw Contents of Primary Display Buffer to Display
@@ -5782,7 +5787,7 @@ handle_vertical_jump_3:
        jne  handle_vertical_jump_4     ; JR NZ,55258       ; ...then skip ahead to #R55258
 * Jumper has banged his head
        movb @bytes+6,a                 ; LD A,6            ; Set pending sound index to 6 (banging head) if it is currently zero, or lower priority...
-       .call @request_sound            ; CALL 59613        ; ...
+       bl   @request_sound            ; CALL 59613        ; ...
        movb @bytes+6,@e                ; LD E,6            ; Load E with 6 (jumper has banged his head on something above him)
        b    @handle_vertical_jump_20   ; RET               ; Return (of of range)
 * No collision, or collision with entity other than that of class 130
