@@ -1,0 +1,624 @@
+*********************************************************************************
+* Update States of All Level 3 Entities
+*
+* Used by the routine at #R34438.
+update_level_3_entities:
+       .proc
+       .call @update_yellow_creature_state                   ; CALL 39776        ; Update state of Large Yellow Creature
+       .call @update_coloured_creature_states                   ; CALL 39601        ; Update states of coloured creatures
+       .call @update_clawed_foot_state                   ; CALL 39278        ; Update state of Clawed Foot
+       .call @update_hatsh_state                   ; CALL 39151        ; Update state of Hatch
+       .endproc                        ; RET               ; Return
+
+*********************************************************************************
+* Update States of Coloured Creatures
+*
+* Used by the routine at #R39137.
+update_coloured_creature_states:
+       movb @_44894+9,a                ; LD A,(44903)      ; Load A with first coloured creature's flags
+       movb a,tmp0                     ; BIT 2,A           ; If Coloured Creatures' Reward Given Flag is set...
+       andi tmp0,4*256                 ;
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb a,tmp0                     ; BIT 1,A           ; If All Coloured Creatures Home Flag is set...
+       andi tmp0,2*256                 ;
+       jeq  !                          ; JP NZ,39760       ; ...then present reward for getting coloured creatures home, and return
+       b    @_39760                    ;
+!
+       .call @count_coloured_creatures_in_slots                   ; CALL 39699        ; Count coloured creatures in slots and return if all are home
+       movb @l,a                       ; LD A,L            ; If all three coloured creatures are in slots...
+       cb   a,@bytes+3                 ; CP 3              ; ...
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+       movb @current_characters_room,a                  ; LD A,(34218)      ; If current character's current room is not 6 (coloured creatures' room)...
+       cb   a,@bytes+6                 ; CP 6              ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       li   hl,coloured_creatures_cycles                  ; LD HL,39600       ; Increase cycles elapsed since last swap of creatures...
+       ab   one,*hl                    ; INC (HL)          ; ...
+       movb *hl,a                      ; LD A,(HL)         ; ...
+       cb   a,@bytes+100               ; CP 100            ; ...and if less than 100...
+       jhe  !                          ; RET C             ; ...then return
+       .ret                            ;
+!
+       movb @bytes+0,*hl               ; LD (HL),0         ; Set cycles elapsed since last swap of creatures to zero
+       bl   @cycle_colors_and_refresh                   ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
+                                                           ; room
+       li   hl,coloured_creatures_curr_seq                  ; LD HL,39599       ; Point HL at current Sequence ID
+_39641:
+       movb @bytes+3,a                 ; LD A,3            ; Load A with a random number, 0-2...
+       bl   @rnd_no                    ; CALL 54222        ; ...
+       cb   a,*hl                      ; CP (HL)           ; ...and if this is the same as the current Sequence ID...
+       jeq  _39641                     ; JR Z,39641        ; ...then jump back to #R39641 to generate a new random number
+       movb a,*hl                      ; LD (HL),A         ; Set new Sequence ID to generated number
+       ab   a,a                        ; ADD A,A           ; Load BC with three times Sequence ID...
+       ab   *hl,a                      ; ADD A,(HL)        ; ...
+       movb a,@c                       ; LD C,A            ; ...
+       sb   b,b                        ; LD B,0            ; ...
+       li   iy,coloured_creatures_data                  ; LD IY,39584       ; Load IY with start address of Table of Coloured Creatures' Properties...
+       a    bc,iy                      ; ADD IY,BC         ; ...and add three times Sequence ID to get address of first entry in new sequence
+       li   ix,_44894                  ; LD IX,44894       ; Load IX with address of complex state data for first coloured creature (Level 3)
+       movb @bytes+3,b                 ; LD B,3            ; Load B with 3 (as there are three coloured creatures)
+_39667:
+       movb *iy,a                      ; LD A,(IY+0)       ; Set class of current coloured creature...
+       movb a,@8(ix)                   ; LD (IX+8),A       ; ...
+       movb @1(iy),a                   ; LD A,(IY+1)       ; ...and address of graphic layout data...
+       movb a,@2(ix)                   ; LD (IX+2),A       ; ...
+       movb @2(iy),a                   ; LD A,(IY+2)       ; ...
+       movb a,@3(ix)                   ; LD (IX+3),A       ; ...to values in current record in Table of Coloured Creatures' Properties
+       inc  iy                         ; INC IY            ; Advance IY to next entry in properties table...
+       inc  iy                         ; INC IY            ; ...
+       inc  iy                         ; INC IY            ; ...
+       li   de,13                      ; LD DE,13          ; Advance IX to next coloured creature's properties...
+       a    de,ix                      ; ADD IX,DE         ; ...
+       sb   one,b                      ; DJNZ 39667        ; Decrease remaining number of coloured creatures to update and loop back to #R39667 if not
+       jne  _39667                     ;
+                                                           ; zero
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Count Coloured Creatures in Slots and Return if All Are Home
+*
+* Used by the routine at #R39601. Output: H  Number of coloured creatures in correct slots L  Number of coloured
+* creatures in slots
+count_coloured_creatures_in_slots:
+       li   ix,_44894                  ; LD IX,44894       ; Load IX with address of complex state data for first coloured creature (Level 3)
+       li   hl,0                       ; LD HL,0           ; Load HL with zero
+       movb @bytes+3,b                 ; LD B,3            ; Load B with 3 (as there are 3 creatures)
+_39708:
+       movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of bottom of current creature is not 114...
+       cb   a,@bytes+114               ; CP 114            ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       ab   one,@l                     ; INC L             ; Increase L (number of creatures in slots)
+       movb @8(ix),a                   ; LD A,(IX+8)       ; If current entity class is not 13 (Red Coloured Creature, Level 3)...
+       cb   a,@bytes+13                ; CP 13             ; ...
+       jne  _39726                     ; JR NZ,39726       ; ...then skip ahead to #R39726
+       movb @bytes+108,a               ; LD A,108          ; Load A with 108 (x-coordinate of left-most slot)
+       jmp  _39736                     ; JR 39736          ; Skip ahead to #R39736
+_39726:
+       cb   a,@bytes+14                ; CP 14             ; If current entity class is not 14 (Yellow Coloured Creature, Level 3)...
+       jne  _39734                     ; JR NZ,39734       ; ...then skip ahead to #R39734
+       movb @bytes+115,a               ; LD A,115          ; Load A with 115 (x-coordinate of middle slot)
+       jmp  _39736                     ; JR 39736          ; Skip ahead to #R39736
+_39734:
+       movb @bytes+122,a               ; LD A,122          ; Load A with 122 (x-coordinate of right-most slot)
+_39736:
+       cb   a,@5(ix)                   ; CP (IX+5)         ; If x-coordinate of slot in A is not the same as x-coordinate of current creature's left...
+       jne  _39742                     ; JR NZ,39742       ; ...then skip ahead to #R39742
+       ab   one,h                      ; INC H             ; Increase H (number of creatures at correct x-coordinate for their respective coloured slots)
+_39742:
+       li   de,13                      ; LD DE,13          ; Advance IX to next entity...
+       a    de,ix                      ; ADD IX,DE         ; ...
+       sb   one,b                      ; DJNZ 39708        ; Loop back to #R39708 for next creature
+       jne  _39708                     ;
+       movb h,a                        ; LD A,H            ; If H is not 3 (i.e. at least one creature not at correct x-coordinates)...
+       cb   a,@bytes+3                 ; CP 3              ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @bytes+2,a                 ; LD A,2            ; Set All Coloured Creatures Home Flag
+       movb a,@_44894+9                ; LD (44903),A      ; ...
+       .pop bc                         ; POP BC            ; Return to routine that called the calling routine...
+       .ret                            ; RET               ; ...
+
+* Present Reward for Getting Coloured Creatures Home
+*
+* Used by the routine at #R39601.
+_39760:
+       bl   @cycle_colors_and_refresh  ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
+                                                           ; room
+       li   ix,_44972                  ; LD IX,44972       ; Load IX with address of complex state data for edible eyes (normally hidden off-screen)...
+       bl   @prepare_falling          ; CALL 55516        ; ...and set their "Can Fall" Flag and set initial velocity factor to 2
+       movb @bytes+4,a                 ; LD A,4            ; Set Coloured Creatures' Reward Given Flag...
+       movb a,@_44894+9                ; LD (44903),A      ; ...
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Update State of Large Yellow Creature (Level 3)
+*
+* Used by the routine at #R39137.
+update_yellow_creature_state:
+       li   iy,_44868                  ; LD IY,44868       ; Load IY with address of complex state data for Large Yellow Creature (Level 3)
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       li   hl,_44868+9                ; LD HL,44877       ; Load HL with address of Large Yellow Creature's flags...
+       movb *hl,a                      ; LD A,(HL)         ; ...and load flags into A
+       cb   a,@bytes+2                 ; CP 2              ; If creature is in "Rising From Floor" mode...
+       jeq  _39831                     ; JR Z,39831        ; ...then skip ahead to #R39831
+       cb   a,@bytes+4                 ; CP 4              ; If creature is in "Hunting" mode...
+       jeq  _39845                     ; JR Z,39845        ; ...then skip ahead to #R39845
+       cb   a,@bytes+8                 ; CP 8              ; If creature is in "Attacking" mode...
+       jeq  _39918                     ; JR Z,39918        ; ...then skip ahead to #R39918
+       cb   a,@bytes+16                ; CP 16             ; If creature is in "Just Attacked" mode...
+       jne  !                          ; JP Z,39934        ; ...then set creature's mode to "Returning Home", set Berk's "Has Been Killed" Flag and return
+       b    @_39934                    ;
+!
+       movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is not 3 (Yellow Creature's Room)...
+       cb   a,@bytes+3                 ; CP 3              ; ...
+       jeq  !                          ; JP NZ,39998       ; ...then set creature's mode to "Returning Home", move one step closer to home and return
+       b    @_39998                    ;
+!
+* "Returning Home" mode
+       movb @5(iy),a                   ; LD A,(IY+5)       ; If x-coordinate of creature's left side...
+       cb   a,@5(ix)                   ; CP (IX+5)         ; ...is the same as that of Berk's left side...
+       jeq  _39828                     ; JR Z,39828        ; ...then skip ahead to #R39828
+       ab   one,a                      ; INC A             ; If x-coordinate of creature's left side...
+       cb   a,@5(ix)                   ; CP (IX+5)         ; ...is not one character to the right of Berk's left side...
+       jeq  !                          ; JP NZ,39998       ; ...then set creature's mode to "Returning Home", move one step closer to home and return
+       b    @_39998                    ;
+!
+_39828:
+       equ  $
+       movb @bytes+2,a                 ; LD A,2            ; Set creature's mode to "Rising from Floor"...
+       movb a,*hl                      ; LD (HL),A         ; ...
+* "Rising from Floor" mode
+_39831:
+       .call @_39971                   ; CALL 39971        ; Move creature such that its left edge is up to two characters closer to Berk's
+       .call @_39961                   ; CALL 39961        ; Move creature up by two characters
+       movb @4(iy),a                   ; LD A,(IY+4)       ; If y-coordinate of creature's top...
+       cb   a,@bytes+108               ; CP 108            ; ...is 108 or greater...
+       jl   !                          ; RET NC            ; ...then return
+       .ret                            ;
+!
+       movb @bytes+4,*hl               ; LD (HL),4         ; Set creature's mode to "Hunting"
+* "Hunting" mode
+_39845:
+       movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is not 3 (Yellow Creature's Room)...
+       cb   a,@bytes+3                 ; CP 3              ; ...
+       jeq  !                          ; JP NZ,39998       ; ...then set creature's mode to "Returning Home", move one step closer to home and return
+       b    @_39998                    ;
+!
+       movb @berks_current_power,a                  ; LD A,(34220)      ; If Berk's current power is invisibility (Level 3)...
+       cb   a,@bytes+11                ; CP 11             ; ...
+       jeq  _39909                     ; JR Z,39909        ; ...then skip ahead to #R39909 ("confused" mode)
+       movb @4(ix),a                   ; LD A,(IX+4)       ; If y-coordinate of Berk's top...
+       cb   a,@bytes+103               ; CP 103            ; ...is less than 103...
+       jl   _39909                     ; JR C,39909        ; ...then skip ahead to #R39909 ("confused" mode)
+       .call @_39971                   ; CALL 39971        ; Move creature such that its left edge is up to two characters closer to Berk's
+       movb @4(iy),a                   ; LD A,(IY+4)       ; If creature's top...
+       ab   @bytes+4,a                 ; ADD A,4           ; ...is four characters above Berk's top...
+       cb   a,@4(ix)                   ; CP (IX+4)         ; ...
+       jeq  _39890                     ; JR Z,39890        ; ...then skip ahead to #R39890 (set "Attacking" mode)
+       jhe  _39961                     ; JR NC,39961       ; If creature's top is less than 4 characters above Berk's top then move creature up by two
+                                                           ; characters and return
+       ab   one,a                      ; INC A             ; If creature's top is five characters above Berk's top...
+       cb   a,@4(ix)                   ; CP (IX+4)         ; ...
+       jeq  _39890                     ; JR Z,39890        ; ...then skip ahead to #R39890 (set "Attacking" mode)
+       jl   _39951                     ; JR C,39951        ; If creature's top is more than five characters above Berk's top then move creature down two
+                                                           ; characters and return
+_39890:
+       movb @bytes+8,*hl               ; LD (HL),8         ; Set creature's mode to "Attacking"
+       movb one,@1(iy)                 ; LD (IY+1),1       ; Set creature's depth to 1
+       socb @bits+5,@9(ix)             ; SET 5,(IX+9)      ; Set Berk's "Do Not Update State" Flag
+       li   bc,_40442                  ; LD BC,40442       ; Set graphic layout data address for creature to #R40442 (Large Yellow Creature with mouth
+                                                           ; open)...
+       .call @_39944                   ; CALL 39944        ; ...
+       b    @drop_item_0               ; JP 36296          ; Make Berk drop the entity he is holding, load IY with its complex state data address and
+                                                           ; return
+* "Confused" mode
+_39909:
+       li   bc,_40485                  ; LD BC,40485       ; Set graphic layout data address for creature to #R40485 (Large Yellow Creature, animated,
+                                                           ; confused)...
+       .call @_39944                   ; CALL 39944        ; ...
+       b    @_40008                    ; JP 40008          ; Move creature one step closer to x (left) = 113, y (top) > 111 if not already there, and
+                                                           ; return
+* "Attacking" mode
+_39918:
+       .call @_39951                   ; CALL 39951        ; Move creature down two characters
+       movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set Berk's depth to zero
+       movb @bytes+16,*hl              ; LD (HL),16        ; Set creature's mode to "Just Attacked"
+       li   bc,_40451                  ; LD BC,40451       ; Set graphic layout data address for creature to #R40451 (Large Yellow Creature with mouth
+                                                           ; closed)...
+       b    @_39944                    ; JP 39944          ; ...and return
+
+* Unused routine
+       .ret                            ; RET               ; Return
+
+* Set Large Yellow Creature's Mode to "Returning Home", and Set Berk's "Has Been Killed" Flag
+*
+* Used by the routine at #R39776.
+_39934:
+       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       szcb @bits+5,@9(ix)             ; RES 5,(IX+9)      ; Reset Berk's "Do Not Update State" Flag
+       movb @bytes+0,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
+       .ret                            ; RET               ; Return
+
+* Set Graphic Layout Data Address for Entity at IY to BC
+*
+* Used by the routine at #R39776. Input:  BC  Graphic layout data address IY  Address of complex state data for an
+* entity
+_39944:
+       movb @c,@2(iy)                  ; LD (IY+2),C       ; Set graphic layout data address for entity to address in BC...
+       movb b,@3(iy)                   ; LD (IY+3),B       ; ...
+       .ret                            ; RET               ; Return
+
+* Move Entity at IY Down Two Characters
+*
+* Used by the routine at #R39776. Input:  IY  Address of complex state data for an entity
+_39951:
+       .call @_39954                   ; CALL 39954        ; Move entity at IY down one character
+* This entry point is used by the routine at #R40008.
+_39954:
+       ab   one,@4(iy)                 ; INC (IY+4)        ; Increase y-coordinates of entity's top and bottom edges...
+       ab   one,@6(iy)                 ; INC (IY+6)        ; ...
+       .ret                            ; RET               ; Return
+
+* Move Entity at IY Up Two Characters
+*
+* Used by the routine at #R39776. Input:  IY  Address of complex state data for an entity
+_39961:
+       .call @_39964                   ; CALL 39964        ; Move entity at IY up one character
+_39964:
+       sb   one,@4(iy)                 ; DEC (IY+4)        ; Decrease y-coordinates of entity's top and bottom edges...
+       sb   one,@6(iy)                 ; DEC (IY+6)        ; ...
+       .ret                            ; RET               ; Return
+
+* Move Entity IY Such that its Left Edge is Up to Two Characters Closer to Entity IX's
+*
+* Used by the routine at #R39776. Input:  IX  Address of complex state data for Entity A IY  Address of complex
+* state data for Entity B
+_39971:
+       .call @_39975                   ; CALL 39975        ; Move Entity B one character closer (horizontally) to Entity A...
+       jne  !                          ; RET Z             ; ...and if left edges now both at same x-coordinate then return
+       .ret                            ;
+!
+* If entities' left edges are not at the same x-coordinate, then proceed into the code block below and move entity B
+* by one additional character.
+_39975:
+       equ  $
+       movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinates of both entities' left edges are the same...
+       cb   a,@5(iy)                   ; CP (IY+5)         ; ...
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+       jl   _39991                     ; JR C,39991        ; If Entity B's left edge is to the right of Entity A's then move Entity B left by one
+                                                           ; character
+       ab   one,@5(iy)                 ; INC (IY+5)        ; Move Entity B right by one character...
+       ab   one,@7(iy)                 ; INC (IY+7)        ; ...
+       .ret                            ; RET               ; Return
+_39991:
+       sb   one,@5(iy)                 ; DEC (IY+5)        ; Move Entity B left by one character...
+       sb   one,@7(iy)                 ; DEC (IY+7)        ; ...
+       .ret                            ; RET               ; Return
+
+* Set Large Yellow Creature's Mode to "Returning Home", Move One Step Closer to Home and Return
+*
+* Used by the routine at #R39776. Input:  HL  Address of creature's flags IY  Address of complex state data for
+* creature
+_39998:
+       movb @bytes+0,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
+_40000:
+       movb @bytes+2,@1(iy)            ; LD (IY+1),2       ; Set creature's depth to 2
+       movb @bytes+122,a               ; LD A,122          ; Move creature one step closer to x (Left) = 113, y (Top) > 122...
+       jmp  _40010                     ; JR 40010          ; ...and return
+
+*********************************************************************************
+* Move Entity at IY One Step Closer to Home Position
+*
+* This routine moves an entity (whose complex state data is pointed to by IY) one character left or right, if such a
+* move would take the x-coordinate of that entity's left edge closer to a value of 113. The entity will also be
+* moved down by one character if the y-coordinate of its top edge is less than or equal to 111 (or the input value
+* in A if we are entering this routine via #R40010). Input:  A  (Entry at #R40010 only) Minimum allowed y-coordinate
+* for entity's top edge IY  Address of complex state data for an entity
+_40008:
+       movb @bytes+111,a               ; LD A,111          ; Load A with 111 (minimum allowed y-coordinate)
+* This entry point is used by the routine at #R39998.
+_40010:
+       cb   a,@4(iy)                   ; CP (IY+4)         ; If y-coordinate of entity's top edge is greater than value in A...
+       jl   _40018                     ; JR C,40018        ; ...then skip ahead to #R40018
+       .call @_39954                   ; CALL 39954        ; Move entity at IY down one character
+_40018:
+       movb @5(iy),a                   ; LD A,(IY+5)       ; If x-coordinate of entity's left edge...
+       cb   a,@bytes+113               ; CP 113            ; ...is 113...
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+       jl   _40033                     ; JR C,40033        ; ...else if greater than 113 then skip ahead to #R40033
+       sb   one,@5(iy)                 ; DEC (IY+5)        ; Move entity left one character...
+       sb   one,@7(iy)                 ; DEC (IY+7)        ; ...
+       .ret                            ; RET               ; Return
+_40033:
+       ab   one,@5(iy)                 ; INC (IY+5)        ; Move entity right one character...
+       ab   one,@7(iy)                 ; INC (IY+7)        ; ...
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Update State of Hatch (Level 3)
+*
+* Used by the routine at #R39137.
+update_hatsh_state:
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       li   hl,hatch_state_index                  ; LD HL,39150       ; If Hatch State Index is zero...
+       movb *hl,a                      ; LD A,(HL)         ; ...
+       socb a,a                        ; OR A              ; ...
+       jeq  _39176                     ; JR Z,39176        ; ...then skip ahead to #R39176
+* Hatch State Index is not zero
+       ab   one,*hl                    ; INC (HL)          ; Increase Hatch State Index
+       cb   a,@bytes+2                 ; CP 2              ; If Hatch State Index is 2 (Berk was thrown 1 cycle ago)...
+       jeq  _39264                     ; JR Z,39264        ; ...then skip ahead to #R39264
+       cb   a,@bytes+10                ; CP 10             ; If Hatch State Index is 10 (Berk was thrown 9 cycles ago)...
+       jeq  _39259                     ; JR Z,39259        ; ...then skip ahead to #R39259
+       cb   a,@bytes+11                ; CP 11             ; If Hatch State Index is 11 (Berk was thrown 10 cycles ago)...
+       jeq  _39269                     ; JR Z,39269        ; ...then skip ahead to #R39269
+       .ret                            ; RET               ; Return
+* Hatch State Index is zero
+_39176:
+       movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If Berk's Must Process Current Script Data Flag is set...
+       andi tmp0,1*256                 ;
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb *ix,a                      ; LD A,(IX+0)       ; If Berk's room is not 4 (Hatch Room)...
+       cb   a,@bytes+4                 ; CP 4              ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of Berk's bottom edge is not 121...
+       cb   a,@bytes+121               ; CP 121            ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of Berk's left edge is less than 109...
+       cb   a,@bytes+109               ; CP 109            ; ...
+       jhe  !                          ; RET C             ; ...then return
+       .ret                            ;
+!
+       movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of Berk's right edge is 120 or greater...
+       cb   a,@bytes+120               ; CP 120            ; ...
+       jl   !                          ; RET NC            ; ...then return
+       .ret                            ;
+!
+* At this point, Berk is standing on the hatch
+       movb @berk_entity_held,a                  ; LD A,(34221)      ; If Berk is holding the weight...
+       cb   a,@bytes+12                ; CP 12             ; ...
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+       ab   one,*hl                    ; INC (HL)          ; Increase Hatch State Index to 1
+       bl   @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       movb @berks_current_power,a                  ; LD A,(34220)      ; If Berk's current power is not invisibility (Level 3)...
+       cb   a,@bytes+11                ; CP 11             ; ...
+       jne  _39225                     ; JR NZ,39225       ; ...then skip ahead to #R39225
+       bl   @remove_current_power                   ; CALL 48417        ; Remove Berk's invisibility and reset corresponding edible eyes to their original position
+_39225:
+       movb @bytes+4,b                 ; LD B,4            ; Move Berk up four characters...
+_39227:
+       .call @_39442                   ; CALL 39442        ; ...
+       sb   one,b                      ; DJNZ 39227        ; ...
+       jne  _39227                     ;
+       movb @bytes+107,@5(ix)          ; LD (IX+5),107     ; Set x-coordinate of Berk's left edge to 107
+       movb @bytes+112,@7(ix)          ; LD (IX+7),112     ; Set x-coordinate of Berk's right edge to 112
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
+       li   hl,_59048                  ; LD HL,59048       ; Set Berk's graphic layout data address to #R59048...
+       movb @l,@2(ix)                  ; LD (IX+2),L       ; ...(Berk being thrown left)...
+       movb h,@3(ix)                   ; LD (IX+3),H       ; ...
+       li   hl,_35523                  ; LD HL,35523       ; Set current position in Berk's script data to #R35523...
+       mov  hl,@berk_script_pos        ; LD (35687),HL     ; (Berk being thrown left by Hatch)
+* Hatch State Index is 10 (Berk was thrown 9 cycles ago)
+_39259:
+       li   hl,_41115                  ; LD HL,41115       ; Load HL with graphic layout data address of Hatch half open with Bat (Animated)
+       jmp  _39274                     ; JR 39274          ; Skip ahead to #R39274 (set Hatch's GLD address to value in HL and return)
+* Hatch State Index is 2 (Berk was thrown 1 cycle ago)
+_39264:
+       li   hl,_41099                  ; LD HL,41099       ; Load HL with graphic layout data address of Hatch fully open With Bat (Animated)
+       jmp  _39274                     ; JR 39274          ; Skip ahead to #R39274 (set Hatch's GLD address to value in HL and return)
+* Hatch State Index is 11 (Berk was thrown 10 cycles ago)
+_39269:
+       movb @bytes+0,*hl               ; LD (HL),0         ; Set Hatch State Index to zero
+       li   hl,_41090                  ; LD HL,41090       ; Load HL with graphic layout data address of Hatch closed
+_39274:
+       movb @l,@hatch+2                ; LD (44792),HL     ; Set Hatch's graphic layout data address to value in HL
+       movb h,@hatch+3
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Update State of Clawed Foot (Level 3)
+*
+* Used by the routine at #R39137.
+update_clawed_foot_state:
+       movb @clawed_foot_tti,a                  ; LD A,(34228)      ; If Clawed Foot's Attack Timer is zero...
+       socb a,a                        ; OR A              ; ...
+       jeq  _39289                     ; JR Z,39289        ; ...then skip ahead to #R39289
+       sb   one,a                      ; DEC A             ; Decrease Clawed Foot's Attack Timer...
+       movb a,@clawed_foot_tti                  ; LD (34228),A      ; ...
+       .ret                            ; RET               ; Return
+* Clawed Foot is attacking
+_39289:
+       li   iy,_44881                  ; LD IY,44881       ; Load IY with address of complex state data for Clawed Foot (Level 3)
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Berk's current room
+       movb @_44881+9,a                ; LD A,(44890)      ; Load A with Clawed Foot's flags...
+       socb a,a                        ; OR A              ; ...and if any are set...
+       jne  _39337                     ; JR NZ,39337       ; ...then skip ahead to #R39337
+* Clawed Foot attack not yet started
+       movb *iy,a                      ; LD A,(IY+0)       ; If the Clawed Foot's room...
+       cb   a,*ix                      ; CP (IX+0)         ; ...is not the same as Berk's room...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @11(ix),a                  ; LD A,(IX+11)      ; If Berk's Walking Left Flag or Walking Right Flag is set...
+       andi a,3*256                    ; AND 3             ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @5(ix),a                   ; LD A,(IX+5)       ; Set the Clawed Foot's left edge...
+       ab   one,a                      ; INC A             ; ...to be one character to the right of Berk's left edge...
+       movb a,@5(iy)                   ; LD (IY+5),A       ; ...
+       ab   @bytes+2,a                 ; ADD A,2           ; Set the Clawed Foot's right edge...
+       movb a,@7(iy)                   ; LD (IY+7),A       ; ...to be two characters to the right of its left edge
+       socb @bits+1,@9(iy)             ; SET 1,(IY+9)      ; Set Clawed Foot's Moving Down Flag
+       jmp  _39341                     ; JR 39341          ; Skip ahead to #R39341
+* Clawed Foot attack underway
+_39337:
+       movb a,tmp0                     ; BIT 1,A           ; If Clawed Foot's Moving Down Flag is reset...
+       andi tmp0,2*256                 ;
+       jeq  _39420                     ; JR Z,39420        ; ...then skip ahead to #R39420
+_39341:
+       movb @bytes+3,b                 ; LD B,3            ; Load B with 3 (as the Clawed Foot moves down three characters at time)
+_39343:
+       ab   one,@4(iy)                 ; INC (IY+4)        ; Advance Clawed Foot one character down...
+       ab   one,@6(iy)                 ; INC (IY+6)        ; ...
+       movb @6(iy),a                   ; LD A,(IY+6)       ; If y-coordinate of bottom edge of Clawed Foot is 115...
+       cb   a,@bytes+115               ; CP 115            ; ...
+       jeq  _39359                     ; JR Z,39359        ; ...then skip ahead to #R39359
+       sb   one,b                      ; DJNZ 39343        ; Decrease remaining number of characters to move and loop back to #R39343 if not zero
+       jne  _39343                     ;
+       .ret                            ; RET               ; Return
+* Clawed Foot attempting to grab Berk
+_39359:
+       movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
+       andi tmp0,64*256                ;
+       jne  _39386                     ; JR NZ,39386       ; ...then skip ahead to #R39386 (set Clawed Foot's Moving Up Flag and return)
+       movb @10(ix),tmp0               ; BIT 6,(IX+10)     ; If Berk is falling...
+       andi tmp0,64*256                ;
+       jne  _39386                     ; JR NZ,39386       ; ...then skip ahead to #R39386 (set Clawed Foot's Moving Up Flag and return)
+       movb @5(iy),a                   ; LD A,(IY+5)       ; If Clawed Foot's left edge...
+       sb   one,a                      ; DEC A             ; ...is one character to the right of Berk's left edge...
+       cb   a,@5(ix)                   ; CP (IX+5)         ; ...
+       jeq  _39391                     ; JR Z,39391        ; ...then skip ahead to #R39391
+       sb   one,a                      ; DEC A             ; If Clawed Foot's left edge...
+       cb   a,@5(ix)                   ; CP (IX+5)         ; ...is two characters to the right of Berk's left edge...
+       jeq  _39391                     ; JR Z,39391        ; ...then skip ahead to #R39391
+* Berk is flying or falling, or Clawed Foot has missed
+_39386:
+       movb @bytes+4,@9(iy)            ; LD (IY+9),4       ; Set Clawed Foot's Moving Up Flag
+       .ret                            ; RET               ; Return
+* Make Clawed Foot grab Berk (Clawed Foot is one or two characters to the right of Berk's left edge)
+_39391:
+       li   bc,_35515                  ; LD BC,35515       ; Set current position in Berk's script data to...
+       mov  bc,@berk_script_pos        ; LD (35687),BC     ; ...Berk in floating position
+       socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Berk's Must Process Current Script Data Flag
+       movb @bytes+12,a                ; LD A,12           ; Set Clawed Foot's Moving Up Flag and Holding Berk Flag...
+       movb a,@9(iy)                   ; LD (IY+9),A       ; ...
+       li   bc,_40368                  ; LD BC,40368       ; Set Clawed Foot's graphic layout data address to point to #R40368 (Reaching, Closed)...
+_39410:
+       movb @c,@2(iy)                  ; LD (IY+2),C       ; ...
+       movb b,@3(iy)                   ; LD (IY+3),B       ; ...
+       bl   @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       .ret                            ; RET               ; Return
+* Check Clawed Foot's Moving Up Flag
+_39420:
+       movb a,tmp0                     ; BIT 2,A           ; If Clawed Foot's Moving Up Flag is reset...
+       andi tmp0,4*256                 ;
+       jeq  _39532                     ; JR Z,39532        ; ...then skip ahead to #R39532
+       sb   one,@4(iy)                 ; DEC (IY+4)        ; Move Clawed Foot up one character...
+       sb   one,@6(iy)                 ; DEC (IY+6)        ; ...
+       movb @6(iy),a                   ; LD A,(IY+6)       ; If y-coordinate of bottom of Clawed Foot...
+       cb   a,@bytes+95                ; CP 95             ; ...is 95...
+       jeq  _39449                     ; JR Z,39449        ; ...then skip ahead to #R39449
+       movb @9(iy),tmp0                ; BIT 3,(IY+9)      ; If Clawed Foot's Holding Berk Flag is reset...
+       andi tmp0,8*256                 ;
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+* This entry point is used by the routine at #R39151.
+_39442:
+       equ  $
+       sb   one,@4(ix)                 ; DEC (IX+4)        ; Move entity at IX (Berk) up one character...
+       sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
+       .ret                            ; RET               ; Return
+_39449:
+       movb @9(iy),tmp0                ; BIT 3,(IY+9)      ; If Clawed Foot's Holding Berk Flag is reset...
+       andi tmp0,8*256                 ;
+       jeq  _39527                     ; JR Z,39527        ; ...then skip ahead to #R39527 (Reset Clawed Foot to inactive state and return)
+       movb @clawed_foot_action,a                  ; LD A,(34229)      ; Increase Clawed Foot's Action Index...
+       ab   one,a                      ; INC A             ; ...
+_39459:
+       movb a,@clawed_foot_action                  ; LD (34229),A      ; ...
+       cb   a,@bytes+7                 ; CP 7              ; ...and if less than 7...
+       jl   _39470                     ; JR C,39470        ; ...then skip ahead to #R39470
+       movb one,a                      ; LD A,1            ; Set Clawed Foot's Action Index to 1...
+       jmp  _39459                     ; JR 39459          ; ...and jump to #R39470 (via #R39459)
+_39470:
+       cb   a,@bytes+3                 ; CP 3              ; If Clawed Foot's Action Index is less than 3...
+       jl   _39501                     ; JR C,39501        ; ...then skip ahead to #R39501 (i.e. make clawed foot release Berk, and return)
+       cb   a,@bytes+5                 ; CP 5              ; If Clawed Foot's Action Index is less than 5...
+       jl   _39482                     ; JR C,39482        ; ...then skip ahead to #R39482
+       movb @bytes+112,@e              ; LD E,112          ; Load E with 112 (prepare to set Clawed Foot's destination x-coordinate)
+       jmp  _39484                     ; JR 39484          ; Skip ahead to #R39484
+_39482:
+       movb @bytes+122,@e              ; LD E,122          ; Load E with 122 (prepare to set Clawed Foot's destination x-coordinate)
+_39484:
+       movb @e,@12(ix)                 ; LD (IX+12),E      ; Store destination x-coordinate in byte 12 of Berk's complex state data
+       movb a,tmp0                     ; BIT 0,A           ; If Clawed Foot's Action Index is even...
+       andi tmp0,1*256                 ;
+       jeq  _39496                     ; JR Z,39496        ; ...then skip ahead to #R39496
+       movb @bytes+16,@9(iy)           ; LD (IY+9),16      ; Set Clawed Foot's Move Left Flag
+       .ret                            ; RET               ; Return
+_39496:
+       movb @bytes+32,@9(iy)           ; LD (IY+9),32      ; Set Clawed Foot's Move Right Flag
+       .ret                            ; RET               ; Return
+* The instructions between #R39501 and #R39531 make the Clawed Foot release Berk.
+_39501:
+       movb @bytes+100,a               ; LD A,100          ; Set Clawed Foot's Attack Timer to 100...
+       movb a,@clawed_foot_tti                  ; LD (34228),A      ; ...i.e. Clawed Foot will attack again in 100 cycles
+       socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set Berk's "Can Fall" flag
+       movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set Berk's velocity factor to 2
+       li   bc,_35359                  ; LD BC,35359       ; Set current position in Berk's script data to...
+       mov  bc,@berk_script_pos        ; LD (35687),BC     ; ...Berk starting to fall downwards
+       li   bc,_40320                  ; LD BC,40320       ; Set Clawed Foot's graphic layout data address to point to #R40320 (Reaching, Open)...
+       .call @_39410                   ; CALL 39410        ; ...make Berk drop the entity he is holding and load IY with its complex state data address
+* Reset Clawed Foot to inactive state
+_39527:
+       movb @bytes+0,@9(iy)            ; LD (IY+9),0       ; Reset Clawed Foot's Flags
+_39531:
+       .ret                            ; RET               ; Return
+* Check Clawed Foot's Moving Left Flag
+_39532:
+       movb a,tmp0                     ; BIT 4,A           ; If Clawed Foot's Move Left Flag is reset...
+       andi tmp0,16*256                ;
+       jeq  _39552                     ; JR Z,39552        ; ...then skip ahead to #R39552
+       sb   one,@5(ix)                 ; DEC (IX+5)        ; Move Berk one character left...
+       sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
+       bl   @move_into_left_room       ; CALL 54348        ; Move Berk into room to the left, if appropriate
+       movb *ix,a                      ; LD A,(IX+0)       ; If Berk's room is 5 (room to the left of the Coloured Creatures' Room)...
+       cb   a,@bytes+5                 ; CP 5              ; ...then set Zero Flag
+       jmp  _39569                     ; JR 39569          ; Skip ahead to #R39569
+* Check Clawed Foot's Moving Right Flag
+_39552:
+       movb a,tmp0                     ; BIT 5,A           ; If Clawed Foot's Move Right Flag is reset...
+       andi tmp0,32*256                ;
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+       ab   one,@5(ix)                 ; INC (IX+5)        ; Move Berk one character right...
+       ab   one,@7(ix)                 ; INC (IX+7)        ; ...
+       bl   @move_into_right_room      ; CALL 54313        ; Move Berk into room to the right, if appropriate
+       movb *ix,a                      ; LD A,(IX+0)       ; If Berk's room is 7 (room to the right of the Coloured Creatures' Room)...
+       cb   a,@bytes+7                 ; CP 7              ; ...then set Zero Flag
+_39569:
+       jeq  !                          ; RET NZ            ; If Zero Flag is not set (i.e. Berk is not in Room 5 or Room 7) then return
+       .ret                            ;
+!
+       movb @12(ix),a                  ; LD A,(IX+12)      ; If the x-coordinate of Berk's left edge...
+       cb   a,@5(ix)                   ; CP (IX+5)         ; ...is not the same as the Clawed Foot's destination x-coordinate...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       li   iy,_44881                  ; LD IY,44881       ; Load IY with address of complex state data for Clawed Foot (Level 3)
+       b    @_39501                    ; JP 39501          ; Make Clawed Foot release Berk, and return
+

@@ -1,0 +1,368 @@
+*********************************************************************************
+* Update States of All Level 2 Entities
+*
+* Used by the routine at #R34438.
+update_level_2_entities:
+       .proc
+       .call @update_stalachites_state                   ; CALL 38592        ; Update states of stalactites (Level 2)
+       .call @update_apebeast_states                   ; CALL 38480        ; Update states of apebeasts (Level 2) and store current positions in script data
+       .call @update_bubo_state_and_store                   ; CALL 38054        ; Update state of Bubo (Level 2) and store current position in script data
+       .call @update_bupos_projectile                   ; CALL 38219        ; Update state of Bubo's projectile
+       .endproc                        ; RET               ; Return
+
+*********************************************************************************
+* Update States of Stalactites (Level 2)
+*
+* Used by the routine at #R38009.
+update_stalachites_state:
+       li   ix,_44305                  ; LD IX,44305       ; Load IX with address of complex state data for first of seven falling stalactites (Level 2)
+_38596:
+       movb @8(ix),a                   ; LD A,(IX+8)       ; If current entity class is not 34 (Stalactite, Level 2)...
+       cb   a,@bytes+34                ; CP 34             ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @12(ix),a                  ; LD A,(IX+12)      ; If velocity factor of stalactite is not zero (i.e. it is falling)...
+       socb a,a                        ; OR A              ; ...
+       jne  _38635                     ; JR NZ,38635       ; ...then skip ahead to #R38635
+       movb @bytes+40,a                ; LD A,40           ; Load A with a random number, 0-39...
+       bl   @rnd_no                    ; CALL 54222        ; ...
+       socb a,a                        ; OR A              ; ...and if this is not zero (39 in 40 chance)...
+       jeq  !                          ; JP NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
+       b    @_38748                    ;
+!
+       .call @move_projectile_down                   ; CALL 38756        ; Move stalactite down one character and load A with new top y-coordinate
+       movb @4(ix),a                   ; LD A,(IX+4)       ; Load A with top y-coordinate of stalactite (see trivia)
+       cb   a,@bytes+101               ; CP 101            ; If new top y-coordinate is not 101
+       jeq  !                          ; JP NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
+       b    @_38748                    ;
+!
+       movb one,@12(ix)                ; LD (IX+12),1      ; Set stalactite's velocity factor to 1
+       b    @_38748                    ; JP 38748          ; Advance IX to next entry in complex state data and loop back to #R38596
+_38635:
+       cb   a,one                      ; CP 1              ; If velocity factor is not 1...
+       jne  _38707                     ; JR NZ,38707       ; ...then check for collision with Berk killing him if so, ensure stalactite is falling and
+                                                           ; update its vertical position (#R38707)
+       movb @5(ix),@e                  ; LD E,(IX+5)       ; Load E with x-coordinate of left of stalactite
+       mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
+       movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is not the same as the stalactite's...
+       cb   a,*ix                      ; CP (IX+0)         ; ...
+       jne  _38679                     ; JR NZ,38679       ; ...then skip ahead to #R38679 to check Drutt's position
+       movb @11(iy),a                  ; LD A,(IY+11)      ; If Berk's Walking Left Flag is set...
+       movb a,tmp0                     ; BIT 1,A           ; ...
+       andi tmp0,2*256                 ;
+       jne  _38673                     ; JR NZ,38673       ; ...then skip ahead to #R38673
+       movb a,tmp0                     ; BIT 0,A           ; If Berk's Walking Right Flag is not set...
+       andi tmp0,1*256                 ;
+       jeq  _38679                     ; JR Z,38679        ; ...then skip ahead to #R38679 to check Drutt's position
+       movb @7(iy),a                   ; LD A,(IY+7)       ; If Berk's right-side x-coordinate is the same as the stalactite's left-side x-coordinate...
+       cb   a,@e                       ; CP E              ; ...
+       jeq  _38707                     ; JR Z,38707        ; ...then check for collision with Berk killing him if so, ensure stalactite is falling and
+                                                           ; update its vertical position (#R38707)
+       jmp  _38679                     ; JR 38679          ; Skip ahead to #R38679 to check Drutt's position
+_38673:
+       movb @5(iy),a                   ; LD A,(IY+5)       ; If Berk's left-side x-coordinate is the same as the stalactite's left-side x-coordinate...
+       cb   a,@e                       ; CP E              ; ...
+       jeq  _38707                     ; JR Z,38707        ; ...then check for collision with Berk killing him if so, ensure stalactite is falling and
+                                                           ; update its vertical position (#R38707)
+_38679:
+       li   iy,drutts_state_data_2                  ; LD IY,44396       ; Load IY with address of complex state data for Drutt (Level 2)
+       movb *iy,a                      ; LD A,(IY+0)       ; If Drutt's current room is not the same as the stalactite's...
+       cb   a,*ix                      ; CP (IX+0)         ; ...
+       jne  _38699                     ; JR NZ,38699       ; ...then skip ahead to #R38699
+       movb @5(iy),a                   ; LD A,(IY+5)       ; If Drutt's left-side x-coordinate is the same as the stalactite's left-side x-coordinate...
+       cb   a,@5(ix)                   ; CP (IX+5)         ; ...
+       jeq  _38707                     ; JR Z,38707        ; ...then check for collision with Berk killing him if so, ensure stalactite is falling and
+                                                           ; update its vertical position (#R38707)
+_38699:
+       movb @bytes+200,a               ; LD A,200          ; Load A with a random number, 0-199...
+       bl   @rnd_no                    ; CALL 54222        ; ...
+       socb a,a                        ; OR A              ; ...and if this is not zero (199 in 200 chance)...
+       jne  _38748                     ; JR NZ,38748       ; ...then advance IX to next entry in complex state data and loop back to #R38596
+_38707:
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+                                                           ; Flag is set...
+       cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
+       jne  _38718                     ; JR NZ,38718       ; ...then skip ahead to #R38718 (start stalactite falling)
+       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       .ret                            ; RET               ; Return
+_38718:
+       movb @12(ix),b                  ; LD B,(IX+12)      ; Load B with stalactite's velocity factor...
+_38721:
+       .call @move_projectile_down                   ; CALL 38756        ; ...and move stalactite down by this many characters...
+       sb   one,b                      ; DJNZ 38721        ; ...
+       jne  _38721                     ;
+       ab   one,@12(ix)                ; INC (IX+12)       ; Increase stalactite's velocity factor by one
+       movb @4(ix),a                   ; LD A,(IX+4)       ; If y-coordinate of top of stalactite is less than 150...
+       cb   a,@bytes+150               ; CP 150            ; ...
+       jl   _38748                     ; JR C,38748        ; ...then advance IX to next entry in complex state data and loop back to #R38596
+       movb @bytes+98,@4(ix)           ; LD (IX+4),98      ; Move stalactite back to top of room...
+       movb @bytes+100,@6(ix)          ; LD (IX+6),100     ; ...
+       movb @bytes+0,@12(ix)           ; LD (IX+12),0      ; ...and set its velocity factor to zero
+_38748:
+       li   bc,13                      ; LD BC,13          ; Advance IX by 13 bytes to move to next complex state data entry...
+       a    bc,ix                      ; ADD IX,BC         ; ...
+       b    @_38596                    ; JP 38596          ; ...and loop back to #R38596 for next entity
+
+*********************************************************************************
+* Update States of Apebeasts (Level 2) and Store Current Positions in Script Data
+*
+* Used by the routine at #R38009.
+update_apebeast_states:
+       li   ix,_44162                  ; LD IX,44162       ; Load IX with address of complex state data for Green Apebeast 1 (Level 2)
+       li   iy,apebeasts_script_data_pos                  ; LD IY,38424       ; Point IY at Table of Current Positions in Apebeasts' Script Data
+_38488:
+       movb @1(ix),a                   ; LD A,(IX+1)       ; If depth of Apebeast is zero (i.e. Apebeast killed by Bubo)...
+       socb a,a                        ; OR A              ; ...
+       jeq  _38523                     ; JR Z,38523        ; ...then skip ahead to #R38523 (i.e. move onto next apebeast)
+       movb *iy,@l                     ; LD L,(IY+0)       ; Load HL with current position in script data for current apebeast...
+       movb @1(iy),h                   ; LD H,(IY+1)       ; ...
+       mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
+       .push ix                        ; PUSH IX           ; Store IX
+       .push iy                        ; PUSH IY           ; Store IY
+       .call @update_current_apebeast                   ; CALL 38540        ; Update the state of the current apebeast
+       .pop iy                         ; POP IY            ; Restore IY
+       .pop ix                         ; POP IX            ; Restore IX
+       mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data for current apebeast) stored at #R34277...
+       movb @l,*iy                     ; LD (IY+0),L       ; ...in table at #R38424 as current position in this apebeast's script data...
+       movb h,@1(iy)                   ; LD (IY+1),H       ; ...
+_38523:
+       inc  iy                         ; INC IY            ; Advance IY to next entry in table (i.e. position in next apebeast's script data)...
+       inc  iy                         ; INC IY            ; ...
+       li   de,13                      ; LD DE,13          ; Advance IX by 13 bytes (i.e. to entry for next apebeast)...
+       a    de,ix                      ; ADD IX,DE         ; ...
+       movb @8(ix),a                   ; LD A,(IX+8)       ; If class of this next entry is 25 (i.e. Apebeast)...
+       cb   a,@bytes+25                ; CP 25             ; ...
+       jeq  _38488                     ; JR Z,38488        ; ...then loop back to #R38488
+       .ret                            ; RET               ; Return
+
+* Update State of an Apebeast
+*
+* Used by the routine at #R38480.
+update_current_apebeast:
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+                                                           ; Flag is set...
+       jnc  !                          ; JP C,48096        ; ...and if no collision occurred, then jump to #R48096 (advance HL to next script instruction
+       b    @inct_execute_script                    ;
+!
+                                                           ; and execute)
+       cb   a,@bytes+31                ; CP 31             ; If collision was with entity of class 31 (Berk)...
+       jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
+       bl   @set_bert_killed                   ;
+!
+       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+
+*********************************************************************************
+* Reset Current Positions in Apebeasts' Script Data to Initial Values
+*
+* Used by the routine at #R34751.
+reset_apebeasts:
+       li   de,apebeasts_script_data_pos                  ; LD DE,38424       ; Point DE at Table of Current Positions in Apebeasts' Script Data
+       li   hl,_38416                  ; LD HL,38416       ; Point HL at Table of Initial Positions in Apebeasts' Script Data
+       li   bc,8                       ; LD BC,8           ; Load BC with 8 (as there are eight bytes to copy)
+       .ldir                           ; LDIR              ; Overwrite addresses in Table of Current Positions with those from Table of Initial Positions
+       rt                              ; RET               ; Return
+*// reset_apebeasts
+
+*********************************************************************************
+* Update State of Bubo (Level 2) and Store Current Position in Script Data
+*
+* Used by the routine at #R38009.
+update_bubo_state_and_store:
+       li   ix,_44227                  ; LD IX,44227       ; Load IX with address of complex state data for Bubo (Level 2)
+       mov  @bubo_script_pos,hl        ; LD HL,(38022)     ; Load HL with current position in Bubo's script data from #R38022...
+       mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
+       .call @update_bubo_state                   ; CALL 38074        ; Update state of Bubo
+       mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
+       mov  hl,@bubo_script_pos        ; LD (38022),HL     ; ...at #R38022 as current position in Bubo's script data
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Update State of Bubo
+*
+* Used by the routine at #R38054. Input:  IX  Address of complex state data for Bubo (Level 2)
+update_bubo_state:
+       movb @9(ix),tmp0                ; BIT 3,(IX+9)      ; If Bubo's Harmless Flag is set...
+       andi tmp0,8*256                 ;
+       jne  _38101                     ; JR NZ,38101       ; ...then skip ahead to #R38101
+       movb @berks_current_power,a                  ; LD A,(34220)      ; If Berk's current power is not immunity to Bubo (Level 2)...
+       cb   a,@bytes+9                 ; CP 9              ; ...
+       jne  _38093                     ; JR NZ,38093       ; ...then skip ahead to #R38093
+       socb @bits+3,@9(ix)             ; SET 3,(IX+9)      ; Set Bubo's Harmless Flag
+       jmp  _38101                     ; JR 38101          ; Skip ahead to #R38101
+_38093:
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+                                                           ; Flag is set...
+       cb   a,@bytes+31                ; CP 31             ; ...and if collision was with entity of class 31 (Berk)...
+       jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
+       bl   @set_bert_killed                   ;
+!
+_38101:
+       equ  $
+       li   iy,_44214                  ; LD IY,44214       ; Load IY with address of complex state data for Bubo's Projectile (Level 2)
+       movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If Bubo's Must Process Current Script Data Flag is set (Bubo firing)...
+       andi tmp0,1*256                 ;
+       jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
+       b    @inct_execute_script                    ;
+!
+       movb @9(iy),tmp0                ; BIT 1,(IY+9)      ; If Projectile's Fired Flag is set...
+       andi tmp0,2*256                 ;
+       jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
+       b    @inct_execute_script                    ;
+!
+_38119:
+       equ  $
+       movb @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Bubo is not being carried...
+       andi tmp0,32*256                ;
+       jeq  _38132                     ; JR Z,38132        ; ...then skip ahead to #R38132
+       socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set Bubo's Waiting to Fire Flag
+       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+* The code block below is only entered if Bubo's Must Process Current Script Data Flag is reset (i.e. he is not
+* firing), the Projectile's Fired Flag is reset and Bubo is not being carried.
+_38132:
+       movb @1(ix),a                   ; LD A,(IX+1)       ; If Bubo has a depth of 2...
+       cb   a,@bytes+2                 ; CP 2              ; ...
+       jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
+       b    @inct_execute_script                    ;
+!
+       movb @9(ix),tmp0                ; BIT 2,(IX+9)      ; If Bubo's Waiting to Fire Flag is set, i.e. he has just been dropped...
+       andi tmp0,4*256                 ;
+       jne  _38155                     ; JR NZ,38155       ; ...then skip ahead to #R38155 (make Bubo fire)
+       movb @bytes+60,a                ; LD A,60           ; Load A with a random number, 0-59...
+       bl   @rnd_no                   ; CALL 54222        ; ...
+       socb a,a                        ; OR A              ; ...and if this is not zero (59 in 60 chance)...
+       jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
+       b    @inct_execute_script                    ;
+!
+_38155:
+       equ  $
+       szcb @bits+2,@9(ix)             ; RES 2,(IX+9)      ; Reset Bubo's Waiting to Fire Flag
+       li   hl,_38032                  ; LD HL,38032       ; Point HL at script data for Bubo firing...
+       b    @execute_script                    ; JP 48098          ; ...and execute
+
+*********************************************************************************
+* Update State of Bubo's Projectile
+*
+* Used by the routine at #R38009.
+update_bupos_projectile:
+       li   ix,_44214                  ; LD IX,44214       ; Load IX with address of complex state data for Bubo's Projectile (Level 2)
+       movb @9(ix),tmp0                ; BIT 1,(IX+9)      ; If projectile's Fired Flag is reset...
+       andi tmp0,2*256                 ;
+       jne  !                          ; RET Z             ; ...then return
+       .ret                            ;
+!
+       movb @9(ix),tmp0                ; BIT 2,(IX+9)      ; If projectile's Has Hit Target Flag is reset...
+       andi tmp0,4*256                 ;
+       jeq  _38252                     ; JR Z,38252        ; ...then update position of projectile and knock key down if appropriate
+       li   bc,_39131                  ; LD BC,39131       ; Point BC at graphic layout data for Bubo's Projectile...
+       movb @c,@2(ix)                  ; LD (IX+2),C       ; ...and set this as the Graphic Lookup Address for the projectile's complex state data
+                                                           ; entry...
+       movb b,@3(ix)                   ; LD (IX+3),B       ; ...
+       movb @bytes+0,@9(ix)            ; LD (IX+9),0       ; Reset projectile's Has Hit Target Flag and Fired Flag
+       movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set projectile's depth to zero
+       .ret                            ; RET               ; Return
+_38252:
+       li   iy,_44227                  ; LD IY,44227       ; Point IY at complex state data for Bubo (Level 2)
+       movb @12(ix),a                  ; LD A,(IX+12)      ; If projectile's velocity factor is not zero...
+       socb a,a                        ; OR A              ; ...
+       jne  _38267                     ; JR NZ,38267       ; ...then skip ahead to #R38267
+       .call @start_level_2_key_falling                   ; CALL 38377        ; Start level 2 key falling if Bubo's projectile is in place below it
+       jmp  _38361                     ; JR 38361          ; Jump to #R38361 (increase velocity and handle landing if appropriate)
+_38267:
+       movb a,tmp0                     ; BIT 7,A           ; If bit 7 of projectile's velocity factor is set (i.e. negative, moving upwards)...
+       andi tmp0,128*256               ;
+       jne  _38336                     ; JR NZ,38336       ; ...then skip ahead to #R38336
+       cb   a,@bytes+6                 ; CP 6              ; If projectile's velocity factor is less than 6...
+       jl   _38277                     ; JR C,38277        ; ...then skip ahead to #R38277
+       movb @bytes+5,a                 ; LD A,5            ; Load A with 5 (terminal velocity)
+_38277:
+       movb a,b                        ; LD B,A            ; Load B with velocity value
+_38278:
+       .push bc                        ; PUSH BC           ; Store BC (B = remaining velocity value)
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+                                                           ; Flag is set...
+       joc  _38328                     ; JR C,38328        ; ...and if no collision occurred, then skip ahead to #R38328
+       cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
+       jne  _38293                     ; JR NZ,38293       ; ...then skip ahead to #R38293
+       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       jmp  _38328                     ; JR 38328          ; Skip ahead to #R38328
+_38293:
+       cb   a,@bytes+25                ; CP 25             ; If collision was not with entity of class 25 (Green Apebeast, Level 2)...
+       jne  _38328                     ; JR NZ,38328       ; ...then skip ahead to #R38328
+       movb @current_characters_room,a                  ; LD A,(34218)      ; Load A with current character's current room...
+       cb   a,*ix                      ; CP (IX+0)         ; ...and if this is not the same as the projectile's room...
+       jne  _38328                     ; JR NZ,38328       ; ...then skip ahead to #R38328
+       movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set Ape Beast's depth to zero
+       movb @bytes+0,@11(iy)           ; LD (IY+11),0      ; Reset Ape Beast's flags
+       li   bc,_51483                  ; LD BC,51483       ; Point BC at graphic layout data for Explosion (Bubo's Projectile / Fallen Drips, Level 4)...
+       movb @c,@2(ix)                  ; LD (IX+2),C       ; ...and set this as the Graphic Lookup Address for the projectile's complex state data
+                                                           ; entry...
+       movb b,@3(ix)                   ; LD (IX+3),B       ; ...
+       socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set projectile's Has Hit Target Flag
+       .pop bc                         ; POP BC            ; Restore BC (B = current velocity factor)
+       .ret                            ; RET               ; Return
+_38328:
+       .call @move_projectile_down     ; CALL 38756        ; Move projectile down one character
+       .pop bc                         ; POP BC            ; Restore BC (B = current velocity factor)
+       sb   one,b                      ; DJNZ 38278        ; Decrease remaining velocity value and loop back to #R38278 if not zero
+       jne  _38278                     ;
+       jmp  _38361                     ; JR 38361          ; Skip ahead to #R38361 (increase velocity and handle landing if appropriate)
+* Projectile moving upwards
+_38336:
+       neg a                           ; NEG               ; Multiply projectile's velocity factor by -1
+       cb   a,@bytes+6                 ; CP 6              ; If projectile's velocity factor is now less than 6...
+       jl   _38344                     ; JR C,38344        ; ...then skip ahead to #R38344 (change projectile's y-coordinate based upon velocity)
+       movb @bytes+5,a                 ; LD A,5            ; Load A with 5 (i.e. cap velocity magnitude at 5)
+_38344:
+       neg a                           ; NEG               ; Multiply value in A by -1...
+       movb a,@e                       ; LD E,A            ; ...and load value (capped velocity) into E
+       movb @4(ix),a                   ; LD A,(IX+4)       ; Decrease projectile's y-coordinate by value in E...
+       ab   @e,a                       ; ADD A,E           ; ...
+       movb a,@4(ix)                   ; LD (IX+4),A       ; ...
+       movb @6(ix),a                   ; LD A,(IX+6)       ; ...
+       ab   @e,a                       ; ADD A,E           ; ...
+       movb a,@6(ix)                   ; LD (IX+6),A       ; ...
+_38361:
+       movb @4(ix),a                   ; LD A,(IX+4)       ; If projectile's y-coordinate is at least 124...
+       cb   a,@bytes+124               ; CP 124            ; ...
+       jhe  _38372                     ; JR NC,38372       ; ...then skip ahead to #R38372 (reset projectile's Fired Flag and return)
+       ab   one,@12(ix)                ; INC (IX+12)       ; Increase projectile's velocity factor by one
+       .ret                            ; RET               ; Return
+_38372:
+       szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset projectile's Fired Flag
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Start Level 2 Key Falling if Bubo's Projectile is in Place Below it
+*
+* Used by the routine at #R38219. Input:  IX  Address of complex state data for Bubo's projectile (Level 2)
+start_level_2_key_falling:
+       movb *ix,a                      ; LD A,(IX+0)       ; If room of projectile is not 1...
+       cb   a,one                      ; CP 1              ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @5(ix),a                   ; LD A,(IX+5)       ; If projectile's left-side has an x-coordinate less than 114...
+       cb   a,@bytes+114               ; CP 114            ; ...
+       jhe  !                          ; RET C             ; ...then return
+       .ret                            ;
+!
+       cb   a,@bytes+118               ; CP 118            ; If projectile's left-side has an x-coordinate of 118 or more...
+       jl   !                          ; RET NC            ; ...then return
+       .ret                            ;
+!
+       li   iy,_44240                  ; LD IY,44240       ; Load IY with address of complex state data for Key (Level 2)
+       movb *iy,a                      ; LD A,(IY+0)       ; If key's room is not 2...
+       cb   a,@bytes+2                 ; CP 2              ; ...
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       movb @10(iy),tmp0               ; BIT 6,(IY+10)     ; If key's Is Falling Flag is set...
+       andi tmp0,64*256                ;
+       jeq  !                          ; RET NZ            ; ...then return
+       .ret                            ;
+!
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; Set key's Is Falling Flag
+       movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set key's velocity factor to 2
+       .ret                            ; RET               ; Return
+
