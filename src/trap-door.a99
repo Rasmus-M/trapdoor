@@ -444,18 +444,18 @@ update_berk_state:
        jne  update_berk_state_1        ; RET NZ            ; ...then return
        mov  @berk_script_pos,hl        ; LD HL,(35687)     ; Load current position in Berk's script data from #R35687 into HL...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
-       bl  @update_berk_state_2      ; CALL 35735        ; Update state of Berk depending upon currently selected character, control input and currently
+       bl  @update_berk_state_2        ; CALL 35735        ; Update state of Berk depending upon currently selected character, control input and currently
                                                            ; active power
        mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
        mov  hl,@berk_script_pos        ; LD (35687),HL     ; ...at #R35687 as current position in Berk's script data
-       movb @berks_current_power,a                  ; LD A,(34220)      ; If Berk's current power is not invisibility (level 3)...
+       movb @berks_current_power,a     ; LD A,(34220)      ; If Berk's current power is not invisibility (level 3)...
        cb   a,@bytes+11                ; CP 11             ; ...
        jne  update_berk_state_1        ; RET NZ            ; ...then return
 * Current power is invisibility (Level 3)
        li   bc,_50800                  ; LD BC,50800       ; Load BC with address of blank graphic layout data...
        movb @c,@2(ix)                  ; LD (IX+2),C       ; ...and set this as Berk's current graphic layout data address...
        movb b,@3(ix)                   ; LD (IX+3),B       ; ...
-       bl   @dec_power_duration                   ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
+       bl   @dec_power_duration        ; CALL 48388        ; Decrease remaining time for current power and if zero, exit this routine and run script data
                                                            ; for removal of power
 update_berk_state_1:
        .endproc                        ; RET               ; Return
@@ -513,21 +513,21 @@ update_berk_state_3:
        equ  $
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is not flying...
        andi tmp0,64*256                ;                   
-       jeq  update_berk_state_4                     ; JR Z,35802        ; ...then skip ahead to #R35802
+       jeq  update_berk_state_4        ; JR Z,35802        ; ...then skip ahead to #R35802
 * Berk is flying
        szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset Berk's Is Flying Flag
        li   hl,_35359                  ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * No control pressed and Berk not flying
 update_berk_state_4:
        movb @9(ix),tmp0                ; BIT 1,(IX+9)      ; If Berk's Facing Into Screen Flag is reset...
        andi tmp0,2*256                 ;                   
-       jeq  update_berk_state_6                     ; JR Z,35821        ; ...then skip ahead to #R35821
+       jeq  update_berk_state_6        ; JR Z,35821        ; ...then skip ahead to #R35821
 * No control pressed, Berk not flying and Berk's Facing Into Screen Flag is set
        movb @11(ix),tmp0               ; BIT 3,(IX+11)     ; If Berk's Unused (11,3) Flag is reset...
        andi tmp0,8*256                 ;                   
        jne  !                          ; JP Z,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;
 !
 * No control pressed, Berk not flying, Berk's Facing Into Screen and Unused (11,3) flags are set This entry point is
 * used by the routine at #R35577.
@@ -545,9 +545,9 @@ update_berk_state_7:
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
        andi tmp0,64*256                ;                   
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;                   
+       b    @inct_execute_script       ;
 !
-       bl   @eat                   ; CALL 36008        ; If Berk is holding an edible entity them make him eat it, process appropriate script data
+       bl   @eat                       ; CALL 36008        ; If Berk is holding an edible entity them make him eat it, process appropriate script data
                                                            ; and return to calling routine
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Temporarily decrease y-coordinate of Berk's top edge
        bl   @chk_coll_next_depth_rev   ; CALL 54890        ; Check entity at IX for collision with another entity (in reverse order) at next depth level
@@ -617,21 +617,21 @@ update_berk_state_11:
                                                            ; turn into screen
        movb @4(iy),a                   ; LD A,(IY+4)       ; Load A with y-coordinate of top edge of coloured creature slot... (see trivia)
        sb   one,a                      ; DEC A             ; ...minus 1...
-       movb a,@berk_coloured_creature                  ; LD (34222),A      ; ...and store at #R34222
+       movb a,@berk_coloured_creature  ; LD (34222),A      ; ...and store at #R34222
        li   hl,_35235                  ; LD HL,35235       ; Point HL at script data for Berk putting an entity down above floor behind him...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * No collision, collision with non-interactive entity or interaction conditions not met
 update_berk_state_12:
-       movb @berks_current_power,a                  ; LD A,(34220)      ; If Berk has no current power...
+       movb @berks_current_power,a     ; LD A,(34220)      ; If Berk has no current power...
        socb a,a                        ; OR A              ; ...
-       jeq  update_berk_state_13                     ; JR Z,35969        ; ...then skip ahead to #R35969
+       jeq  update_berk_state_13       ; JR Z,35969        ; ...then skip ahead to #R35969
        cb   a,@bytes+4                 ; CP 4              ; If Berk's current power is 1-3 (jumping)...
        jhe  !                          ; JP C,35995        ; ...then skip ahead to #R35995
-       b    @update_berk_state_15                    ;
+       b    @update_berk_state_15      ;
 !
        cb   a,@bytes+9                 ; CP 9              ; If Berk's current power is 4-8 (flying)...
        jhe  !                          ; JP C,35985        ; ...then skip ahead to #R35985
-       b    @update_berk_state_14                    ;
+       b    @update_berk_state_14      ;
 !
 * Berk has neither jumping nor flying power
 update_berk_state_13:
@@ -651,13 +651,13 @@ update_berk_state_13:
 update_berk_state_14:
        socb @bits+6,@9(ix)             ; SET 6,(IX+9)      ; Set Berk's Is Flying Flag
        li   hl,_35417                  ; LD HL,35417       ; Point HL at script data for Berk starting to fly...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Berk's current power is jumping
 update_berk_state_15:
-       bl   @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
+       bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        movb @bytes+129,@12(ix)         ; LD (IX+12),129    ; Set Berk's Is Jumping Flag and set initial jump velocity to 1
        li   hl,_35441                  ; LD HL,35441       ; Point HL at script data for Berk starting to jump straight up...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 *********************************************************************************
 * Make Berk Eat the Entity He is Holding, if Edible, and Exit Calling Routine
@@ -1090,8 +1090,8 @@ reset_skeleton_and_bat:
 update_level_1_entities:
        .proc
        .call @execute_bonis_kidnap     ; CALL 36887        ; Execute script data for Boni's kidnap and handle Trap Door opening and closing
-       .call @update_bat_state_and_store                   ; CALL 37062        ; Update state of Bat (Level 1) and store current position in script data
-       .call @update_state_of_spiders                   ; CALL 37586        ; Update states of the Spiders (Level 1) and store current positions in script data
+       .call @update_bat_state_and_store ; CALL 37062        ; Update state of Bat (Level 1) and store current position in script data
+       .call @update_state_of_spiders  ; CALL 37586        ; Update states of the Spiders (Level 1) and store current positions in script data
        .endproc                        ; RET               ; Return
 
 *********************************************************************************
@@ -5033,23 +5033,23 @@ rnd_no_1:
 * Used by the routines at #R35735 and #R55041. Input:  IX  Address of complex state data for an entity
 move_into_new_room:
        .proc
-       movb @tmp_width_current_room,a                  ; LD A,(34235)      ; Load A with width of current room (chars) + 97...
+       movb @tmp_width_current_room,a  ; LD A,(34235)      ; Load A with width of current room (chars) + 97...
        sb   one,a                      ; DEC A             ; ...
        sb   one,a                      ; DEC A             ; ...
        cb   a,@5(ix)                   ; CP (IX+5)         ; If x-coordinate of left side (+100) of entity is greater than this...
-       jl   _54306                     ; JR C,54306        ; ...then skip ahead to #R54306
+       jl   move_into_new_room_1       ; JR C,54306        ; ...then skip ahead to #R54306
        movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of right side (+100) of entity is not less than 102...
        cb   a,@bytes+102               ; CP 102            ; ...
-       jhe  move_into_new_room_1       ; RET NC            ; ...then return
+       jhe  move_into_new_room_2       ; RET NC            ; ...then return
        bl   @get_left_room_index       ; CALL 54539        ; Load B with index of room to left of entity's current room
        bl   @do_move_into_left_room    ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
                                                            ; if moving entity is Berk
-       jmp  move_into_new_room_1       ; RET               ; Return
-_54306:
+       jmp  move_into_new_room_2       ; RET               ; Return
+move_into_new_room_1:
        bl   @get_right_room_index      ; CALL 54505        ; Load B with index of room to right of current character's current room
        bl    @do_move_into_right_room  ; CALL 54383        ; Move entity at IX into room to right of its current room and update position of carried
                                                            ; entity if moving entity is Berk
-move_into_new_room_1:
+move_into_new_room_2:
        .endproc                        ; RET               ; Return
 *// move_into_new_room
 
@@ -5629,6 +5629,7 @@ handle_berk_jump:
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jne  handle_berk_or_drutt_jump_1 ; JR NZ,55065       ; ...then skip ahead to #R55065
+       jmp  handle_berk_or_drutt_jump
 handle_berk_jump_1:
        .endproc
 
