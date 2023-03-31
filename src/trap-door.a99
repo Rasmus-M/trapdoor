@@ -83,8 +83,8 @@ main_all_levels:
        bl   @check_control_input       ; CALL 47893        ; Check for control input and store at #R34219
        bl   @move_falling_entities     ; CALL 55525        ; Move all falling entities down by distances appropriate to their current velocity factors
        bl   @swap_characters           ; CALL 34916        ; If Fire Pressed, or Character Swap Pending Flag set, then swap characters
-       bl   @clear_prim_disp_buf_area  ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
-       bl   @populate_prim_disp_buf    ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
+       bl   @clear_display_buffer      ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
+       bl   @populate_display_buffer   ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
        bl   @draw_display_buffer       ; CALL 54034        ; Draw contents of Primary Display Buffer to display
        bl   @play_sound                ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
@@ -3017,7 +3017,7 @@ _42512:
 * Populate Primary Display Buffer with Layout Data for Current Character's Current Room
 * 
 * Used by the routine at #R34438.
-populate_prim_disp_buf:
+populate_display_buffer:
        .proc
        ; LD HL,(34279)                 ; Modify instruction at #R46045 with address of Primary Display Buffer..
                                        ; LD (46046),HL     ; ...
@@ -3027,38 +3027,38 @@ populate_prim_disp_buf:
                                        ; LD B,A            ; ...
        sb   d,d                        ; LD D,0            ; Load D with zero
 * Start drawing simple entities
-populate_prim_disp_buf_1:
+populate_display_buffer_1:
        mov  @current_data_addrs,ix     ; LD IX,(34236)     ; Load IX with start address of current level's simple state data
        movb @bytes+6,@e                ; LD E,6            ; Load DE with 6 (as simple state data entries are 6 bytes wide)
-populate_prim_disp_buf_2:
+populate_display_buffer_2:
        movb *ix,a                      ; LD A,(IX+0)       ; Load first byte of current simple state data entry into A
        cb   a,@bytes+255               ; CP 255            ; If this is 255 (end marker for complex state data)...
-       jeq  populate_prim_disp_buf_5   ; JR Z,45961        ; ...then skip ahead to #R45961
+       jeq  populate_display_buffer_5  ; JR Z,45961        ; ...then skip ahead to #R45961
        cb   a,@bytes+254               ; CP 254            ; If it is not 254 (end marker for level's simple state data)...
-       jne  populate_prim_disp_buf_3   ; JR NZ,45939       ; ...then skip ahead to #R45939
+       jne  populate_display_buffer_3  ; JR NZ,45939       ; ...then skip ahead to #R45939
 * At this point, we have passed the end marker for the simple state data block and are now at the start of the
 * complex state data block whose entries are 13 bytes wide.
        movb @bytes+13,@e               ; LD E,13           ; Load DE with 13
        inc  ix                         ; INC IX            ; Advance IX to start of complex state data block
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with entity's room index
 * At this point, A holds the index of the room to which the simple or complex entity belongs
-populate_prim_disp_buf_3:
+populate_display_buffer_3:
        cb   a,b                        ; CP B              ; If entity's room is not the same as the current character's current room...
-       jne  populate_prim_disp_buf_4   ; JR NZ,45957       ; ...then skip ahead to #R45957
+       jne  populate_display_buffer_4  ; JR NZ,45957       ; ...then skip ahead to #R45957
        movb @c,a                       ; LD A,C            ; If entity's depth is not the same as current depth in C...
        cb   a,@1(ix)                   ; CP (IX+1)         ; ...
-       jne  populate_prim_disp_buf_4   ; JR NZ,45957       ; ...then skip ahead to #R45957
+       jne  populate_display_buffer_4  ; JR NZ,45957       ; ...then skip ahead to #R45957
        .exx                            ; EXX               ; Switch registers
        .push ix                        ; PUSH IX           ; Store IX (pointer to current entry in simple/complex state data)
        bl   @draw_entity               ; CALL 45965        ; Load Primary Display Buffer with graphic layout data for current entity
        .pop ix                         ; POP IX            ; Restore IX (pointer to current entry in simple/complex state data)
        .exx                            ; EXX               ; Switch registers
-populate_prim_disp_buf_4:
+populate_display_buffer_4:
        a    de,ix                      ; ADD IX,DE         ; Advance IX to next entity's state data
-       jmp  populate_prim_disp_buf_2   ; JR 45921          ; Loop back to #R45921
-populate_prim_disp_buf_5:
+       jmp  populate_display_buffer_2  ; JR 45921          ; Loop back to #R45921
+populate_display_buffer_5:
        sb   one,@c                     ; DEC C             ; Decrease current depth (i.e. closer to screen)
-       jne  populate_prim_disp_buf_1   ; JR NZ,45915       ; If depth is not zero (i.e. still depth levels to process) then loop back to #R45915
+       jne  populate_display_buffer_1  ; JR NZ,45915       ; If depth is not zero (i.e. still depth levels to process) then loop back to #R45915
        .endproc                        ; RET               ; Return
 
 * Populate Primary Display Buffer with Graphic Layout Data for Entity Whose Simple / Complex State Data is at
@@ -4511,16 +4511,17 @@ check_berk_killed_1:
 * Set Each Value in Primary Display Buffer Within Play Area to Zero
 * 
 * Used by the routine at #R34438.
-clear_prim_disp_buf_area:
+; TODO: Use room boundaries instead
+clear_display_buffer:
        .proc
        mov  @prim_disp_buffer_addr,hl  ; LD HL,(34279)     ; Load HL with start address of Primary Display Buffer
        li   bc,704                     ; LD BC,704         ; Set BC to 704, as there are 704 entries in a Display Buffer
        li   de,3                       ; LD DE,3           ; Load DE with 3 as each entry in the Display Buffer is three bytes wide
        clr  tmp0
-clear_prim_disp_buf_area_1:
+clear_display_buffer_1:
        movb *hl,a                      ; LD A,(HL)         ; Read first byte in Display Buffer...
                                        ; INC A             ; ...and add one
-       jlt  clear_prim_disp_buf_area_2 ; JP Z,53806        ; If value is now zero (i.e. was previously 255 and therefore outside normal play area), then
+       jlt  clear_display_buffer_2     ; JP Z,53806        ; If value is now zero (i.e. was previously 255 and therefore outside normal play area), then
                                                            ; skip ahead to #R53806
                                        ; XOR A             ; Set all values in current entry to zero...
        movb tmp0,*hl+                  ; LD (HL),A         ; ...
@@ -4529,16 +4530,16 @@ clear_prim_disp_buf_area_1:
                                        ; INC HL            ; ...
        movb tmp0,*hl+                  ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
-       jmp  clear_prim_disp_buf_area_3 ; JP 53807          ; Skip ahead to #R53807
-clear_prim_disp_buf_area_2:
+       jmp  clear_display_buffer_3     ; JP 53807          ; Skip ahead to #R53807
+clear_display_buffer_2:
        a    de,hl                      ; ADD HL,DE         ; Advance current position in Display Buffer to next entry
-clear_prim_disp_buf_area_3:
+clear_display_buffer_3:
        dec  bc                         ; DEC BC            ; Decrease remaining number of entries to process
                                        ; LD A,B            ; If remaining number of entries is not zero...
                                        ; OR C              ; ...
-       jne  clear_prim_disp_buf_area_1 ; JP NZ,53791       ; ...then loop back to #R53791
+       jne  clear_display_buffer_1     ; JP NZ,53791       ; ...then loop back to #R53791
        .endproc                        ; RET               ; Return
-*// clear_prim_disp_buf_area
+*// clear_display_buffer
 
 *********************************************************************************
 * Advance DE by 2xA Bytes and Load WORD at this Location into DE
@@ -4764,8 +4765,8 @@ draw_display_buffer_2:
                                        ; INC HL            ; Advance HL to next byte (Graphic Index) in Primary Display Buffer
                                        ; OR A              ; If Graphic Set Index is zero...
        jeq  draw_display_buffer_8      ; JP Z,54130        ; ...then skip ahead to #R54130
-       cb   a,@bytes+255               ; CP 255            ; If Graphic Set Index is 255 (character block outside room's dimensions)...
-       jeq  draw_display_buffer_9      ; JP Z,54140        ; ...then skip ahead to #R54140
+                                       ; CP 255            ; If Graphic Set Index is 255 (character block outside room's dimensions)...
+       jlt  draw_display_buffer_9      ; JP Z,54140        ; ...then skip ahead to #R54140
        movb a,b                        ; LD B,A            ; Transfer Graphic Set Index into B
        movb @bytes+0,@e                ; LD E,0            ; Set E to zero
        cb   a,*iy                      ; CP (IY+0)         ; If Graphic Set Index in Primary Display Buffer entry is different to Graphic Set Index in
@@ -4797,21 +4798,21 @@ draw_display_buffer_5:
        .pop hl                         ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
 draw_display_buffer_6:
        inc  hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
-       inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
-       mov ix,de                       ; PUSH IX           ; Copy current Attribute File address from IX to DE...
-                                       ; POP DE            ; ...
-       movb @e,a                       ; LD A,E            ; If current Attribute File address is not at the start of the seventh row of a third of the
-                                                           ; display (i.e. row 7, 15 or 23)...
-       cb   a,@bytes+192               ; CP 192            ; ...
-       jne  draw_display_buffer_7      ; JR NZ,54122       ; ...then skip ahead to #R54122
-       movb d,a                        ; LD A,D            ; If current Attribute File address is 23232 (256*90 + 192, i.e. at start of second last
-                                                           ; display character row)...
-       cb   a,@bytes+90                ; CP 90             ; ...
-       jeq  draw_display_buffer_10      ; RET Z             ; ...then return, as only timer figures appear in last two rows
 draw_display_buffer_7:
-       li   de,3                       ; LD DE,3           ; Advance current position in Secondary Display Buffer by 3 bytes...
-       a    de,iy                      ; ADD IY,DE         ; ...
-       b    @draw_display_buffer_2     ; JP 54055          ; Loop back to #R54055
+       inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
+                                       ; PUSH IX           ; Copy current Attribute File address from IX to DE...
+                                       ; POP DE            ; ...
+                                       ; LD A,E            ; If current Attribute File address is not at the start of the seventh row of a third of the
+                                                           ; display (i.e. row 7, 15 or 23)...
+                                       ; CP 192            ; ...
+                                       ; JR NZ,54122       ; ...then skip ahead to #R54122
+                                       ; LD A,D            ; If current Attribute File address is 23232 (256*90 + 192, i.e. at start of second last
+                                                           ; display character row)...
+       ci   ix,zx_attributes+(22*32)   ; CP 90             ; ...
+       jeq  draw_display_buffer_10     ; RET Z             ; ...then return, as only timer figures appear in last two rows
+                                       ; LD DE,3           ; Advance current position in Secondary Display Buffer by 3 bytes...
+       ai   iy,3                       ; ADD IY,DE         ; ...
+       jmp  draw_display_buffer_2      ; JP 54055          ; Loop back to #R54055
 draw_display_buffer_8:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
        movb *hl,a                      ; LD A,(HL)         ; Load attribute into A
@@ -4820,8 +4821,8 @@ draw_display_buffer_8:
        bl   @draw_attribute
        jmp  draw_display_buffer_6      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_9:
-       inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
-       jmp  draw_display_buffer_6      ; JP 54107          ; Loop back to #R54107
+       inct hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
+       jmp  draw_display_buffer_7      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_10:
        .endproc
 *// draw_display_buffer
