@@ -1413,17 +1413,17 @@ main_menu:
        bl   @fill_screen               ; CALL 53649        ; ...
        bl   @print_title               ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
        bl   @print_score_strings       ; CALL 47628        ; Print SCORE / TOTAL / HI-SC string in current character's colours
-       li   ix,main_menu_attrs                  ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
+       li   ix,main_menu_attrs         ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
        li   iy,main_menu_strings       ; LD IY,46710       ; Point IY at start of Table of Main Menu Strings
        movb @bytes+112,a               ; LD A,112          ; Load A with 112 (black INK on yellow PAPER)
        movb a,@print_attr              ; LD (34269),A      ; Store at #R34269
        movb @bytes+10,b                ; LD B,10           ; Load B with 10 as there are 10 strings to print (loop counter)
-_46863:
+main_menu_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of strings to print)
        mov  *ix,hl                     ; LD L,(IX+0)       ; Load Attribute File address at which to print text into HL...
                                        ; LD H,(IX+1)       ; ...
        movb @bytes+12,b                ; LD B,12           ; Load B with 12 as there are 12 characters to print (loop counter)
-_46872:
+main_menu_2:
        .push bc                        ; PUSH BC           ; Store BC (B = number of remaining characters to print)
        movb *iy,@e                     ; LD E,(IY+0)       ; Load E with text character to print
        bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
@@ -1431,41 +1431,41 @@ _46872:
        inc  hl                         ; INC HL            ; Advance to next Attribute File location
        .pop bc                         ; POP BC            ; Restore BC (B = number of remaining characters to print)
        sb   one,b                      ; DJNZ 46872        ; Loop back for next character
-       jne  _46872                     ;                   
+       jne  main_menu_2                ;
        inct ix                         ; INC IX            ; Advance IX to next entry in list of Attribute File addresses to print to...
                                        ; INC IX            ; ...
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of strings to print)
        sb   one,b                      ; DJNZ 46863        ; Loop back for next string
-       jne  _46863                     ;
+       jne  main_menu_1                ;
        bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
        movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
        bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
 * This entry point is used by the routine at #R46968.
-_46900:
+main_menu_3:
        bl   @wait_keypress             ; CALL 47955        ; Wait for key-press, store pressed key code in A and play Main Menu Sound
        cb   a,@bytes+83                ; CP 83             ; If pressed key was not 83 (S)...
-       jne  _46915                     ; JR NZ,46915       ; ...then skip ahead to #R46915
+       jne  main_menu_4                ; JR NZ,46915       ; ...then skip ahead to #R46915
        movb @bytes+2,a                 ; LD A,2            ; Set current border colour to red...
        movb a,@border_color            ; LD (34217),A      ; ...
        bl   @set_border_color          ; OUT (254),A       ; ...
        .endproc                        ; RET               ; Return
-_46915:
+main_menu_4:
        cb   a,@bytes+74                ; CP 74             ; If pressed key was not 74 (J)...
        jne  _46968                     ; JR NZ,46968       ; ...then jump to #R46968 (if "K" pressed then redefine controls)
-       movb @joystick_mode_flag,a                  ; LD A,(34298)      ; If we are in Joystick Mode...
+       movb @joystick_mode_flag,a      ; LD A,(34298)      ; If we are in Joystick Mode...
        socb a,a                        ; OR A              ; ...
-       jne  _46937                     ; JR NZ,46937       ; ...then skip ahead to #R46937
-       .call @_47043                   ; CALL 47043        ; If Kempston Interface not present, or Kempston Joystick moved / fire pressed...
-       joc  _46900                     ; JR C,46900        ; TODO: check code. ...then jump to #R46900
+       jne  main_menu_5                ; JR NZ,46937       ; ...then skip ahead to #R46937
+       bl   @check_for_joystick       ; CALL 47043        ; If Kempston Interface not present, or Kempston Joystick moved / fire pressed...
+       joc  main_menu_3                ; JR C,46900        ; TODO: check code. ...then jump to #R46900
        movb one,a                      ; LD A,1            ; Set Joystick Mode to On...
-       movb a,@joystick_mode_flag                  ; LD (34298),A      ; ...(see trivia)
-       jmp  _46938                     ; JR 46938          ; Skip ahead to #R46938
-_46937:
+       movb a,@joystick_mode_flag      ; LD (34298),A      ; ...(see trivia)
+       jmp  main_menu_6                ; JR 46938          ; Skip ahead to #R46938
+main_menu_5:
        sb   one,a                      ; DEC A             ; Set Joystick Mode to Off...
-_46938:
-       movb a,@joystick_mode_flag                  ; LD (34298),A      ; ...
+main_menu_6:
+       movb a,@joystick_mode_flag      ; LD (34298),A      ; ...
        bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
-       jmp  _46900                     ; JR 46900          ; Loop back to #R46900
+       jmp  main_menu_3                ; JR 46900          ; Loop back to #R46900
 
 * Draw Joystick "J" (Main Menu) in Colour Depending Upon Joystick Mode
 * 
@@ -1491,7 +1491,7 @@ _46958:
 * Used by the routine at #R46830. Input:  A  ASCII code of pressed key
 _46968:
        cb   a,@bytes+75                ; CP 75             ; If pressed key was not 75 (K)...
-       jne  _46900                     ; JR NZ,46900       ; ...then jump to Main Menu handling routine at #R46900
+       jne  main_menu_3                     ; JR NZ,46900       ; ...then jump to Main Menu handling routine at #R46900
        movb @bytes+7,b                 ; LD B,7            ; Load B with 7 (as there are seven controls to define)
        li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at start of Table of Current Keyboard Controls
 _46977:
@@ -1512,7 +1512,7 @@ _46997:
        bl  @set_and_print_dbl_height   ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
 _47005:
        bl   @wait_keypress             ; CALL 47955        ; Wait for key-press, store pressed key code in A and play Main Menu Sound
-       .call @_47060                   ; CALL 47060        ; If key pressed matches a direction, or the Berk / Drutt key...
+       bl   @is_direction_key                   ; CALL 47060        ; If key pressed matches a direction, or the Berk / Drutt key...
        jeq  _47005                     ; JR Z,47005        ; ...then loop back to #R47005
        movb a,@e                       ; LD E,A            ; Load keycode of pressed control into E...
        movb @e,*iy+                    ; LD (IY+0),E       ; ...and store in Table of Current Keyboard Controls
@@ -1528,47 +1528,51 @@ _47005:
        movb a,@joystick_mode_flag                  ; LD (34298),A      ; ...
        movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
        bl @print_keyboard_controls     ; CALL 47084        ; Print keyboard controls on main menu
-       b    @_46900                    ; JP 46900          ; Jump to Main Menu handling routine at #R46900
+       b    @main_menu_3                    ; JP 46900          ; Jump to Main Menu handling routine at #R46900
 
 * Set Carry Flag if Kempston Interface not Present, or Kempston Joystick Moved / Fire Pressed
 * 
 * Used by the routine at #R46830. Output: F  Carry Flag set if Kempston Interface not present, Kempston Joystick
 * moved or fire pressed, reset otherwise
-_47043:
+check_for_joystick:
+       .proc
        sb   b,b                        ; LD B,0            ; Set B to zero (to repeat check loop 256 times)
-_47045:
-       ; IN A,(31)                     ; IN A,(31)         ; Read value from Port 31 into A (Kempston Interface)
-       socb a,a                        ; OR A              ; If retrieved value is not zero (i.e. Kempston Interface not present, or Kempston Joystick not
-                                                           ; centred / fire button pressed)...
-       jne  _47053                     ; JR NZ,47053       ; ...then skip ahead to #R47053
-       sb   one,b                      ; DJNZ 47045        ; Decrease B (loop counter) and loop back to #R47045 to check Kempston status again if counter
-       jne  _47045                     ;                   
-                                                           ; not zero
-       .ret                            ; RET               ; Return
-_47053:
-       movb @bytes+6,a                 ; LD A,6            ; Set sound 6 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound           ; CALL 59722        ; ...
-       ; SCF                           ; SCF               ; Set Carry Flag
-       .ret                            ; RET               ; Return
+;_47045:
+;       ; IN A,(31)                     ; IN A,(31)         ; Read value from Port 31 into A (Kempston Interface)
+;       socb a,a                        ; OR A              ; If retrieved value is not zero (i.e. Kempston Interface not present, or Kempston Joystick not
+;                                                           ; centred / fire button pressed)...
+;       jne  _47053                     ; JR NZ,47053       ; ...then skip ahead to #R47053
+;       sb   one,b                      ; DJNZ 47045        ; Decrease B (loop counter) and loop back to #R47045 to check Kempston status again if counter
+;       jne  _47045                     ;
+;                                                           ; not zero
+;       .ret                            ; RET               ; Return
+;_47053:
+;       movb @bytes+6,a                 ; LD A,6            ; Set sound 6 as pending if appropriate, then play and clear pending sound...
+;       bl   @request_sound           ; CALL 59722        ; ...
+;       ; SCF                           ; SCF               ; Set Carry Flag
+;       .ret                            ; RET               ; Return
+       b    @return_without_carry
 
+*********************************************************************************
 * Set Zero Flag if Key Whose Index is in A Matches a Direction, or the Berk / Drutt Key
 * 
 * Used by the routine at #R46968. Input:  A  Index of pressed key Output: F  Zero Flag set if input key index
 * matches an entry in table at #R46683, reset otherwise HL  Address of matching entry in table at #R46683 (if match
 * found)
-_47060:
+is_direction_key:
        li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at Table of Current Keyboard Controls
        movb @bytes+5,b                 ; LD B,5            ; Load B with 5 (as we are checking the first five defined keys, see bugs)
-_47065:
+is_direction_key_1:
        cb   a,*hl                      ; CP (HL)           ; If character code at current HL position matches the key we are checking...
-       jne  !                          ; RET Z             ; ...then return with Zero Flag set
-       .ret                            ;                   
-!
+       jeq  is_direction_key_2         ; RET Z             ; ...then return with Zero Flag set
        inc  hl                         ; INC HL            ; Advance HL to next character in keyboard controls table
        sb   one,b                      ; DJNZ 47065        ; Loop back to #R47065 to check next control
-       jne  _47065                     ;                   
-       .ret                            ; RET               ; Return
+       jne  is_direction_key_1                     ;
+is_direction_key_2:
+       rt                              ; RET               ; Return
+*// is_direction_key
 
+*********************************************************************************
 * Set Attribute and Location and Print Double-Height Character in E
 * 
 * Used by the routines at #R46946 and #R46968. Input:  A  Attribute for character to print E  Character to print IX
@@ -1580,6 +1584,7 @@ set_and_print_dbl_height:
                                        ; LD H,(IX+1)       ; ...
        bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
        .endproc                            ; RET               ; Return
+*// set_and_print_dbl_height
 
 *********************************************************************************
 * Print Keyboard Controls on Main Menu
@@ -1605,6 +1610,7 @@ _47097:
        sb   one,b                      ; DJNZ 47097        ; Loop back to #R47097 for next keyboard control
        jne  _47097                     ;                   
        .endproc                        ; RET               ; Return
+*// print_keyboard_controls
 
 *********************************************************************************
 * Print "THROUGH the TRAPDOOR" String
@@ -1873,12 +1879,14 @@ reduce_remaining_time:
        mov  hl,@timer_tick             ; LD (34211),HL     ; ...
        ci   hl,768                     ; LD A,H            ; If Timer Tick Counter is less than 768 (i.e. 3 x 256)...
                                        ; CP 3              ; ...
-       jl   reduce_remaining_time_1    ; RET C             ; ...then return
+       jl   reduce_remaining_time_2    ; RET C             ; ...then return
        clr  @timer_tick                ; LD HL,0           ; Reset Timer Tick Counter to zero...
                                        ; LD (34211),HL     ; ...
+       jmp  !
 * This entry point is used by the routine at #R53723.
-_47485:
-       movb @time_left,a               ; LD A,(34210)      ; If no time / lives remain...
+reduce_remaining_time_1:
+       .proc
+!      movb @time_left,a               ; LD A,(34210)      ; If no time / lives remain...
                                        ; OR A              ; ...
        jne  !                          ; JP Z,47241        ; ...then reset Show Score Flag, draw timer figures bar and return
        b    @draw_timer_bar_0          ;
@@ -1886,7 +1894,7 @@ _47485:
        sb   one,a                      ; DEC A             ; Decrease current time / lives by one...
        movb a,@time_left               ; LD (34210),A      ; ...
        b    @draw_timer_bar_0          ; JP 47241          ; Reset Show Score Flag, and draw timer figures bar and return
-reduce_remaining_time_1:
+reduce_remaining_time_2:
        .endproc
 
 *********************************************************************************
@@ -2103,53 +2111,62 @@ digit_to_str_1:
 * 
 * Used by the routines at #R47893 and #R47942. Output: A  Index of the key that was pressed
 read_keyboard:
-       .exx                            ; EXX               ; Swap registers
-       li   bc,65278                   ; LD BC,65278       ; Load B and C with 254
-       li   hl,ret_val_keyboard                  ; LD HL,47853       ; Point HL at list of return values
-       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard) [IN 65278 reads the half row CAPS SHIFT to V]
-       socb @bits+0,a                  ; SET 0,A           ; Set bit 0 of A (i.e. clear pressing of CAPS SHIFT)
-       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
-       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
-       xor  tmp0,a                     ;                   
-       jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
-       li   de,5                       ; LD DE,5           ; Advance HL by five characters in list of return values string...
-       a    de,hl                      ; ADD HL,DE         ; ...
-       movb @bytes+6,@e                ; LD E,6            ; Load E with 6 as there are 6 keyboard half-rows to test (loop counter)
-_47811:
-       sra  b,1                        ; RLC B             ; With each loop, change BC from 65278 -> 65022 -> 64510 -> 63486 -> 61438 -> 57342 -> 49150
-       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
-       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
-       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
-       xor  tmp0,a                     ;                   
-       jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
-       inc  hl                         ; INC HL            ; Advance HL by five characters in list of return values string...
-       inc  hl                         ; INC HL            ; ...
-       inc  hl                         ; INC HL            ; ...
-       inc  hl                         ; INC HL            ; ...
-       inc  hl                         ; INC HL            ; ...
-       sb   one,@e                     ; DEC E             ; Decrease number of remaining keyboard half-rows to check
-       jne  _47811                     ; JR NZ,47811       ; If there are any more half rows to check then loop back to #R47811
-       sra  b,1                        ; RLC B             ; Set BC to 32766 for final keyboard half-row
-       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
-       socb @bits+1,a                  ; SET 1,A           ; Set bit 1 of A (i.e. clear pressing of SYMBOL SHIFT)
-       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
-       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
-       xor  tmp0,a                     ;                   
-       jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
-       .exx                            ; EXX               ; Swap registers
-       .ret                            ; RET               ; Return [no key pressed]
-_47843:
-       srl  a,1                        ; SRL A             ; Shift bits right
-       mov  af,tmp0
-       andi tmp0,>0080
-       jne  _47850                     ; JR C,47850        ; If carry flag is set, then this is the key that was pressed, so skip ahead to #R47850
-       inc  hl                         ; INC HL            ; Advance HL to check next character
-       jmp  _47843                     ; JR 47843          ; Loop back to #R47843
-_47850:
-       movb *hl,a                      ; LD A,(HL)         ; Load current character in list of return values string into A as this is the key that was
-                                                           ; pressed
-       .exx                            ; EXX               ; Swap registers
-       .ret                            ; RET               ; Return [key pressed]
+       .proc
+        li  tmp0,JOY_FI
+        bl  @check_key
+        jeq read_keyboard_1
+        seto a
+        jmp  read_keyboard_2
+read_keyboard_1:
+        clr a
+;       .exx                            ; EXX               ; Swap registers
+;       li   bc,65278                   ; LD BC,65278       ; Load B and C with 254
+;       li   hl,ret_val_keyboard                  ; LD HL,47853       ; Point HL at list of return values
+;       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard) [IN 65278 reads the half row CAPS SHIFT to V]
+;       socb @bits+0,a                  ; SET 0,A           ; Set bit 0 of A (i.e. clear pressing of CAPS SHIFT)
+;       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
+;       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
+;       xor  tmp0,a                     ;
+;       jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
+;       li   de,5                       ; LD DE,5           ; Advance HL by five characters in list of return values string...
+;       a    de,hl                      ; ADD HL,DE         ; ...
+;       movb @bytes+6,@e                ; LD E,6            ; Load E with 6 as there are 6 keyboard half-rows to test (loop counter)
+;_47811:
+;       sra  b,1                        ; RLC B             ; With each loop, change BC from 65278 -> 65022 -> 64510 -> 63486 -> 61438 -> 57342 -> 49150
+;       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
+;       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
+;       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
+;       xor  tmp0,a                     ;
+;       jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
+;       inc  hl                         ; INC HL            ; Advance HL by five characters in list of return values string...
+;       inc  hl                         ; INC HL            ; ...
+;       inc  hl                         ; INC HL            ; ...
+;       inc  hl                         ; INC HL            ; ...
+;       inc  hl                         ; INC HL            ; ...
+;       sb   one,@e                     ; DEC E             ; Decrease number of remaining keyboard half-rows to check
+;       jne  _47811                     ; JR NZ,47811       ; If there are any more half rows to check then loop back to #R47811
+;       sra  b,1                        ; RLC B             ; Set BC to 32766 for final keyboard half-row
+;       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard)
+;       socb @bits+1,a                  ; SET 1,A           ; Set bit 1 of A (i.e. clear pressing of SYMBOL SHIFT)
+;       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
+;       li   tmp0,31*256                ; XOR 31            ; Invert all of the lowest five bits
+;       xor  tmp0,a                     ;
+;       jne  _47843                     ; JR NZ,47843       ; If this value is non-zero, then a key has been pressed, so skip ahead to #R47843
+;       .exx                            ; EXX               ; Swap registers
+;       .ret                            ; RET               ; Return [no key pressed]
+;_47843:
+;       srl  a,1                        ; SRL A             ; Shift bits right
+;       mov  af,tmp0
+;       andi tmp0,>0080
+;       jne  _47850                     ; JR C,47850        ; If carry flag is set, then this is the key that was pressed, so skip ahead to #R47850
+;       inc  hl                         ; INC HL            ; Advance HL to check next character
+;       jmp  _47843                     ; JR 47843          ; Loop back to #R47843
+;_47850:
+;       movb *hl,a                      ; LD A,(HL)         ; Load current character in list of return values string into A as this is the key that was
+;                                                           ; pressed
+;       .exx                            ; EXX               ; Swap registers
+read_keyboard_2:
+       .endproc                         ; RET               ; Return [key pressed]
 
 *********************************************************************************
 * Check for Control Key Press and Store at 34219
@@ -2226,11 +2243,11 @@ _47930:
 wait_release_and_keypress:
        .proc
 wait_release_and_keypress_1:
-       .call @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
+       bl   @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
        socb a,a                        ; OR A              ; If a key is pressed...
        jne  wait_release_and_keypress_1 ; JR NZ,47942       ; ...then loop back to #R47942
 wait_release_and_keypress_2:
-       .call @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
+       bl   @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
        socb a,a                        ; OR A              ; If a key is not pressed...
        jeq  wait_release_and_keypress_2 ; JR Z,47948        ; ...then loop back to #R47948
        .endproc                        ; RET               ; Return
@@ -2338,13 +2355,13 @@ remove_current_power:
        cb   a,@bytes+6                 ; CP 6              ; If Berk's current power is not 6 (flying, level 3, 2)...
        jne  remove_current_power_1                     ; JR NZ,48445       ; ...then skip ahead to #R48445
        movb @bytes+13,a                ; LD A,13           ; Reset complex state data for Red Coloured Creature to that stored in Initial-State Table...
-       .call @reset_1st_entity_of_class                   ; CALL 53987        ; ...
+       bl   @reset_1st_entity_of_class                   ; CALL 53987        ; ...
        movb @bytes+14,a                ; LD A,14           ; Reset complex state data for Yellow Coloured Creature to that stored in Initial-State
                                                            ; Table...
-       .call @reset_1st_entity_of_class                   ; CALL 53987        ; ...
+       bl   @reset_1st_entity_of_class                   ; CALL 53987        ; ...
        movb @bytes+15,a                ; LD A,15           ; Reset complex state data for White Coloured Creature to that stored in Initial-State
                                                            ; Table...
-       .call @reset_1st_entity_of_class                   ; CALL 53987        ; ...
+       bl   @reset_1st_entity_of_class                   ; CALL 53987        ; ...
        jmp  remove_current_power_2                     ; JR 48474          ; Skip ahead to #R48474
 remove_current_power_1:
        cb   a,@bytes+10                ; CP 10             ; If Berk's current power is not 10 (floating)...
@@ -2360,7 +2377,7 @@ remove_current_power_1:
 remove_current_power_2:
        movb @berks_current_power,a     ; LD A,(34220)      ; Reset complex state data for entity responsible for Berk's current power to that stored in
                                                            ; Initial-State Table...
-       .call @reset_1st_entity_of_class                   ; CALL 53987        ; ...
+       bl   @reset_1st_entity_of_class                   ; CALL 53987        ; ...
        sb   a,a                        ; XOR A             ; Clear Berk's current power...
        movb a,@berks_current_power     ; LD (34220),A      ; ...
        .pop ix                         ; POP IX            ; Restore IX
@@ -2640,7 +2657,7 @@ check_berk_killed:
        movb @bytes+127,a               ; LD A,127          ; Fill top 22 rows of Attribute File with white PAPER and white INK, BRIGHT...
        bl   @fill_screen               ; CALL 53649        ; ...
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
-       .call @_47485                   ; CALL 47485        ; Decrease current time / lives by one if greater than zero and redraw Timer Figures
+       bl   @reduce_remaining_time_1                   ; CALL 47485        ; Decrease current time / lives by one if greater than zero and redraw Timer Figures
 check_berk_killed_1:
        .endproc                        ; RET               ; Return
 *// check_berk_killed
@@ -2844,25 +2861,30 @@ print_red_cell_1:
 * Used by the routines at #R37639 and #R48417. Input:  A  Entity class value IX  (Entry at #R53994 only) Address of
 * complex state data for an entity
 reset_1st_entity_of_class:
-       bl   @find_1st_entity_of_class                   ; CALL 54019        ; Load IX with address of complex state data for first entry in current level that has class
+       .proc
+       bl   @find_1st_entity_of_class                      ; CALL 54019        ; Load IX with address of complex state data for first entry in current level that has class
                                                            ; A...
-       .push iy                        ; PUSH IY           ; ...
-       .pop ix                         ; POP IX            ; ...
+       mov iy,ix                       ; PUSH IY           ; ..
+                                       ; POP IX            ; ...
+       jmp  reset_1st_entity_of_class_1
 * This entry point is used by the routine at #R42064.
-_53994:
+reset_1st_entity_of_class_0:
+       .proc
+reset_1st_entity_of_class_1:
        li   iy,initial_entity_states   ; LD IY,59821       ; Point IY at start of Table of Initial-State Data for Complex Entities
        bl   @find_1st_entity_of_class_0                   ; CALL 54023        ; Advance IY to first entry in copied complex state data that has class A
        .push ix                        ; PUSH IX           ; Store IX (address of entry in complex state data to overwrite)
        movb @e,b                       ; LD B,E            ; Load B with 13 (DE set to 13 in routine at #R54019)
-_54004:
+reset_1st_entity_of_class_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Overwrite IX data entry with IY data...
        movb a,*ix+                     ; LD (IX+0),A       ; ...
                                        ; INC IX            ; ...
        inc  iy                         ; INC IY            ; ...
        sb   one,b                      ; DJNZ 54004        ; ...
-       jne  _54004                     ;                   
+       jne  reset_1st_entity_of_class_2                     ;
        .pop ix                         ; POP IX            ; Restore IX (address of entry in complex state data just overwritten)
-       .ret                            ; RET               ; Return
+       .endproc                        ; RET               ; Return
+*// reset_1st_entity_of_class
 
 *********************************************************************************
 * Point IY at First Entry in Current Level's Complex State Data that has Class A
