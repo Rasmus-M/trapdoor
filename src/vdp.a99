@@ -73,6 +73,13 @@ set_border_color:
 * tmp0: address in zx attribute file
 *
 draw_attribute:
+       .ifeq optimize_attr_drawing,1
+       mov  tmp0,tmp1
+       cb   a,@ti_attributes-zx_attributes(tmp1)
+       jne  !
+       rt
+!      movb a,@ti_attributes-zx_attributes(tmp1)
+       .endif
        .proc
        ai   tmp0,-zx_attributes
        sla  tmp0,3
@@ -90,6 +97,11 @@ draw_attribute:
        movb tmp0,*tmp2
        .endproc
 *// draw_attribute
+
+       .ifeq optimize_attr_drawing,1
+ti_attributes:
+       bss 768
+       .endif
 
 *********************************************************************************
 *

@@ -4444,6 +4444,14 @@ clear_display_buffers_1:
 * Used by the routines at #R46830 and #R53723. Input:  A  Attribute
 fill_screen:
        .proc
+       .ifeq optimize_attr_drawing,1
+       li   tmp0,ti_attributes
+       li   tmp2,22*32
+fill_screen_1:
+       movb a,*tmp0+
+       dec  tmp2
+       jne  fill_screen_1
+       .endif
        bl   @ti_color
        mov  tmp0,r1
        li   r0,color_table

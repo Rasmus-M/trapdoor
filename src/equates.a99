@@ -1,3 +1,6 @@
+optimize_attr_drawing:
+       equ  1
+
 **
 * Memory mapped addresses
 *
