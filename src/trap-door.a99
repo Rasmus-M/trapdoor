@@ -1100,7 +1100,7 @@ move_projectile_down:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Increase y-coordinates of top and bottom of entity by one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
        movb @4(ix),a                   ; LD A,(IX+4)       ; Load new y-coordinate of entity's top into A
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 *********************************************************************************
 * Reset Skeleton to Initial State
@@ -2195,6 +2195,14 @@ check_control_input:
        bl   @check_key
        jeq  !
        socb @bits+4,a
+!      li   r0,KEY_P
+       bl   @check_key
+       jeq  !
+       socb @bits+5,a
+!      li   r0,KEY_R
+       bl   @check_key
+       jeq  !
+       socb @bits+6,a
 !
 ;       movb a,@control_input           ; LD (34219),A      ; ...
 ;       .call @_47788                   ; CALL 47788        ; Read keyboard and load character of pressed key into A

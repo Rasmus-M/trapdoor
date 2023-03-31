@@ -4,18 +4,18 @@
 * Used by the routine at #R34438.
 update_level_4_entities:
        .proc
-       .call @_42266                   ; CALL 42266        ; Update state of Flying Skeleton Creature
-       .call @_42381                   ; CALL 42381        ; Update state of Snake
-       .call @_42064                   ; CALL 42064        ; Update states of drips
-       .call @_41767                   ; CALL 41767        ; Update state of Cannon and Projectile
-       .call @_41633                   ; CALL 41633        ; Update state of Ghost
-       .call @_41381                   ; CALL 41381        ; Update state of Skeleton (Level 4) and store current position in script data
+       .call @update_flying_skeleton_creature                   ; CALL 42266        ; Update state of Flying Skeleton Creature
+       .call @update_snake             ; CALL 42381        ; Update state of Snake
+       .call @update_drips             ; CALL 42064        ; Update states of drips
+       .call @update_cannon            ; CALL 41767        ; Update state of Cannon and Projectile
+       .call @update_ghost             ; CALL 41633        ; Update state of Ghost
+       .call @update_skeleton_lvl_4    ; CALL 41381        ; Update state of Skeleton (Level 4) and store current position in script data
        .endproc                        ; RET               ; Return
 
 * Update State of Skeleton (Level 4) and Store Current Position in Script Data
 *
 * Used by the routine at #R41211.
-_41381:
+update_skeleton_lvl_4:
        li   ix,_45404                  ; LD IX,45404       ; Load IX with address of complex state data for Skeleton (Level 4)
        movb @9(ix),tmp0                ; BIT 2,(IX+9)      ; If Skeleton's Removed From Game Flag is set...
        andi tmp0,4*256                 ;
@@ -107,7 +107,7 @@ _41513:
 * Update State of Ghost
 *
 * Used by the routine at #R41211.
-_41633:
+update_ghost:
        li   ix,_45794                  ; LD IX,45794       ; Load IX with address of complex state data for Ghost (Level 4)
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
@@ -199,7 +199,7 @@ _41758:
 * Update State of Cannon and Projectile
 *
 * Used by the routine at #R41211.
-_41767:
+update_cannon:
        .call @_41961                   ; CALL 41961        ; Update State of Cannon's Projectile
        li   ix,_45508                  ; LD IX,45508       ; Load IX with address of complex state data for Cannon (Level 4)
        movb @9(ix),tmp0                ; BIT 2,(IX+9)      ; If Cannon's Just Loaded Flag is reset...
@@ -370,7 +370,7 @@ _42058:
 * Update States of Drips (Level 4)
 *
 * Used by the routine at #R41211.
-_42064:
+update_drips:
        li   ix,_45521                  ; LD IX,45521       ; Load IX with address of complex state data for first drip (Level 4)
        movb @bytes+6,b                 ; LD B,6            ; Load B with 6 (as there are 6 drips to process)
 _42070:
@@ -474,7 +474,7 @@ _42251:
 * Update State of Flying Skeleton Creature (Level 4)
 *
 * Used by the routine at #R41211.
-_42266:
+update_flying_skeleton_creature:
        li   ix,_45482                  ; LD IX,45482       ; Load IX with address of complex state data for Flying Skeleton Creature (Level 4)
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
@@ -550,7 +550,7 @@ _42374:
 * Update State of Snake (Level 4)
 *
 * Used by the routine at #R41211.
-_42381:
+update_snake:
        li   ix,_45495                  ; LD IX,45495       ; Point IX at start of state data for Snake (Level 4)
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        li   hl,_45495+12               ; LD HL,45507       ; Load HL with address of Snake's Attack Progress Index
