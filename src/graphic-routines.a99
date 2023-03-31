@@ -1,3 +1,5 @@
+*********************************************************************************
+*
 * Table of Addresses of Graphic Layout Data Handling Routines
 *
 * Graphic layout data is stored in the form of encoded instructions. Generally an instruction is simply to display a
@@ -5,6 +7,7 @@
 * first byte (normally the graphic index) is 236 or greater, however, then we are dealing with a special
 * instruction; the values 236 and above can be considered to be opcodes. These opcodes correspond to calls/jumps to
 * routines at addresses stored in this table. The opcodes all take different combinations of parameters.
+*
 graphic_routines_jmp_tbl:
        data graphics_routine_236                                                   ; (236)
        data graphics_routine_237                                                   ; (237)
@@ -27,6 +30,7 @@ graphic_routines_jmp_tbl:
        data graphics_routine_254                                                   ; (254)
        data graphics_routine_255                                                   ; (255)
 
+*********************************************************************************
 * Graphic Layout Routine (237) Set New Pending Sound Input:  IX  Address of first parameter in current graphic
 * layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
 graphics_routine_237:
@@ -35,6 +39,7 @@ graphics_routine_237:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @inc_execute_gfx_script    ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (242) Set Current Attribute Input:  IX  Address of first parameter in current graphic
 * layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
 graphics_routine_242:
@@ -43,6 +48,7 @@ graphics_routine_242:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @inc_execute_gfx_script    ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (244) Set Current Graphic Set Index Input:  IX  Address of first parameter in current
 * graphic layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
 graphics_routine_244:
@@ -51,6 +57,7 @@ graphics_routine_244:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @inc_execute_gfx_script    ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (236) Set Graphic Index in Next Instruction to Value Randomly Selected from List
 *
 * Read Current Byte (n, random number cap), generate random number m (1 to n inclusive) and copy the m-th byte in
@@ -75,6 +82,7 @@ graphics_routine_236:
        movb a,*ix                      ; LD (IX+0),A       ; Store byte previously read at current position
        b    @execute_gfx_script        ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (245) Decrease Timer Value, and if Zero, Reset and Write Random Graphic Index from List
 * into Next Instruction
 *
@@ -91,6 +99,7 @@ graphics_routine_245:
        movb @e,*ix                     ; LD (IX+0),E       ; ...
        b    @execute_gfx_script        ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (246) Decrease Timer Value, and if Zero, Reset and Write Random Attribute from List into
 * Next Instruction
 *
@@ -113,6 +122,7 @@ graphics_routine_246_2:
        movb @e,@1(ix)                  ; LD (IX+1),E       ; ...
        b    @execute_gfx_script        ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (250) Adjust x- and y-Coordinates for Drawing Without Storing
 *
 * Read following two bytes in graphic layout data and adjust y- and x-coordinates by these amounts respectively,
@@ -129,6 +139,7 @@ graphics_routine_250:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script        ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (254) Adjust x- and y-Coordinates for Drawing and Set as New Base Coordinates
 *
 * Read following two bytes in graphic layout data and adjust y- and x-coordinates by these amounts respectively,
@@ -148,6 +159,7 @@ graphics_routine_254:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script        ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (251) Process Graphic Layout Data at Following Address and Return When Complete
 *
 * Functionally equivalent to "CALL" instruction. Read current WORD (address) from graphic layout data, load graphic
@@ -166,6 +178,7 @@ graphics_routine_251:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script        ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (248) Jump to Graphic Layout Data Address
 *
 * Read current WORD (address) from graphic layout data and move graphic layout data Pointer to this address. Input:
@@ -179,6 +192,7 @@ graphics_routine_248:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script        ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (249) Jump to Time-Weighted, Randomly Selected Graphic Layout Data Address in List Input:
 * IX  Address of first parameter in current graphic layout data instruction Output: B  Do Not Recalculate Display
 * Buffer Address Flag (0) IX  Address of next graphic layout data instruction to process
@@ -217,6 +231,7 @@ graphics_routine_249_2:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script                    ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (243) Increment Index, n, and Jump to n-th Address in Following List
 *
 * Read first parameter (n) from graphic layout data, increment (resetting to zero if it is equal to the length of
@@ -236,6 +251,7 @@ graphics_routine_243_1:
        ab   @bytes+2,a                 ; ADD A,2           ; ...
        jmp  graphics_routine_247_2     ; JR 46586          ; Jump to #R46586
 
+*********************************************************************************
 * Graphic Layout Routine (247) Jump to Randomly Selected Graphic Layout Data Address from List
 *
 * Read current byte value (n) from graphic layout data, generate random number m (0 - n-1) then jump to address in
@@ -257,12 +273,14 @@ graphics_routine_247_2:
        b    @graphics_routine_248      ; JP 46481          ; Jump to #R46481 (set current position in graphic layout data to value of WORD at this
                                                            ; address)
 
+*********************************************************************************
 * Graphic Layout Routine (253) Jump to Graphic Layout Data Address Selected from List, Based Upon Width of Berk's
 * Carried Entity Output: A  Number of words in graphic layout data to skip over
 graphics_routine_253:
        movb @carried_entity_width,a    ; LD A,(34272)      ; Load A with width of entity (characters) carried by Berk, minus 1
        jmp  graphics_routine_247_1     ; JR 46585          ; Set current position in graphic layout data to value of A-th word in list
 
+*********************************************************************************
 * Unused routine
 *
 * Graphic layout routine (252): if Berk is holding nothing then jump to address. Input:IX Address of first parameter
@@ -277,6 +295,7 @@ graphics_routine_252:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @inct_execute_gfx_script   ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 
+*********************************************************************************
 * Graphic Layout Routine (238) Start Loop (1 / 2)
 *
 * Start a loop in graphic layout data. The parameter is the repeat count. The current value of the repeat counter is
@@ -292,6 +311,7 @@ graphics_routine_238:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script        ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (239) End Loop (1 / 2) Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX
 * Address of next graphic layout data instruction to process
 graphics_routine_239:
@@ -304,6 +324,7 @@ graphics_routine_239:
        mov  @loop_address,ix           ; LD IX,(34294)     ; ...else, restore stored position in graphic layout data (start of loop)...
 !      b    @execute_gfx_script        ; JP 46003          ; ...and continue processing data from this point
 
+*********************************************************************************
 * Graphic Layout Routine (240) Start Loop (2 / 2)
 *
 * Start a loop in graphic layout data. The parameter is the repeat count. The current value of the repeat counter is
@@ -319,6 +340,7 @@ graphics_routine_240:
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @execute_gfx_script        ; JP 46003          ; Read / process data at address in IX
 
+*********************************************************************************
 * Graphic Layout Routine (241) End Loop (2 / 2) Output: B  Do Not Recalculate Display Buffer Address Flag (0) IX
 * Address of next graphic layout data instruction to process
 graphics_routine_241:
@@ -331,6 +353,7 @@ graphics_routine_241:
        mov  @loop_start,ix             ; LD IX,(34296)     ; ...else, restore stored position in graphic layout data (start of loop)...
 !      b    @execute_gfx_script        ; JP 46003          ; ...and continue processing data from this point
 
+*********************************************************************************
 * Graphic Layout Routine (255) Load HL with Stored Coordinates from 34281 and Return from Drawing
 *
 * Note that when returning from another block of graphic layout data, the Current Attribute stored at #R34270 (and
@@ -344,6 +367,7 @@ graphics_routine_255:
        movb a,b                        ; LD B,A            ; Set B to zero
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Reset Timer to Initial Value then Load E with Random Value from Sequence (in Graphic Layout Data)
 *
 * Used by the routines at #R46347 and #R46363. Input:  B  Always zero IX  Current address in graphic layout data

@@ -1,4 +1,7 @@
+*********************************************************************************
+*
 * Table of Script Routine Start Addresses
+*
 script_routines_jmp_table:
        data 0                                              ; (00) - Unused
        data script_routine_01                              ; (01) - Load HL (Script Data Pointer) with New Address
@@ -70,6 +73,7 @@ script_routines_jmp_table:
        data script_routine_63                              ; (63) - Have Skeleton Advance or Retreat Based Upon Positions of Berk and Fake Boni
        data script_routine_64                              ; (64) - Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
 
+*********************************************************************************
 * Script Routine (04) If Current Character and Target Entity are in the Same Room then Set Pending Sound Input:  HL
 * Current position in script data IX  Address of complex state data for an entity
 script_routine_04:
@@ -79,22 +83,26 @@ script_routine_04:
        bl   @request_entity_sound      ; CALL 59601        ; If current character is in same room as target entity at IX then set pending sound to A
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (62) Move Entity at IX into Room to the Left, if Appropriate
 script_routine_62:
        bl   @move_into_left_room       ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (16) Have Berk Hold an Entity, and Position it Appropriately Between his Hands
 script_routine_16:
        bl   @position_carried_item                   ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (17) Have Berk Put Down an Entity in Front of Him, if Appropriate Output: D  Depth offset for
 * entity being put down
 script_routine_17:
        movb @bytes+0,d                 ; LD D,0            ; Load D with depth offset of 0 (as Berk is putting down an entity in front of him)
        jmp  _48160                     ; JR 48160          ; Have Berk put down an entity, if appropriate
 
+*********************************************************************************
 * Script Routine (18) Have Berk Put Down an Entity Behind Him, if Appropriate Input:  D  (Entry at #R48160 only)
 * Depth offset for entity being put down IX  Address of complex state data (current level) for Berk
 script_routine_18:
@@ -134,6 +142,7 @@ _48198:
        movb a,@berk_coloured_creature                  ; LD (34222),A      ; ...as Berk is not (any longer) interacting with a coloured creature slot on Level 3
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (10) Reset Walking Left and Walking Right Flags
 *
 * Used by the routine at #R36542. Output: E  Combination of flags to (re)set
@@ -141,11 +150,13 @@ script_routine_10:
        movb @bytes+0,@e                ; LD E,0            ; Reset Entity Walking Left and Entity Walking Right flags...
        jmp  _48222                     ; JR 48222          ; ...and advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (12) Reset Walking Left Flag and Set Walking Right Flag Output: E  Combination of flags to (re)set
 script_routine_12:
        movb one,@e                     ; LD E,1            ; Set Entity Walking Right Flag, reset Entity Walking Left Flag...
        jmp  _48222                     ; JR 48222          ; ...and advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (11) Set Walking Left Flag and Reset Walking Right Flag Input:  E  (Entry at #R48222 only)
 * Combination of flags to (re)set IX  Address of complex state data for an entity
 script_routine_11:
@@ -158,24 +169,28 @@ _48222:
        movb a,@11(ix)                  ; LD (IX+11),A      ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (07) Reset Berk's Facing Into Screen, Facing Left and Facing Right Flags Output: B  Combination of
 * flags to (re)set
 script_routine_07:
        sb   b,b                        ; LD B,0            ; Reset Berk's Facing Into Screen, Facing Left and Facing Right flags...
        jmp  _48248                     ; JR 48248          ; ...and advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (06) Set Berk's Facing Into Screen Flag, and Reset his Facing Left and Facing Right Flags Output: B
 * Combination of flags to (re)set
 script_routine_06:
        movb @bytes+2,b                 ; LD B,2            ; Set Berk's Facing Into Screen Flag, and reset his Facing Left and Facing Right flags...
        jmp  _48248                     ; JR 48248          ; ...and advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (13) Set Berk's Facing Left Flag, and Reset his Facing Into Screen and Facing Right Flags Output: B
 * Combination of flags to (re)set
 script_routine_13:
        movb @bytes+4,b                 ; LD B,4            ; Set Berk's Facing Left Flag, and reset his Facing Into Screen and Facing Right flags...
        jmp  _48248                     ; JR 48248          ; ...and advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (14) Set Berk's Facing Right Flag, and Reset his Facing Into Screen and Facing Left Flags Input:  B
 * (Entry at #R48248 only) Combination of flags to (re)set IX  Address of complex state data (current level) for Berk
 script_routine_14:
@@ -189,18 +204,21 @@ _48248:
        movb a,@9(ix)                   ; LD (IX+9),A       ; ...and store
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (09) Reset Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
 script_routine_09:
        szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Must Process Current Script Data Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (08) Set Must Process Current Script Data Flag for Entity at IX Input:  IX  Address of complex
 * state data for an entity
 script_routine_08:
        socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Must Process Current Script Data Flag
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (15) Jump to New Address if Berk Is Carrying Something Input:  HL  Current position in script data
 * IX  Address of complex state data for an entity
 script_routine_15:
@@ -211,6 +229,7 @@ script_routine_15:
        jne  _48287                     ; JR NZ,48287       ; ...then read parameter address into HL and execute next script instruction at that address
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (01) Load HL (Script Data Pointer) with New Address
 *
 * Functionality analogous to JP instruction. Input:  HL  Address in script data Output: HL  New address in script
@@ -227,6 +246,7 @@ _48287:
                                        ; POP HL            ; ...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (23) Start Loop (1 / 3)
 *
 * Start a loop in script data. The first of the following two bytes is the repeat count and the second is
@@ -239,6 +259,7 @@ script_routine_23:
        mov  hl,@script_23_24_loop_addr ; LD (34286),HL     ; Store address to return to (i.e. first instruction in loop) at #R34285...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (24) End Loop (1 / 3) Output: HL  Address of next script instruction to execute
 script_routine_24:
        movb @script_23_24_loop_count,a ; LD A,(34285)      ; Load A with current repeat count
@@ -251,6 +272,7 @@ script_routine_24:
        mov  @script_23_24_loop_addr,hl ; LD HL,(34286)     ; Load HL with address of first instruction in loop...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (25) Start Loop (2 / 3)
 *
 * Start a loop in script data. The first of the following two bytes is the repeat count and the second is
@@ -263,6 +285,7 @@ script_routine_25:
        mov  hl,@script_25_26_loop_addr ; LD (34289),HL     ; Store address to return to (i.e. first instruction in loop) at #R34288...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (26) End Loop (2 / 3) Output: HL  Address of next script instruction to execute
 script_routine_26:
        movb @script_25_26_loop_count,a ; LD A,(34288)      ; Load A with current repeat count
@@ -275,6 +298,7 @@ script_routine_26:
        mov  @script_25_26_loop_addr,hl ; LD HL,(34289)     ; Load HL with address of first instruction in loop...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (27) Start Loop (3 / 3)
 *
 * Start a loop in script data. The first of the following two bytes is the repeat count and the second is
@@ -287,6 +311,7 @@ script_routine_27:
        mov  hl,@script_27_28_loop_addr ; LD (34292),HL     ; Store address to return to (i.e. first instruction in loop) at #R34291...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (28) End Loop (3 / 3) Output: HL  Address of next script instruction to execute
 script_routine_28:
        movb @script_27_28_loop_count,a ; LD A,(34291)      ; Load A with current repeat count
@@ -299,6 +324,7 @@ script_routine_28:
        mov  @script_27_28_loop_addr,hl ; LD HL,(34292)     ; Load HL with address of first instruction in loop...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (32) Update Berk's Position and State (Flying) Depending Upon Control Input
 *
 * See pokes Input:  IX  (Entry at #R48487 only) Address of complex state data (current level) for Berk IX  (Entry at
@@ -354,6 +380,7 @@ script_routine_34:
        sb   one,@6(iy)                 ; DEC (IY+6)        ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (35) Move Entity at IX (and if Berk, Carried Entity) Down One Character
 *
 * Used by the routine at #R37778. Input:  IX  Address of complex state data for an entity
@@ -434,26 +461,31 @@ script_routine_02:
        sb   one,@7(iy)                 ; DEC (IY+7)        ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (22) Move Carried Entity Behind Berk as he Faces Into Screen
 script_routine_22:
        bl   @move_carried_to_back                   ; CALL 48715        ; Move carried entity behind Berk as he faces into screen
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (21) Move Carried Entity in Front of Berk as he Faces Out of Screen
 script_routine_21:
        bl   @move_carried_to_front                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (19) Move Carried Entity to Berk's Left as he Faces Left
 script_routine_19:
        bl   @move_carried_to_left                   ; CALL 48738        ; Move carried entity to Berk's left as he faces left
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (20) Move Carried Entity to Berk's Right as he Faces Right
 script_routine_20:
        bl   @move_carried_to_right                   ; CALL 48727        ; Move carried entity to Berk's right as he faces right
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (29) Make Berk Start Falling, and Drop his Carried Entity if Appropriate Input:  IX  Address of
 * complex state data for an entity
 script_routine_29:
@@ -462,6 +494,7 @@ script_routine_29:
        bl   @drop_item                   ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (30) Check Berk's Fall Velocity, and React to Landing
 *
 * See trivia and pokes Input:  IX  Address of complex state data (current level) for Berk Output: HL  Address of
@@ -474,20 +507,21 @@ script_routine_30:
        andi tmp0,8*256                 ;
        jne  _48952                     ; JR NZ,48952       ; ...then skip ahead to #R48952
        li   hl,_35363                  ; LD HL,35363       ; Load HL with address of script data for Berk starting to fall...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 _48952:
        li   hl,_35367                  ; LD HL,35367       ; Point HL at script data for Berk falling rapidly (horizontal, arms outstretched)...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 _48958:
        movb @12(ix),tmp0               ; BIT 3,(IX+12)     ; If bit 3 of Berk's velocity factor is set (i.e. Berk has a velocity factor of 8)...
        andi tmp0,8*256                 ;
        jne  _48970                     ; JR NZ,48970       ; ...then skip ahead to #R48970
        li   hl,_35457                  ; LD HL,35457       ; Point HL at script data for Berk landing (after jump)
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 _48970:
        li   hl,_35371                  ; LD HL,35371       ; Point HL at script data for Berk lying on floor stunned and getting up
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (31) React to Berk's Landing
 *
 * See trivia Input:  IX  Address of complex state data for an entity Output: HL  Address of next script instruction
@@ -502,6 +536,7 @@ _48988:
        li   hl,_35371                  ; LD HL,35371       ; Point HL at script data for Berk lying on floor stunned and getting up
        b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (33) Advance Berk's Jump and Select Next Phase if Current Phase Complete Output: HL  Address of
 * next script instruction to execute
 script_routine_33:
@@ -517,6 +552,7 @@ script_routine_33:
        .ex_de_hl                       ; EX DE,HL          ; ...
        b    @execute_script            ; JP 48098          ; ...and execute script instruction at this location
 
+*********************************************************************************
 * Script Routine (43) Select Next Action for Drutt Depending Upon Control Input Input:  IX  Address of complex state
 * data (current level) for Drutt Output: HL  Address of next script instruction to execute
 script_routine_43:
@@ -525,8 +561,8 @@ script_routine_43:
        cb   a,@bytes+129               ; CP 129            ; ...and if collision was not with entity of class 129 (causes other entities to start
                                                            ; falling)...
        jne  _51792                     ; JR NZ,51792       ; ...then skip ahead to #R51792
-       bl   @prepare_falling                   ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
-       b    @script_routine_45                    ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
+       bl   @prepare_falling           ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
+       b    @script_routine_45         ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
 _51792:
        mov  @worm_state_addr,iy        ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
        movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset...
@@ -586,7 +622,7 @@ _51875:
        li   de,drutts_script_data_actions                  ; LD DE,51890       ; Point DE at Table of Addresses of Script Data for Drutt's Actions...
        bl   @load_table_addr           ; CALL 53814        ; ...and load DE with entry of index A in this table
        .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (now contains address of randomly selected script data)
-       b    @execute_script                    ; JP 48098          ; Execute script data at address in HL
+       b    @execute_script            ; JP 48098          ; Execute script data at address in HL
 
 * Randomly Select Script Data for Rightward Hop of Size Three or Four, and Execute
 *
@@ -597,11 +633,11 @@ _51904:
        socb a,a                        ; OR A              ; ...and if this is zero (1 in 2 chance)...
        jeq  _51918                     ; JR Z,51918        ; ...then skip ahead to #R51918
        li   hl,_51538                  ; LD HL,51538       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size four...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 _51918:
        li   hl,_51562                  ; LD HL,51562       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size
                                                            ; three...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Randomly Select Script Data for Leftward Hop of Size Three or Four, and Execute
 *
@@ -612,10 +648,10 @@ _51924:
        socb a,a                        ; OR A              ; ...and if this is zero (1 in 2 chance)...
        jeq  _51938                     ; JR Z,51938        ; ...then skip ahead to #R51938
        li   hl,_51584                  ; LD HL,51584       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size four...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 _51938:
        li   hl,_51608                  ; LD HL,51608       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size three...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Start Drutt Jumping
 *
@@ -623,14 +659,14 @@ _51938:
 _51944:
        movb @bytes+130,@12(ix)         ; LD (IX+12),130    ; Set Drutt's Is Jumping Flag and set initial Jump Velocity to 2
        li   hl,_51674                  ; LD HL,51674       ; Point HL at script data for Drutt starting to jump straight up...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Point HL at Script Data for Drutt Swapping Depth Levels and Execute
 *
 * Used by the routine at #R51779.
 _51954:
        li   hl,_51630                  ; LD HL,51630       ; Point HL at script data for Drutt swapping depth levels...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
 * Move Drutt Closer to the Worm and Eat it if Close Enough
 *
@@ -663,46 +699,51 @@ _51960:
 _52007:
        movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set worm's depth to zero (i.e. remove from play)
        li   hl,_51706                  ; LD HL,51706       ; Point HL at script data for Drutt eating a worm...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt's left edge to left of worm's
 _52017:
        li   hl,_51538                  ; LD HL,51538       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size four...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Worm's right edge to left of Drutt's left edge
 _52023:
        li   hl,_51584                  ; LD HL,51584       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size four...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (44) Move Entity Up One Character
 *
 * Used by the routine at #R48026. Input:  IX  Address of complex state data for an entity
 script_routine_44:
        sb   one,@4(ix)                 ; DEC (IX+4)        ; Move entity up one character...
        sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (45) Move Entity Down One Character
 *
 * Used by the routine at #R51779. Input:  IX  Address of complex state data for an entity
 script_routine_45:
        ab   one,@4(ix)                 ; INC (IX+4)        ; Move entity down one character...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (46) Move Drutt, or Entity he is Pushing Left One Character and Start Pushed Entity Falling if
 * Appropriate
 script_routine_46:
-       bl   @push_left                   ; CALL 52053        ; Move Drutt, or entity he is pushing left one character and start pushed entity falling if
+       bl   @push_left                 ; CALL 52053        ; Move Drutt, or entity he is pushing left one character and start pushed entity falling if
                                                            ; appropriate
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (47) Move Drutt, or Entity he is Pushing Right One Character and Start Pushed Entity Falling if
 * Appropriate
 script_routine_47:
-       bl   @push_right                   ; CALL 52148        ; Move Drutt, or entity he is pushing right one character and start pushed entity falling if
+       bl   @push_right                ; CALL 52148        ; Move Drutt, or entity he is pushing right one character and start pushed entity falling if
                                                            ; appropriate
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (50) Advance Drutt's Jump and Select Next Phase if Current Phase Complete
 *
 * The CALL at #R52243 will be RETurned from if Drutt's Is Jumping Flag is reset. Otherwise, E will be loaded with
@@ -721,7 +762,7 @@ script_routine_50:
 * Jump state index is 1 (landed on floor / platform and Back (control input) bit set) or 2 (unused)
 _52259:
        li   hl,_51674                  ; LD HL,51674       ; Point HL at script data for Drutt starting to jump straight up...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Jump state index is not 2
 _52265:
        cb   a,@bytes+3                 ; CP 3              ; If jump state index is not 3...
@@ -750,15 +791,17 @@ _52295:
        b    @inct_execute_script                    ;
 !
 * Jump state index is 6 (Drutt has banged his head on something above him)
-       bl   @prepare_falling                   ; CALL 55516        ; Set Drutt's Can Fall Flag and set initial velocity factor of 2
+       bl   @prepare_falling           ; CALL 55516        ; Set Drutt's Can Fall Flag and set initial velocity factor of 2
        li   hl,_51520                  ; LD HL,51520       ; Point HL at script data for Drutt facing out of screen (falling)...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (51) Swap Drutt's Current Depth Level if Possible
 script_routine_51:
-       bl   @swap_drutts_depth                   ; CALL 52315        ; Swap Drutt's current depth level if possible
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       bl   @swap_drutts_depth         ; CALL 52315        ; Swap Drutt's current depth level if possible
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (53) Move Worm Left if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
 * state data for an entity
 script_routine_53:
@@ -770,6 +813,7 @@ script_routine_53:
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (54) Move Worm Right if Possible, Otherwise Choose New Direction Input:  IX  Address of complex
 * state data for an entity
 script_routine_54:
@@ -789,6 +833,7 @@ _52908:
        li   hl,_52747                  ; LD HL,52747       ; Point HL at script data for worm, choosing next direction...
        b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (55) Choose New Direction and Start Crawling (Worm) Input:  IX  Address of complex state data for
 * an entity
 script_routine_55:
@@ -820,6 +865,7 @@ _52961:
        li   hl,_52781                  ; LD HL,52781       ; Point HL at script data for worm, crawling right...
        b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (52) Increase Worm's Age and Decrease Time Until Direction Change, or React to Drutt's Presence
 *
 * When both Drutt and the worm are in the same room, and the worm is alerted to Drutt's presence, then the worm will
@@ -874,12 +920,14 @@ _53034:
        li   hl,_52797                  ; LD HL,52797       ; Point HL at script data for worm, fleeing left...
        b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (48, 49) Return
 *
 * This script routine terminates the script data currently under execution until the next game cycle.
 script_routine_48_49:
        .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Script Routine (59) Have Berk Interact Appropriately with a Door Behind Him Output: BC  Address of script data to
 * execute upon arrival of new level
 script_routine_59:
@@ -887,6 +935,7 @@ script_routine_59:
                                                            ; input
        jmp  _36393                     ; JR 36393          ; Have Berk interact appropriately with a door
 
+*********************************************************************************
 * Script Routine (58) Have Berk Interact Appropriately with a Door in Front of Him Input:  BC  (entry at #R36393
 * only) Address of script data to execute upon arrival of new level
 script_routine_58:
@@ -942,6 +991,7 @@ _36462:
        bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (56) Give Berk Power Corresponding to Entity Eaten Input:  IX  Address of complex state data
 * (current level) for Berk
 script_routine_56:
@@ -972,22 +1022,24 @@ script_routine_56:
        socb @bits+7,@8(ix)             ; SET 7,(IX+8)      ; Set bit 7 of Berk's class value (i.e. set "Spans Full Depth" Flag)
        ab   one,@6(ix)                 ; INC (IX+6)        ; Increase y-coordinate of Berk's bottom edge by two characters...
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-_36536:
        li   hl,_35515                  ; LD HL,35515       ; Point HL at script data for Berk gaining floating power...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (57) Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside Current Room
 script_routine_57:
        bl   @cycle_colors_and_refresh  ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
                                                            ; room
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (36) Remove Boni from Level 1
 script_routine_36:
        sb   a,a                        ; XOR A             ; Set Boni's room (Level 1) to zero...
-       movb a,@bonis_state_data_1                  ; LD (43606),A      ; ...
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       movb a,@bonis_state_data_1      ; LD (43606),A      ; ...
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (37) Remove Flying Skeleton Creature from Level 1, and Terminate Script Processing Input:  IX
 * Address of complex state data for an entity
 script_routine_37:
@@ -996,17 +1048,19 @@ script_routine_37:
        socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set Flying Skeleton Creature's Inactive Flag
        .ret                            ; RET               ; Return (i.e. terminate further script processing)
 
+*********************************************************************************
 * Script Routine (38) Close the Trap Door
 script_routine_38:
        bl   @close_trap_door                   ; CALL 36996        ; Close the Trap Door
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (39) Open the Trap Door
 script_routine_39:
        bl   @open_trap_door                   ; CALL 37004        ; Open the Trap Door
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
-
+*********************************************************************************
 * Script Routine (41) Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait Input:  IX Address
 * of complex state data for an entity Output: HL  Address of next script instruction to execute
 script_routine_41:
@@ -1031,6 +1085,7 @@ _37744:
        li   hl,_37792                  ; LD HL,37792       ; Point HL at script data for spider waiting...
        b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (42) Decrease Remaining Time Until Spider Next Descends and if Zero, Start Descent Input:  IX
 * Address of complex state data for an entity Output: HL  Address of next script instruction to execute
 script_routine_42:
@@ -1048,6 +1103,7 @@ _37772:
        li   hl,_37800                  ; LD HL,37800       ; Point HL at script data for spider moving down...
        b    @execute_script            ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (40) Move Spider Down One Character, and if at Bottom, Advance it to Bounce / Climb Up Mode Input:
 * IX  Address of complex state data for an entity Output: HL  Address of next script instruction to execute
 script_routine_40:
@@ -1059,7 +1115,7 @@ script_routine_40:
        li   hl,_37816                  ; LD HL,37816       ; Point HL at script data for bounce / climb up mode...
        b    @execute_script            ; JP 48098          ; ...and execute
 
-
+*********************************************************************************
 * Script Routine (61) Fire Bubo's Projectile
 *
 * Note that Bubo normally can't fire when being carried (see instructions at #R38119), however if he starts to fire
@@ -1089,6 +1145,7 @@ _38185:
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set projectile's depth to zero
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 
+*********************************************************************************
 * Script Routine (60) Check Position of Apebeast and Turn If Appropriate Input:  IX  Address of complex state data
 * for an entity Output: HL  Address of next script instruction to execute
 script_routine_60:
@@ -1114,6 +1171,7 @@ _38575:
        li   hl,_38450                  ; LD HL,38450       ; Point HL at script data for Apebeast walking left...
        b    @execute_script                    ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * The skeleton will step forward once, and then step back, if Berk is close enough and Fake Boni is in a room to the
 * right. If Fake Boni is in the Skeleton's room, or a room to the left of this, then the Skeleton will step forward
 * repeatedly while Berk is close enough and will only back off when Berk moves out of range. The range is nine, so
@@ -1155,6 +1213,7 @@ _41597:
        li   hl,_41280                  ; LD HL,41280       ; Point HL at script data for Skeleton stepping forward (left)...
        b    @execute_script                    ; JP 48098          ; ...and execute
 
+*********************************************************************************
 * Script Routine (64) Set Random (1 to 10) Number of Iterations in Following Loop Script Instruction
 script_routine_64:
        movb @bytes+10,a                ; LD A,10           ; Load A with a random number, 1-10...
