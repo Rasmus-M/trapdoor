@@ -369,3 +369,14 @@ start_level_2_key_falling:
 start_level_2_key_falling_1:
        .ret                            ; RET               ; Return
 
+*********************************************************************************
+* Move Entity at IX Down One Character
+*
+* Used by the routines at #R38219 and #R38592. Input:  IX  Address of complex state data for an entity Output: A New
+* y-coordinate of entity's top
+move_projectile_down:
+       ab   one,@4(ix)                 ; INC (IX+4)        ; Increase y-coordinates of top and bottom of entity by one character...
+       ab   one,@6(ix)                 ; INC (IX+6)        ; ...
+       movb @4(ix),a                   ; LD A,(IX+4)       ; Load new y-coordinate of entity's top into A
+       rt                              ; RET               ; Return
+

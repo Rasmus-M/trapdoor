@@ -7,6 +7,7 @@
        copy "level-4-entities.a99"
        copy "graphic-routines.a99"
        copy "script-routines.a99"
+       copy "common-routines.a99"
        copy "vdp.a99"
        copy "data.a99"
        copy "level-data.a99"

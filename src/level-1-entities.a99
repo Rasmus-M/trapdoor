@@ -247,3 +247,12 @@ update_spider_state_2:
 update_spider_state_3:
        .endproc
 *// update_spider_state
+
+*********************************************************************************
+* Advance HL to Next Script Instruction and Start Executing
+*
+* Used by the routine at #R36887.
+start_executing:
+       .proc
+       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+

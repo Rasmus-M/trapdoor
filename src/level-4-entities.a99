@@ -645,3 +645,22 @@ _42486:
        bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        .ret                            ; RET               ; Return
 
+*********************************************************************************
+* Move Entity at IX Right One Character
+*
+* Used by the routines at #R41961 and #R42381.
+_42505:
+       ab   one,@7(ix)                 ; INC (IX+7)        ; Increase x-coordinates of left and right edges of entity at IX by one...
+       ab   one,@5(ix)                 ; INC (IX+5)        ; ...
+       .ret                            ; RET               ; Return
+
+*********************************************************************************
+* Set Graphic Layout Data Address for Entity at IX to BC
+*
+* Used by the routines at #R41767, #R41961, #R42251, #R42381 and #R42486. Input:  BC  Holds address of graphic
+* layout data
+_42512:
+       movb @c,@2(ix)                  ; LD (IX+2),C       ; Set current entity's graphic layout data address to BC...
+       movb b,@3(ix)                   ; LD (IX+3),B       ; ...
+       .ret                            ; RET               ; Return
+

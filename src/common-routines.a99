@@ -1,0 +1,177 @@
+*********************************************************************************
+* Make Berk Drop the Entity He is Holding and Load IY with its Complex State Data Address
+*
+* Used by the routines at #R35735, #R36116, #R36390, #R36638, #R39151, #R39278, #R39776, #R48920 and #R53723. Input:
+* IX  Address of complex state data (current level) for Berk Output: IY  Address of complex state data for entity
+* dropped by Berk
+drop_item:
+       .proc
+drop_item_0:
+       movb @berk_entity_held,a        ; LD A,(34221)      ; If Berk is not holding anything...
+       socb a,a                        ; OR A              ; ...
+       jeq  drop_item_5                ; RET Z             ; ...then return
+       sb   a,a                        ; XOR A             ; Set class of entity held by Berk to zero (i.e. nothing)...
+       movb a,@berk_entity_held        ; LD (34221),A      ; ...
+       mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk
+       movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set this dropped entity's velocity factor to 2...
+       szcb @bits+5,@10(iy)            ; RES 5,(IY+10)     ; ...reset its Is Being Carried Flag...
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its Can Fall Flag
+       szcb @bits+4,@9(ix)             ; RES 4,(IX+9)      ; Reset Berk's Carrying Something Flag
+       movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Berk's Walking Right Flag is reset...
+       andi tmp0,1*256                 ;
+       jeq  drop_item_2                ; JR Z,36339        ; ...then skip ahead to #R36339
+drop_item_1:
+       ab   one,@7(iy)                 ; INC (IY+7)        ; Move dropped entity right one character...
+       ab   one,@5(iy)                 ; INC (IY+5)        ; ...
+       jmp  drop_item_4                ; JR 36351          ; Skip ahead to #R36351
+drop_item_2:
+       movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If Berk's Walking Left Flag is reset...
+       andi tmp0,2*256                 ;
+       jeq  drop_item_4                ; JR Z,36351        ; ...then skip ahead to #R36351
+drop_item_3:
+       sb   one,@7(iy)                 ; DEC (IY+7)        ; Move dropped entity left one character...
+       sb   one,@5(iy)                 ; DEC (IY+5)        ; ...
+drop_item_4:
+       movb @5(iy),a                   ; LD A,(IY+5)       ; If entity at IY has the x-coordinate of its left side less than 100...
+       cb   a,@bytes+100               ; CP 100            ; ...
+       jl   drop_item_1                ; JR C,36331        ; ...then move right until left x-coordinate is 100
+       movb @tmp_width_current_room,a  ; LD A,(34235)      ; Load A with width of current room (chars) + 99
+       cb   a,@7(iy)                   ; CP (IY+7)         ; If entity at IY has the x-coordinate of its right side greater than the width of the current
+                                                           ; room...
+       jl   drop_item_3                ; JR C,36345        ; ...then move right until left x-coordinate is less than room width
+drop_item_5:
+       .ret                            ; RET               ; Return
+*// drop_item
+
+*********************************************************************************
+* Cycle Attributes (Full-Screen), Clear Display Buffers and Paint Red Areas Outside Current Room
+*
+* Used by the routines at #R36610, #R39584 and #R39760.
+cycle_colors_and_refresh:
+       .proc
+       .push hl                        ; PUSH HL           ; Store HL
+       bl   @cycle_attributes_short    ; CALL 53581        ; Cycle Attributes (Full-Screen) and Clear Display Buffers
+       bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
+       .pop hl                         ; POP HL            ; Restore HL
+       .endproc                        ; RET               ; Return
+
+*********************************************************************************
+* Change Entity's Room Up One if Appropriate
+*
+* Used by the routines at #R36542, #R48487 and #R55196. Input:  IX  Address of complex state data for an entity
+change_room_up:
+       .proc
+       movb @bytes+99,a                ; LD A,99           ; If y-coordinate of top of entity is larger than 99 (i.e. top of entity is below top of
+                                                           ; room)...
+       cb   a,@4(ix)                   ; CP (IX+4)         ; ...
+       jl   change_room_up_4           ; RET C             ; ...then return
+       .push hl                        ; PUSH HL           ; Store HL
+       .push bc                        ; PUSH BC           ; Store BC
+       .push de                        ; PUSH DE           ; Store DE
+       mov  @vert_room_connect_map,iy                 ; LD IY,(34254)     ; Load start address of current level's Vertical Room Connectivity Data into IY
+       inc  iy                         ; INC IY            ; Advance by one byte to second byte (lower room index) of first entry
+       movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity into D
+change_room_up_1:
+       movb *iy,a                      ; LD A,(IY+0)       ; Load second byte (lower room index) of current entry into A
+       cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
+       jeq  change_room_up_3                     ; JR Z,55512        ; ...then skip ahead to #R55512
+       cb   a,d                        ; CP D              ; If byte is the same as the entity's current room...
+       jeq  change_room_up_2                     ; JR Z,55467        ; ...then skip ahead to #R55467
+       inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
+                                       ; INC IY            ; ...
+       jmp  change_room_up_1                     ; JR 55451          ; Loop back to #R55451
+change_room_up_2:
+       movb @-1(iy),b                  ; LD B,(IY-1)       ; Load first byte (upper room index) of current entry into B
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
+       movb a,d                        ; LD D,A            ; ...
+       bl   @set_room_of_entity        ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
+                                                           ; minus one
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
+       sb   d,a                        ; SUB D             ; Subtract x-coordinate of old room's left edge from x-coordinate of new room's left edge...
+       movb a,d                        ; LD D,A            ; ...and place result in D
+       movb @5(ix),a                   ; LD A,(IX+5)       ; Load A with x-coordinate of left of entity...
+       sb   d,a                        ; SUB D             ; ...subtract difference in positions of rooms' left edges...
+       movb a,@5(ix)                   ; LD (IX+5),A       ; ...and store
+       ab   @e,a                       ; ADD A,E           ; Update x-coordinate of right of entity by adding entity's (width - 1) value...
+       movb a,@7(ix)                   ; LD (IX+7),A       ; ...
+       movb @4(ix),a                   ; LD A,(IX+4)       ; Add 22 to y-coordinate of top of entity...
+       ab   @bytes+22,a                ; ADD A,22          ; ...
+       movb a,@4(ix)                   ; LD (IX+4),A       ; ...
+       movb @6(ix),a                   ; LD A,(IX+6)       ; Add 22 to y-coordinate of bottom of entity...
+       ab   @bytes+22,a                ; ADD A,22          ; ...
+       movb a,@6(ix)                   ; LD (IX+6),A       ; ...
+       bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
+                                                           ; state data
+change_room_up_3:
+       .pop de                         ; POP DE            ; Restore DE
+       .pop bc                         ; POP BC            ; Restore BC
+       .pop hl                         ; POP HL            ; Restore HL
+change_room_up_4:
+       .endproc                        ; RET               ; Return
+*// change_room_up
+
+*********************************************************************************
+* Set Can Fall Flag and Set Initial Velocity Factor of 2 for Entity Defined at Address in IX
+*
+* Used by the routines at #R36638, #R39760, #R48417, #R51779, #R52098, #R52193 and #R52243. Input:  IX  Address of
+* complex state data for an entity
+prepare_falling:
+       socb @bits+6,@10(ix)            ; SET 6,(IX+10)     ; Set entity's "Can Fall" flag
+       movb @bytes+2,@12(ix)           ; LD (IX+12),2      ; Set entity's initial velocity factor to 2
+       rt                            ; RET               ; Return
+
+*********************************************************************************
+* Change Entity's Room Down One if Appropriate
+*
+* Used by the routines at #R55196 and #R55525. Input:  IX  Address of complex state data for an entity
+change_room_down:
+       .proc
+       movb @bytes+122,a               ; LD A,122          ; If y-coordinate of bottom of entity is smaller than 122 (i.e. bottom of entity is above
+                                                           ; bottom of room)...
+       cb   a,@6(ix)                   ; CP (IX+6)         ; ...
+       jhe  change_room_down_4         ; RET NC            ; ...then return
+       .push bc                        ; PUSH BC           ; Store BC
+       .push de                        ; PUSH DE           ; Store DE
+       mov  @vert_room_connect_map,iy                 ; LD IY,(34254)     ; Load start address of current level's Vertical Room Connectivity Data into IY
+       movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity into D
+change_room_down_1:
+       movb *iy,a                      ; LD A,(IY+0)       ; Load first byte (upper room index) of current entry into A
+       cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
+       jeq  change_room_down_3                     ; JR Z,55695        ; ...then skip ahead to #R55695
+       cb   a,d                        ; CP D              ; If byte is the same as the entity's current room...
+       jeq  change_room_down_2                     ; JR Z,55647        ; ...then skip ahead to #R55647
+       inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
+                                       ; INC IY            ; ...
+       jmp  change_room_down_1                     ; JR 55631          ; Loop back to #R55631
+change_room_down_2:
+       movb @1(iy),b                   ; LD B,(IY+1)       ; Load second byte (lower room index) of current entry into B
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (old, that entity is leaving) into D...
+       movb a,d                        ; LD D,A            ; ...
+       bl   @set_room_of_entity        ; CALL 54480        ; Set room of entity to B, store room size data for new room and load E with entity's width
+                                                           ; minus one
+       movb @tmp_room_dim_data+1,a     ; LD A,(34231)      ; Load position (chars) of left side of current room (new, that entity has entered) into A
+       sb   d,a                        ; SUB D             ; Subtract x-coordinate of old room's left edge from x-coordinate of new room's left edge...
+       movb a,d                        ; LD D,A            ; ...and place result in D
+       movb @5(ix),a                   ; LD A,(IX+5)       ; Load A with x-coordinate of left of entity...
+       sb   d,a                        ; SUB D             ; ...subtract difference in positions of rooms' left edges...
+       movb a,@5(ix)                   ; LD (IX+5),A       ; ...and store
+       ab   @e,a                       ; ADD A,E           ; Update x-coordinate of right of entity by adding entity's (width - 1) value...
+       movb a,@7(ix)                   ; LD (IX+7),A       ; ...
+       movb @4(ix),a                   ; LD A,(IX+4)       ; Subtract 20 from y-coordinate of top of entity...
+       sb   @bytes+20,a                ; SUB 20            ; ...
+       movb a,@4(ix)                   ; LD (IX+4),A       ; ...
+       movb @6(ix),a                   ; LD A,(IX+6)       ; Subtract 20 from y-coordinate of bottom of entity...
+       sb   @bytes+20,a                ; SUB 20            ; ...
+       movb a,@6(ix)                   ; LD (IX+6),A       ; ...
+       bl   @paint_red_areas_char      ; CALL 54456        ; Paint red areas outside current character's room if IX points to current character's complex
+                                                           ; state data
+       .pop de                         ; POP DE            ; Restore DE
+       .pop bc                         ; POP BC            ; Restore BC
+       .ret                            ; RET               ; Return
+change_room_down_3:
+       .pop de                         ; POP DE            ; Restore DE
+       .pop bc                         ; POP BC            ; Restore BC
+change_room_down_4:
+       .endproc                        ; RET               ; Return
+*// change_room_down
+

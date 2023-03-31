@@ -1753,3 +1753,329 @@ open_close_trap_door_end:
        movb a,@_43437                  ; LD (43437),A      ; Set value in A as the current room of "Open Trap Door"...
        movb a,@_43450                  ; LD (43450),A      ; ...and marker (preventing Berk and Drutt passing door lid)
        .endproc                        ; RET               ; Return
+
+*********************************************************************************
+* Handle Drutt's Jump, and Load E with Jump State Index As Appropriate
+*
+* See description of routine at #R55041 for details. Output: E  (via routine at #R55041) Jump state index (see
+* #R55041)
+handle_drutt_jump:
+       .proc
+       mov  @drutt_state_addr,ix       ; LD IX,(34242)     ; Load IX with address of current level's complex state data for Drutt
+       movb @12(ix),tmp0               ; BIT 7,(IX+12)     ; If Drutt's Is Jumping Flag is reset...
+       andi tmp0,128*256               ;
+       jeq  handle_drutt_jump_1        ; RET Z             ; ...then return
+* Drutt's Is Jumping Flag is set
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset (Berk Mode)...
+       movb a,tmp0                     ; BIT 0,A           ; ...
+       andi tmp0,1*256                 ;
+       jeq  handle_berk_or_drutt_jump_1 ; JR Z,55065        ; ...then handle Drutt's jump, and load E with jump state index as appropriate based upon no
+                                                           ; control input
+       jmp  handle_berk_or_drutt_jump  ; JR 55060          ; Handle Drutt's jump, and load E with jump state index as appropriate based upon current
+handle_drutt_jump_1                                        ; control input
+        .endproc
+
+*********************************************************************************
+* Handle Berk's Jump, and Load E with Jump State Index As Appropriate
+*
+* This routine updates the position, direction and velocity of a jumping character (Berk if entry at #R55041 or
+* Drutt if entry via routine at #R55023) based upon various conditions (control input, collisions with obstructions
+* and the character's current position, direction and velocity). Register E is loaded (either by this routine, or
+* the CALLed routine at #R55196) with a value determined by these conditions. The value in E in turn determines how
+* the character's jump will progress. A given numeric value may result from more than one set of conditions.
+* Possible output values in E are: Input:  IX  Address of complex state data (current level) for Berk (entry via
+* #R55041) or Drutt (entry via #R55060 and #R55065) Output: E  Jump state index (see table above)
+handle_berk_jump:
+       .proc
+       bl   @move_into_new_room        ; CALL 54283        ; Move Berk into new room (left or right) if he is at the edge of his current room
+       mov  @berk_state_addr,ix        ; LD IX,(34240)     ; Load IX with address of current level's complex state data for Berk
+       movb @12(ix),tmp0               ; BIT 7,(IX+12)     ; If Berk's Is Jumping Flag is reset...
+       andi tmp0,128*256               ;
+       jeq  handle_berk_jump_1          ; RET Z             ; ...then return
+* Berk's Is Jumping Flag is set
+       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is set...
+       movb a,tmp0                     ; BIT 0,A           ; ...
+       andi tmp0,1*256                 ;
+       jne  handle_berk_or_drutt_jump_1 ; JR NZ,55065       ; ...then skip ahead to #R55065
+       jmp  handle_berk_or_drutt_jump
+handle_berk_jump_1:
+       .endproc
+
+*********************************************************************************
+* From this point onwards, IX points to either Berk's complex state data (entry via #R55041) or Drutt's complex
+* state data (entry via #R55060 or #R55065). This entry point is used by the routine at #R55023.
+* Jump - not call
+handle_berk_or_drutt_jump:
+       movb @control_input,a           ; LD A,(34219)      ; Load A with control input
+       jmp  handle_berk_or_drutt_jump_2 ; JR 55066          ; Skip ahead to #R55066
+* This entry point is used by the routine at #R55023.
+handle_berk_or_drutt_jump_1:
+       sb   a,a                        ; XOR A             ; Load A with zero
+handle_berk_or_drutt_jump_2:
+       movb a,@cached_control_input    ; LD (55022),A      ; Store value in A at #R55022
+       movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If jumper's Walking Right Flag is reset...
+       andi tmp0,1*256                 ;
+       jeq  handle_berk_or_drutt_jump_6 ; JR Z,55128        ; ...then skip ahead to #R55128
+* Walking Right Flag is set
+       movb @bytes+2,b                 ; LD B,2            ; Load B with 2 (as Berk and Drutt jump right by two characters)
+handle_berk_or_drutt_jump_3:
+       .push bc                        ; PUSH BC           ; Store BC (B = remaining number of characters to move)
+       bl   @chk_coll_right            ; CALL 54569        ; Check jumper for collision with another impassable / pushable entity immediately to the
+                                                           ; right...
+       joc  handle_berk_or_drutt_jump_4 ; JR C,55108        ; ...and if a collision has not occurred, then skip ahead to #R55108
+       cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class less than 22 (can be picked up)...
+       jl   handle_berk_or_drutt_jump_4 ; JR C,55108        ; ...then skip ahead to #R55108
+       cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
+       jeq  handle_berk_or_drutt_jump_4 ; JR Z,55108        ; ...then skip ahead to #R55108
+       cb   a,@bytes+50                ; CP 50             ; If collision was with entity of class 50 (causes Drutt to swap depth levels)...
+       jeq  handle_berk_or_drutt_jump_4 ; JR Z,55108        ; ...then skip ahead to #R55108
+       cb   a,@bytes+159               ; CP 159            ; If collision was not with entity of class 159 (Berk floating)...
+       jne  handle_berk_or_drutt_jump_5 ; JR NZ,55124       ; ...then skip ahead to #R55124
+* Collision with Berk, floating
+       movb @bytes+241,@11(iy)         ; LD (IY+11),241    ; Set Berk's Walking Right, Impassable Leftwards, Impassable Rightwards, Interaction (11,6)
+                                                           ; and Interaction (11,7) flags and reset his Walking Left, Unused (11,2) and Unused (11,3)
+                                                           ; flags
+       bl   @set_swap_pending_flag     ; CALL 55187        ; Set Character Swap Pending Flag
+       jmp  handle_berk_or_drutt_jump_5 ; JR 55124          ; Skip ahead to #R55124
+* No collision, or collision with entity of class 50, 129 or less than 22
+handle_berk_or_drutt_jump_4:
+       bl   @move_into_right_room      ; CALL 54313        ; Move jumper into room to the right, if appropriate...
+       jnc  handle_berk_or_drutt_jump_5                     ; JR NC,55124       ; ...and if jumper can't enter new room then skip ahead to #R55124
+       ab   one,@5(ix)                 ; INC (IX+5)        ; Move jumper right by one character...
+       ab   one,@7(ix)                 ; INC (IX+7)        ; ...
+       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of characters to move)
+       sb   one,b                      ; DJNZ 55077        ; Decrease remaining number of characters to move, and if not zero, loop back to #R55077
+       jne  handle_berk_or_drutt_jump_3                     ;
+       jmp  handle_vertical_jump       ; JR 55196          ; Handle vertical component of jumper's jump, load E with Jump State Index and return
+* Collision with other class of entity
+handle_berk_or_drutt_jump_5:
+       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of characters to move)
+       movb @bytes+4,@e                ; LD E,4            ; Load E with 4 (jumper has bounced off an obstruction to the right while jumping right)
+       jmp  handle_berk_or_drutt_jump_10 ; RET               ; Return
+* Walking Right Flag is reset
+handle_berk_or_drutt_jump_6:
+       movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If jumper's Walking Left Flag is reset...
+       andi tmp0,2*256                 ;
+       jeq  handle_vertical_jump       ; JR Z,55196        ; ...then skip ahead to #R55196 (handle vertical component of jumper's jump, load E with Jump
+                                                           ; State Index and return)
+* Walking Left Flag is set
+       movb @bytes+2,b                 ; LD B,2            ; Load B with 2 (as Berk and Drutt jump left by two characters)
+handle_berk_or_drutt_jump_7:
+       .push bc                        ; PUSH BC           ; Store BC (B = remaining number of characters to move)
+       bl    @chk_coll_left            ; CALL 54666        ; Check jumper for collision with another impassable / pushable entity immediately to the
+                                                           ; left...
+       joc  handle_berk_or_drutt_jump_8 ; JR C,55167        ; ...and if a collision has not occurred, then skip ahead to #R55167
+       cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class less than 22 (can be picked up)...
+       jl   handle_berk_or_drutt_jump_8 ; JR C,55167        ; ...then skip ahead to #R55167
+       cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
+       jeq  handle_berk_or_drutt_jump_8 ; JR Z,55167        ; ...then skip ahead to #R55167
+       cb   a,@bytes+50                ; CP 50             ; If collision was with entity of class 50 (causes Drutt to swap depth levels)...
+       jeq  handle_berk_or_drutt_jump_8 ; JR Z,55167        ; ...then skip ahead to #R55167
+       cb   a,@bytes+159               ; CP 159            ; If collision was not with entity of class 159 (Berk floating)...
+       jne  handle_berk_or_drutt_jump_9 ; JR NZ,55183       ; ...then skip ahead to #R55183
+* Collision with Berk, floating
+       movb @bytes+242,@11(iy)         ; LD (IY+11),242    ; Set Berk's Walking Left, Impassable Leftwards, Impassable Rightwards, Interaction (11,6) and
+                                                           ; Interaction (11,7) flags and reset his Walking Right and Unused (11,2) and Unused (11,3)
+                                                           ; flags
+       bl   @set_swap_pending_flag     ; CALL 55187        ; Set Character Swap Pending Flag
+       jmp  handle_berk_or_drutt_jump_9 ; JR 55183          ; Skip ahead to #R55183
+* No collision, or collision with entity of class 50, 129 or less than 22
+handle_berk_or_drutt_jump_8:
+       bl   @move_into_left_room       ; CALL 54348        ; Move jumper into room to the left, if appropriate...
+       jnc  handle_berk_or_drutt_jump_9 ; JR NC,55183       ; ...and if jumper can't enter new room then skip ahead to #R55183
+       sb   one,@5(ix)                 ; DEC (IX+5)        ; Move jumper left by one character...
+       sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
+       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of characters to move)
+       sb   one,b                      ; DJNZ 55136        ; Decrease remaining number of characters to move, and if not zero, loop back to #R55136
+       jne  handle_berk_or_drutt_jump_7                     ;
+       jmp  handle_vertical_jump       ; JR 55196          ; Handle vertical component of jumper's jump, load E with Jump State Index and return
+* Collision with other class of entity
+handle_berk_or_drutt_jump_9:
+       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of characters to move)
+       movb @bytes+5,@e                ; LD E,5            ; Load E with 5 (jumper has bounced off an obstruction to the left while jumping left)
+handle_berk_or_drutt_jump_10:
+       .endproc                        ; RET               ; Return
+
+*********************************************************************************
+* Handle Vertical Component of Character's Jump, and Load E with Jump State Index As Appropriate
+*
+* This routine handles the vertical component of Berk's or Drutt's jumping, checking for collisions (e.g. Berk or
+* Drutt hitting an obstruction above, or Drutt knocking down an entity such as a key). The routine also checks the
+* cached control input value at #R55022 to determine the outcome of the next "bounce" if the jumper is on the floor
+* (for example, start a leftward jump if left was pressed). Input:  IX  Address of complex state data (current
+* level) for Berk or Drutt Output: E  Jump state index (see table in description of routine at #R55041)
+* Jump - not call
+handle_vertical_jump:
+       movb @12(ix),a                  ; LD A,(IX+12)      ; Load A with current velocity of jumper's jump...
+       andi a,15*256                   ; AND 15            ; ...
+       movb @12(ix),tmp0               ; BIT 6,(IX+12)     ; If Downward Jump Phase Flag is set...
+       andi tmp0,64*256                ;
+       jne  handle_vertical_jump_6     ; JR NZ,55281       ; ...then skip ahead to #R55281
+* Downward Jump Phase Flag is reset, i.e. in upward phase of jump
+       socb a,a                        ; OR A              ; If current velocity of jumper's jump is at least one...
+       jne  handle_vertical_jump_2     ; JR NZ,55234       ; ...then skip ahead to #R55234
+* Current velocity of jumper's jump is zero
+       movb @cached_control_input,a    ; LD A,(55022)      ; Load A with Cached Control Input...
+       movb a,tmp0                     ; BIT 3,A           ; ...and if Back Bit is reset...
+       andi tmp0,8*256                 ;
+       jeq  handle_vertical_jump_1     ; JR Z,55223        ; ...then skip ahead to #R55223
+       sb   one,@4(ix)                 ; DEC (IX+4)        ; Move jumper up one character...
+       sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
+handle_vertical_jump_1:
+       socb @bits+6,@12(ix)            ; SET 6,(IX+12)     ; Set Downward Jump Phase Flag
+       bl   @inc_jump_velocity         ; CALL 55421        ; Increase current velocity of jumper's jump if less than 7
+       movb one,a                      ; LD A,1            ; Prepare to set velocity of jumper's jump to one, downwards
+       jmp  handle_vertical_jump_7     ; JR 55284          ; Skip ahead to #R55284 (handle downward phase of jump)
+* Current velocity of jumper's jump is at least 1
+handle_vertical_jump_2:
+       movb a,b                        ; LD B,A            ; Load B with current velocity of jumper's jump
+handle_vertical_jump_3:
+       sb   one,@4(ix)                 ; DEC (IX+4)        ; Move jumper up one character...
+       sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+                                                           ; Flag is set...
+       joc  handle_vertical_jump_4     ; JR C,55258        ; ...and if no collision occurred, then skip ahead to #R55258
+       cb   a,@bytes+130               ; CP 130            ; If collision was not with entity of class 130 (causes Berk and Drutt to bounce off or bang
+                                                           ; head)...
+       jne  handle_vertical_jump_4     ; JR NZ,55258       ; ...then skip ahead to #R55258
+* Jumper has banged his head
+       movb @bytes+6,a                 ; LD A,6            ; Set pending sound index to 6 (banging head) if it is currently zero, or lower priority...
+       bl   @request_sound            ; CALL 59613        ; ...
+       movb @bytes+6,@e                ; LD E,6            ; Load E with 6 (jumper has banged his head on something above him)
+       b    @handle_vertical_jump_20   ; RET               ; Return (of of range)
+* No collision, or collision with entity other than that of class 130
+handle_vertical_jump_4:
+       cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of 22 or greater (can't be picked up, or 255 for no
+                                                           ; collision)...
+       jhe  handle_vertical_jump_5     ; JR NC,55270       ; ...then skip ahead to #R55270
+* Drutt has knocked down an entity, e.g. Red Sweet on Level 1
+       movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set initial velocity factor of entity jumper collided with to 2...
+       socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its "Can Fall" flag
+handle_vertical_jump_5:
+       bl   @change_room_up            ; CALL 55433        ; Change jumper's room up one if appropriate
+       sb   one,b                      ; DJNZ 55235        ; Decrease B (remaining number of characters to move up) and loop back to #R55235 if not zero
+       jne  handle_vertical_jump_3     ;
+       sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease current velocity of jumper's jump, slowing ascent
+       movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping upwards, no collision)
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Downward Jump Phase Flag is set, i.e. in downward phase of jump
+handle_vertical_jump_6:
+       bl   @inc_jump_velocity         ; CALL 55421        ; Increase current velocity of jumper's jump if less than 7, speeding descent, and load into A
+handle_vertical_jump_7:
+       movb a,b                        ; LD B,A            ; Load B with velocity of jumper's jump
+handle_vertical_jump_8:
+       ab   one,@4(ix)                 ; INC (IX+4)        ; Move jumper down one character...
+       ab   one,@6(ix)                 ; INC (IX+6)        ; ...
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is
+                                                           ; set...
+       joc  handle_vertical_jump_9     ; JR C,55300        ; ...and if no collision occurred, then skip ahead to #R55300
+       cb   a,@bytes+35                ; CP 35             ; If collision was with an entity of class 35 (platform, Level 1 or Level 3)...
+       jeq  handle_vertical_jump_14    ; JR Z,55363        ; ...then skip ahead to #R55363
+* No collision, or collision with entity other than that of class 35
+handle_vertical_jump_9:
+       movb @6(ix),a                   ; LD A,(IX+6)       ; Load A with y-coordinate of jumper's bottom edge...
+       ab   @1(ix),a                   ; ADD A,(IX+1)      ; ...and add jumper's depth
+       cb   a,@bytes+122               ; CP 122            ; If A is 122 (i.e. jumper is at bottom of screen)...
+       jeq  handle_vertical_jump_10    ; JR Z,55320        ; ...then skip ahead to #R55320
+       sb   one,b                      ; DJNZ 55285        ; Decrease B (remaining number of characters to move down) and loop back to #R55285 if not zero
+       jne  handle_vertical_jump_8     ;
+       .push hl                        ; PUSH HL           ; Store HL
+       bl   @change_room_down          ; CALL 55616        ; Change jumper's room down one if appropriate
+       .pop hl                         ; POP HL            ; Restore HL
+       movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping downwards, no collision)
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Jumper is at the bottom of the screen
+handle_vertical_jump_10:
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is
+                                                           ; set...
+handle_vertical_jump_11:
+       joc  handle_vertical_jump_14    ; JR C,55363        ; ...and if no collision occurred, then skip ahead to #R55363
+       cb   a,@bytes+129               ; CP 129            ; If collision was with entity of class 129 (causes other entities to start falling)...
+       jeq  handle_vertical_jump_12    ; JR Z,55334        ; ...then skip ahead to #R55334
+* Collision was not with entity of class 129, so need to resume collision check from current position in entities
+* list, i.e. entity that jumper did collide with
+       bl  @chk_coll_same_depth_5      ; CALL 54871        ; Resume checking jumper for collision with another entity at same depth whose Interaction
+                                                           ; (11,6) Flag is set
+       jmp  handle_vertical_jump_11    ; JR 55323          ; ...and jump back to #R55323
+* Collision with entity of class 129
+handle_vertical_jump_12:
+       movb @8(ix),a                   ; LD A,(IX+8)       ; If jumper is not Berk...
+       cb   a,@bytes+31                ; CP 31             ; ...(class = 31).....
+       jne  handle_vertical_jump_8     ; JR NZ,55285       ; ...then jump back to #R55285 (continue moving downwards)
+       movb @5(ix),a                   ; LD A,(IX+5)       ; If Berk's left edge...
+       cb   a,@5(iy)                   ; CP (IY+5)         ; ...is at or to the right of the colliding entity's left edge...
+       jhe  handle_vertical_jump_13    ; JR NC,55352       ; ...then skip ahead to #R55352
+* Berk's left edge is to the left of colliding entity's left edge
+       movb @bytes+7,@e                ; LD E,7            ; Load E with 7 (jumper is Berk, his left edge is to the left of colliding, class=129, entity's
+                                                           ; left edge)
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Berk's left edge is at, or to the right of, colliding entity's left edge
+handle_vertical_jump_13:
+       movb @7(iy),a                   ; LD A,(IY+7)       ; If Berk's right edge...
+       cb   a,@7(ix)                   ; CP (IX+7)         ; ...is at or to the right of the colliding entity's right edge...
+       jhe  handle_vertical_jump_8     ; JR NC,55285       ; ...then jump back to #R55285 (continue moving downwards)
+* Berk's right edge is to the left of colliding entity's right edge
+       movb @bytes+8,@e                ; LD E,8            ; Load E with 8 (jumper is Berk, and he is between left and right edges of colliding,
+                                                           ; class=129, entity)
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Downward phase, and collision with entity of class 35 (platform, Level 1 or Level 3) or no collision at bottom of
+* screen
+handle_vertical_jump_14:
+       szcb @bits+6,@12(ix)            ; RES 6,(IX+12)     ; Reset Downward Jump Phase Flag (i.e. prepare to jump up again)
+       movb @cached_control_input,a    ; LD A,(55022)      ; Load A with Cached Control Input...
+       movb a,tmp0                     ; BIT 3,A           ; ...and if Back Bit is reset...
+       andi tmp0,8*256                 ;
+       jeq  handle_vertical_jump_15    ; JR Z,55377        ; ...then skip ahead to #R55377
+       movb one,@e                     ; LD E,1            ; Load E with 1 (jumper landed on floor / platform and Back Control Input Bit set)
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Back Bit is reset
+handle_vertical_jump_15:
+       movb @12(ix),a                  ; LD A,(IX+12)      ; If current velocity of jumper's jump is at least 4...
+       andi a,15*256                   ; AND 15            ; ...
+       cb   a,@bytes+4                 ; CP 4              ; ...
+       jhe  handle_vertical_jump_16    ; JR NC,55393       ; ...then skip ahead to #R55393
+       movb @bytes+0,@12(ix)           ; LD (IX+12),0      ; Reset jumper's Is Jumping Flag and set current velocity of jump to zero
+       movb @bytes+3,@e                ; LD E,3            ; Load E with 3 (jumper's jump velocity less than 4, and back not pressed, i.e. terminate
+                                                           ; jumping)
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Current velocity of jumper's jump is at least 4, and Back Bit is reset
+handle_vertical_jump_16:
+       movb @cached_control_input,a    ; LD A,(55022)      ; Load A with Cached Control Input...
+       movb a,tmp0                     ; BIT 1,A           ; ...and if Left Bit is reset...
+       andi tmp0,2*256                 ;
+       jeq  handle_vertical_jump_17    ; JR Z,55404        ; ...then skip ahead to #R55404
+* Left Bit is set
+       movb @bytes+4,@e                ; LD E,4            ; Load E with 4 (jumper's jump velocity at least 4 and Left Control Input Bit set)
+       jmp  handle_vertical_jump_18    ; JR 55410          ; Decrease current velocity of jumper's jump by two and return
+* Left Bit is reset
+handle_vertical_jump_17:
+       movb a,tmp0                     ; BIT 0,A           ; If Right Bit is reset...
+       andi tmp0,1*256                 ;
+       jeq  handle_vertical_jump_19    ; JR Z,55417        ; ...then skip ahead to #R55417
+* Right Bit is set
+       movb @bytes+5,@e                ; LD E,5            ; Load E with 5 (jumper's jump velocity at least 4 and Right Control Input Bit set)
+handle_vertical_jump_18:
+       sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease current velocity of jumper's jump by two...
+       sb   one,@12(ix)                ; DEC (IX+12)       ; ...
+       jmp  handle_vertical_jump_20    ; RET               ; Return
+* Right Bit (and Left and Back bits) reset
+handle_vertical_jump_19:
+       movb @bytes+0,@e                ; LD E,0            ; Load E with zero (current velocity of jumper's jump is at least 4 and Back, Left and Right
+                                                           ; Control Input bits are reset)
+       jmp  handle_vertical_jump_18    ; JR 55410          ; Decrease current velocity of jumper's jump by two and return
+handle_vertical_jump_20:
+       .endproc
+
+*********************************************************************************
+* Increase Current Velocity of Character's Jump if Less Than 7
+*
+* See pokes Input:  IX  Address of complex state data (current level) for Berk or Drutt
+inc_jump_velocity:
+       movb @12(ix),a                  ; LD A,(IX+12)      ; Load A with current velocity of character's jump...
+       andi a,15*256                   ; AND 15            ; ...
+       cb   a,@bytes+7                 ; CP 7              ; ...and if this is 7 or more...
+       jhe  inc_jump_velocity_1        ; RET NC            ; ...then return
+       ab   one,@12(ix)                ; INC (IX+12)       ; Increase velocity of character's jump
+inc_jump_velocity_1:
+       rt                              ; RET               ; Return
+
