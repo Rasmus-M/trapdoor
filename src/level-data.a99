@@ -84,6 +84,7 @@ state_data_complex_1:
                                                                      ; emerges at the end of the game)
        byte 10,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
        byte 11,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
+level_1_exit_door:
        byte 9,2,_50663%256,_50663/256,112,124,120,131,33,2,0,192,0   ; (#R50663) Exit door
        byte 9,2,_50579%256,_50579/256,107,123,120,124,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
        byte 9,2,_50579%256,_50579/256,107,131,120,132,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks

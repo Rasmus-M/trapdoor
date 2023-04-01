@@ -33,6 +33,11 @@ main:
        bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        bl   @draw_timer_bar            ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
+
+       li   tmp0,level_1_exit_door
+       mov  tmp0,@bert_interaction_state
+       bl   @next_level
+
 * Start of main loop
 main_loop:
        bl   @check_berk_killed         ; CALL 53723        ; If Berk has been killed then reset his state, flash screen and decrease time / lives
@@ -279,7 +284,7 @@ init_level_data:
        dec  hl
        sla  hl,1                       ; LD HL,34281       ; Point HL at position 20 bytes before start of list of start addresses of level 1's data
        mov  @level_data_table(hl),hl                       ; blocks
-                                       ; LD BC,20          ; Set data length to 20, as there are 10 data blocks per level (so 10 addresses)
+       li   bc,20                      ; LD BC,20          ; Set data length to 20, as there are 10 data blocks per level (so 10 addresses)
 
                                        ; ADD HL,BC         ; Advance HL to start of data block address list for next level
                                        ; DEC A             ; Decrease level counter
@@ -1695,7 +1700,7 @@ ret_if_show_score_flag:
        rt                              ;
 !
        .pop bc                         ; POP BC            ; Remove return address from stack...
-       rt                              ; RET               ; ...and return to routine that called the calling routine
+       .endproc                        ; RET               ; ...and return to routine that called the calling routine
 
 *********************************************************************************
 * Update Eyes of a Randomly Selected Timer Figure, Increase Timer Tick Counter and Process Timer Figure Blinking
@@ -1857,7 +1862,7 @@ update_and_print_score_3:
 print_score_strings:
        .proc
 print_score_strings_0
-       li   iy,score_text                  ; LD IY,47589       ; Point IY at SCORE / TOTAL / HI-SC text
+       li   iy,score_text              ; LD IY,47589       ; Point IY at SCORE / TOTAL / HI-SC text
        li   hl,23232                   ; LD HL,23232       ; Set Attribute File address at which to print text to start of second-last character row
 print_score_strings_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load a character from the string into A
@@ -2008,7 +2013,7 @@ digit_to_str_1:
        ab   one,*iy                    ; INC (IY+0)        ; Advance character at current string position to next numeric character up
        s    de,hl                      ; SBC HL,DE         ; Subtract current power of ten from number to convert
        jgt  digit_to_str_1             ; JR NC,47777       ; TODO: check code. If number to convert has not dropped below 0 (i.e. we have not yet subtracted too many of the
-                                                           ; current power of ten) then loop back to #R47777
+       jeq  digit_to_str_1                                 ; current power of ten) then loop back to #R47777
        a    de,hl                      ; ADD HL,DE         ; We have subtracted one too many of the current power of ten, so add it back to make the
                                                            ; remainder positive
        inc  iy                         ; INC IY            ; Advance to next character in the string as we are finished dealing with the current power of
