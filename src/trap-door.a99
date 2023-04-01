@@ -982,7 +982,7 @@ next_level:
        b    @execute_script            ; JP 48098          ; ...and execute
 * Destination level is not Level 1
 next_level_1:
-       bl   @align_with_level_1_door  ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
+       bl   @align_with_level_1_door   ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
        mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
        mov  iy,@bert_interaction_state ; LD (34256),IY     ; ...and store at #R34256
        bl   @position_carried_item     ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
@@ -3202,7 +3202,7 @@ move_into_left_room_2:
        bl   @do_move_into_left_room    ; CALL 54419        ; Move entity at IX into room to left of its current room and update position of carried entity
                                                            ; if moving entity is Berk
        bl    @chk_coll_left            ; CALL 54666        ; Set Carry Flag if entity at IX has not collided with another impassable / pushable entity
-                                                           ; immediately to the left, reset otherwise
+       jnc   move_into_left_room_4                         ; immediately to the left, reset otherwise
 move_into_left_room_3:
        bl   @return_with_carry         ; RET               ; Return
 move_into_left_room_4:
