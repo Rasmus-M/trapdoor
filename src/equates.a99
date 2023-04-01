@@ -50,8 +50,10 @@ r1lb:
        equ  wrksp+3
 wrksp2:
        equ  wrksp+>20
-stack:
+bits:
        equ  wrksp2+>20
+stack:
+       equ  bits+8
 rndsd:
        equ  >83c0                      ; Random number seed
 

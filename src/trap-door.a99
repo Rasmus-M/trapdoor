@@ -13,10 +13,11 @@
 start:
        limi 0                           ; DI                ; Disable interrupts
        lwpi wrksp
-;       mov @rndsd,@rnd_seed             ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
+;       mov @rndsd,@rnd_seed            ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
                                         ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
        li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
+       bl   @init_bits
        bl   @graphics_mode
 
 *********************************************************************************
@@ -2842,32 +2843,33 @@ draw_display_buffer:
        li   ix,zx_attributes           ; LD IX,22528       ; Point IX at first byte of Attribute File
        li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
        li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
-       movb @display_buffer_flag,a                  ; LD A,(34271)      ; If "Display Buffer 2 is Primary" Flag is reset...
+       movb @display_buffer_flag,a     ; LD A,(34271)      ; If "Display Buffer 2 is Primary" Flag is reset...
                                        ; OR A              ; ...i.e. Display Buffer 1 is Primary...
        jeq  draw_display_buffer_1      ; JP Z,54052        ; ...then skip ahead to #R54052
        .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (Display Buffer 1 is Secondary, Display Buffer 2 is Primary)
 draw_display_buffer_1:
        mov de,iy                       ; PUSH DE           ; Copy address of Secondary Display Buffer into IY...
                                        ; POP IY            ; ...
+       li   de_,3
 draw_display_buffer_2:
-       movb *hl+,a                     ; LD A,(HL)         ; Read Graphic Set Index from Primary Display Buffer into A
+       movb *hl+,b                     ; LD A,(HL)         ; Read Graphic Set Index from Primary Display Buffer into A
                                        ; INC HL            ; Advance HL to next byte (Graphic Index) in Primary Display Buffer
                                        ; OR A              ; If Graphic Set Index is zero...
        jeq  draw_display_buffer_8      ; JP Z,54130        ; ...then skip ahead to #R54130
                                        ; CP 255            ; If Graphic Set Index is 255 (character block outside room's dimensions)...
        jlt  draw_display_buffer_9      ; JP Z,54140        ; ...then skip ahead to #R54140
-       movb a,b                        ; LD B,A            ; Transfer Graphic Set Index into B
+                                       ; LD B,A            ; Transfer Graphic Set Index into B
        clr  de                         ; LD E,0            ; Set E to zero
-       cb   a,*iy                      ; CP (IY+0)         ; If Graphic Set Index in Primary Display Buffer entry is different to Graphic Set Index in
+       cb   b,*iy                      ; CP (IY+0)         ; If Graphic Set Index in Primary Display Buffer entry is different to Graphic Set Index in
                                                            ; Secondary Display Buffer entry...
        jne  draw_display_buffer_3      ; JP NZ,54076       ; ...then skip ahead to #R54076
        inc  de                         ; INC E             ; Increase E
 draw_display_buffer_3:
-       movb *hl,a                      ; LD A,(HL)         ; Load Graphic Index from Primary Display Buffer
+       movb *hl,@c                      ; LD A,(HL)         ; Load Graphic Index from Primary Display Buffer
                                        ; OR A              ; If Graphic Index is zero...
        jeq  draw_display_buffer_8      ; JP Z,54130        ; ...then skip ahead to #R54130
-       movb a,@c                       ; LD C,A            ; Transfer Graphic Index into C
-       cb   a,@1(iy)                   ; CP (IY+1)         ; If Graphic Index in Primary Display Buffer is different to Graphic Index in Secondary Display
+                                       ; LD C,A            ; Transfer Graphic Index into C
+       cb   @c,@1(iy)                  ; CP (IY+1)         ; If Graphic Index in Primary Display Buffer is different to Graphic Index in Secondary Display
                                                            ; Buffer...
        jne  draw_display_buffer_4      ; JP NZ,54089       ; ...then skip ahead to #R54089
        inc  de                         ; INC E             ; Increase E
@@ -2877,7 +2879,7 @@ draw_display_buffer_4:
        cb   a,@2(iy)                   ; CP (IY+2)         ; If attribute in Display Buffer entry A is different to attribute in Secondary Display Buffer
                                                            ; entry...
        jne  draw_display_buffer_5      ; JP NZ,54102       ; ...then skip ahead to #R54102
-       ci   de,2                       ; BIT 1,E           ; If E is 2 (i.e. both Graphic Set Index and Graphic Index are the same)...
+       dect de                         ; BIT 1,E           ; If E is 2 (i.e. both Graphic Set Index and Graphic Index are the same)...
                                        ;
        jeq  draw_display_buffer_6      ; JP NZ,54107       ; ...then skip ahead to #R54107, over drawing instructions (no need to redraw what is already
                                                            ; there)
@@ -2900,7 +2902,7 @@ draw_display_buffer_7:
        ci   ix,zx_attributes+(22*32)   ; CP 90             ; ...
        jeq  draw_display_buffer_10     ; RET Z             ; ...then return, as only timer figures appear in last two rows
                                        ; LD DE,3           ; Advance current position in Secondary Display Buffer by 3 bytes...
-       ai   iy,3                       ; ADD IY,DE         ; ...
+       a    de_,iy                     ; ADD IY,DE         ; ...
        jmp  draw_display_buffer_2      ; JP 54055          ; Loop back to #R54055
 draw_display_buffer_8:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry

@@ -1,5 +1,20 @@
 *********************************************************************
 *
+* Init bits for bit operations
+*
+init_bits:
+       li   tmp0,>0100
+       li   tmp1,bits
+       li   tmp2,8
+init_bits_1:
+       movb tmp0,*tmp1+
+       sla  tmp0,1
+       dec  tmp2
+       jne  init_bits_1
+*// init_bits
+
+*********************************************************************
+*
 * Set graphics mode
 *
 graphics_mode:
