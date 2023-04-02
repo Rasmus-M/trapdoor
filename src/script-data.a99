@@ -1494,7 +1494,7 @@ _41412:
 * Addresses of Graphic Layout Data for Drips (Level 4)
 *
 * Used by the routine at #R42251.
-_42233:
+gfx_layout_drips:
        data _50800                                                   ; Stage 0 - Blank
        data _49600                                                   ; Stage 1 - Green drip forming
        data _49615                                                   ; Stage 2 - Red drip enlarging

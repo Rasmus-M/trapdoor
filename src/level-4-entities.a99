@@ -4,41 +4,46 @@
 * Used by the routine at #R34438.
 update_level_4_entities:
        .proc
-       .call @update_flying_skeleton_creature                   ; CALL 42266        ; Update state of Flying Skeleton Creature
-       .call @update_snake             ; CALL 42381        ; Update state of Snake
-       .call @update_drips             ; CALL 42064        ; Update states of drips
-       .call @update_cannon            ; CALL 41767        ; Update state of Cannon and Projectile
-       .call @update_ghost             ; CALL 41633        ; Update state of Ghost
-       .call @update_skeleton_lvl_4    ; CALL 41381        ; Update state of Skeleton (Level 4) and store current position in script data
+       bl   @update_flying_skeleton    ; CALL 42266        ; Update state of Flying Skeleton Creature
+       bl   @update_snake              ; CALL 42381        ; Update state of Snake
+       bl   @update_drips              ; CALL 42064        ; Update states of drips
+       bl   @update_cannon             ; CALL 41767        ; Update state of Cannon and Projectile
+       bl   @update_ghost              ; CALL 41633        ; Update state of Ghost
+       bl   @update_skeleton           ; CALL 41381        ; Update state of Skeleton (Level 4) and store current position in script data
        .endproc                        ; RET               ; Return
+*// update_level_4_entities
 
+*********************************************************************************
 * Update State of Skeleton (Level 4) and Store Current Position in Script Data
 *
 * Used by the routine at #R41211.
-update_skeleton_lvl_4:
+update_skeleton:
+       .proc
        li   ix,_45404                  ; LD IX,45404       ; Load IX with address of complex state data for Skeleton (Level 4)
        movb @9(ix),tmp0                ; BIT 2,(IX+9)      ; If Skeleton's Removed From Game Flag is set...
        andi tmp0,4*256                 ;
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;
-!
+       jne  update_skeleton_1          ; RET NZ            ; ...then return
        movb @9(ix),tmp0                ; BIT 1,(IX+9)      ; If Skeleton's Is Dying Flag is set...
        andi tmp0,2*256                 ;
-       jne  _41424                     ; JR NZ,41424       ; ...then update state of Skeleton (dying) and return
+       jne  update_skeleton_state      ; JR NZ,41424       ; ...then update state of Skeleton (dying) and return
        mov  @skeleton_script_pos,hl    ; LD HL,(41230)     ; Load current position in Skeleton's script data from #R41230 into HL...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
-       .call @_41498                   ; CALL 41498        ; Kill Berk if he collides with Skeleton
+       bl   @chk_berk_killed_by_skeleton ; CALL 41498        ; Kill Berk if he collides with Skeleton
        mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
        mov  hl,@skeleton_script_pos    ; LD (41230),HL     ; ...at #R41230 as current position in Skeleton's script data
-       .ret                            ; RET               ; Return
+update_skeleton_1:
+       .endproc                        ; RET               ; Return
+*// update_skeleton
 
+*********************************************************************************
 * Update State of Skeleton (Dying)
 *
 * Used by the routine at #R41381. Input:  IX  Address of complex state data for Skeleton (Level 4)
-_41424:
+* Jump - not call
+update_skeleton_state:
        movb @_42910+1,a                ; LD A,(42911)      ; If current attribute in Skeleton's graphic layout data is not 1...
        cb   a,one                      ; CP 1              ; ...
-       jne  _41473                     ; JR NZ,41473       ; ...then skip ahead to #R41473
+       jne  update_skeleton_state_1                     ; JR NZ,41473       ; ...then skip ahead to #R41473
        movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set Skeleton's room to 0
        li   iy,_45417                  ; LD IY,45417       ; Load IY with address of complex state data for Boni (Level 4)
        movb @4(ix),a                   ; LD A,(IX+4)       ; Set y-coordinate of Boni's top edge...
@@ -52,229 +57,316 @@ _41424:
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set Boni's depth to 1
        socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; Set Boni's Can Fall Flag
        socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set Skeleton's Removed From Game Flag
-       .ret                            ; RET               ; Return
+       jmp  update_skeleton_state_3    ; RET               ; Return
 * Current attribute in Skeleton's graphic layout data is not 1
-_41473:
+update_skeleton_state_1:
        li   ix,_41412                  ; LD IX,41412       ; Load IX with address of Table of Addresses of Attribute Data in Skeleton's GLD Blocks
        movb @bytes+6,b                 ; LD B,6            ; Load B with 6 (as there are six blocks of graphic layout data to modify)
-_41479:
+update_skeleton_state_2:
        movb *ix,@l                     ; LD L,(IX+0)       ; Load HL with address of attribute data in current block...
        movb @1(ix),h                   ; LD H,(IX+1)       ; ...
        sb   one,*hl                    ; DEC (HL)          ; Decrease the attribute value
        inc  ix                         ; INC IX            ; Advance IX to next address...
        inc  ix                         ; INC IX            ; ...
        sb   one,b                      ; DJNZ 41479        ; Decrease remaining number of blocks to modify and loop back to #R41479 if not zero
-       jne  _41479                     ;
+       jne  update_skeleton_state_2                     ;
        movb @bytes+11,a                ; LD A,11           ; Set sound 11 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound                   ; CALL 59722        ; ...
-       .ret                            ; RET               ; Return
+       bl   @request_sound             ; CALL 59722        ; ...
+update_skeleton_state_3:
+       .endproc                        ; RET               ; Return
+*// update_skeleton_state
 
+*********************************************************************************
 * Kill Berk if He Collides with Skeleton
 *
 * See trivia Input:  IX  Address of complex state data for Skeleton (Level 4) (#R45404)
-_41498:
+chk_berk_killed_by_skeleton:
+       .proc
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
-       joc  _41513                     ; JR C,41513        ; ...and if no collision occurred, then skip ahead to #R41513
+       joc  chk_berk_killed_by_skeleton_1 ; JR C,41513        ; ...and if no collision occurred, then skip ahead to #R41513
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
-       jne  _41513                     ; JR NZ,41513       ; ...then skip ahead to #R41513
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       jne  chk_berk_killed_by_skeleton_1 ; JR NZ,41513       ; ...then skip ahead to #R41513
+       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 * The instructions below do a "manual" check for a collision between the Skeleton and Berk. See trivia
-_41513:
+chk_berk_killed_by_skeleton_1:
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's current room is not 3 (Skeleton's room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;
+       b    @inct_execute_script       ;
 !
        movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of Skeleton's left edge...
        sb   @bytes+5,a                 ; SUB 5             ; ...is at least five characters to the right of Berk's right edge...
        cb   a,@7(iy)                   ; CP (IY+7)         ; ...
        jl   !                          ; JP NC,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;
+       b    @inct_execute_script       ;
 !
        movb @6(iy),a                   ; LD A,(IY+6)       ; If y-coordinate of Berk's bottom edge...
        cb   a,@bytes+116               ; CP 116            ; ...is less than 116...
        jhe  !                          ; JP C,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
-       b    @inct_execute_script                    ;
+       b    @inct_execute_script       ;
 !
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
+*// chk_berk_killed_by_skeleton
 
+*********************************************************************************
+* Update State of Flying Skeleton Creature (Level 4)
+*
+* Used by the routine at #R41211.
+update_flying_skeleton:
+       .proc
+       li   ix,_45482                  ; LD IX,45482       ; Load IX with address of complex state data for Flying Skeleton Creature (Level 4)
+       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+                                                           ; Flag is set...
+       cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
+       jne  update_flying_skeleton_1   ; JR NZ,42285       ; ...then skip ahead to #R42285
+       movb @berks_state_data_4+10,a   ; LD A,(45401)      ; If Berk's Can Fall Flag is reset...
+       movb a,tmp0                     ; BIT 6,A           ; ...
+       andi tmp0,64*256                ;
+       jne  update_flying_skeleton_1   ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
+       bl   @set_bert_killed                   ;
+update_flying_skeleton_1:
+       li   hl,_45482+9                ; LD HL,45491       ; Load HL with address of Flying Skeleton Creature's flags
+       movb *hl,tmp0                   ; BIT 0,(HL)        ; If creature's Horizontal Direction Flag is set (moving left)...
+       andi tmp0,1*256                 ;
+       jne  update_flying_skeleton_3   ; JR NZ,42320       ; ...then skip ahead to #R42320
+* Horizontal Direction Flag reset (moving right)
+       movb *ix,a                      ; LD A,(IX+0)       ; If creature's room is not 4 (Fake Boni's Room)...
+       cb   a,@bytes+4                 ; CP 4              ; ...
+       jne  update_flying_skeleton_2   ; JR NZ,42309       ; ...then skip ahead to #R42309
+       movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of creature's right edge is less than 126...
+       cb   a,@bytes+126               ; CP 126            ; ...
+       jl   update_flying_skeleton_2   ; JR C,42309        ; ...then skip ahead to #R42309
+       socb @bits+0,*hl                ; SET 0,(HL)        ; Set creature's Horizontal Direction Flag (moving left)
+       jmp  update_flying_skeleton_9   ; RET               ; Return
+update_flying_skeleton_2:
+       ab   one,@5(ix)                 ; INC (IX+5)        ; Move creature right one character...
+       ab   one,@7(ix)                 ; INC (IX+7)        ; ...
+       bl   @move_into_right_room      ; CALL 54313        ; ...and move into room to the right, if appropriate
+       jmp  update_flying_skeleton_5   ; JR 42346          ; Skip ahead to #R42346
+* Horizontal Direction Flag set (moving left)
+update_flying_skeleton_3:
+       movb *ix,a                      ; LD A,(IX+0)       ; If creature's room is not 1 (Door Room)...
+       cb   a,one                      ; CP 1              ; ...
+       jne  update_flying_skeleton_4   ; JR NZ,42337       ; ...then skip ahead to #R42337
+       movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of creature's left edge is at least 108...
+       cb   a,@bytes+108               ; CP 108            ; ...
+       jhe  update_flying_skeleton_4   ; JR NC,42337       ; ...then skip ahead to #R42337
+       szcb @bits+0,*hl                ; RES 0,(HL)        ; Reset creature's Horizontal Direction Flag (moving right)
+       jmp  update_flying_skeleton_9   ; RET               ; Return
+update_flying_skeleton_4:
+       sb   one,@5(ix)                 ; DEC (IX+5)        ; Move creature left one character...
+       sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
+       bl   @move_into_left_room       ; CALL 54348        ; ...and move into room to the left, if appropriate
+update_flying_skeleton_5:
+       movb @4(ix),a                   ; LD A,(IX+4)       ; Load A with y-coordinate of creature's top edge
+       movb *hl,tmp0                   ; BIT 1,(HL)        ; If creature's Vertical Direction Flag is set (moving up)...
+       andi tmp0,2*256                 ;
+       jne  update_flying_skeleton_7   ; JR NZ,42367       ; ...then skip ahead to #R42367
+* Vertical Direction Flag reset, moving down
+       cb   a,@bytes+108               ; CP 108            ; If y-coordinate of creature's top edge is not 108...
+       jne  update_flying_skeleton_6   ; JR NZ,42360       ; ...then skip ahead to #R42360
+       socb @bits+1,*hl                ; SET 1,(HL)        ; Set creature's Vertical Direction Flag (moving up)
+       jmp  update_flying_skeleton_9   ; RET               ; Return
+* This entry point is used by the routine at #R41633.
+update_flying_skeleton_6:
+       ab   one,@4(ix)                 ; INC (IX+4)        ; Move creature down one character...
+       ab   one,@6(ix)                 ; INC (IX+6)        ; ...
+       jmp  update_flying_skeleton_9   ; RET               ; Return
+* Vertical Direction Flag set, moving up
+update_flying_skeleton_7:
+       cb   a,@bytes+100               ; CP 100            ; If y-coordinate of creature's top edge is not 100...
+       jne  update_flying_skeleton_8   ; JR NZ,42374       ; ...then skip ahead to #R42374
+       szcb @bits+1,*hl                ; RES 1,(HL)        ; Reset creature's Vertical Direction Flag (moving down)
+       jmp  update_flying_skeleton_9   ; RET               ; Return
+* This entry point is used by the routine at #R41633.
+update_flying_skeleton_8:
+       sb   one,@4(ix)                 ; DEC (IX+4)        ; Move creature up one character...
+       sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
+update_flying_skeleton_9:
+       .endproc                        ; RET               ; Return
+*// update_flying_skeleton
+
+*********************************************************************************
 * Script Routine (63) Have Skeleton Advance or Retreat Based Upon Positions of Berk and Fake Boni
 *
 * Update State of Ghost
 *
 * Used by the routine at #R41211.
 update_ghost:
+       .proc
        li   ix,_45794                  ; LD IX,45794       ; Load IX with address of complex state data for Ghost (Level 4)
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
-       jne  _41653                     ; JR NZ,41653       ; ...then skip ahead to #R41653
+       jne  update_ghost_1             ; JR NZ,41653       ; ...then skip ahead to #R41653
 * If collision was with Berk, then IY will point to Berk's complex state data
        movb @9(iy),tmp0                ; BIT 6,(IY+9)      ; If Berk is not flying...
        andi tmp0,64*256                ;
-       jeq  _41653                     ; JR Z,41653        ; ...then skip ahead to #R41653
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-_41653:
-       movb @current_characters_room,a                  ; LD A,(34218)      ; Load E with current character's current room index...
+       jeq  update_ghost_1             ; JR Z,41653        ; ...then skip ahead to #R41653
+       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+update_ghost_1:
+       movb @current_characters_room,a ; LD A,(34218)      ; Load E with current character's current room index...
        movb a,@e                       ; LD E,A            ; ...
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with Ghost's current room index
        movb @4(ix),@c                  ; LD C,(IX+4)       ; Load C with y-coordinate of Ghost's top edge
        movb @6(ix),b                   ; LD B,(IX+6)       ; Load B with y-coordinate of Ghost's bottom edge
        movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If Ghost's Moving Upwards Flag is set...
        andi tmp0,1*256                 ;
-       jne  _41716                     ; JR NZ,41716       ; ...then skip ahead to #R41716
+       jne  update_ghost_4             ; JR NZ,41716       ; ...then skip ahead to #R41716
        cb   a,@bytes+4                 ; CP 4              ; If Ghost's current room is 4 (room above pit)...
-       jeq  _41687                     ; JR Z,41687        ; ...then skip ahead to #R41687
+       jeq  update_ghost_2             ; JR Z,41687        ; ...then skip ahead to #R41687
        movb b,a                        ; LD A,B            ; If y-coordinate of Ghost's bottom edge...
        cb   a,@bytes+119               ; CP 119            ; ...is not 119...
        jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
-       b    @_42360                    ;
+       b    @update_flying_skeleton_6                    ;
 !
        socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Ghost's Moving Upwards Flag
-       .ret                            ; RET               ; Return
+       jmp  update_ghost_8             ; RET               ; Return
 * Ghost's current room is 4 (room above pit)
-_41687:
+update_ghost_2:
        cb   a,@e                       ; CP E              ; If current character is in the same room as the Ghost...
-       jeq  _41703                     ; JR Z,41703        ; ...then skip ahead to #R41703
+       jeq  update_ghost_3             ; JR Z,41703        ; ...then skip ahead to #R41703
        movb b,a                        ; LD A,B            ; If y-coordinate of Ghost's bottom edge...
        cb   a,@bytes+119               ; CP 119            ; ...is not 119...
        jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
-       b    @_42360                    ;
+       b    @update_flying_skeleton_6                    ;
 !
        ab   one,*ix                    ; INC (IX+0)        ; Increase index of Ghost's current room (to 5, pit)
        movb @bytes+94,a                ; LD A,94           ; Position Ghost such that the y-coordinate of its top edge is 115...
-       jmp  _41758                     ; JR 41758          ; ...and return
+       jmp  update_ghost_7             ; JR 41758          ; ...and return
 * Current character and Ghost in same room (room above pit)
-_41703:
+update_ghost_3:
        movb @c,a                       ; LD A,C            ; If y-coordinate of Ghost's top edge...
        cb   a,@bytes+121               ; CP 121            ; ...is not 121...
        jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
-       b    @_42360                    ;
+       b    @update_flying_skeleton_6                    ;
 !
        ab   one,*ix                    ; INC (IX+0)        ; Increase index of Ghost's current room (to 5, pit)
        movb @bytes+100,a               ; LD A,100          ; Position Ghost such that the y-coordinate of its top edge is 100...
-       jmp  _41758                     ; JR 41758          ; ...and return
+       jmp  update_ghost_7             ; JR 41758          ; ...and return
 * Ghost's Moving Upwards Flag is set
-_41716:
+update_ghost_4:
        cb   a,@bytes+5                 ; CP 5              ; If Ghost's current room is 5 (pit)...
-       jeq  _41731                     ; JR Z,41731        ; ...then skip ahead to #R41731
+       jeq  update_ghost_5             ; JR Z,41731        ; ...then skip ahead to #R41731
        movb @c,a                       ; LD A,C            ; If y-coordinate of Ghost's top edge...
        cb   a,@bytes+101               ; CP 101            ; ...is not 101...
        jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
-       b    @_42374                    ;
+       b    @update_flying_skeleton_8                    ;
 !
        szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Ghost's Moving Upwards Flag (i.e. moving downwards)
-       .ret                            ; RET               ; Return
+       jmp  update_ghost_8             ; RET               ; Return
 * Ghost's current room is 5 (pit)
-_41731:
+update_ghost_5:
        cb   a,@e                       ; CP E              ; If current character is in the same room as the Ghost...
-       jeq  _41747                     ; JR Z,41747        ; ...then skip ahead to #R41747
+       jeq  update_ghost_6             ; JR Z,41747        ; ...then skip ahead to #R41747
        movb @c,a                       ; LD A,C            ; If y-coordinate of Ghost's top edge...
        cb   a,@bytes+101               ; CP 101            ; ...is not 101...
        jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
-       b    @_42374                    ;
+       b    @update_flying_skeleton_8  ;
 !
        sb   one,*ix                    ; DEC (IX+0)        ; Decrease index of Ghost's current room (to 4, room above pit)
        movb @bytes+121,a               ; LD A,121          ; Position Ghost such that the y-coordinate of its top edge is 121...
-       jmp  _41758                     ; JR 41758          ; ...and return
+       jmp  update_ghost_7             ; JR 41758          ; ...and return
 * Current character and Ghost in same room (pit)
-_41747:
+update_ghost_6:
        movb b,a                        ; LD A,B            ; If y-coordinate of Ghost's bottom edge...
        cb   a,@bytes+100               ; CP 100            ; ...is not 100...
        jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
-       b    @_42374                    ;
+       b    @update_flying_skeleton_8  ;
 !
        sb   one,*ix                    ; DEC (IX+0)        ; Decrease index of Ghost's current room (to 4, room above pit)
        movb @bytes+115,a               ; LD A,115          ; Prepare to set y-coordinate of Ghost's top edge to 115
-_41758:
+update_ghost_7:
        movb a,@4(ix)                   ; LD (IX+4),A       ; Set y-coordinate of Ghost's top edge to value in A
        ab   @bytes+6,a                 ; ADD A,6           ; Add 6 to value in A (as Ghost is 6 characters tall)...
        movb a,@6(ix)                   ; LD (IX+6),A       ; ...and set y-coordinate of Ghost's bottom edge to value in A
-       .ret                            ; RET               ; Return
+update_ghost_8:
+       .endproc                        ; RET               ; Return
+*// update_ghost
 
+*********************************************************************************
 * Update State of Cannon and Projectile
 *
 * Used by the routine at #R41211.
 update_cannon:
-       .call @_41961                   ; CALL 41961        ; Update State of Cannon's Projectile
+       .proc
+       bl   @update_projectile         ; CALL 41961        ; Update State of Cannon's Projectile
        li   ix,_45508                  ; LD IX,45508       ; Load IX with address of complex state data for Cannon (Level 4)
        movb @9(ix),tmp0                ; BIT 2,(IX+9)      ; If Cannon's Just Loaded Flag is reset...
        andi tmp0,4*256                 ;
-       jeq  _41805                     ; JR Z,41805        ; ...then skip ahead to #R41805
+       jeq  update_cannon_3            ; JR Z,41805        ; ...then skip ahead to #R41805
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease Cannon's Fire Timer...
-       jeq  _41791                     ; JR Z,41791        ; ...and if now zero then skip ahead to #R41791
+       jeq  update_cannon_1            ; JR Z,41791        ; ...and if now zero then skip ahead to #R41791
        li   bc,_42519                  ; LD BC,42519       ; Set Cannon's graphic layout data address to point to graphic layout data for Cannon
                                                            ; (Rocking) and return...
-       b    @set_graphics_addr_for_entity                    ; JP 42512          ; ...
-_41791:
+       b    @set_gfx_addr_for_entity_1 ; JP 42512          ; ...
+update_cannon_1:
        szcb @bits+2,@9(ix)             ; RES 2,(IX+9)      ; Reset Cannon's Just Loaded Flag
        movb @bytes+50,@12(ix)          ; LD (IX+12),50     ; Set Cannon's Fire Timer to 50
-_41799:
+update_cannon_2:
        li   bc,_42530                  ; LD BC,42530       ; Set Cannon's graphic layout data address to point to graphic layout data for Cannon
                                                            ; (Dormant) and return...
-       b    @set_graphics_addr_for_entity                    ; JP 42512          ; ...
+       b    @set_gfx_addr_for_entity_1 ; JP 42512          ; ...
 * Cannon's Just Loaded Flag is reset, so Cannon has finished its rocking phase.
-_41805:
-       movb @cannon_ammo_counter,a                  ; LD A,(34209)      ; If Cannon has no ammunition...
+update_cannon_3:
+       movb @cannon_ammo_counter,a     ; LD A,(34209)      ; If Cannon has no ammunition...
        socb a,a                        ; OR A              ; ...
-       jeq  _41799                     ; JR Z,41799        ; ...then jump to #R41799 (Cannon dormant)
+       jeq  update_cannon_2            ; JR Z,41799        ; ...then jump to #R41799 (Cannon dormant)
        movb @10(ix),tmp0               ; BIT 5,(IX+10)     ; If Cannon has its Is Being Carried Flag set...
        andi tmp0,32*256                ;
-       jne  _41799                     ; JR NZ,41799       ; ...then jump to #R41799 (Cannon dormant)
+       jne  update_cannon_2            ; JR NZ,41799       ; ...then jump to #R41799 (Cannon dormant)
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is the same as the Cannon's room...
        cb   a,*iy                      ; CP (IY+0)         ; ...
-       jeq  _41833                     ; JR Z,41833        ; ...then skip ahead to #R41833
-       jl   _41860                     ; JR C,41860        ; If index of Berk's current room is greater than the index of the Cannon's room then skip
+       jeq  update_cannon_4            ; JR Z,41833        ; ...then skip ahead to #R41833
+       jl   update_cannon_5            ; JR C,41860        ; If index of Berk's current room is greater than the index of the Cannon's room then skip
                                                            ; ahead to #R41860
-       jmp  _41871                     ; JR 41871          ; Skip ahead to #R41871
+       jmp  update_cannon_6            ; JR 41871          ; Skip ahead to #R41871
 * Berk and Cannon in same room
-_41833:
+update_cannon_4:
        movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of Cannon's right side is smaller than x-coordinate of Berk's left side
                                                            ; (i.e. Cannon is to left of Berk)...
        cb   a,@5(iy)                   ; CP (IY+5)         ; ...
-       jl   _41860                     ; JR C,41860        ; ...then skip ahead to #R41860
+       jl   update_cannon_5            ; JR C,41860        ; ...then skip ahead to #R41860
        movb @7(iy),a                   ; LD A,(IY+7)       ; If x-coordinate of Berk's right side is smaller than x-coordinate of Cannon's left side
                                                            ; (i.e. Cannon is to right of Berk)...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...
-       jl   _41871                     ; JR C,41871        ; ...then skip ahead to #R41871
+       jl   update_cannon_6            ; JR C,41871        ; ...then skip ahead to #R41871
 * Berk and Cannon overlapping horizontally
        movb one,@e                     ; LD E,1            ; Load E with 1 (as Projectile will appear one character to the right of the Cannon's
                                                            ; coordinate position)
        movb @bytes+0,@9(ix)            ; LD (IX+9),0       ; Prepare to set Projectile's state to zero (fired vertically)
        li   bc,_42530                  ; LD BC,42530       ; Load BC with graphic layout data address for Cannon (Upright)
-       jmp  _41880                     ; JR 41880          ; Skip ahead to #R41880
+       jmp  update_cannon_7            ; JR 41880          ; Skip ahead to #R41880
 * Berk is to the right of the Cannon
-_41860:
+update_cannon_5:
        movb one,@9(ix)                 ; LD (IX+9),1       ; Prepare to set Projectile's state to 1 (fired left)
        movb @bytes+2,@e                ; LD E,2            ; Load E with 2 (as Projectile will appear two characters to the right of the Cannon's
                                                            ; coordinate position)
        li   bc,_42556                  ; LD BC,42556       ; Load BC with graphic layout data address for Cannon (Tilted Right)
-       jmp  _41880                     ; JR 41880          ; Skip ahead to #R41880
+       jmp  update_cannon_7            ; JR 41880          ; Skip ahead to #R41880
 * Berk is to the left of the Cannon
-_41871:
+update_cannon_6:
        movb @bytes+2,@9(ix)            ; LD (IX+9),2       ; Prepare to set Projectile's state to 2 (fired right)
        li   bc,_42594                  ; LD BC,42594       ; Load BC with graphic layout data address for Cannon (Tilted Left)
        movb @bytes+0,@e                ; LD E,0            ; Load E with 0 (as Projectile will appear at the same x-coordinate as in the Cannon's
                                                            ; coordinate position)
-_41880:
-       .call @set_graphics_addr_for_entity                   ; CALL 42512        ; Set Cannon's graphic layout data address to value in BC
+update_cannon_7:
+       bl   @set_gfx_addr_for_entity   ; CALL 42512        ; Set Cannon's graphic layout data address to value in BC
        movb @1(ix),a                   ; LD A,(IX+1)       ; If Cannon's depth is 2...
        cb   a,@bytes+2                 ; CP 2              ; ...
-       jne  !                          ; RET Z             ; ...then return (Cannon won't fire if it is placed behind Berk)
-       .ret                            ;
-!
+       jeq  update_cannon_9            ; RET Z             ; ...then return (Cannon won't fire if it is placed behind Berk)
        movb @12(ix),a                  ; LD A,(IX+12)      ; If Cannon's Fire Timer is at zero...
        socb a,a                        ; OR A              ; ...
-       jeq  _41899                     ; JR Z,41899        ; ...then skip ahead to #R41899
+       jeq  update_cannon_8            ; JR Z,41899        ; ...then skip ahead to #R41899
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease Cannon's Fire Timer
-       .ret                            ; RET               ; Return
+       jmp  update_cannon_9            ; RET               ; Return
 * Cannon's Fire Timer is at zero
-_41899:
+update_cannon_8:
        li   hl,cannon_ammo_counter                  ; LD HL,34209       ; Decrease ammunition level of Cannon (Level 4) by one...
        sb   one,*hl                    ; DEC (HL)          ; ...
        movb @bytes+50,@12(ix)          ; LD (IX+12),50     ; Set Cannon's Fire Timer to 50
@@ -299,43 +391,45 @@ _41899:
                                                            ; fallen drips, Level 4)...
        movb @c,@2(iy)                  ; LD (IY+2),C       ; ...as Projectile is launched from Cannon in an explosion...
        movb b,@3(iy)                   ; LD (IY+3),B       ; ...
-       .ret                            ; RET               ; Return
+update_cannon_9:
+       .endproc                        ; RET               ; Return
+*// update_cannon
 
+*********************************************************************************
 * Update State of Cannon's Projectile
 *
 * Used by the routine at #R41767.
-_41961:
+update_projectile:
+       .proc
        li   ix,_45599                  ; LD IX,45599       ; Load IX with address of complex state data for Cannon's Projectile
        movb @1(ix),a                   ; LD A,(IX+1)       ; If Projectile's depth is zero...
        socb a,a                        ; OR A              ; ...
-       jne  !                          ; RET Z             ; ...then return
-       .ret                            ;
-!
+       jeq  update_projectile_5        ; RET Z             ; ...then return
        li   bc,_49699                  ; LD BC,49699       ; Set Projectile's graphic layout data address to that of drip stage 8, disconnected and
                                                            ; falling (ball)...
-       .call @set_graphics_addr_for_entity                   ; CALL 42512        ; ...
+       bl   @set_gfx_addr_for_entity   ; CALL 42512        ; ...
        movb @9(ix),a                   ; LD A,(IX+9)       ; If Projectile's state is zero (fired vertically)...
        socb a,a                        ; OR A              ; ...
-       jeq  _42015                     ; JR Z,42015        ; ...then skip ahead to #R42015
+       jeq  update_projectile_3        ; JR Z,42015        ; ...then skip ahead to #R42015
        cb   a,@bytes+8                 ; CP 8              ; If Projectile's state is not 8 (finished)...
-       jne  _41991                     ; JR NZ,41991       ; ...then skip ahead to #R41991
+       jne  update_projectile_1        ; JR NZ,41991       ; ...then skip ahead to #R41991
        movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set Projectile's depth to 0
-       .ret                            ; RET               ; Return
-_41991:
+       jmp  update_projectile_5        ; RET               ; Return
+update_projectile_1:
        cb   a,@bytes+2                 ; CP 2              ; If Projectile's state is not 2 (fired right)...
-       jne  _42006                     ; JR NZ,42006       ; ...then skip ahead to #R42006
+       jne  update_projectile_2        ; JR NZ,42006       ; ...then skip ahead to #R42006
 * Projectile flying left
-       .call @_42447                   ; CALL 42447        ; Move entity left two characters...
-       .call @_42447                   ; CALL 42447        ; ...
+       bl   @update_snake_4            ; CALL 42447        ; Move entity left two characters...
+       bl   @update_snake_4            ; CALL 42447        ; ...
        bl   @move_into_left_room       ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
-       jmp  _42015                     ; JR 42015          ; Skip ahead to #R42015
+       jmp  update_projectile_3        ; JR 42015          ; Skip ahead to #R42015
 * Projectile flying right
-_42006:
-       .call @move_entity_right_4                   ; CALL 42505        ; Move entity right two characters...
-       .call @move_entity_right_4                   ; CALL 42505        ; ...
+update_projectile_2:
+       bl   @move_entity_right_l4      ; CALL 42505        ; Move entity right two characters...
+       bl   @move_entity_right_l4      ; CALL 42505        ; ...
        bl   @move_into_right_room      ; CALL 54313        ; Move entity at IX into room to the right, if appropriate
 * Update Projectile's vertical velocity
-_42015:
+update_projectile_3:
        movb @12(ix),a                  ; LD A,(IX+12)      ; Load Projectile's velocity into A and E...
        movb a,@e                       ; LD E,A            ; ...
        ab   @4(ix),a                   ; ADD A,(IX+4)      ; Add velocity to y-coordinates of top and bottom of projectile...
@@ -344,33 +438,32 @@ _42015:
        ab   one,@12(ix)                ; INC (IX+12)       ; Increase velocity by one (initially negative so will accelerate downwards)
        movb @e,a                       ; LD A,E            ; If velocity (before increase) was not 5...
        cb   a,@bytes+5                 ; CP 5              ; ...i.e. projectile has not yet fallen back to floor-level...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;
-!
+       jne  update_projectile_5        ; RET NZ            ; ...then return
        movb @bytes+8,@9(ix)            ; LD (IX+9),8       ; Set Projectile's state to 8 (finished)
        li   bc,_51483                  ; LD BC,51483       ; Set Projectile's graphic layout data address to that of explosion (Bubo's Projectile / fallen
                                                            ; drips, Level 4)...
-       .call @set_graphics_addr_for_entity                   ; CALL 42512        ; ...
-       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       bl   @set_gfx_addr_for_entity   ; CALL 42512        ; ...
+       bl   @chk_coll_same_depth       ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
-       jnc  !                          ; RET C             ; ...and if no collision occurred, then return
-       .ret                            ;
-!
+       joc  update_projectile_5        ; RET C             ; ...and if no collision occurred, then return
        cb   a,@bytes+36                ; CP 36             ; If collision was not with entity of class 36 (skeleton, Level 4)...
-       jne  _42058                     ; JR NZ,42058       ; ...then skip ahead to #R42058
+       jne  update_projectile_4        ; JR NZ,42058       ; ...then skip ahead to #R42058
        li   hl,_45404+9                ; LD HL,45413       ; Set Skeleton's Is Dying Flag...
        socb @bits+1,*hl                ; SET 1,(HL)        ; ...
-_42058:
+update_projectile_4:
        cb   a,@bytes+31                ; CP 31             ; If collision was with entity of class 31 (Berk)...
-       jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;
-!
-       .ret                            ; RET               ; Return
+       jne  update_projectile_5        ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
+       bl   @set_bert_killed           ;
+update_projectile_5:
+       .endproc                        ; RET               ; Return
+*// update_projectile
 
+*********************************************************************************
 * Update States of Drips (Level 4)
 *
 * Used by the routine at #R41211.
 update_drips:
+       .proc
        li   ix,_45521                  ; LD IX,45521       ; Load IX with address of complex state data for first drip (Level 4)
        movb @bytes+6,b                 ; LD B,6            ; Load B with 6 (as there are 6 drips to process)
 update_drips_1:
@@ -399,14 +492,14 @@ update_drips_4:
        movb @c,a                       ; LD A,C            ; Load drip's stage back into A...
        ab   one,a                      ; INC A             ; ...and add one
        movb a,@9(ix)                   ; LD (IX+9),A       ; Store updated drip stage value
-       .call @set_drip_stage           ; CALL 42251        ; Set drip's graphic layout data pointer to stage A graphic
+       bl   @set_drip_stage            ; CALL 42251        ; Set drip's graphic layout data pointer to stage A graphic
 update_drips_5:
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries are 13 bytes wide)
        a    de,ix                      ; ADD IX,DE         ; Advance IX to next drip's complex state data
        .pop bc                         ; POP BC            ; Restore BC (B = Remaining number of drips to process)
        sb   one,b                      ; DJNZ 42070        ; Loop back to #R42070
        jne  update_drips_1             ;
-       .ret                            ; RET               ; Return
+       jmp  update_drips_11            ; RET               ; Return
 * Drip's velocity factor is not zero
 update_drips_6:
        ab   one,@12(ix)                ; INC (IX+12)       ; Increase drip's velocity factor
@@ -442,7 +535,7 @@ update_drips_8:
 update_drips_9:
        movb @bytes+8,a                 ; LD A,8            ; Set drip's graphical stage to 8 (exploding on contact)...
        movb a,@9(ix)                   ; LD (IX+9),A       ; ...and also set drip's stage to 8...
-       .call @set_drip_stage           ; CALL 42251        ; ...
+       bl   @set_drip_stage            ; CALL 42251        ; ...
        movb @bytes+0,@12(ix)           ; LD (IX+12),0      ; Set drip's velocity factor to zero
        b    @update_drips_5            ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
 update_drips_10:
@@ -454,213 +547,146 @@ update_drips_10:
        sb   one,b                      ; DJNZ 42140        ; Decrease B (velocity factor) and loop back to #R42140 if not zero
        jne  update_drips_7             ;
        b    @update_drips_5            ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
+update_drips_11:
+       .endproc
+*// update_drips
 
+*********************************************************************************
 * Set a Drip's (Level 4) Stage to A
 *
 * Used by the routine at #R42064. Input:  A  Index of drip state (0-8) IX  Address of complex state data for a drip
 * (level 4)
 set_drip_stage:
+       .proc
        ab   a,a                        ; ADD A,A           ; Double index of drip state...
        movb a,@c                       ; LD C,A            ; ...and load into BC...
        sb   b,b                        ; LD B,0            ; ...
-       li   hl,_42233                  ; LD HL,42233       ; Point HL at start of table of Addresses of Graphic Layout Data for Drips (Level 4)
-       a    bc,hl                      ; ADD HL,BC         ; Add BC to HL as offset
-       mov  *hl,bc                     ; LD C,(HL)         ; Load address (of graphic layout data) at this location into BC...
+                                       ; LD HL,42233       ; Point HL at start of table of Addresses of Graphic Layout Data for Drips (Level 4)
+                                       ; ADD HL,BC         ; Add BC to HL as offset
+       mov  @gfx_layout_drips(bc),bc   ; LD C,(HL)         ; Load address (of graphic layout data) at this location into BC...
                                        ; INC HL            ; ...
                                        ; LD B,(HL)         ; ...
-       .call @set_graphics_addr_for_entity                   ; CALL 42512        ; Set drip's graphic layout data address to BC
-       .ret                            ; RET               ; Return
+       bl   @set_gfx_addr_for_entity   ; CALL 42512        ; Set drip's graphic layout data address to BC
+       .endproc                        ; RET               ; Return
+*// set_drip_stage
 
-* Update State of Flying Skeleton Creature (Level 4)
-*
-* Used by the routine at #R41211.
-update_flying_skeleton_creature:
-       li   ix,_45482                  ; LD IX,45482       ; Load IX with address of complex state data for Flying Skeleton Creature (Level 4)
-       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
-                                                           ; Flag is set...
-       cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
-       jne  _42285                     ; JR NZ,42285       ; ...then skip ahead to #R42285
-       movb @berks_state_data_4+10,a               ; LD A,(45401)      ; If Berk's Can Fall Flag is reset...
-       movb a,tmp0                     ; BIT 6,A           ; ...
-       andi tmp0,64*256                ;
-       jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;
-!
-_42285:
-       equ  $
-       li   hl,_45482+9                ; LD HL,45491       ; Load HL with address of Flying Skeleton Creature's flags
-       movb *hl,tmp0                   ; BIT 0,(HL)        ; If creature's Horizontal Direction Flag is set (moving left)...
-       andi tmp0,1*256                 ;
-       jne  _42320                     ; JR NZ,42320       ; ...then skip ahead to #R42320
-* Horizontal Direction Flag reset (moving right)
-       movb *ix,a                      ; LD A,(IX+0)       ; If creature's room is not 4 (Fake Boni's Room)...
-       cb   a,@bytes+4                 ; CP 4              ; ...
-       jne  _42309                     ; JR NZ,42309       ; ...then skip ahead to #R42309
-       movb @7(ix),a                   ; LD A,(IX+7)       ; If x-coordinate of creature's right edge is less than 126...
-       cb   a,@bytes+126               ; CP 126            ; ...
-       jl   _42309                     ; JR C,42309        ; ...then skip ahead to #R42309
-       socb @bits+0,*hl                ; SET 0,(HL)        ; Set creature's Horizontal Direction Flag (moving left)
-       .ret                            ; RET               ; Return
-_42309:
-       ab   one,@5(ix)                 ; INC (IX+5)        ; Move creature right one character...
-       ab   one,@7(ix)                 ; INC (IX+7)        ; ...
-       bl   @move_into_right_room      ; CALL 54313        ; ...and move into room to the right, if appropriate
-       jmp  _42346                     ; JR 42346          ; Skip ahead to #R42346
-* Horizontal Direction Flag set (moving left)
-_42320:
-       movb *ix,a                      ; LD A,(IX+0)       ; If creature's room is not 1 (Door Room)...
-       cb   a,one                      ; CP 1              ; ...
-       jne  _42337                     ; JR NZ,42337       ; ...then skip ahead to #R42337
-       movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of creature's left edge is at least 108...
-       cb   a,@bytes+108               ; CP 108            ; ...
-       jhe  _42337                     ; JR NC,42337       ; ...then skip ahead to #R42337
-       szcb @bits+0,*hl                ; RES 0,(HL)        ; Reset creature's Horizontal Direction Flag (moving right)
-       .ret                            ; RET               ; Return
-_42337:
-       sb   one,@5(ix)                 ; DEC (IX+5)        ; Move creature left one character...
-       sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
-       bl   @move_into_left_room       ; CALL 54348        ; ...and move into room to the left, if appropriate
-_42346:
-       movb @4(ix),a                   ; LD A,(IX+4)       ; Load A with y-coordinate of creature's top edge
-       movb *hl,tmp0                   ; BIT 1,(HL)        ; If creature's Vertical Direction Flag is set (moving up)...
-       andi tmp0,2*256                 ;
-       jne  _42367                     ; JR NZ,42367       ; ...then skip ahead to #R42367
-* Vertical Direction Flag reset, moving down
-       cb   a,@bytes+108               ; CP 108            ; If y-coordinate of creature's top edge is not 108...
-       jne  _42360                     ; JR NZ,42360       ; ...then skip ahead to #R42360
-       socb @bits+1,*hl                ; SET 1,(HL)        ; Set creature's Vertical Direction Flag (moving up)
-       .ret                            ; RET               ; Return
-* This entry point is used by the routine at #R41633.
-_42360:
-       ab   one,@4(ix)                 ; INC (IX+4)        ; Move creature down one character...
-       ab   one,@6(ix)                 ; INC (IX+6)        ; ...
-       .ret                            ; RET               ; Return
-* Vertical Direction Flag set, moving up
-_42367:
-       cb   a,@bytes+100               ; CP 100            ; If y-coordinate of creature's top edge is not 100...
-       jne  _42374                     ; JR NZ,42374       ; ...then skip ahead to #R42374
-       szcb @bits+1,*hl                ; RES 1,(HL)        ; Reset creature's Vertical Direction Flag (moving down)
-       .ret                            ; RET               ; Return
-* This entry point is used by the routine at #R41633.
-_42374:
-       sb   one,@4(ix)                 ; DEC (IX+4)        ; Move creature up one character...
-       sb   one,@6(ix)                 ; DEC (IX+6)        ; ...
-       .ret                            ; RET               ; Return
-
+*********************************************************************************
 * Update State of Snake (Level 4)
 *
 * Used by the routine at #R41211.
 update_snake:
+       .proc
        li   ix,_45495                  ; LD IX,45495       ; Point IX at start of state data for Snake (Level 4)
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        li   hl,_45495+12               ; LD HL,45507       ; Load HL with address of Snake's Attack Progress Index
        movb *hl,a                      ; LD A,(HL)         ; If Snake's Attack Progress Index is not zero...
        socb a,a                        ; OR A              ; ...
-       jne  _42415                     ; JR NZ,42415       ; ...then skip ahead to #R42415
+       jne  update_snake_2             ; JR NZ,42415       ; ...then skip ahead to #R42415
 * Snake's Attack Progress Index is zero
        movb *iy,a                      ; LD A,(IY+0)       ; If Berk's room is not 5 (Snake's room)...
        cb   a,@bytes+5                 ; CP 5              ; ...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;
-!
+       jne  update_snake_10            ; RET NZ            ; ...then return
        movb @12(iy),tmp0               ; BIT 7,(IY+12)     ; If Berk's Is Jumping Flag is set...
        andi tmp0,128*256               ;
-       jne  _42413                     ; JR NZ,42413       ; ...then skip ahead to #R42413
+       jne  update_snake_1             ; JR NZ,42413       ; ...then skip ahead to #R42413
        movb @9(iy),tmp0                ; BIT 0,(IY+9)      ; If Snake's Must Process Current Script Data Flag is set...
        andi tmp0,1*256                 ;
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;
-!
-_42413:
-       equ  $
+       jne  update_snake_10            ; RET NZ            ; ...then return
+update_snake_1:
        ab   one,*hl                    ; INC (HL)          ; Increase Snake's Attack Progress Index
-       .ret                            ; RET               ; Return
+       jmp  update_snake_10            ; RET               ; Return
 * Snake's Attack Progress Index is not zero
-_42415:
+update_snake_2:
        cb   a,@bytes+8                 ; CP 8              ; If Snake's Attack Progress Index is less than 8...
-       jl   _42454                     ; JR C,42454        ; ...then jump to #R42454 (Snake moving right)
+       jl   update_snake_5             ; JR C,42454        ; ...then jump to #R42454 (Snake moving right)
        cb   a,@bytes+15                ; CP 15             ; If Snake's Attack Progress Index is less than 15...
-       jl   _42459                     ; JR C,42459        ; ...then jump to #R42459 (Snake preparing to pounce)
+       jl   update_snake_6             ; JR C,42459        ; ...then jump to #R42459 (Snake preparing to pounce)
        cb   a,@bytes+17                ; CP 17             ; If Snake's Attack Progress Index is less than 17...
-       jl   _42461                     ; JR C,42461        ; ...then jump to #R42461 (Snake pouncing)
-       jeq  _42480                     ; JR Z,42480        ; If Snake's Attack Progress Index is 17 then jump to #R42480 (Snake finished pouncing)
+       jl   update_snake_7             ; JR C,42461        ; ...then jump to #R42461 (Snake pouncing)
+       jeq  update_snake_9             ; JR Z,42480        ; If Snake's Attack Progress Index is 17 then jump to #R42480 (Snake finished pouncing)
 * Snake's Attack Progress Index is greater than 17
-_42429:
+update_snake_3:
        movb @bytes+20,*hl              ; LD (HL),20        ; Set Snake's Attack Progress Index to 20
        li   bc,_42648                  ; LD BC,42648       ; Set Snake's graphic layout data address to #R42648...
-       .call @set_graphics_addr_for_entity                   ; CALL 42512        ; ...(Snake, mouth closed, with animated tongue)
+       bl   @set_gfx_addr_for_entity   ; CALL 42512        ; ...(Snake, mouth closed, with animated tongue)
        movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of Snake's left edge is not 83...
        cb   a,@bytes+83                ; CP 83             ; ...
-       jne  _42447                     ; JR NZ,42447       ; ...then move Snake left one character and return
+       jne  update_snake_4a            ; JR NZ,42447       ; ...then move Snake left one character and return
        movb @bytes+0,*hl               ; LD (HL),0         ; Set Snake's Attack Progress Index to 0
-       .ret                            ; RET               ; Return
+       jmp  update_snake_10            ; RET               ; Return
 * This entry point is used by the routine at #R41961.
-_42447:
+update_snake_4:
+       .proc
+update_snake_4a:
        sb   one,@5(ix)                 ; DEC (IX+5)        ; Decrease x-coordinates of left and right edges of entity at IX by one...
        sb   one,@7(ix)                 ; DEC (IX+7)        ; ...
-       .ret                            ; RET               ; Return
+       jmp  update_snake_10            ; RET               ; Return
 * Snake's Attack Progress Index is less than 8
-_42454:
+update_snake_5:
        ab   one,*hl                    ; INC (HL)          ; Increase Snake's Attack Progress Index
-       .call @move_entity_right_4                   ; CALL 42505        ; Move Snake right one character
-       .ret                            ; RET               ; Return
+       bl   @move_entity_right_l4      ; CALL 42505        ; Move Snake right one character
+       jmp  update_snake_10            ; RET               ; Return
 * Snake's Attack Progress Index is 8 or more, but less than 15
-_42459:
+update_snake_6:
        ab   one,*hl                    ; INC (HL)          ; Increase Snake's Attack Progress Index
-       .ret                            ; RET               ; Return
+       jmp  update_snake_1             ; RET               ; Return
 * Snake's Attack Progress Index is 15 or more, but less than 17
-_42461:
+update_snake_7:
        movb @6(iy),a                   ; LD A,(IY+6)       ; If the y-coordinate of Berk's bottom edge is less than 116...
        cb   a,@bytes+116               ; CP 116            ; ...
-       jl   _42429                     ; JR C,42429        ; ...then jump back to #R42429
-       .call @_42486                   ; CALL 42486        ; Open Snake's mouth and set Berk Has Been Killed Flag if Snake and Berk have collided
+       jl   update_snake_3             ; JR C,42429        ; ...then jump back to #R42429
+       bl   @chk_berk_killed_by_snake  ; CALL 42486        ; Open Snake's mouth and set Berk Has Been Killed Flag if Snake and Berk have collided
        movb @bytes+4,b                 ; LD B,4            ; Move Snake right four characters...
-_42473:
-       .call @move_entity_right_4                   ; CALL 42505        ; ...
+update_snake_8:
+       bl   @move_entity_right_l4      ; CALL 42505        ; ...
        sb   one,b                      ; DJNZ 42473        ; ...
-       jne  _42473                     ;
+       jne  update_snake_8             ;
        ab   one,*hl                    ; INC (HL)          ; Increase Snake's Attack Progress Index
-       .ret                            ; RET               ; Return
+       jmp  update_snake_10            ; RET               ; Return
 * Snake's Attack Progress Index is 17
-_42480:
-       .call @_42486                   ; CALL 42486        ; Open Snake's mouth and set Berk Has Been Killed Flag if Snake and Berk have collided
+update_snake_9:
+       bl   @chk_berk_killed_by_snake  ; CALL 42486        ; Open Snake's mouth and set Berk Has Been Killed Flag if Snake and Berk have collided
        movb @bytes+20,*hl              ; LD (HL),20        ; Set Snake's Attack Progress Index to 20
-       .ret                            ; RET               ; Return
+update_snake_10:
+       .endproc                        ; RET               ; Return
+*// update_snake
 
+*********************************************************************************
 * Open Snake's Mouth and Set Berk Has Been Killed Flag if Snake and Berk Have Collided
 *
 * Used by the routine at #R42381. Input:  HL  Address of Snake's Attack Progress Index IX  Address of complex state
 * data for Snake (Level 4)
-_42486:
+chk_berk_killed_by_snake:
+       .proc
        li   bc,_42703                  ; LD BC,42703       ; Set Snake's graphic layout data address to #R42703...
-       .call @set_graphics_addr_for_entity                   ; CALL 42512        ; ...(Snake, mouth open, attacking)
-       bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
+       bl   @set_gfx_addr_for_entity   ; CALL 42512        ; ...(Snake, mouth open, attacking)
+       bl   @chk_coll_same_depth       ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;
-!
+       jne  chk_berk_killed_by_snake_1 ; RET NZ            ; ...then return
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        movb @bytes+18,*hl              ; LD (HL),18        ; Set Snake's Attack Progress Index to 18
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
-       .ret                            ; RET               ; Return
+       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+chk_berk_killed_by_snake_1:
+       .endproc                        ; RET               ; Return
 
 *********************************************************************************
 * Move Entity at IX Right One Character
 *
 * Used by the routines at #R41961 and #R42381.
-move_entity_right_4:
+move_entity_right_l4:
        ab   one,@7(ix)                 ; INC (IX+7)        ; Increase x-coordinates of left and right edges of entity at IX by one...
        ab   one,@5(ix)                 ; INC (IX+5)        ; ...
-       .ret                            ; RET               ; Return
+       rt                              ; RET               ; Return
 
 *********************************************************************************
 * Set Graphic Layout Data Address for Entity at IX to BC
 *
 * Used by the routines at #R41767, #R41961, #R42251, #R42381 and #R42486. Input:  BC  Holds address of graphic
 * layout data
-set_graphics_addr_for_entity:
+set_gfx_addr_for_entity:
+       .proc
+set_gfx_addr_for_entity_1:
        movb @c,@2(ix)                  ; LD (IX+2),C       ; Set current entity's graphic layout data address to BC...
        movb b,@3(ix)                   ; LD (IX+3),B       ; ...
-       .ret                            ; RET               ; Return
-
+       .endproc                        ; RET               ; Return
