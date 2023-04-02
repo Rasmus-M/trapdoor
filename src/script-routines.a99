@@ -1292,9 +1292,9 @@ move_carried_to_right:
 * Berk
 move_carried_to_left:
        .proc
-       bl   @load_carried_item_data                   ; CALL 48760        ; If Berk is carrying an entity then load A with its width minus one divided by two and D with
+       bl   @load_carried_item_data    ; CALL 48760        ; If Berk is carrying an entity then load A with its width minus one divided by two and D with
                                                            ; Berk's depth, else return
-       ab   a,a                        ; ADD A,A           ; Double A to give width minus one... (see bugs)
+       ; fix bug                       ; ADD A,A           ; Double A to give width minus one... (see bugs)
        ab   one,a                      ; INC A             ; ...and add one to get width of entity
        neg a                           ; NEG               ; Subtract width of carried entity...
        ab   @5(ix),a                   ; ADD A,(IX+5)      ; ...from Berk's left-side x-coordinate and load into A

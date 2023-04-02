@@ -372,6 +372,7 @@ graphics_routine_255:
 *
 * Used by the routines at #R46347 and #R46363. Input:  B  Always zero IX  Current address in graphic layout data
 reset_timer:
+       .proc
        movb @1(ix),*ix                 ; LD A,(IX+1)       ; Set current timer value to maximum...
                                        ; LD (IX+0),A       ; ...
        movb @2(ix),a                   ; LD A,(IX+2)       ; Load A with number of states
@@ -382,11 +383,13 @@ reset_timer:
        a    bc,ix                      ; ADD IX,BC         ; Advance IX by C bytes (BC = C, as B = 0)
        movb *ix,@e                     ; LD E,(IX+0)       ; Load E with value at this position
        .pop ix                         ; POP IX            ; Restore IX (old position in graphic layout data)
+       jmp  !
 * This entry point is used by the routine at #R46363.
 reset_timer_1:
-       movb @2(ix),a                   ; LD A,(IX+2)       ; Advance IX by number of states + 3 bytes to arrive at start of next data...
+       .proc
+!      movb @2(ix),a                   ; LD A,(IX+2)       ; Advance IX by number of states + 3 bytes to arrive at start of next data...
        ab   @bytes+3,a                 ; ADD A,3           ; ...
        movb a,@c                       ; LD C,A            ; ...
        a    bc,ix                      ; ADD IX,BC         ; ...
-       rt                              ; RET               ; Return
+       .endproc                        ; RET               ; Return
 

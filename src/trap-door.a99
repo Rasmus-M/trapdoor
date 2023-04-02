@@ -34,7 +34,9 @@ main:
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        bl   @draw_timer_bar            ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
 
-       li   tmp0,level_1_exit_door
+;       li   tmp0,level_1_exit_door
+;       li   tmp0,rev_col_check_addr_2
+       li   tmp0,state_data_complex_3
        mov  tmp0,@bert_interaction_state
        bl   @next_level
 
@@ -2229,6 +2231,12 @@ execute_script_1:
        movb a,@c                       ; LD C,A            ; ...
        sb   b,b                        ; LD B,0            ; ...
                                        ; ADD HL,BC         ; ...and add as offset in HL to point to start address of required script routine
+       mov bc,bc
+       jeq  error
+       ci   bc,64*2
+       jle  !
+error: jmp  error
+!
        mov  @script_routines_jmp_table(bc),bc ; LD C,(HL)         ; Load address at this location into BC...
                                        ; INC HL            ; ...
                                        ; LD B,(HL)         ; ...

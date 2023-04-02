@@ -449,19 +449,19 @@ data_addresses_4:
 *
 state_data_simple_4:
        byte 1,2,_49178%256,_49178/256,100,126                        ; (#R49178) Left brickwork
-       byte 1,2,240,195,121,100                                      ; (#R50126) Single arch
-       byte 2,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 1,2,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
+       byte 2,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
        byte 2,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
        byte 2,2,_49178%256,_49178/256,100,107                        ; (#R49178) Left brickwork
        byte 2,2,_49178%256,_49178/256,100,125                        ; (#R49178) Left brickwork
        byte 3,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
        byte 3,2,_49178%256,_49178/256,100,114                        ; (#R49178) Left brickwork
-       byte 3,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 3,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
        byte 4,2,_49413%256,_49413/256,117,123                        ; (#R49413) Single wide brick
        byte 4,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
        byte 4,1,_50238%256,_50238/256,121,99                         ; (#R50238) Left part of floor
        byte 4,1,_50211%256,_50211/256,121,121                        ; (#R50211) Right part of floor
-       byte 5,1,240,195,121,100                                      ; (#R50126) Single arch
+       byte 5,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
        byte 5,1,_49584%256,_49584/256,97,100                         ; (#R49584) Vertical red bar (outside normal game area)
        byte 5,1,_49584%256,_49584/256,102,127                        ; (#R49584) Vertical red bar (outside normal game area)
        byte 5,1,_49489%256,_49489/256,117,100                        ; (#R49489) Snake's Brickwork
