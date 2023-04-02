@@ -22,7 +22,7 @@ game_flags:
 *
 * Number of shots Cannon can fire before returning to its dormant state. Increases by 10 for each drip the Cannon
 * catches.
-cannom_ammo_counter:
+cannon_ammo_counter:
        byte 0
 
 * Current Time / Lives
