@@ -33,13 +33,21 @@ main:
        bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        bl   @paint_red_areas           ; CALL 53887        ; Paint red areas outside accessible areas of current character's current room
        bl   @draw_timer_bar            ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
-
-;       li   tmp0,level_1_exit_door
-;       li   tmp0,rev_col_check_addr_2
+*      Debug: start at other level
+       .ifne start_at_level,1
+       .ifeq start_at_level,2
+       li   tmp0,level_1_exit_door
+       .endif
+       .ifeq start_at_level,3
+       li   tmp0,rev_col_check_addr_2
+       .endif
+       .ifeq start_at_level,4
        li   tmp0,state_data_complex_3
+       .endif
        mov  tmp0,@bert_interaction_state
        bl   @next_level
-
+       .endif
+*      Debug - end
 * Start of main loop
 main_loop:
        bl   @check_berk_killed         ; CALL 53723        ; If Berk has been killed then reset his state, flash screen and decrease time / lives
@@ -2554,7 +2562,9 @@ fill_screen_1:
 * #R41633, #R41961, #R42064, #R42266 and #R42486.
 set_bert_killed:
        movb @game_flags,a              ; LD A,(34208)      ; Set "Berk Has Been Killed" Flag...
-;       socb @bits+2,a                  ; SET 2,A           ; ...
+       .ifeq bart_can_die,1
+       socb @bits+2,a                  ; SET 2,A           ; ...
+       .endif
        movb a,@game_flags              ; LD (34208),A      ; ...
        rt                              ; RET               ; Return
 *// set_bert_killed:
