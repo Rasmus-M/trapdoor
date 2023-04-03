@@ -231,7 +231,7 @@ update_yellow_creature_6:
 * Used by the routine at #R39776.
 * Jump - not call
 yellow_creature_killed_berk:
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        szcb @bits+5,@9(ix)             ; RES 5,(IX+9)      ; Reset Berk's "Do Not Update State" Flag
        movb @bytes+0,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
        .endproc                        ; RET               ; Return

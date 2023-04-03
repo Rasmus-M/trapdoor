@@ -1,10 +1,17 @@
+**
+* Settings
+*
 optimize_attr_drawing:
        equ  1
+**
+* Cheats
+*
 start_at_level:
        equ  1
-bert_can_die:
+berk_cant_die:
        equ  1
-
+higher_jumps:
+       equ  1
 
 **
 * Memory mapped addresses

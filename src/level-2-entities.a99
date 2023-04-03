@@ -83,7 +83,7 @@ _38707:
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  _38718                     ; JR NZ,38718       ; ...then skip ahead to #R38718 (start stalactite falling)
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        jmp   update_stalachites_state_e ; RET               ; Return
 _38718:
        movb @12(ix),b                  ; LD B,(IX+12)      ; Load B with stalactite's velocity factor...
@@ -154,7 +154,7 @@ update_apebeast:
                                                            ; and execute)
        cb   a,@bytes+31                ; CP 31             ; If collision was with entity of class 31 (Berk)...
        jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;
+       bl   @set_berk_killed                   ;
 !
        b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
 *// update_current_apebeast
@@ -205,7 +205,7 @@ update_bubo_state_1:
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was with entity of class 31 (Berk)...
        jne  update_bubo_state_2                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;
+       bl   @set_berk_killed                   ;
 update_bubo_state_2:
        equ  $
        li   iy,_44214                  ; LD IY,44214       ; Load IY with address of complex state data for Bubo's Projectile (Level 2)
@@ -293,7 +293,7 @@ update_bupos_projectile_4:
        joc  update_bupos_projectile_6                     ; JR C,38328        ; ...and if no collision occurred, then skip ahead to #R38328
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
        jne  update_bupos_projectile_5                     ; JR NZ,38293       ; ...then skip ahead to #R38293
-       bl   @set_bert_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed                   ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        jmp  update_bupos_projectile_6                     ; JR 38328          ; Skip ahead to #R38328
 update_bupos_projectile_5:
        cb   a,@bytes+25                ; CP 25             ; If collision was not with entity of class 25 (Green Apebeast, Level 2)...

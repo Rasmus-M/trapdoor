@@ -593,7 +593,7 @@ _51792:
        movb @1(iy),a                   ; LD A,(IY+1)       ; If worm's depth is zero (i.e. not in play area)...
        socb a,a                        ; OR A              ; ...
        jeq  _51875                     ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
-       b    @_51960                    ; JP 51960          ; Move Drutt closer to the worm and eat it if close enough
+       b    @_51960                    ; JP 51960          ; Move Drutt closer to the worm and ½ it if close enough
 * Drutt Mode Flag is reset (i.e. Berk Mode)
 _51841:
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
@@ -988,7 +988,7 @@ _36448:
 * Door is locked or Berk is not holding the correct character
 _36462:
        bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
@@ -1939,7 +1939,7 @@ handle_vertical_jump_3:
        jne  handle_vertical_jump_4     ; JR NZ,55258       ; ...then skip ahead to #R55258
 * Jumper has banged his head
        movb @bytes+6,a                 ; LD A,6            ; Set pending sound index to 6 (banging head) if it is currently zero, or lower priority...
-       bl   @request_sound            ; CALL 59613        ; ...
+       bl   @request_sound             ; CALL 59613        ; ...
        movb @bytes+6,@e                ; LD E,6            ; Load E with 6 (jumper has banged his head on something above him)
        b    @handle_vertical_jump_20   ; RET               ; Return (of of range)
 * No collision, or collision with entity other than that of class 130
@@ -2072,7 +2072,11 @@ handle_vertical_jump_20:
 inc_jump_velocity:
        movb @12(ix),a                  ; LD A,(IX+12)      ; Load A with current velocity of character's jump...
        andi a,15*256                   ; AND 15            ; ...
+       .ifeq higher_jumps,1
+       cb   a,@bytes+9                 ; CP 7              ; ...and if this is 7 or more...
+       .else
        cb   a,@bytes+7                 ; CP 7              ; ...and if this is 7 or more...
+       .endif
        jhe  inc_jump_velocity_1        ; RET NC            ; ...then return
        ab   one,@12(ix)                ; INC (IX+12)       ; Increase velocity of character's jump
 inc_jump_velocity_1:

@@ -87,7 +87,7 @@ chk_berk_killed_by_skeleton:
        joc  chk_berk_killed_by_skeleton_1 ; JR C,41513        ; ...and if no collision occurred, then skip ahead to #R41513
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
        jne  chk_berk_killed_by_skeleton_1 ; JR NZ,41513       ; ...then skip ahead to #R41513
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 * The instructions below do a "manual" check for a collision between the Skeleton and Berk. See trivia
 chk_berk_killed_by_skeleton_1:
@@ -108,7 +108,7 @@ chk_berk_killed_by_skeleton_1:
        jhe  !                          ; JP C,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 *// chk_berk_killed_by_skeleton
 
@@ -127,7 +127,7 @@ update_flying_skeleton:
        movb a,tmp0                     ; BIT 6,A           ; ...
        andi tmp0,64*256                ;
        jne  update_flying_skeleton_1   ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed                   ;
+       bl   @set_berk_killed                   ;
 update_flying_skeleton_1:
        li   hl,_45482+9                ; LD HL,45491       ; Load HL with address of Flying Skeleton Creature's flags
        movb *hl,tmp0                   ; BIT 0,(HL)        ; If creature's Horizontal Direction Flag is set (moving left)...
@@ -207,7 +207,7 @@ update_ghost:
        movb @9(iy),tmp0                ; BIT 6,(IY+9)      ; If Berk is not flying...
        andi tmp0,64*256                ;
        jeq  update_ghost_1             ; JR Z,41653        ; ...then skip ahead to #R41653
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
 update_ghost_1:
        movb @current_characters_room,a ; LD A,(34218)      ; Load E with current character's current room index...
        movb a,@e                       ; LD E,A            ; ...
@@ -453,7 +453,7 @@ update_projectile_3:
 update_projectile_4:
        cb   a,@bytes+31                ; CP 31             ; If collision was with entity of class 31 (Berk)...
        jne  update_projectile_5        ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
-       bl   @set_bert_killed           ;
+       bl   @set_berk_killed           ;
 update_projectile_5:
        .endproc                        ; RET               ; Return
 *// update_projectile
@@ -531,7 +531,7 @@ update_drips_8:
                                                            ; Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
        jne  update_drips_10            ; JR NZ,42215       ; ...then skip ahead to #R42215
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
 update_drips_9:
        movb @bytes+8,a                 ; LD A,8            ; Set drip's graphical stage to 8 (exploding on contact)...
        movb a,@9(ix)                   ; LD (IX+9),A       ; ...and also set drip's stage to 8...
@@ -666,7 +666,7 @@ chk_berk_killed_by_snake:
        jne  chk_berk_killed_by_snake_1 ; RET NZ            ; ...then return
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        movb @bytes+18,*hl              ; LD (HL),18        ; Set Snake's Attack Progress Index to 18
-       bl   @set_bert_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
+       bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
 chk_berk_killed_by_snake_1:
        .endproc                        ; RET               ; Return
 
