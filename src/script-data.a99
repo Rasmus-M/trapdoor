@@ -748,7 +748,7 @@ _38032:
        byte 1,0,_38024%256,_38024/256                                ; Jump to #R38024
 
 * Table of Initial Positions in Apebeasts' Script Data
-_38416:
+apebeasts_script_data_init:
        data _38432                                                   ; Apebeast 1 (Level 2)
        data _38450                                                   ; Apebeast 2 (Level 2)
        data _38432                                                   ; Apebeast 3 (Level 2)

@@ -44,12 +44,13 @@ data_addresses_1:
 state_data_simple_1:
        byte 1,2,_50389%256,_50389/256,107,100                        ; (#R50389) Left brickwork
        byte 1,2,_50389%256,_50389/256,106,117                        ; (#R50389) Right brickwork
+home_sweet_home:
        byte 1,0,_50479%256,_50479/256,107,107                        ; (#R50479) "Home Sweet Home" brick border
        byte 1,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
        byte 1,2,_50018%256,_50018/256,100,100                        ; (#R50018) Spider's web
        byte 1,1,_50238%256,_50238/256,121,100                        ; (#R50238) Left part of floor
        byte 1,1,_50211%256,_50211/256,121,120                        ; (#R50211) Right part of floor
-_43188:
+closed_trap_door:
        byte 1,2,_50267%256,_50267/256,121,112                        ; (#R50267) Closed Trap Door
        byte 1,2,_50147%256,_50147/256,112,115                        ; (#R50147) Boni's shelf
        byte 2,1,_50359%256,_50359/256,100,100                        ; (#R50359) Left wall
@@ -90,12 +91,12 @@ level_1_exit_door:
        byte 9,2,_50579%256,_50579/256,107,131,120,132,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
        byte 6,2,_50579%256,_50579/256,107,107,120,108,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
        byte 6,1,_50800%256,_50800/256,121,102,121,102,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
-_43437:
+opened_trap_door:
        byte 0,1,_50283%256,_50283/256,114,112,121,119,129,0,0,240,0  ; (#R50283) Open Trap Door (also acts as marker, makes Berk
                                                                      ; and Drutt fall)
-_43450:
+marker:
        byte 1,1,_50800%256,_50800/256,114,120,121,120,128,0,0,48,0   ; (#R50800) Marker (prevents Berk and Drutt passing)
-_43463:
+bat:
        byte 6,1,_37205%256,_37205/256,93,115,98,118,30,0,128,192,0   ; (#R37205) Bat
        byte 7,1,_50800%256,_50800/256,120,106,121,125,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
        byte 8,1,_50609%256,_50609/256,100,96,100,105,130,0,0,240,0   ; (#R50609) Ceiling (left section)
@@ -111,7 +112,7 @@ berks_state_data_1:
        byte 1,1,_56804%256,_56804/256,115,123,121,128,31,0,128,192,0 ; (#R56804) Berk
 bonis_state_data_1:
        byte 1,2,_50317%256,_50317/256,108,115,111,116,19,0,128,0,0   ; (#R50317) Boni
-_43619:
+flying_skeleton:
        byte 1,2,_51314%256,_51314/256,124,115,128,116,30,0,128,192,0 ; (#R51314) Flying Skeleton Creature
        byte 6,2,_50792%256,_50792/256,105,103,105,104,17,0,128,240,0 ; (#R50792) Key
        byte 9,2,_50560%256,_50560/256,105,103,105,104,4,0,131,240,0  ; (#R50560) Red Sweet (Flying, duration = 3)
@@ -125,7 +126,7 @@ worms_state_data_1:
        byte 4,1,_50609%256,_50609/256,100,99,100,108,130,0,0,240,0   ; (#R50609) Ceiling, left section
 rev_col_check_addr_1:
        byte 4,1,_50609%256,_50609/256,100,123,100,132,130,0,0,240,0  ; (#R50609) Ceiling, right section
-_43749:
+spider:
        byte 5,2,_37888%256,_37888/256,103,118,106,120,27,0,128,0,0   ; (#R37888) Spider
 _43762:
        byte 5,2,_37888%256,_37888/256,103,110,106,112,28,0,128,0,0   ; (#R37888) Spider

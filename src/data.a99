@@ -1,3 +1,7 @@
+*********************************************************************************
+clear_data_start:
+       equ  $
+
 * Index of Current Level
 current_level:
        byte 1
@@ -195,16 +199,9 @@ loop_counter_value_2:
        byte 0                                                        ; Store for current value of loop counter in graphic layout data processing (instructions 240
                                                                      ; and 241)
 
-* Unused
-      byte 0
-
 * Position (Address) in Script Data Currently Running
 current_script_addr:                   ; High endian
        data 0
-
-* Data for Drawing to Display
-prim_disp_buffer_addr:
-       data display_buffer_1                                         ; Start address of Primary Display Buffer
 
        even
 draw_coordinates:
@@ -232,6 +229,13 @@ loop_address:
 loop_start:
        data 0                                                        ; Store for address of start of current loop in graphic layout data processing (instructions
                                                                      ; 240 and 241)
+clear_data_end:
+       equ  $
+*********************************************************************************
+
+* Data for Drawing to Display
+prim_disp_buffer_addr:
+       data display_buffer_1                                         ; Start address of Primary Display Buffer
 
 * Joystick Mode Flag
 *

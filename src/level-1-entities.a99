@@ -16,8 +16,8 @@ update_level_1_entities:
 * Used by the routine at #R36791.
 execute_bonis_kidnap:
        .proc
-       li   ix,_43619                  ; LD IX,43619       ; Load IX with address of complex state data for Flying Skeleton Creature
-       movb @_43619+9,a                ; LD A,(43628)      ; If Berk and Drutt Through Trap Door Flag is set...
+       li   ix,flying_skeleton         ; LD IX,43619       ; Load IX with address of complex state data for Flying Skeleton Creature
+       movb @flying_skeleton+9,a       ; LD A,(43628)      ; If Berk and Drutt Through Trap Door Flag is set...
        movb a,tmp0                     ; BIT 3,A           ; ...
        andi tmp0,8*256                 ;
        jne execute_bonis_kidnap_1      ; RET NZ            ; ...then return
@@ -67,10 +67,10 @@ open_trap_door_if_berk_is_near:
        jhe  open_trap_door_if_berk_is_near_1 ; RET NC            ; ...then return
        socb @bits+2,@9(ix)             ; SET 2,(IX+9)      ; Set Trap Door Opened Flag
        sb   a,a                        ; XOR A             ; Set room of "Closed Trap Door" to 0 (i.e. remove from Trap Door Room)...
-       movb a,@_43188                  ; LD (43188),A      ; ...
+       movb a,@closed_trap_door        ; LD (43188),A      ; ...
        ab   one,a                      ; INC A             ; Increase A to 1 (index of Trap Door Room)...
-       movb a,@_43437                  ; LD (43437),A      ; ...and set this as the current room of "Open Trap Door"...
-       movb a,@_43450                  ; LD (43450),A      ; ...and marker (preventing Berk and Drutt passing door lid)
+       movb a,@opened_trap_door        ; LD (43437),A      ; ...and set this as the current room of "Open Trap Door"...
+       movb a,@marker                  ; LD (43450),A      ; ...and marker (preventing Berk and Drutt passing door lid)
 open_trap_door_if_berk_is_near_1:
        .endproc                        ; RET               ; Return
 *// open_trap_door_if_berk_is_near
@@ -81,7 +81,7 @@ open_trap_door_if_berk_is_near_1:
 * Used by the routine at #R36791.
 update_bat_state_and_store:
        .proc
-       li   ix,_43463                  ; LD IX,43463       ; Point IX at position data for Bat (Level 1)
+       li   ix,bat                  ; LD IX,43463       ; Point IX at position data for Bat (Level 1)
        bl   @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Bat's room
        mov  @bat_script_pos,hl         ; LD HL,(37016)     ; Load current position in Bat's script data from #R37016 into HL...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
@@ -171,7 +171,7 @@ update_bat_state_8:
 * Used by the routine at #R36791.
 update_state_of_spiders:
        .proc
-       li   ix,_43749                  ; LD IX,43749       ; Load IX with address of complex state data for Spider 1 (Level 1)
+       li   ix,spider                  ; LD IX,43749       ; Load IX with address of complex state data for Spider 1 (Level 1)
        li   iy,spiders_script_data_pos ; LD IY,37580       ; Load IY with start address of Table of Current Positions in Spiders' Script Data
        movb @bytes+3,b                 ; LD B,3            ; Load B with 3 as there are 3 spiders
 update_state_of_spiders_1:

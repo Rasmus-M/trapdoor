@@ -164,8 +164,8 @@ update_apebeast:
 *
 * Used by the routine at #R34751.
 reset_apebeasts:
-       li   de,apebeasts_script_data_pos                  ; LD DE,38424       ; Point DE at Table of Current Positions in Apebeasts' Script Data
-       li   hl,_38416                  ; LD HL,38416       ; Point HL at Table of Initial Positions in Apebeasts' Script Data
+       li   de,apebeasts_script_data_pos ; LD DE,38424       ; Point DE at Table of Current Positions in Apebeasts' Script Data
+       li   hl,apebeasts_script_data_init ; LD HL,38416       ; Point HL at Table of Initial Positions in Apebeasts' Script Data
        li   bc,8                       ; LD BC,8           ; Load BC with 8 (as there are eight bytes to copy)
        .ldir                           ; LDIR              ; Overwrite addresses in Table of Current Positions with those from Table of Initial Positions
        rt                              ; RET               ; Return
