@@ -777,7 +777,7 @@ update_berk_state_2:
        movb a,tmp0                     ; BIT 1,A           ; If left has been pressed...
        andi tmp0,2*256                 ;                   
        jeq  !                          ; JP NZ,36137       ; ...then skip ahead to #R36137 (move Berk left if appropriate)
-       b    @move_berk_closer_1                    ;
+       b    @attempt_to_move_left                    ;
 !
        bl   @move_into_new_room        ; CALL 54283        ; Move Berk into new room (left or right) if he is at the edge of his current room
        movb @control_input,a           ; LD A,(34219)      ; Load A with control input
@@ -1040,29 +1040,28 @@ move_berk_closer:
        ab   @5(iy),a                   ; ADD A,(IY+5)      ; Add result to x-coordinate of entity's left edge
 * At this point, A holds the x-coordinate of the middle of the entity at IY, minus two
        cb   a,@5(ix)                   ; CP (IX+5)         ; If x-coordinate in A is the same as Berk's left side x-coordinate...
-       jne  !                          ; RET Z             ; ...then return
-       .endproc                            ;
-!
+       jeq  move_berk_closer_1         ; RET Z             ; ...then return
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        cb   a,@5(ix)
-       jl   move_berk_closer_1         ; JP NC,36214       ; If x-coordinate in A is the less than Berk's left side x-coordinate then skip ahead to
-       b    @attempt_to_move_right     ;                   ; #R36214
+       jl   attempt_to_move_left       ; JP NC,36214       ; If x-coordinate in A is the less than Berk's left side x-coordinate then skip ahead to
+       jh  attempt_to_move_right       ;                   ; #R36214
+move_berk_closer_1:
+       .endproc                        ;
 
 * This entry point is used by the routine at #R35735. Attempt to move Berk left
-move_berk_closer_1:
-       equ  $
+attempt_to_move_left:
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
        andi tmp0,64*256                ;                   
-       jne  attempt_to_move_left       ; JR NZ,36200       ; ...then skip ahead to #R36200
+       jne  attempt_to_move_left_4       ; JR NZ,36200       ; ...then skip ahead to #R36200
 * Attempt to move Berk left (not flying) (see bugs)
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
        bl    @chk_coll_left            ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
-       jnc  move_berk_closer_3         ; JR NC,36171       ; ...and if a collision occurred, then skip ahead to #R36171
+       jnc  attempt_to_move_left_2         ; JR NC,36171       ; ...and if a collision occurred, then skip ahead to #R36171
 * No collision
        bl   @move_into_left_room       ; CALL 54348        ; Move Berk into room to the left, if appropriate...
-       joc  move_berk_closer_2         ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
+       joc  attempt_to_move_left_1         ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
        b    @update_berk_state_3       ;                   ; him (turn to) face out of screen as appropriate)
-move_berk_closer_2:
+attempt_to_move_left_1:
        equ  $
        movb @11(ix),tmp0               ; BIT 1,(IX+11)     ; If Berk's Walking Left Flag is already set...
        andi tmp0,2*256                 ;                   
@@ -1072,17 +1071,17 @@ move_berk_closer_2:
        li   hl,_35263                  ; LD HL,35263       ; Point HL at script data for Berk starting to walk left...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Collision occurred with entity to the left
-move_berk_closer_3:
+attempt_to_move_left_2:
        cb   a,@bytes+129               ; CP 129            ; If collision was not with entity of class 129 (causes other entities to start falling)...
-       jne  move_berk_closer_4         ; JR NZ,36184       ; ...then skip ahead to #R36184
+       jne  attempt_to_move_left_3         ; JR NZ,36184       ; ...then skip ahead to #R36184
        bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        li   hl,_35291                  ; LD HL,35291       ; Point HL at script data for Berk starting to fall to the left...
        b    @execute_script            ; JP 48098          ; ...and execute
-move_berk_closer_4:
+attempt_to_move_left_3:
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of less than 22 (can be picked up)...
-       jl   move_berk_closer_2         ; JR C,36158        ; ...then jump back to #R36158
+       jl   attempt_to_move_left_1         ; JR C,36158        ; ...then jump back to #R36158
        cb   a,@bytes+50                ; CP 50             ; If collision was with entity of class 50 (causes Drutt to swap depth levels)...
-       jeq  move_berk_closer_2         ; JR Z,36158        ; ...then jump back to #R36158
+       jeq  attempt_to_move_left_1         ; JR Z,36158        ; ...then jump back to #R36158
        cb   a,@bytes+25                ; CP 25             ; If collision was with entity of class 25 (Green Apebeast, Level 2)...
        jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
        bl   @set_berk_killed           ;
@@ -1090,7 +1089,7 @@ move_berk_closer_4:
        b    @update_berk_state_3       ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
                                                            ; appropriate)
 * Attempt to move Berk left (flying)
-attempt_to_move_left:
+attempt_to_move_left_4:
        bl    @chk_coll_left            ; CALL 54666        ; Check Berk for collision with another impassable / pushable entity immediately to the left...
        jnc  !                          ; JP C,48096        ; ...and if a collision has not occurred, then jump to #R48096 (advance HL to next script
        b    @inct_execute_script       ;                   
@@ -1107,20 +1106,18 @@ attempt_to_move_right:
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
        andi tmp0,64*256                ;                   
        jeq  !                          ; JP NZ,36282       ; ...then skip ahead to #R36282
-       b    @move_berk_closer_8                    ;
+       b    @attempt_to_move_right_4                    ;
 !
 * Attempt to move Berk right (not flying) (see bugs)
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
        bl   @chk_coll_right            ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
                                                            ; right...
-       jnc  move_berk_closer_6         ; JR NC,36249       ; ...and if a collision occurred, then skip ahead to #R36249
+       jnc  attempt_to_move_right_2         ; JR NC,36249       ; ...and if a collision occurred, then skip ahead to #R36249
 * No collision
        bl   @move_into_right_room      ; CALL 54313        ; Move Berk into room to the right, if appropriate...
-       joc  !                          ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
+       joc  attempt_to_move_right_1    ; JP NC,35786       ; ...and if Berk can't enter new room then jump to #R35786 (terminate Berk's flight, or have
        b    @update_berk_state_3                           ; him (turn to) face out of screen as appropriate)
-!
-
-move_berk_closer_5:
+attempt_to_move_right_1:
        equ  $
        movb @11(ix),tmp0               ; BIT 0,(IX+11)     ; If Berk's Walking Right Flag is already set...
        andi tmp0,1*256                 ;                   
@@ -1130,18 +1127,18 @@ move_berk_closer_5:
        li   hl,_35251                  ; LD HL,35251       ; Point HL at script data for Berk starting to walk right...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Collision occurred with entity to the right
-move_berk_closer_6:
+attempt_to_move_right_2:
        cb   a,@bytes+129               ; CP 129            ; If collision was not with entity of class 129 (causes other entities to start falling)...
-       jne  move_berk_closer_7         ; JR NZ,36266       ; ...then skip ahead to #R36266
+       jne  attempt_to_move_right_3         ; JR NZ,36266       ; ...then skip ahead to #R36266
        bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
        mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk (see trivia)
        li   hl,_35327                  ; LD HL,35327       ; Point HL at script data for Berk starting to fall to the right...
        b    @execute_script            ; JP 48098          ; ...and execute
-move_berk_closer_7:
+attempt_to_move_right_3:
        cb   a,@bytes+22                ; CP 22             ; If collision was with an entity of class of less than 22 (can be picked up)...
-       jl   move_berk_closer_5         ; JR C,36236        ; ...then jump back to #R36236
+       jl   attempt_to_move_right_1         ; JR C,36236        ; ...then jump back to #R36236
        cb   a,@bytes+50                ; CP 50             ; If collision was with entity of class 50 (causes Drutt to swap depth levels)...
-       jeq  move_berk_closer_5         ; JR Z,36236        ; ...then jump back to #R36236
+       jeq  attempt_to_move_right_1         ; JR Z,36236        ; ...then jump back to #R36236
        cb   a,@bytes+25                ; CP 25             ; If collision was with entity of class 25 (Green Apebeast, Level 2)...
        jne  !                          ; CALL Z,53667      ; ...then set "Berk Has Been Killed" Flag
        bl   @set_berk_killed           ;
@@ -1149,7 +1146,7 @@ move_berk_closer_7:
        b    @update_berk_state_3       ; JP 35786          ; Jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
                                                            ; appropriate)
 * Attempt to move Berk right (flying)
-move_berk_closer_8:
+attempt_to_move_right_4:
        bl   @chk_coll_right            ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
                                                            ; right...
        jnc  !                          ; JP C,48096        ; ...and if a collision has not occurred, then jump to #R48096 (advance HL to next script
