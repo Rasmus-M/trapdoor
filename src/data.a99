@@ -251,9 +251,149 @@ joystick_mode_flag:
 high_score:
        data 999
 
+* Current Keyboard Controls
+current_keyboard_ctrls:
+       text 'X'                                                      ; Right
+       text 'Z'                                                      ; Left
+       text 'A'                                                      ; Forward
+       text 'Q'                                                      ; Back
+       text 'C'                                                      ; Berk / Drutt
+       text 'P'                                                      ; Pause
+       text 'R'                                                      ; Restart
+
+* Table of Attribute File Addresses for Main Menu Strings
+main_menu_addrs:
+       data 22666                                                    ; "S   START   "
+       data 22762                                                    ; "K NEW KEYS  "
+main_menu_addrs_kempston:
+       data 22851                                                    ; "J +KEMPSTON "
+main_menu_addrs_dirs:
+       data 22947                                                    ; "   RIGHT    "
+       data 23043                                                    ; "   LEFT     "
+       data 23139                                                    ; "   FORWARD  "
+       data 22865                                                    ; "   BACK     "
+       data 22961                                                    ; "   BERK/DRUT"
+       data 23057                                                    ; "   PAUSE    "
+       data 23153                                                    ; "   RESTART  "
+
+* Table of Main Menu Strings
+main_menu_strings:
+       text 'S   START   '
+       text 'K NEW KEYS  '
+       text 'J +KEMPSTON '
+       text '   RIGHT    '
+       text '   LEFT     '
+       text '   FORWARD  '
+       text '   BACK     '
+       text '   BERK/DRUT'                                           ; (see bugs)
+       text '   PAUSE    '
+       text '   RESTART  '
+
+* "THROUGH the TRAPDOOR" String
+title_text:
+       text 'THROUGH the TRAPDOOR'
+
+* "SORRY BERK,  BUT YOUR TIME IS UP" String
+sorry_berk_text:
+       text 'SORRY BERK,  BUT YOUR TIME IS UP'
+
+* "HOME SWEET HOME" String
+home_sweet_home_text:
+       text 'HOME SWEET HOME'
+
+* Score / Total / High Score String
+score_text:
+       text '*SCORE#00000* TOTAL#00000* HI-SC#00999$'
+
+* Return Values from Keyboard Reading Routine
+ret_val_keyboard:
+       text 'cZXCVASDFGQWERT1234509876POIUYeLKJH yMNB'
+
+* Pathfinding Data Table
+*
+* When built, this table has a header and a main data block. The header is three bytes long and contains the values:
+pathfinding_data_table:
+       byte 0,0,0
+pathfinding_1st_entry:
+       byte 0,0
+       byte 0,0
+       byte 0,0
+       byte 0,0
+       byte 0
+
+* Data for Pseudo-Random Number Generator
+rnd_seed:
+       data 0                                                        ; Seed
+rnd_range:
+       byte 0                                                        ; Temporary store for range value
+
+w96:
+       data 96
+paper_bits:
+       data >3800
+preserve_ink_flag:
+       data >4000
+
+*********************************************************************************
+
 * Current Position in Berk's Script Data
 berk_script_pos:
        data _35081                                                   ; Berk facing out of screen, ready to respond to control input
+
+* Table of Addresses of Berk's Jump Script Data
+berks_jump_script_data:
+       data _35441                                                   ; (1) - Berk starting to jump straight up
+       data _35447                                                   ; (2) - Unused
+       data _35457                                                   ; (3) - Berk landing (after jump)
+       data _35469                                                   ; (4) - Berk jumping left
+       data _35481                                                   ; (5) - Berk jumping right
+       data _35283                                                   ; (6) - Berk banging head
+       data _35339                                                   ; (7) - Berk falling to the right
+       data _35303                                                   ; (8) - Berk falling to the left
+
+* Table of Berk's Reset Complex State Data Addresses
+*
+* Addresses of complex state data reverted to by Berk after he is "killed"
+berk_reset_table:
+       data berk_init_state_level_1                                                   ; Level 1
+       data berk_init_state_level_2_4                                                   ; Level 2
+       data berk_init_state_level_3                                                   ; Level 3
+       data berk_init_state_level_2_4                                                   ; Level 4
+
+* Berk's Reset Complex State Data
+*
+* Complex state data reverted to by Berk after he is "killed"
+berk_init_state_level_1:
+       byte 4,1,103,231,85,113,91,118,31,1,192,192,10                ; Level 1
+berk_init_state_level_3:
+       byte 1,1,103,231,85,107,91,112,31,1,192,192,10                ; Level 3
+berk_init_state_level_2_4:
+       byte 1,1,103,231,85,113,91,118,31,1,192,192,10                ; Levels 2 & 4
+
+* Current Position in Drutt's Script Data
+drutts_script_pos:
+       data drutt_facing_out_script
+
+* Table of Addresses of Script Data for Drutt's Actions
+*
+* When Drutt is neither under player control nor seeking a target (a worm or Berk) then his actions are determined
+* by randomly selecting a script data address from this table and executing. There is:
+drutts_script_data_actions:
+       data _51538                                                   ; Move Drutt and any pushed entity right by a hop of size four
+       data _51608                                                   ; Move Drutt and any pushed entity left by a hop of size three
+       data _51630                                                   ; Drutt swapping depth levels
+       data drutt_facing_out_script                                  ; Drutt facing out of screen
+       data drutt_facing_out_script                                  ; Drutt facing out of screen
+       data drutt_facing_out_script                                  ; Drutt facing out of screen
+       data drutt_facing_out_script                                  ; Drutt facing out of screen
+
+* Current Position in Worm's Script Data
+worms_script_data_pos:
+       data _52729
+
+* Worm's Age
+worms_age:
+       byte 0
 
 * Current Position in Script Data for Boni's Kidnap
 boni_kidnap_script_pos:
@@ -309,144 +449,6 @@ coloured_creatures_cycles:
 * Current Position in Skeleton's Script Data
 skeleton_script_pos:
        data skeleton_idling_script                                                   ; (#R41232, Skeleton Idling)
-
-* Current Keyboard Controls
-current_keyboard_ctrls:
-       text 'X'                                                      ; Right
-       text 'Z'                                                      ; Left
-       text 'A'                                                      ; Forward
-       text 'Q'                                                      ; Back
-       text 'C'                                                      ; Berk / Drutt
-       text 'P'                                                      ; Pause
-       text 'R'                                                      ; Restart
-
-* Table of Attribute File Addresses for Main Menu Strings
-main_menu_attrs:
-       data 22666                                                    ; "S   START   "
-       data 22762                                                    ; "K NEW KEYS  "
-main_menu_attrs_kempston:
-       data 22851                                                    ; "J +KEMPSTON "
-main_menu_attrs_dirs:
-       data 22947                                                    ; "   RIGHT    "
-       data 23043                                                    ; "   LEFT     "
-       data 23139                                                    ; "   FORWARD  "
-       data 22865                                                    ; "   BACK     "
-       data 22961                                                    ; "   BERK/DRUT"
-       data 23057                                                    ; "   PAUSE    "
-       data 23153                                                    ; "   RESTART  "
-
-* Table of Main Menu Strings
-main_menu_strings:
-       text 'S   START   '
-       text 'K NEW KEYS  '
-       text 'J +KEMPSTON '
-       text '   RIGHT    '
-       text '   LEFT     '
-       text '   FORWARD  '
-       text '   BACK     '
-       text '   BERK/DRUT'                                           ; (see bugs)
-       text '   PAUSE    '
-       text '   RESTART  '
-
-* "THROUGH the TRAPDOOR" String
-title_text:
-       text 'THROUGH the TRAPDOOR'
-
-* "SORRY BERK,  BUT YOUR TIME IS UP" String
-sorry_berk_text:
-       text 'SORRY BERK,  BUT YOUR TIME IS UP'
-
-* "HOME SWEET HOME" String
-home_sweet_home_text:
-       text 'HOME SWEET HOME'
-
-* Score / Total / High Score String
-score_text:
-       text '*SCORE#00000* TOTAL#00000* HI-SC#00999$'
-
-* Return Values from Keyboard Reading Routine
-ret_val_keyboard:
-       text 'cZXCVASDFGQWERT1234509876POIUYeLKJH yMNB'
-
-* Table of Addresses of Berk's Jump Script Data
-berks_jump_script_data:
-       data _35441                                                   ; (1) - Berk starting to jump straight up
-       data _35447                                                   ; (2) - Unused
-       data _35457                                                   ; (3) - Berk landing (after jump)
-       data _35469                                                   ; (4) - Berk jumping left
-       data _35481                                                   ; (5) - Berk jumping right
-       data _35283                                                   ; (6) - Berk banging head
-       data _35339                                                   ; (7) - Berk falling to the right
-       data _35303                                                   ; (8) - Berk falling to the left
-
-* Current Position in Drutt's Script Data
-drutts_script_pos:
-       data drutt_facing_out_script
-
-* Table of Addresses of Script Data for Drutt's Actions
-*
-* When Drutt is neither under player control nor seeking a target (a worm or Berk) then his actions are determined
-* by randomly selecting a script data address from this table and executing. There is:
-drutts_script_data_actions:
-       data _51538                                                   ; Move Drutt and any pushed entity right by a hop of size four
-       data _51608                                                   ; Move Drutt and any pushed entity left by a hop of size three
-       data _51630                                                   ; Drutt swapping depth levels
-       data drutt_facing_out_script                                  ; Drutt facing out of screen
-       data drutt_facing_out_script                                  ; Drutt facing out of screen
-       data drutt_facing_out_script                                  ; Drutt facing out of screen
-       data drutt_facing_out_script                                  ; Drutt facing out of screen
-
-* Current Position in Worm's Script Data
-worms_script_data_pos:
-       data _52729
-
-* Worm's Age
-worms_age:
-       byte 0
-
-* Pathfinding Data Table
-*
-* When built, this table has a header and a main data block. The header is three bytes long and contains the values:
-pathfinding_data_table:
-       byte 0,0,0
-pathfinding_1st_entry:
-       byte 0,0
-       byte 0,0
-       byte 0,0
-       byte 0,0
-       byte 0
-
-* Table of Berk's Reset Complex State Data Addresses
-*
-* Addresses of complex state data reverted to by Berk after he is "killed"
-berk_reset_table:
-       data berk_init_state_level_1                                                   ; Level 1
-       data berk_init_state_level_2_4                                                   ; Level 2
-       data berk_init_state_level_3                                                   ; Level 3
-       data berk_init_state_level_2_4                                                   ; Level 4
-
-* Berk's Reset Complex State Data
-*
-* Complex state data reverted to by Berk after he is "killed"
-berk_init_state_level_1:
-       byte 4,1,103,231,85,113,91,118,31,1,192,192,10                ; Level 1
-berk_init_state_level_3:
-       byte 1,1,103,231,85,107,91,112,31,1,192,192,10                ; Level 3
-berk_init_state_level_2_4:
-       byte 1,1,103,231,85,113,91,118,31,1,192,192,10                ; Levels 2 & 4
-
-* Data for Pseudo-Random Number Generator
-rnd_seed:
-       data 0                                                        ; Seed
-rnd_range:
-       byte 0                                                        ; Temporary store for range value
-
-w96:
-       data 96
-paper_bits:
-       data >3800
-preserve_ink_flag:
-       data >4000
 
 * Table of Sound Parameters
 *

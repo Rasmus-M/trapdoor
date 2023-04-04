@@ -1333,7 +1333,7 @@ main_menu:
        bl   @fill_screen               ; CALL 53649        ; ...
        bl   @print_title               ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
        bl   @print_score_strings       ; CALL 47628        ; Print SCORE / TOTAL / HI-SC string in current character's colours
-       li   ix,main_menu_attrs         ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
+       li   ix,main_menu_addrs         ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
        li   iy,main_menu_strings       ; LD IY,46710       ; Point IY at start of Table of Main Menu Strings
        movb @bytes+112,a               ; LD A,112          ; Load A with 112 (black INK on yellow PAPER)
        movb a,@print_attr              ; LD (34269),A      ; Store at #R34269
@@ -1401,7 +1401,7 @@ _46956:
        movb @bytes+114,a               ; LD A,114          ; Load A with attribute value for red INK, yellow PAPER, BRIGHT
 _46958:
        movb @bytes+74,@e               ; LD E,74           ; Load E with 74 (index for character "J")
-       li   ix,main_menu_attrs_kempston                  ; LD IX,46694       ; Point IX at entry for "J +KEMPSTON " in table of Attribute File addresses at which to print
+       li   ix,main_menu_addrs_kempston                  ; LD IX,46694       ; Point IX at entry for "J +KEMPSTON " in table of Attribute File addresses at which to print
                                                            ; menu strings
        bl   @set_and_print_dbl_height  ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
        .endproc                        ; RET               ; Return
@@ -1422,7 +1422,7 @@ _46977:
        movb @bytes+112,a               ; LD A,112          ; Load A with the attribute value for black INK, yellow PAPER, BRIGHT
        bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
        li   iy,current_keyboard_ctrls  ; LD IY,46683       ; Point IY at Table of Current Keyboard Controls
-       li   ix,main_menu_attrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
+       li   ix,main_menu_addrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
                                                            ; print for main menu
        movb @bytes+7,b                 ; LD B,7            ; Load B with 7 (as there are seven controls to define)
 _46997:
@@ -1513,7 +1513,7 @@ set_and_print_dbl_height:
 print_keyboard_controls:
        .proc
        movb a,@print_attr              ; LD (34269),A      ; Set attribute for printing text
-       li   ix,main_menu_attrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
+       li   ix,main_menu_addrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
                                                            ; print
        li   iy,current_keyboard_ctrls  ; LD IY,46683       ; Point IY at Table of Current Keyboard Controls
        movb @bytes+7,b                 ; LD B,7            ; Load B with 7, as there are 7 keyboard controls (loop counter)
