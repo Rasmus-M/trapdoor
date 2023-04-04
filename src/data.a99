@@ -245,7 +245,7 @@ prim_disp_buffer_addr:
 * { 1 | Joystick Mode on }
 * TABLE#
 joystick_mode_flag:
-       byte 0
+       byte 1
 
 * Current High Score
 high_score:
@@ -253,10 +253,10 @@ high_score:
 
 * Current Keyboard Controls
 current_keyboard_ctrls:
-       text 'X'                                                      ; Right
-       text 'Z'                                                      ; Left
-       text 'A'                                                      ; Forward
-       text 'Q'                                                      ; Back
+       text 'D'                                                      ; Right
+       text 'S'                                                      ; Left
+       text 'X'                                                      ; Forward
+       text 'E'                                                      ; Back
        text 'C'                                                      ; Berk / Drutt
        text 'P'                                                      ; Pause
        text 'R'                                                      ; Restart
@@ -279,8 +279,8 @@ main_menu_addrs_dirs:
 * Table of Main Menu Strings
 main_menu_strings:
        text 'S   START   '
-       text 'K NEW KEYS  '
-       text 'J +KEMPSTON '
+       text '  CONTROLS  '
+       text ' JOYSTICK + '
        text '   RIGHT    '
        text '   LEFT     '
        text '   FORWARD  '
@@ -304,10 +304,6 @@ home_sweet_home_text:
 * Score / Total / High Score String
 score_text:
        text '*SCORE#00000* TOTAL#00000* HI-SC#00999$'
-
-* Return Values from Keyboard Reading Routine
-ret_val_keyboard:
-       text 'cZXCVASDFGQWERT1234509876POIUYeLKJH yMNB'
 
 * Pathfinding Data Table
 *

@@ -161,7 +161,7 @@ wait_key_and_restart:
 
 *********************************************************************************
 * Pause
-* 
+*
 * Used by the routine at #R53649. Input:  B  Repeat count for outer loop C  Additional repeat count for inner loop
 ;pause:
 ;       .push bc                        ; PUSH BC           ; Store BC
@@ -176,6 +176,273 @@ wait_key_and_restart:
 ;       jne  pause                     ;
 ;       .ret                            ; RET               ; Return
 ;*// pause
+
+*********************************************************************************
+* Display and Handle Main Menu
+*
+* Used by the routine at #R34438.
+main_menu:
+       .proc
+       movb one,a                      ; LD A,1            ; Load A with 1 (blue)
+       movb a,@border_color            ; LD (34217),A      ; Store at #R34217 and...
+       bl   @set_border_color          ; OUT (254),A       ; ...set border to this value (blue)
+       movb @bytes+9,a                 ; LD A,9            ; Fill top 22 rows of Attribute File with blue PAPER & blue INK...
+       bl   @fill_screen               ; CALL 53649        ; ...
+       bl   @print_title               ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
+       bl   @print_score_strings       ; CALL 47628        ; Print SCORE / TOTAL / HI-SC string in current character's colours
+       li   ix,main_menu_addrs         ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
+       li   iy,main_menu_strings       ; LD IY,46710       ; Point IY at start of Table of Main Menu Strings
+       movb @bytes+112,a               ; LD A,112          ; Load A with 112 (black INK on yellow PAPER)
+       movb a,@print_attr              ; LD (34269),A      ; Store at #R34269
+       movb @bytes+10,b                ; LD B,10           ; Load B with 10 as there are 10 strings to print (loop counter)
+main_menu_1:
+       .push bc                        ; PUSH BC           ; Store BC (B = remaining number of strings to print)
+       mov  *ix,hl                     ; LD L,(IX+0)       ; Load Attribute File address at which to print text into HL...
+                                       ; LD H,(IX+1)       ; ...
+       movb @bytes+12,b                ; LD B,12           ; Load B with 12 as there are 12 characters to print (loop counter)
+main_menu_2:
+       .push bc                        ; PUSH BC           ; Store BC (B = number of remaining characters to print)
+       movb *iy,@e                     ; LD E,(IY+0)       ; Load E with text character to print
+       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
+       inc  iy                         ; INC IY            ; Advance IY to next character in text to print
+       inc  hl                         ; INC HL            ; Advance to next Attribute File location
+       .pop bc                         ; POP BC            ; Restore BC (B = number of remaining characters to print)
+       sb   one,b                      ; DJNZ 46872        ; Loop back for next character
+       jne  main_menu_2                ;
+       inct ix                         ; INC IX            ; Advance IX to next entry in list of Attribute File addresses to print to...
+                                       ; INC IX            ; ...
+       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of strings to print)
+       sb   one,b                      ; DJNZ 46863        ; Loop back for next string
+       jne  main_menu_1                ;
+;       bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
+       movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
+       bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
+* This entry point is used by the routine at #R46968.
+main_menu_3:
+       bl   @wait_keypress             ; CALL 47955        ; Wait for key-press, store pressed key code in A and play Main Menu Sound
+;       cb   a,@bytes+83                ; CP 83             ; If pressed key was not 83 (S)...
+;       jne  main_menu_4                ; JR NZ,46915       ; ...then skip ahead to #R46915
+;       movb @bytes+2,a                 ; LD A,2            ; Set current border colour to red...
+;       movb a,@border_color            ; LD (34217),A      ; ...
+       bl   @set_border_color          ; OUT (254),A       ; ...
+       .endproc                        ; RET               ; Return
+;main_menu_4:
+;       cb   a,@bytes+74                ; CP 74             ; If pressed key was not 74 (J)...
+;       jne  _46968                     ; JR NZ,46968       ; ...then jump to #R46968 (if "K" pressed then redefine controls)
+;       movb @joystick_mode_flag,a      ; LD A,(34298)      ; If we are in Joystick Mode...
+;       socb a,a                        ; OR A              ; ...
+;       jne  main_menu_5                ; JR NZ,46937       ; ...then skip ahead to #R46937
+;       bl   @check_for_joystick        ; CALL 47043        ; If Kempston Interface not present, or Kempston Joystick moved / fire pressed...
+;       joc  main_menu_3                ; JR C,46900        ; ...then jump to #R46900
+;       movb one,a                      ; LD A,1            ; Set Joystick Mode to On...
+;       movb a,@joystick_mode_flag      ; LD (34298),A      ; ...(see trivia)
+;       jmp  main_menu_6                ; JR 46938          ; Skip ahead to #R46938
+;main_menu_5:
+;       sb   one,a                      ; DEC A             ; Set Joystick Mode to Off...
+;main_menu_6:
+;       movb a,@joystick_mode_flag      ; LD (34298),A      ; ...
+;       bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
+;       jmp  main_menu_3                ; JR 46900          ; Loop back to #R46900
+
+* Draw Joystick "J" (Main Menu) in Colour Depending Upon Joystick Mode
+*
+* Used by the routine at #R46830.
+;draw_joystick_j:
+;       .proc
+;       movb @joystick_mode_flag,a      ; LD A,(34298)      ; If Joystick Mode Flag is set...
+;                                       ; OR A              ; ...
+;       jne  draw_joystick_j_1          ; JR NZ,46956       ; ...then skip ahead to #R46956
+;       movb @bytes+112,a               ; LD A,112          ; Load A with attribute value for black INK, yellow PAPER, BRIGHT
+;       jmp  draw_joystick_j_2          ; JR 46958          ; Skip ahead to #R46958
+;draw_joystick_j_1:
+;       movb @bytes+114,a               ; LD A,114          ; Load A with attribute value for red INK, yellow PAPER, BRIGHT
+;draw_joystick_j_2:
+;       movb @bytes+74,@e               ; LD E,74           ; Load E with 74 (index for character "J")
+;       li   ix,main_menu_addrs_kempston ; LD IX,46694       ; Point IX at entry for "J +KEMPSTON " in table of Attribute File addresses at which to print
+;                                                           ; menu strings
+;       bl   @set_and_print_dbl_height  ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
+;       .endproc                        ; RET               ; Return
+
+;* If "K" Pressed then Redefine Controls
+;*
+;* Used by the routine at #R46830. Input:  A  ASCII code of pressed key
+;_46968:
+;       cb   a,@bytes+75                ; CP 75             ; If pressed key was not 75 (K)...
+;       jne  main_menu_3                     ; JR NZ,46900       ; ...then jump to Main Menu handling routine at #R46900
+;       movb @bytes+7,b                 ; LD B,7            ; Load B with 7 (as there are seven controls to define)
+;       li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at start of Table of Current Keyboard Controls
+;_46977:
+;       movb @bytes+63,*hl              ; LD (HL),63        ; Set current entry in table to 63 (ASCII code for "?")
+;       inc  hl                         ; INC HL            ; Advance HL to next entry
+;       sb   one,b                      ; DJNZ 46977        ; Decrease remaining number of controls to change and loop back to #R46977 if not zero
+;       jne  _46977                     ;
+;       movb @bytes+112,a               ; LD A,112          ; Load A with the attribute value for black INK, yellow PAPER, BRIGHT
+;       bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
+;       li   iy,current_keyboard_ctrls  ; LD IY,46683       ; Point IY at Table of Current Keyboard Controls
+;       li   ix,main_menu_addrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
+;                                                           ; print for main menu
+;       movb @bytes+7,b                 ; LD B,7            ; Load B with 7 (as there are seven controls to define)
+;_46997:
+;       .push bc                        ; PUSH BC           ; Store BC (remaining number of controls to define)
+;       movb @bytes+198,a               ; LD A,198          ; Load A with 198 (yellow INK, black PAPER, BRIGHT, FLASH)
+;       movb @bytes+32,@e               ; LD E,32           ; Load E with 32 (" ")
+;       bl  @set_and_print_dbl_height   ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
+;_47005:
+;       bl   @wait_keypress             ; CALL 47955        ; Wait for key-press, store pressed key code in A and play Main Menu Sound
+;       bl   @is_direction_key          ; CALL 47060        ; If key pressed matches a direction, or the Berk / Drutt key...
+;       jeq  _47005                     ; JR Z,47005        ; ...then loop back to #R47005
+;       movb a,@e                       ; LD E,A            ; Load keycode of pressed control into E...
+;       movb @e,*iy+                    ; LD (IY+0),E       ; ...and store in Table of Current Keyboard Controls
+;                                       ; INC IY            ; Advance IY to next control
+;       movb @bytes+113,a               ; LD A,113          ; Load A with 113 (blue INK, yellow PAPER, BRIGHT)
+;       bl @set_and_print_dbl_height    ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
+;       inct ix                         ; INC IX            ; Advance IX to next entry in table of Attribute File addresses...
+;                                       ; INC IX            ; ...
+;       .pop bc                         ; POP BC            ; Restore BC (remaining number of controls to define)
+;       sb   one,b                      ; DJNZ 46997        ; Decrease remaining number of controls to define and loop back to #R46997 if not zero
+;       jne  _46997                     ;
+;       sb   a,a                        ; XOR A             ; Switch Joystick Mode to Off...
+;       movb a,@joystick_mode_flag                  ; LD (34298),A      ; ...
+;       movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
+;       bl @print_keyboard_controls     ; CALL 47084        ; Print keyboard controls on main menu
+;       b    @main_menu_3                    ; JP 46900          ; Jump to Main Menu handling routine at #R46900
+
+* Set Carry Flag if Kempston Interface not Present, or Kempston Joystick Moved / Fire Pressed
+*
+* Used by the routine at #R46830. Output: F  Carry Flag set if Kempston Interface not present, Kempston Joystick
+* moved or fire pressed, reset otherwise
+check_for_joystick:
+       .proc
+;       sb   b,b                        ; LD B,0            ; Set B to zero (to repeat check loop 256 times)
+;_47045:
+;       ; IN A,(31)                     ; IN A,(31)         ; Read value from Port 31 into A (Kempston Interface)
+;       socb a,a                        ; OR A              ; If retrieved value is not zero (i.e. Kempston Interface not present, or Kempston Joystick not
+;                                                           ; centred / fire button pressed)...
+;       jne  _47053                     ; JR NZ,47053       ; ...then skip ahead to #R47053
+;       sb   one,b                      ; DJNZ 47045        ; Decrease B (loop counter) and loop back to #R47045 to check Kempston status again if counter
+;       jne  _47045                     ;
+;                                                           ; not zero
+;       .ret                            ; RET               ; Return
+;_47053:
+;       movb @bytes+6,a                 ; LD A,6            ; Set sound 6 as pending if appropriate, then play and clear pending sound...
+;       bl   @request_sound           ; CALL 59722        ; ...
+;       ; SCF                           ; SCF               ; Set Carry Flag
+;       .ret                            ; RET               ; Return
+;       b    @return_without_carry
+
+*********************************************************************************
+* Set Zero Flag if Key Whose Index is in A Matches a Direction, or the Berk / Drutt Key
+*
+* Used by the routine at #R46968. Input:  A  Index of pressed key Output: F  Zero Flag set if input key index
+* matches an entry in table at #R46683, reset otherwise HL  Address of matching entry in table at #R46683 (if match
+* found)
+;is_direction_key:
+;       li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at Table of Current Keyboard Controls
+;       movb @bytes+5,b                 ; LD B,5            ; Load B with 5 (as we are checking the first five defined keys, see bugs)
+;is_direction_key_1:
+;       cb   a,*hl                      ; CP (HL)           ; If character code at current HL position matches the key we are checking...
+;       jeq  is_direction_key_2         ; RET Z             ; ...then return with Zero Flag set
+;       inc  hl                         ; INC HL            ; Advance HL to next character in keyboard controls table
+;       sb   one,b                      ; DJNZ 47065        ; Loop back to #R47065 to check next control
+;       jne  is_direction_key_1                     ;
+;is_direction_key_2:
+;       rt                              ; RET               ; Return
+*// is_direction_key
+
+*********************************************************************************
+* Set Attribute and Location and Print Double-Height Character in E
+*
+* Used by the routines at #R46946 and #R46968. Input:  A  Attribute for character to print E  Character to print IX
+* Points to memory location holding Attribute File address at which to print character
+set_and_print_dbl_height:
+       .proc
+       movb a,@print_attr              ; LD (34269),A      ; Set text printing attribute to value in A
+       mov  *ix,hl                     ; LD L,(IX+0)       ; Load Attribute File address to print character to into HL...
+                                       ; LD H,(IX+1)       ; ...
+       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
+       .endproc                            ; RET               ; Return
+*// set_and_print_dbl_height
+
+*********************************************************************************
+* Print Keyboard Controls on Main Menu
+*
+* Used by the routines at #R46830 and #R46968. Input:  A  Attribute for printing text
+print_keyboard_controls:
+       .proc
+       movb a,@print_attr              ; LD (34269),A      ; Set attribute for printing text
+       li   ix,main_menu_addrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
+                                                           ; print
+       li   iy,current_keyboard_ctrls  ; LD IY,46683       ; Point IY at Table of Current Keyboard Controls
+       movb @bytes+7,b                 ; LD B,7            ; Load B with 7, as there are 7 keyboard controls (loop counter)
+_47097:
+       .push bc                        ; PUSH BC           ; Store BC (B = number of remaining control keys)
+       mov  *ix+,hl                    ; LD L,(IX+0)       ; Load HL with Attribute File address at which to print character...
+                                       ; LD H,(IX+1)       ; ...
+       movb *iy+,@e                    ; LD E,(IY+0)       ; Load E with character to print (current keyboard control)
+       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
+                                       ; INC IY            ; Advance IY to next keyboard control
+                                       ; INC IX            ; Advance IX to next entry in list of Attribute File addresses...
+                                       ; INC IX            ; ...
+       .pop bc                         ; POP BC            ; Restore BC (B = number of remaining control keys)
+       sb   one,b                      ; DJNZ 47097        ; Loop back to #R47097 for next keyboard control
+       jne  _47097                     ;
+       .endproc                        ; RET               ; Return
+*// print_keyboard_controls
+
+*********************************************************************************
+* Print "THROUGH the TRAPDOOR" String
+*
+* Used by the routine at #R46830.
+print_title:
+       .proc
+       movb @bytes+20,b                ; LD B,20           ; Load B with 20 (length of string to print)
+       li   hl,22566                   ; LD HL,22566       ; Point HL at position to start printing text in Attribute File
+       movb @bytes+79,a                ; LD A,79           ; Load A with 79, for blue PAPER, white INK, BRIGHT
+       li   ix,title_text              ; LD IX,47120       ; Point IX to text to print
+       jmp  print_text                 ; JR 47224          ; Print the text and return
+*// print_title
+
+*********************************************************************************
+* Print "SORRY BERK,  BUT YOUR TIME IS UP" String
+*
+* Used by the routine at #R34438.
+print_times_up:
+       .proc
+       movb @bytes+32,b                ; LD B,32           ; Load B with 32 (length of string to print)
+       movb @bytes+199,a               ; LD A,199          ; Load A with 199, for black PAPER, white INK, BRIGHT, FLASH
+       li   ix,sorry_berk_text         ; LD IX,47153       ; Point IX to text to print
+       li   hl,23232                   ; LD HL,23232       ; Point HL at position at which to start printing text in Attribute File (start of second-last
+                                                           ; row)
+       jmp  print_text                 ; JR 47224          ; Print the text and return
+*// print_times_up
+
+*********************************************************************************
+* Print "HOME SWEET HOME" String
+*
+* Used by the routine at #R34438.
+print_home_sweet_home:
+       .proc
+       movb @bytes+15,b                ; LD B,15           ; Set string length to 15
+       movb @bytes+68,a                ; LD A,68           ; Set attribute to green INK on black PAPER, BRIGHT
+       li   ix,home_sweet_home_text                  ; LD IX,47198       ; Point IX at "HOME SWEET HOME" text
+       li   hl,22792                   ; LD HL,22792       ; Point HL at Attribute File address at which to print text
+*// print_home_sweet_home:
+
+*********************************************************************************
+* This entry point is used by the routines at #R47140 and #R47185.
+print_text:
+       movb a,@print_attr              ; LD (34269),A      ; Store attribute at #R34269
+print_text_1:
+       .push bc                        ; PUSH BC           ; Store BC (B=remaining length of text)
+       movb *ix+,@e                    ; LD E,(IX+0)       ; Load character of text to print into E
+       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
+                                       ; INC IX            ; Advance IX to next text character to print
+       inc  hl                         ; INC HL            ; Advance HL to next Attribute File address at which to print
+       .pop bc                         ; POP BC            ; Restore BC (B = remaining length of text)
+       sb   one,b                      ; DJNZ 47227        ; Decrease remaining length of text by one and repeat loop for next character
+       jne  print_text_1               ;
+       .endproc                        ; RET               ; Return
+*// print_text
 
 *********************************************************************************
 * Copy State Data for all Resettable Complex Entities into Table of Initial-State Data for Complex Entities
@@ -1065,6 +1332,7 @@ reset_skeleton_1:
        rt                              ; RET               ; Return
 *// reset_skeleton
 
+*********************************************************************************
 * Populate Primary Display Buffer with Layout Data for Current Character's Current Room
 * 
 * Used by the routine at #R34438.
@@ -1112,6 +1380,7 @@ populate_display_buffer_5:
        jne  populate_display_buffer_1  ; JR NZ,45915       ; If depth is not zero (i.e. still depth levels to process) then loop back to #R45915
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Populate Primary Display Buffer with Graphic Layout Data for Entity Whose Simple / Complex State Data is at
 * Address in IX
 * 
@@ -1155,6 +1424,7 @@ process_data_in_ix_call:
        .proc
        jmp  execute_gfx_script
 
+*********************************************************************************
 * At this point, the graphic layout data pointed to by IX is graphical data, not an instruction. We only draw the
 * graphics if they lie within the display area (i.e. have x- and y-coordinates less than 32 and 24 respectively, see
 * trivia).
@@ -1304,6 +1574,7 @@ draw_graphics_10:
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33...
        jmp  draw_graphics_5            ; JP 46128          ; ...and jump back to #R46128 to update current drawing position
 
+*********************************************************************************
 * Jump to Appropriate Graphic Layout Routine
 * 
 * Used by the routine at #R45965. Input:  A  Index of graphic layout data instruction IX  Address of current graphic
@@ -1323,270 +1594,6 @@ jump_to_graphics_routine:
                                        ; LD A,(HL)         ; ...
                                        ; LD (46243),A      ; ...
                                        ; POP HL            ; Restore HL
-* The operand of the instruction at #R46241 represents the addresses of the required graphic layout data handling
-* routine. This is modified by the instruction at #R46232.
-;       b    0                          ; JP 0              ;
-
-* Display and Handle Main Menu
-* 
-* Used by the routine at #R34438.
-main_menu:
-       .proc
-       movb one,a                      ; LD A,1            ; Load A with 1 (blue)
-       movb a,@border_color            ; LD (34217),A      ; Store at #R34217 and...
-       bl   @set_border_color          ; OUT (254),A       ; ...set border to this value (blue)
-       movb @bytes+9,a                 ; LD A,9            ; Fill top 22 rows of Attribute File with blue PAPER & blue INK...
-       bl   @fill_screen               ; CALL 53649        ; ...
-       bl   @print_title               ; CALL 47140        ; Print "THROUGH the TRAPDOOR" string
-       bl   @print_score_strings       ; CALL 47628        ; Print SCORE / TOTAL / HI-SC string in current character's colours
-       li   ix,main_menu_addrs         ; LD IX,46690       ; Point IX at Table of Attribute File Addresses for Main Menu Strings
-       li   iy,main_menu_strings       ; LD IY,46710       ; Point IY at start of Table of Main Menu Strings
-       movb @bytes+112,a               ; LD A,112          ; Load A with 112 (black INK on yellow PAPER)
-       movb a,@print_attr              ; LD (34269),A      ; Store at #R34269
-       movb @bytes+10,b                ; LD B,10           ; Load B with 10 as there are 10 strings to print (loop counter)
-main_menu_1:
-       .push bc                        ; PUSH BC           ; Store BC (B = remaining number of strings to print)
-       mov  *ix,hl                     ; LD L,(IX+0)       ; Load Attribute File address at which to print text into HL...
-                                       ; LD H,(IX+1)       ; ...
-       movb @bytes+12,b                ; LD B,12           ; Load B with 12 as there are 12 characters to print (loop counter)
-main_menu_2:
-       .push bc                        ; PUSH BC           ; Store BC (B = number of remaining characters to print)
-       movb *iy,@e                     ; LD E,(IY+0)       ; Load E with text character to print
-       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
-       inc  iy                         ; INC IY            ; Advance IY to next character in text to print
-       inc  hl                         ; INC HL            ; Advance to next Attribute File location
-       .pop bc                         ; POP BC            ; Restore BC (B = number of remaining characters to print)
-       sb   one,b                      ; DJNZ 46872        ; Loop back for next character
-       jne  main_menu_2                ;
-       inct ix                         ; INC IX            ; Advance IX to next entry in list of Attribute File addresses to print to...
-                                       ; INC IX            ; ...
-       .pop bc                         ; POP BC            ; Restore BC (B = remaining number of strings to print)
-       sb   one,b                      ; DJNZ 46863        ; Loop back for next string
-       jne  main_menu_1                ;
-       bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
-       movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
-       bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
-* This entry point is used by the routine at #R46968.
-main_menu_3:
-       bl   @wait_keypress             ; CALL 47955        ; Wait for key-press, store pressed key code in A and play Main Menu Sound
-       cb   a,@bytes+83                ; CP 83             ; If pressed key was not 83 (S)...
-       jne  main_menu_4                ; JR NZ,46915       ; ...then skip ahead to #R46915
-       movb @bytes+2,a                 ; LD A,2            ; Set current border colour to red...
-       movb a,@border_color            ; LD (34217),A      ; ...
-       bl   @set_border_color          ; OUT (254),A       ; ...
-       .endproc                        ; RET               ; Return
-main_menu_4:
-       cb   a,@bytes+74                ; CP 74             ; If pressed key was not 74 (J)...
-       jne  _46968                     ; JR NZ,46968       ; ...then jump to #R46968 (if "K" pressed then redefine controls)
-       movb @joystick_mode_flag,a      ; LD A,(34298)      ; If we are in Joystick Mode...
-       socb a,a                        ; OR A              ; ...
-       jne  main_menu_5                ; JR NZ,46937       ; ...then skip ahead to #R46937
-       bl   @check_for_joystick       ; CALL 47043        ; If Kempston Interface not present, or Kempston Joystick moved / fire pressed...
-       joc  main_menu_3                ; JR C,46900        ; TODO: check code. ...then jump to #R46900
-       movb one,a                      ; LD A,1            ; Set Joystick Mode to On...
-       movb a,@joystick_mode_flag      ; LD (34298),A      ; ...(see trivia)
-       jmp  main_menu_6                ; JR 46938          ; Skip ahead to #R46938
-main_menu_5:
-       sb   one,a                      ; DEC A             ; Set Joystick Mode to Off...
-main_menu_6:
-       movb a,@joystick_mode_flag      ; LD (34298),A      ; ...
-       bl   @draw_joystick_j           ; CALL 46946        ; Draw Joystick "J" (Main Menu) in colour depending upon Joystick Mode
-       jmp  main_menu_3                ; JR 46900          ; Loop back to #R46900
-
-* Draw Joystick "J" (Main Menu) in Colour Depending Upon Joystick Mode
-* 
-* Used by the routine at #R46830.
-draw_joystick_j:
-       .proc
-       movb @joystick_mode_flag,a                  ; LD A,(34298)      ; If Joystick Mode Flag is set...
-                                       ; OR A              ; ...
-       jne  _46956                     ; JR NZ,46956       ; ...then skip ahead to #R46956
-       movb @bytes+112,a               ; LD A,112          ; Load A with attribute value for black INK, yellow PAPER, BRIGHT
-       jmp  _46958                     ; JR 46958          ; Skip ahead to #R46958
-_46956:
-       movb @bytes+114,a               ; LD A,114          ; Load A with attribute value for red INK, yellow PAPER, BRIGHT
-_46958:
-       movb @bytes+74,@e               ; LD E,74           ; Load E with 74 (index for character "J")
-       li   ix,main_menu_addrs_kempston                  ; LD IX,46694       ; Point IX at entry for "J +KEMPSTON " in table of Attribute File addresses at which to print
-                                                           ; menu strings
-       bl   @set_and_print_dbl_height  ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
-       .endproc                        ; RET               ; Return
-
-* If "K" Pressed then Redefine Controls
-* 
-* Used by the routine at #R46830. Input:  A  ASCII code of pressed key
-_46968:
-       cb   a,@bytes+75                ; CP 75             ; If pressed key was not 75 (K)...
-       jne  main_menu_3                     ; JR NZ,46900       ; ...then jump to Main Menu handling routine at #R46900
-       movb @bytes+7,b                 ; LD B,7            ; Load B with 7 (as there are seven controls to define)
-       li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at start of Table of Current Keyboard Controls
-_46977:
-       movb @bytes+63,*hl              ; LD (HL),63        ; Set current entry in table to 63 (ASCII code for "?")
-       inc  hl                         ; INC HL            ; Advance HL to next entry
-       sb   one,b                      ; DJNZ 46977        ; Decrease remaining number of controls to change and loop back to #R46977 if not zero
-       jne  _46977                     ;                   
-       movb @bytes+112,a               ; LD A,112          ; Load A with the attribute value for black INK, yellow PAPER, BRIGHT
-       bl   @print_keyboard_controls   ; CALL 47084        ; Print keyboard controls on main menu
-       li   iy,current_keyboard_ctrls  ; LD IY,46683       ; Point IY at Table of Current Keyboard Controls
-       li   ix,main_menu_addrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
-                                                           ; print for main menu
-       movb @bytes+7,b                 ; LD B,7            ; Load B with 7 (as there are seven controls to define)
-_46997:
-       .push bc                        ; PUSH BC           ; Store BC (remaining number of controls to define)
-       movb @bytes+198,a               ; LD A,198          ; Load A with 198 (yellow INK, black PAPER, BRIGHT, FLASH)
-       movb @bytes+32,@e               ; LD E,32           ; Load E with 32 (" ")
-       bl  @set_and_print_dbl_height   ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
-_47005:
-       bl   @wait_keypress             ; CALL 47955        ; Wait for key-press, store pressed key code in A and play Main Menu Sound
-       bl   @is_direction_key                   ; CALL 47060        ; If key pressed matches a direction, or the Berk / Drutt key...
-       jeq  _47005                     ; JR Z,47005        ; ...then loop back to #R47005
-       movb a,@e                       ; LD E,A            ; Load keycode of pressed control into E...
-       movb @e,*iy+                    ; LD (IY+0),E       ; ...and store in Table of Current Keyboard Controls
-                                       ; INC IY            ; Advance IY to next control
-       movb @bytes+113,a               ; LD A,113          ; Load A with 113 (blue INK, yellow PAPER, BRIGHT)
-       bl @set_and_print_dbl_height    ; CALL 47071        ; Set attribute to A and location to (IX) and print double-height character in E
-       inct ix                         ; INC IX            ; Advance IX to next entry in table of Attribute File addresses...
-                                       ; INC IX            ; ...
-       .pop bc                         ; POP BC            ; Restore BC (remaining number of controls to define)
-       sb   one,b                      ; DJNZ 46997        ; Decrease remaining number of controls to define and loop back to #R46997 if not zero
-       jne  _46997                     ;                   
-       sb   a,a                        ; XOR A             ; Switch Joystick Mode to Off...
-       movb a,@joystick_mode_flag                  ; LD (34298),A      ; ...
-       movb @bytes+114,a               ; LD A,114          ; Load A with the attribute value for red INK, yellow PAPER, BRIGHT
-       bl @print_keyboard_controls     ; CALL 47084        ; Print keyboard controls on main menu
-       b    @main_menu_3                    ; JP 46900          ; Jump to Main Menu handling routine at #R46900
-
-* Set Carry Flag if Kempston Interface not Present, or Kempston Joystick Moved / Fire Pressed
-* 
-* Used by the routine at #R46830. Output: F  Carry Flag set if Kempston Interface not present, Kempston Joystick
-* moved or fire pressed, reset otherwise
-check_for_joystick:
-       .proc
-       sb   b,b                        ; LD B,0            ; Set B to zero (to repeat check loop 256 times)
-;_47045:
-;       ; IN A,(31)                     ; IN A,(31)         ; Read value from Port 31 into A (Kempston Interface)
-;       socb a,a                        ; OR A              ; If retrieved value is not zero (i.e. Kempston Interface not present, or Kempston Joystick not
-;                                                           ; centred / fire button pressed)...
-;       jne  _47053                     ; JR NZ,47053       ; ...then skip ahead to #R47053
-;       sb   one,b                      ; DJNZ 47045        ; Decrease B (loop counter) and loop back to #R47045 to check Kempston status again if counter
-;       jne  _47045                     ;
-;                                                           ; not zero
-;       .ret                            ; RET               ; Return
-;_47053:
-;       movb @bytes+6,a                 ; LD A,6            ; Set sound 6 as pending if appropriate, then play and clear pending sound...
-;       bl   @request_sound           ; CALL 59722        ; ...
-;       ; SCF                           ; SCF               ; Set Carry Flag
-;       .ret                            ; RET               ; Return
-       b    @return_without_carry
-
-*********************************************************************************
-* Set Zero Flag if Key Whose Index is in A Matches a Direction, or the Berk / Drutt Key
-* 
-* Used by the routine at #R46968. Input:  A  Index of pressed key Output: F  Zero Flag set if input key index
-* matches an entry in table at #R46683, reset otherwise HL  Address of matching entry in table at #R46683 (if match
-* found)
-is_direction_key:
-       li   hl,current_keyboard_ctrls  ; LD HL,46683       ; Point HL at Table of Current Keyboard Controls
-       movb @bytes+5,b                 ; LD B,5            ; Load B with 5 (as we are checking the first five defined keys, see bugs)
-is_direction_key_1:
-       cb   a,*hl                      ; CP (HL)           ; If character code at current HL position matches the key we are checking...
-       jeq  is_direction_key_2         ; RET Z             ; ...then return with Zero Flag set
-       inc  hl                         ; INC HL            ; Advance HL to next character in keyboard controls table
-       sb   one,b                      ; DJNZ 47065        ; Loop back to #R47065 to check next control
-       jne  is_direction_key_1                     ;
-is_direction_key_2:
-       rt                              ; RET               ; Return
-*// is_direction_key
-
-*********************************************************************************
-* Set Attribute and Location and Print Double-Height Character in E
-* 
-* Used by the routines at #R46946 and #R46968. Input:  A  Attribute for character to print E  Character to print IX
-* Points to memory location holding Attribute File address at which to print character
-set_and_print_dbl_height:
-       .proc
-       movb a,@print_attr              ; LD (34269),A      ; Set text printing attribute to value in A
-       mov  *ix,hl                     ; LD L,(IX+0)       ; Load Attribute File address to print character to into HL...
-                                       ; LD H,(IX+1)       ; ...
-       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
-       .endproc                            ; RET               ; Return
-*// set_and_print_dbl_height
-
-*********************************************************************************
-* Print Keyboard Controls on Main Menu
-* 
-* Used by the routines at #R46830 and #R46968. Input:  A  Attribute for printing text
-print_keyboard_controls:
-       .proc
-       movb a,@print_attr              ; LD (34269),A      ; Set attribute for printing text
-       li   ix,main_menu_addrs_dirs                  ; LD IX,46696       ; Point IX at entry for "   RIGHT    " text in table of Attribute File addresses at which to
-                                                           ; print
-       li   iy,current_keyboard_ctrls  ; LD IY,46683       ; Point IY at Table of Current Keyboard Controls
-       movb @bytes+7,b                 ; LD B,7            ; Load B with 7, as there are 7 keyboard controls (loop counter)
-_47097:
-       .push bc                        ; PUSH BC           ; Store BC (B = number of remaining control keys)
-       mov  *ix+,hl                    ; LD L,(IX+0)       ; Load HL with Attribute File address at which to print character...
-                                       ; LD H,(IX+1)       ; ...
-       movb *iy+,@e                    ; LD E,(IY+0)       ; Load E with character to print (current keyboard control)
-       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
-                                       ; INC IY            ; Advance IY to next keyboard control
-                                       ; INC IX            ; Advance IX to next entry in list of Attribute File addresses...
-                                       ; INC IX            ; ...
-       .pop bc                         ; POP BC            ; Restore BC (B = number of remaining control keys)
-       sb   one,b                      ; DJNZ 47097        ; Loop back to #R47097 for next keyboard control
-       jne  _47097                     ;                   
-       .endproc                        ; RET               ; Return
-*// print_keyboard_controls
-
-*********************************************************************************
-* Print "THROUGH the TRAPDOOR" String
-* 
-* Used by the routine at #R46830.
-print_title:
-       .proc
-       movb @bytes+20,b                ; LD B,20           ; Load B with 20 (length of string to print)
-       li   hl,22566                   ; LD HL,22566       ; Point HL at position to start printing text in Attribute File
-       movb @bytes+79,a                ; LD A,79           ; Load A with 79, for blue PAPER, white INK, BRIGHT
-       li   ix,title_text              ; LD IX,47120       ; Point IX to text to print
-       jmp  print_text                 ; JR 47224          ; Print the text and return
-
-*********************************************************************************
-* Print "SORRY BERK,  BUT YOUR TIME IS UP" String
-* 
-* Used by the routine at #R34438.
-print_times_up:
-       .proc
-       movb @bytes+32,b                ; LD B,32           ; Load B with 32 (length of string to print)
-       movb @bytes+199,a               ; LD A,199          ; Load A with 199, for black PAPER, white INK, BRIGHT, FLASH
-       li   ix,sorry_berk_text         ; LD IX,47153       ; Point IX to text to print
-       li   hl,23232                   ; LD HL,23232       ; Point HL at position at which to start printing text in Attribute File (start of second-last
-                                                           ; row)
-       jmp  print_text                 ; JR 47224          ; Print the text and return
-
-*********************************************************************************
-* Print "HOME SWEET HOME" String
-* 
-* Used by the routine at #R34438.
-print_home_sweet_home:
-       .proc
-       movb @bytes+15,b                ; LD B,15           ; Set string length to 15
-       movb @bytes+68,a                ; LD A,68           ; Set attribute to green INK on black PAPER, BRIGHT
-       li   ix,home_sweet_home_text                  ; LD IX,47198       ; Point IX at "HOME SWEET HOME" text
-       li   hl,22792                   ; LD HL,22792       ; Point HL at Attribute File address at which to print text
-
-* This entry point is used by the routines at #R47140 and #R47185.
-print_text:
-       movb a,@print_attr              ; LD (34269),A      ; Store attribute at #R34269
-print_text_1:
-       .push bc                        ; PUSH BC           ; Store BC (B=remaining length of text)
-       movb *ix+,@e                    ; LD E,(IX+0)       ; Load character of text to print into E
-       bl   @print_dbl_height          ; CALL 47682        ; Print double-height text character in E
-                                       ; INC IX            ; Advance IX to next text character to print
-       inc  hl                         ; INC HL            ; Advance HL to next Attribute File address at which to print
-       .pop bc                         ; POP BC            ; Restore BC (B = remaining length of text)
-       sb   one,b                      ; DJNZ 47227        ; Decrease remaining length of text by one and repeat loop for next character
-       jne  print_text_1               ;
-       .endproc                        ; RET               ; Return
 
 *********************************************************************************
 * Reset Show Score Flag and Draw Timer Figures Bar
@@ -2037,18 +2044,10 @@ digit_to_str_1:
 * Read Keyboard and Load Pressed Key Character into A
 * 
 * Used by the routines at #R47893 and #R47942. Output: A  Index of the key that was pressed
-read_keyboard:
-       .proc
-        li  tmp0,JOY_FI
-        bl  @check_key
-        jeq read_keyboard_1
-        seto a
-        jmp  read_keyboard_2
-read_keyboard_1:
-        clr a
+; read_keyboard:
 ;       .exx                            ; EXX               ; Swap registers
 ;       li   bc,65278                   ; LD BC,65278       ; Load B and C with 254
-;       li   hl,ret_val_keyboard                  ; LD HL,47853       ; Point HL at list of return values
+;       li   hl,ret_val_keyboard        ; LD HL,47853       ; Point HL at list of return values
 ;       ; IN A,(C)                      ; IN A,(C)          ; Read from port 254 into A (i.e. read keyboard) [IN 65278 reads the half row CAPS SHIFT to V]
 ;       socb @bits+0,a                  ; SET 0,A           ; Set bit 0 of A (i.e. clear pressing of CAPS SHIFT)
 ;       andi a,31*256                   ; AND 31            ; Strip out all but the five bits representing key presses
@@ -2092,8 +2091,6 @@ read_keyboard_1:
 ;       movb *hl,a                      ; LD A,(HL)         ; Load current character in list of return values string into A as this is the key that was
 ;                                                           ; pressed
 ;       .exx                            ; EXX               ; Swap registers
-read_keyboard_2:
-       .endproc                         ; RET               ; Return [key pressed]
 
 *********************************************************************************
 * Check for Control Key Press and Store at 34219
@@ -2104,33 +2101,66 @@ check_control_input:
        sb   a,a                        ; XOR A             ; Clear previously stored control input...
        li   r0,JOY_RT
        bl   @check_key
-       jeq  !
+       jeq  check_control_input_1
        socb @bits+0,a
-!      li   r0,JOY_LT
+check_control_input_1:
+       li   r0,JOY_LT
        bl   @check_key
-       jeq  !
+       jeq  check_control_input_2
        socb @bits+1,a
-!      li   r0,JOY_DN
+check_control_input_2:
+       li   r0,JOY_DN
        bl   @check_key
-       jeq  !
+       jeq  check_control_input_3
        socb @bits+2,a
-!      li   r0,JOY_UP
+check_control_input_3:
+       li   r0,JOY_UP
        bl   @check_key
-       jeq  !
+       jeq  check_control_input_4
        socb @bits+3,a
-!      li   r0,JOY_FI
+check_control_input_4:
+       li   r0,JOY_FI
        bl   @check_key
-       jeq  !
+       jeq  check_control_input_5
+check_control_input_5:
+       movb  a,a
+       jne   check_control_input_10
+       li   r0,KEY_D
+       bl   @check_key
+       jeq  check_control_input_6
+       socb @bits+0,a
+check_control_input_6:
+       li   r0,KEY_S
+       bl   @check_key
+       jeq  check_control_input_7
+       socb @bits+1,a
+check_control_input_7:
+       li   r0,KEY_X
+       bl   @check_key
+       jeq  check_control_input_8
+       socb @bits+2,a
+check_control_input_8:
+       li   r0,KEY_E
+       bl   @check_key
+       jeq  check_control_input_9
+       socb @bits+3,a
+check_control_input_9:
+       li   r0,KEY_C
+       bl   @check_key
+       jeq  check_control_input_10
        socb @bits+4,a
-!      li   r0,KEY_P
+check_control_input_10:
+       li   r0,KEY_P
        bl   @check_key
-       jeq  !
-       socb @bits+5,a
-!      li   r0,KEY_R
+       jeq  check_control_input_11
+       bl   @release_keypress
+       bl   @wait_keypress
+check_control_input_11:
+       li   r0,KEY_R
        bl   @check_key
-       jeq  !
+       jeq  check_control_input_12
        socb @bits+6,a
-!
+check_control_input_12:
 ;       movb a,@control_input           ; LD (34219),A      ; ...
 ;       .call @_47788                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
 ;       socb a,a                        ; OR A              ; If no key was pressed...
@@ -2172,37 +2202,59 @@ _47930:
 ;       jne  _47926                     ; JR NZ,47926       ; ...then jump to #R47926
 ;       .ret                            ; RET               ; Return
 
+*********************************************************************************
 * Wait for Current Key to Be Released and Another to Be Pressed, Storing in A
 * 
 * Used by the routines at #R34438, #R47893 and #R47955.
 wait_release_and_keypress:
        .proc
 wait_release_and_keypress_1:
-       bl   @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
-       socb a,a                        ; OR A              ; If a key is pressed...
-       jne  wait_release_and_keypress_1 ; JR NZ,47942       ; ...then loop back to #R47942
+       bl   @release_keypress          ; CALL 47788        ; Read keyboard and load character of pressed key into A
+                                       ; OR A              ; If a key is pressed...
+                                       ; JR NZ,47942       ; ...then loop back to #R47942
 wait_release_and_keypress_2:
-       bl   @read_keyboard                   ; CALL 47788        ; Read keyboard and load character of pressed key into A
-       socb a,a                        ; OR A              ; If a key is not pressed...
-       jeq  wait_release_and_keypress_2 ; JR Z,47948        ; ...then loop back to #R47948
+       bl   @wait_keypress             ; CALL 47788        ; Read keyboard and load character of pressed key into A
+                                       ; OR A              ; If a key is not pressed...
+                                       ; JR Z,47948        ; ...then loop back to #R47948
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
+* Wait for release keypress
+*
+release_keypress:
+       .proc
+release_keypress_1:
+       li   r0,KEY_S
+       bl   @check_key
+       jne  release_keypress_1
+       li   r0,JOY_FI
+       bl   @check_key
+       jne  release_keypress_1
+       .endproc
+*// release_keypress
+
+*********************************************************************************
 * Wait for Key-Press, Store Pressed Key Code in A and Play Main Menu Sound
 * 
 * Used by the routines at #R46830 and #R46968. Output: A  code of pressed key
 wait_keypress:
        .proc
-!      li   r0,KEY_S
+wait_keypress_1:
+       li   r0,KEY_S
        bl   @check_key
-       jeq  -!
-       movb @bytes+83,a                ; Key S
+       jne  wait_keypress_2
+       li   r0,JOY_FI
+       bl   @check_key
+       jeq  wait_keypress_1
 ;       .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
 ;       .push af                        ; PUSH AF           ; Store AF (A = last pressed key)
 ;       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
 ;       bl   @request_sound_a           ; CALL 59722        ; ...
 ;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
+wait_keypress_2:
        .endproc                        ; RET               ; Return
 
+*********************************************************************************
 * Advance HL to Next Script Instruction and Execute
 * 
 * Used by the routines at #R35735, #R36116, #R36390, #R36471, #R36542, #R36610, #R36947, #R36950, #R36984, #R36990,
