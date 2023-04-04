@@ -13,7 +13,7 @@
 start:
        limi 0                           ; DI                ; Disable interrupts
        lwpi wrksp
-;       mov @rndsd,@rnd_seed            ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
+       mov @rndsd,@rnd_seed            ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
                                         ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
        li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
