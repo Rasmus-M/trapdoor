@@ -196,13 +196,13 @@ _35275:
        byte _56731%256,_56731/256                                    ; #R56731 (Berk, facing out of screen, arms outstretched, animated)
        byte 57,0                                                     ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
                                                                      ; room
-       byte 1,0,_35359%256,_35359/256                                ; Jump to #R35359 (Berk starting to fall downwards)
+       byte 1,0,berk_fall_script%256,berk_fall_script/256            ; Jump to #R35359 (Berk starting to fall downwards)
 
 * Script Data Berk Banging Head (While Jumping)
 _35283:
        byte _59464%256,_59464/256                                    ; #R59464 (Berk, getting up / banging head, frame 2)
        byte _59464%256,_59464/256                                    ; #R59464 (Berk, getting up / banging head, frame 2)
-       byte 1,0,_35359%256,_35359/256                                ; Jump to #R35359 (Berk starting to fall downwards)
+       byte 1,0,berk_fall_script%256,berk_fall_script/256            ; Jump to #R35359 (Berk starting to fall downwards)
 
 * Script Data Berk Starting to Fall to the Left
 _35291:
@@ -223,7 +223,7 @@ _35303:
        byte 35,0                                                     ; ...
        byte _59048%256,_59048/256                                    ; #R59048 (Berk being thrown left)
        byte 35,0                                                     ; Move Berk down one character
-       byte 1,0,_35359%256,_35359/256                                ; Jump to #R35359 (Berk starting to fall downwards)
+       byte 1,0,berk_fall_script%256,berk_fall_script/256            ; Jump to #R35359 (Berk starting to fall downwards)
 
 * Script Data Berk Starting to Fall to the Right
 _35327:
@@ -246,7 +246,7 @@ _35339:
        byte 35,0                                                     ; Move Berk down one character
 * This is the start of the script data that controls Berk's vertical falls, e.g. when flying power expires, after
 * initial sideways fall down Trap Door, etc.
-_35359:
+berk_fall_script:
        byte 8,0                                                      ; Set Must Process Current Script Data Flag
        byte 29,0                                                     ; Make Berk start falling, and drop his carried entity if appropriate
 _35363:

@@ -43,6 +43,10 @@ main:
        .ifeq start_at_level,4
        li   tmp0,state_data_complex_3
        .endif
+       .ifeq start_at_level,5
+       socb @bits+3,@flying_skeleton+9 ; Set Berk and Drutt through the trap door flag
+       li   tmp0,level_4_door
+       .endif
        mov  tmp0,@bert_interaction_state
        bl   @next_level
        .endif
@@ -529,7 +533,7 @@ update_berk_state_3:
        jeq  update_berk_state_4        ; JR Z,35802        ; ...then skip ahead to #R35802
 * Berk is flying
        szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset Berk's Is Flying Flag
-       li   hl,_35359                  ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
+       li   hl,berk_fall_script        ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
        b    @execute_script            ; JP 48098          ; ...and execute
 * No control pressed and Berk not flying
 update_berk_state_4:
@@ -962,16 +966,16 @@ _36596:
 * Used by the routine at #R36390.
 next_level:
        .proc
-       movb @game_flags,a              ; LD A,(34208)      ; Set Update Scores and Display Flag...
-       socb @bits+5,a                  ; SET 5,A           ; ...
-       movb a,@game_flags              ; LD (34208),A      ; ...
+                                       ; LD A,(34208)      ; Set Update Scores and Display Flag...
+       socb @bits+5,@game_flags        ; SET 5,A           ; ...
+                                       ; LD (34208),A      ; ...
        mov  @bert_interaction_state,iy ; LD IY,(34256)     ; Load IY with address of complex state data for Door just interacted with
        movb @9(iy),a                   ; LD A,(IY+9)       ; Load A with destination level from Door's state data...
        movb a,@current_level           ; LD (34207),A      ; ...and set current level to this value
        cb   a,one                      ; CP 1              ; If destination level is not Level 1...
        jne  next_level_1               ; JR NZ,36725       ; ...then skip ahead to #R36725
 * Destination level is Level 1 (i.e. Level 4 completed)
-       bl   @align_with_level_1_door                       ; CALL 36753        ; Load IX with address of Berk's complex state data and set his horizontal position to match
+       bl   @align_with_level_1_door   ; CALL 36753        ; Load IX with address of Berk's complex state data and set his horizontal position to match
                                                            ; Level 1's entry door
        socb @bits+2,@10(ix)            ; SET 2,(IX+10)     ; Set "Back to Level 1" Flag
        movb @bytes+10,*ix              ; LD (IX+0),10      ; Set Berk's room to 10
@@ -983,14 +987,16 @@ next_level:
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set Boni's depth to 1
        movb @bytes+10,*iy              ; LD (IY+0),10      ; Set Boni's room to 10
        bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
-       bl   @prepare_falling          ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
-       bl   @lock_level_1_exit_door   ; CALL 36739        ; Lock Level 1's exit door and cycle attributes (full-screen)
+       bl   @prepare_falling           ; CALL 55516        ; Set Berk's Can Fall Flag and set his initial velocity factor to 2
+       bl   @lock_level_1_exit_door    ; CALL 36739        ; Lock Level 1's exit door and cycle attributes (full-screen)
+       .ifne start_at_level,5
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
+       .endif
        li   hl,init_drutts_state_data_1 ; LD HL,36625       ; Overwrite Drutt's entry in Level 1's State Data for Complex Entities with data at #R36625...
        li   de,drutts_state_data_1     ; LD DE,43671       ; ...
        li   bc,13                      ; LD BC,13          ; ...
        .ldir                           ; LDIR              ; ...
-       li   hl,_35359                  ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
+       li   hl,berk_fall_script        ; LD HL,35359       ; Point HL at script data for Berk starting to fall downwards...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Destination level is not Level 1
 next_level_1:

@@ -339,7 +339,7 @@ script_routine_32:
                                                            ; bang head)...
        jne  _48507                     ; JR NZ,48507       ; ...then skip ahead to #R48507
        szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset entity's Is Flying Flag
-       li   hl,_35359                  ; LD HL,35359       ; Load HL with script data address for Berk starting to fall downwards
+       li   hl,berk_fall_script        ; LD HL,35359       ; Load HL with script data address for Berk starting to fall downwards
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
 _48507:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of Berk's bottom edge is 121 or greater...
@@ -1052,13 +1052,13 @@ script_routine_37:
 * Script Routine (38) Close the Trap Door
 script_routine_38:
        bl   @close_trap_door                   ; CALL 36996        ; Close the Trap Door
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script               ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
 * Script Routine (39) Open the Trap Door
 script_routine_39:
        bl   @open_trap_door                   ; CALL 37004        ; Open the Trap Door
-       b    @inct_execute_script                    ; JP 48096          ; Advance HL to next script instruction and execute
+       b    @inct_execute_script              ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
 * Script Routine (41) Move Spider Up One Character and, if Home, Reset its Timer and Make it Wait Input:  IX Address
@@ -1734,7 +1734,7 @@ close_trap_door:
        .proc
 close_trap_door_1:
        movb one,a                      ; LD A,1            ; Set room of "Closed Trap Door" to 1 (i.e. Trap Door Room)...
-       movb a,@closed_trap_door                  ; LD (43188),A      ; ...
+       movb a,@closed_trap_door        ; LD (43188),A      ; ...
        sb   one,a                      ; DEC A             ; Decrease A to zero
        jmp  open_close_trap_door_end   ; JR 37009          ; Set room of "Open Trap Door" to 0
 
