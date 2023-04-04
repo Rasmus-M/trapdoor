@@ -2122,6 +2122,7 @@ check_control_input_4:
        li   r0,JOY_FI
        bl   @check_key
        jeq  check_control_input_5
+       socb @bits+4,a
 check_control_input_5:
        movb  a,a
        jne   check_control_input_10
