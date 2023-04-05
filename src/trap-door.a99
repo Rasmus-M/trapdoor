@@ -638,13 +638,12 @@ swap_characters_6:
 * 
 * Used by the routine at #R35735. Input:  IX  Address of complex state data (current level) for Berk
 * jump nor call
-change_berk_direction:
-       movb @current_characters_room,a                  ; LD A,(34218)      ; If Drutt's current room...
+face_towards_drutt:
+       movb @current_characters_room,a ; LD A,(34218)      ; If Drutt's current room...
        cb   a,*ix                      ; CP (IX+0)         ; ...is not the same as Berk's current room...
        jeq  !                          ; JP NZ,35786       ; ...then jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen as
-       b    @update_berk_state_3                    ;
+       b    @update_berk_state_3       ;                   ; appropriate)
 !
-                                                           ; appropriate)
        movb @11(ix),a                  ; LD A,(IX+11)      ; Reset Berk's Walking Right, Walking Left, Unused (11,2) and Unused (11,3) flags...
        andi a,240*256                  ; AND 240           ; ...
        movb a,@11(ix)                  ; LD (IX+11),A      ; ...
@@ -654,64 +653,60 @@ change_berk_direction:
        ab   one,a                      ; INC A             ; ...and increase by one
        cb   a,@5(ix)                   ; CP (IX+5)         ; If x-coordinate of Berk's left side is greater than this (i.e. Drutt is to the left of
                                                            ; Berk)...
-       jl   _35653                     ; JR C,35653        ; ...then skip ahead to #R35653
+       jl   face_towards_drutt_3       ; JR C,35653        ; ...then skip ahead to #R35653
        movb @7(ix),a                   ; LD A,(IX+7)       ; Load A with x-coordinate of Berk's right side
        ab   one,a                      ; INC A             ; Increase A by one
        cb   a,@5(iy)                   ; CP (IY+5)         ; If x-coordinate of Drutt's left side is greater than this (i.e. Drutt is to the right of
                                                            ; Berk)...
-       jl   _35670                     ; JR C,35670        ; ...then skip ahead to #R35670
+       jl   face_towards_drutt_5       ; JR C,35670        ; ...then skip ahead to #R35670
 * Drutt is between Berk's left and right sides
        movb @1(iy),a                   ; LD A,(IY+1)       ; If Drutt's depth is 1...
        cb   a,one                      ; CP 1              ; ...
-       jne  !                          ; JP Z,35642        ; ...then skip ahead to #R35642
-       b    @_35642                    ;                   
-!
+       jeq  face_towards_drutt_2       ; JP Z,35642        ; ...then skip ahead to #R35642
 * Drutt is behind Berk
        movb @e,a                       ; LD A,E            ; Load A with Berk's flags
        andi a,14*256                   ; AND 14            ; If Berk's Facing into Screen, Facing Left and Facing Right flags are all reset...
-       jne  !                          ; JP Z,35636        ; ...then skip ahead to #R35636
-       b    @_35636                    ;                   
-!
+       jeq  face_towards_drutt_1       ; JP Z,35636        ; ...then skip ahead to #R35636
 * Drutt is behind Berk and at least one of Berk's Facing into Screen, Facing Left and Facing Right flags is set
        b    @update_berk_state_5       ; JP 35815          ; Point HL at script data for Berk facing into screen, ready to respond to control input and
                                                            ; execute
 * Drutt is behind Berk and Berk's Facing into Screen, Facing Left and Facing Right flags are all reset
-_35636:
+face_towards_drutt_1:
        li   hl,_35105                  ; LD HL,35105       ; Point HL at script data for Berk turning (facing out of screen to facing into screen)...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt is in front of Berk
-_35642:
+face_towards_drutt_2:
        movb @e,tmp0                    ; BIT 1,E           ; If Berk's Facing into Screen Flag is reset...
        andi tmp0,2*256                 ;                   
        jne  !                          ; JP Z,35821        ; ...then point HL at script data for Berk facing out of screen, ready to respond to control
-       b    @update_berk_state_6                    ;
+       b    @update_berk_state_6       ;                   ; input and execute
 !
-                                                           ; input and execute
+
 * Drutt is in front of Berk and Berk's Facing into Screen Flag is set
        li   hl,_35073                  ; LD HL,35073       ; Point HL at script data for Berk turning (facing into screen to facing out of screen)...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt is to the left of Berk
-_35653:
+face_towards_drutt_3:
        movb @e,a                       ; LD A,E            ; Load A with Berk's flags
        andi a,6*256                    ; AND 6             ; If either of Berk's Facing into Screen or Facing Left flags are set...
-       jne  _35664                     ; JR NZ,35664       ; ...then skip ahead to #R35664
+       jne  face_towards_drutt_4       ; JR NZ,35664       ; ...then skip ahead to #R35664
 * Drutt is to the left of Berk, and Berk's Facing into Screen and Facing Left flags are both reset
        li   hl,_34977                  ; LD HL,34977       ; Point HL at script data for Berk turning to face left...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt is to the left of Berk and either of Berk's Facing into Screen or Facing Left flags are set
-_35664:
+face_towards_drutt_4:
        li   hl,_34985                  ; LD HL,34985       ; Point HL at script data for Berk facing left...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt is to the right of Berk
-_35670:
+face_towards_drutt_5:
        movb @e,a                       ; LD A,E            ; Load A with Berk's flags
        andi a,10*256                   ; AND 10            ; If either of Berk's Facing into Screen or Facing Right flags are set...
-       jne  _35681                     ; JR NZ,35681       ; ...then skip ahead to #R35681
+       jne  face_towards_drutt_6       ; JR NZ,35681       ; ...then skip ahead to #R35681
 * Drutt is to the right of Berk, and Berk's Facing into Screen and Facing Right flags are both reset
        li   hl,_34997                  ; LD HL,34997       ; Point HL at script data for Berk turning to face right...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt is to the right of Berk and either of Berk's Facing into Screen or Facing Right flags are set
-_35681:
+face_towards_drutt_6:
        li   hl,_35005                  ; LD HL,35005       ; Point HL at script data for Berk facing right...
        b    @execute_script            ; JP 48098          ; ...and execute
 *// change_berk_direction
@@ -765,7 +760,7 @@ update_berk_state_2:
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;                   
        jeq  !                          ; JP NZ,35577       ; ...then jump to #R35577 (change direction Berk is facing depending upon relative position of
-       b    @change_berk_direction                         ; Drutt)
+       b    @face_towards_drutt                            ; Drutt)
 !
 * Drutt Mode Flag is reset (i.e. Berk Mode)
        movb @control_input,a           ; LD A,(34219)      ; Load A with control input
@@ -788,13 +783,10 @@ update_berk_state_2:
 !
        movb a,tmp0                     ; BIT 3,A           ; If back has been pressed...
        andi tmp0,8*256                 ;                   
-       jeq  !                          ; JP NZ,35827       ; ...then skip ahead to #R35827
-       b    @update_berk_state_7                    ;
-!
+       jne  update_berk_state_7        ; JP NZ,35827       ; ...then skip ahead to #R35827
 * At this point, no control has been pressed. This entry point is used by the routines at #R35577, #R36036 and
 * #R36116.
 update_berk_state_3:
-       equ  $
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is not flying...
        andi tmp0,64*256                ;                   
        jeq  update_berk_state_4        ; JR Z,35802        ; ...then skip ahead to #R35802
@@ -857,9 +849,7 @@ update_berk_state_8:
 * Collision with entity that can be picked up
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If Berk is already carrying something...
        andi tmp0,16*256                ;                   
-       jeq  !                          ; JP NZ,35953       ; ...then skip ahead to #R35953
-       b    @update_berk_state_12                    ;
-!
+       jne  update_berk_state_12       ; JP NZ,35953       ; ...then skip ahead to #R35953
        bl   @move_berk_closer          ; CALL 36116        ; If Berk is not horizontally aligned with entity then move him closer and exit this routine
 * Berk is now horizontally aligned with entity pointed to by IY
        bl   @turn_into_screen          ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
@@ -910,16 +900,11 @@ update_berk_state_12:
        socb a,a                        ; OR A              ; ...
        jeq  update_berk_state_13       ; JR Z,35969        ; ...then skip ahead to #R35969
        cb   a,@bytes+4                 ; CP 4              ; If Berk's current power is 1-3 (jumping)...
-       jhe  !                          ; JP C,35995        ; ...then skip ahead to #R35995
-       b    @update_berk_state_15      ;
-!
+       jl   update_berk_state_15       ; JP C,35995        ; ...then skip ahead to #R35995
        cb   a,@bytes+9                 ; CP 9              ; If Berk's current power is 4-8 (flying)...
-       jhe  !                          ; JP C,35985        ; ...then skip ahead to #R35985
-       b    @update_berk_state_14      ;
-!
+       jl   update_berk_state_14       ; JP C,35985        ; ...then skip ahead to #R35985
 * Berk has neither jumping nor flying power
 update_berk_state_13:
-       equ  $
        movb @9(ix),tmp0                ; BIT 4,(IX+9)      ; If Berk is not carrying anything...
        andi tmp0,16*256                ;                   
        jne  !                          ; JP Z,35786        ; ...then jump to #R35786 (terminate Berk's flight, or have him (turn to) face out of screen
@@ -949,9 +934,7 @@ update_berk_state_15:
 update_berk_state_16:
        movb @9(ix),tmp0                ; BIT 1,(IX+9)      ; If Berk's Facing Into Screen Flag is reset...
        andi tmp0,2*256                 ;                   
-       jne  !                          ; JP Z,36049        ; ...then skip ahead to #R36049
-       b    @update_berk_state_17                    ;
-!
+       jeq  update_berk_state_17       ; JP Z,36049        ; ...then skip ahead to #R36049
 * Berk's Facing Into Screen Flag is set
        li   hl,_35073                  ; LD HL,35073       ; Point HL at script data for Berk turning (facing into screen to facing out of screen)...
        b    @execute_script            ; JP 48098          ; ...and execute
@@ -1105,9 +1088,7 @@ attempt_to_move_left_4:
 attempt_to_move_right:
        movb @9(ix),tmp0                ; BIT 6,(IX+9)      ; If Berk is flying...
        andi tmp0,64*256                ;                   
-       jeq  !                          ; JP NZ,36282       ; ...then skip ahead to #R36282
-       b    @attempt_to_move_right_4                    ;
-!
+       jne  attempt_to_move_right_4    ; JP NZ,36282       ; ...then skip ahead to #R36282
 * Attempt to move Berk right (not flying) (see bugs)
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Berk's Facing Into Screen Flag
        bl   @chk_coll_right            ; CALL 54569        ; Check Berk for collision with another impassable / pushable entity immediately to the
@@ -1415,11 +1396,12 @@ execute_gfx_script:
        movb *ix,a                      ; LD A,(IX+0)       ; If first byte of graphic layout data entry is at least 236...
        cb   a,@bytes+236               ; CP 236            ; ...i.e. IX points to an instruction...
        jl   draw_graphics              ; JP NC,46218       ; ...then jump to appropriate graphic layout routine
-       b    @jump_to_graphics_routine                    ;
+       jmp  jump_to_graphics_routine                    ;
 * For recursive call
 process_data_in_ix_call:
        .proc
        jmp  execute_gfx_script
+*// draw_entity
 
 *********************************************************************************
 * At this point, the graphic layout data pointed to by IX is graphical data, not an instruction. We only draw the
@@ -1548,14 +1530,14 @@ draw_graphics_6:
        ab   h,a                        ; ADD A,H           ; ...
        movb a,h                        ; LD H,A            ; ...
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address as change in coordinates is non-trivial
-       b    @inct_execute_gfx_script   ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
+       jmp  inct_execute_gfx_script    ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * Cursor Shift byte was 33 (move the cursor right by one character)
 draw_graphics_7:
        inc  de                         ; INC DE            ; Advance pointer to start of next entry in Primary Display Buffer
        ab   one,h                      ; INC H             ; Increase x-coordinate by one
                                        ; JP Z,46135        ; If x-coordinate is zero then jump back to #R46135 (see trivia)
        movb one,b                      ; LD B,1            ; Prepare to skip over recalculation of Display Buffer address as we moved right one character
-       b    @inct_execute_gfx_script   ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
+       jmp  inct_execute_gfx_script    ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * First byte in Primary Display Buffer entry for current position is 255 (i.e. outside dimensions of room)
 draw_graphics_8:
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
@@ -1570,6 +1552,7 @@ draw_graphics_10:
        mov  a,tmp0                     ; required
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33...
        jmp  draw_graphics_5            ; JP 46128          ; ...and jump back to #R46128 to update current drawing position
+*// draw_graphics
 
 *********************************************************************************
 * Jump to Appropriate Graphic Layout Routine
@@ -1591,6 +1574,7 @@ jump_to_graphics_routine:
                                        ; LD A,(HL)         ; ...
                                        ; LD (46243),A      ; ...
                                        ; POP HL            ; Restore HL
+*// jump_to_graphics_routine
 
 *********************************************************************************
 * Reset Show Score Flag and Draw Timer Figures Bar
@@ -1695,10 +1679,10 @@ draw_timer_part_0:
        movb @c,a                       ; LD A,C            ; Load Graphic Index into A
        cb   a,@bytes+32                ; CP 32             ; If graphic index is less than 32 (i.e. we're not dealing with #32 - eyes looking right or #33
                                                            ; - eyes looking left and don't need to cancel inversion at 47350)...
-       jl   _47348                     ; JR C,47348        ; ...then skip ahead to #R47348
+       jl   draw_timer_part_1          ; JR C,47348        ; ...then skip ahead to #R47348
        xor  one,a                      ; XOR 1             ; Add or subtract 1 if Graphic Index is 32 or 33 respectively (Timer Figures' Eyes looking
                                                            ; right or left respectively) to cancel out inversion at 47350
-_47348:
+draw_timer_part_1:
        movb a,@c                       ; LD C,A            ; Load Graphic Index into C
        .pop af                         ; POP AF            ; Restore AF (A = attribute)
        li   tmp0,128*256               ; XOR 128           ; Flip mirror flag to prepare to draw mirror image of just-drawn character block
@@ -1735,7 +1719,7 @@ update_timer:
                                        ; OR A              ; If decreased Blink Duration Counter is not zero...
        jne  update_timer_2             ; RET NZ            ; ...then return
        mov  @blinking_eye_attr_addr,ix ; LD IX,(34264)     ; Restore Attribute File address of eyes of currently blinking timer figure into IX
-       b    @draw_open_eyes_0          ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
+       jmp  draw_open_eyes_0           ; JP 47315          ; If Show Score Flag reset then draw pair of Timer Figure eyes (open, random frame) at
                                                            ; Attribute File address IX, advance IX by two bytes then return
 * Make a randomly chosen timer figure blink
 update_timer_1:
@@ -1784,9 +1768,9 @@ update_rnd_timer_figure:
        movb @e,a                       ; LD A,E            ; Load remaining time / lives into A
 * If remaining time / lives is one, then there is only one Timer Figure to update
        cb   a,one                      ; CP 1              ; If this is 1...
-       jne  !                          ; JP Z,47315        ; ...then jump to #R47315 (If Show Score Flag reset then draw pair of Timer Figure eyes and
-       b    @draw_open_eyes_0          ;                   ; return)
-!
+       jeq  draw_open_eyes_0           ; JP Z,47315        ; ...then jump to #R47315 (If Show Score Flag reset then draw pair of Timer Figure eyes and
+                                       ;                   ; return)
+
 * Otherwise, randomly select one of the remaining Timer Figures to update
        bl   @rnd_no                    ; CALL 54222        ; Load A with random number between 0 and (x-1) where x is remaining time / lives
        ab   a,a                        ; ADD A,A           ; Double A...
@@ -1870,7 +1854,7 @@ update_and_print_score_3:
        li   iy,score_text+33           ; LD IY,47622       ; Point IY at "numeric (high score)" part of string at 47589
        mov  @high_score,hl             ; LD HL,(34299)     ; Load HL with current high score...
        bl   @num_to_str                ; CALL 47741        ; ...and convert to string at IY
-       b    @print_score_strings_0     ; JP 47628          ; Print SCORE / TOTAL / HI-SC string in current character's colours and return
+       jmp  print_score_strings_0      ; JP 47628          ; Print SCORE / TOTAL / HI-SC string in current character's colours and return
 
 *********************************************************************************
 * Print Score / Total / High Score String in Current Character's Colours
@@ -2292,12 +2276,6 @@ execute_script_1:
        movb a,@c                       ; LD C,A            ; ...
        sb   b,b                        ; LD B,0            ; ...
                                        ; ADD HL,BC         ; ...and add as offset in HL to point to start address of required script routine
-       mov bc,bc
-       jeq  error
-       ci   bc,64*2
-       jle  !
-error: jmp  error
-!
        mov  @script_routines_jmp_table(bc),bc ; LD C,(HL)         ; Load address at this location into BC...
                                        ; INC HL            ; ...
                                        ; LD B,(HL)         ; ...
@@ -2329,7 +2307,7 @@ dec_power_duration_1:
        bl   @remove_current_power      ; CALL 48417        ; Remove Berk's current power and reset sweet / mushroom / edible eyes / sausage to its
                                                            ; original position
        li   hl,_35275                  ; LD HL,35275       ; Point HL at script data for Berk's power expiring...
-       b    @execute_script            ; JP 48098          ; ...and execute
+       jmp  execute_script             ; JP 48098          ; ...and execute
 dec_power_duration_2:
        .endproc
 
@@ -2443,9 +2421,7 @@ update_worm_state_1:
        .proc
        movb @1(ix),a                   ; LD A,(IX+1)       ; If worm's depth is zero (i.e. not currently active)...
                                        ; OR A              ; ...
-       jne  !                          ; JP Z,53083        ; ...then attempt to spawn a new worm...
-       b    @spawn_new_worm            ;
-!
+       jeq  spawn_new_worm             ; JP Z,53083        ; ...then attempt to spawn a new worm...
        b    @inct_execute_script       ; JP 48096          ; ...otherwise advance HL to next script instruction and execute
 
 *********************************************************************************
@@ -2456,9 +2432,7 @@ spawn_new_worm:
        movb @bytes+60,a                ; LD A,60           ; Load A with a random number, 0-59...
        bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; If random number is not zero (59 in 60 chance)...
-       jeq  !                          ; RET NZ            ; ...then return
-       .ret                            ;                   
-!
+       jne  spawn_new_worm_4           ; RET NZ            ; ...then return
        movb @current_characters_room,a ; LD A,(34218)      ; Set worm's current room to same as current character's...
        movb a,*ix                      ; LD (IX+0),A       ; ...
        bl @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for worm's current room
@@ -2479,17 +2453,21 @@ spawn_new_worm:
        .push af                        ; PUSH AF           ; Store AF (A = bottom y-coordinate of worm)
        movb @bytes+121,@4(ix)          ; LD (IX+4),121     ; Set worm's top y-coordinate to 121
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
-       jnc  !                                              ; Flag is set
+       jnc  spawn_new_worm_1                               ; Flag is set
        .pop bc
-       jmp  !!
-!      .pop bc                         ; POP BC            ; Store AF (B = bottom y-coordinate of worm)
-       jmp  _53154                     ; JR NC,53154       ; If a collision occurred then set worm's depth to zero and return
-!      movb b,@4(ix)                   ; LD (IX+4),B       ; Set worm's top y-coordinate to same as its bottom y-coordinate
+       jmp  spawn_new_worm_2
+spawn_new_worm_1:
+       .pop bc                         ; POP BC            ; Store AF (B = bottom y-coordinate of worm)
+       jmp  spawn_new_worm_3           ; JR NC,53154       ; If a collision occurred then set worm's depth to zero and return
+spawn_new_worm_2:
+       movb b,@4(ix)                   ; LD (IX+4),B       ; Set worm's top y-coordinate to same as its bottom y-coordinate
        li   hl,_52735                  ; LD HL,52735       ; Point HL at script data for worm rising from floor...
        b    @execute_script            ; JP 48098          ; ...and execute
-_53154:
+spawn_new_worm_3:
        movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set worm's depth to zero
-       .ret                            ; RET               ; Return
+spawn_new_worm_4:
+       .endproc                        ; RET               ; Return
+*// spawn_new_worm
 
 *********************************************************************************
 * Cycle Attributes (Long, Full-Screen) and Clear Display Buffers
@@ -3723,7 +3701,7 @@ chk_coll_next_depth_rev_3:
        cb   a,@bytes+254               ; CP 254            ; ...
        jeq  chk_coll_next_depth_rev_4  ; JP Z,55000        ; ...then skip ahead to #R55000
        a    de,iy                      ; ADD IY,DE         ; Move IY back 13 bytes (i.e. to start of previous entry)
-       b    @chk_coll_next_depth_rev_1 ; JP 54899          ; Jump to #R54899
+       jmp  chk_coll_next_depth_rev_1  ; JP 54899          ; Jump to #R54899
 chk_coll_next_depth_rev_4:
                                        ; SCF               ; Set Carry Flag
        b    @return_with_carry_1       ; RET               ; Return
