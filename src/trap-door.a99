@@ -1952,7 +1952,7 @@ print_half_dbl_height:
        movb *de+,*tmp2
 *      Draw attribute
        movb @print_attr,a
-       mov  hl,tmp0
+       mov  hl,tmp1
        bl   @draw_attribute
 ;       .push hl                        ; PUSH HL           ; Store HL
 ;       .push bc                        ; PUSH BC           ; Store BC
@@ -2514,8 +2514,8 @@ cycle_attributes_2:
 cycle_attributes_3:
        socb @e,a                       ; OR E              ; Add INK component back in
        socb @bytes+64,a                ; OR 64             ; Set BRIGHT flag
-       mov  hl,tmp0
-       ai   tmp0,zx_attributes-ti_attributes
+       mov  hl,tmp1
+       ai   tmp1,zx_attributes-ti_attributes
        bl   @draw_attribute            ; LD (HL),A         ; Paint new attribute back to current position in Attribute File
        andi a,16*256                   ; AND 16            ; Set / reset speaker bit
        socb @bytes+2,a                 ; OR 2              ; Set RED bit to maintain red border
@@ -2843,7 +2843,7 @@ print_red_cell:
        .proc
 ;       movb @bytes+18,*ix              ; LD (IX+0),18      ; Set attribute to red INK, red PAPER
        li   a,18*256
-       mov  ix,tmp0
+       mov  ix,tmp1
        bl   @draw_attribute
        .exx                            ; EXX               ; Switch registers
        movb @bytes+255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
@@ -2991,7 +2991,7 @@ draw_display_buffer_8:
        inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
        movb *hl,a                      ; LD A,(HL)         ; Load attribute into A
        socb @bits+6,a                  ; SET 6,A           ; Set BRIGHT flag
-       mov  ix,tmp0                    ; LD (IX+0),A       ; Place attribute at current position in Attribute File
+       mov  ix,tmp1                    ; LD (IX+0),A       ; Place attribute at current position in Attribute File
        bl   @draw_attribute
        jmp  draw_display_buffer_6      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_9:
@@ -3048,7 +3048,7 @@ draw_character_block_2:
        jne  draw_character_block_2
 *      Draw attribute
 draw_character_block_3:
-       mov  ix,tmp0
+       mov  ix,tmp1
        bl   @draw_attribute
 ;       movb a,*ix                      ; LD (IX+0),A       ; Load attribute value into current Attribute File address
 ;       sb   a,a                        ; XOR A             ; Load graphic set index into HL..
