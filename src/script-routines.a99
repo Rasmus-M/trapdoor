@@ -1,4 +1,51 @@
 *********************************************************************************
+* Advance HL to Next Script Instruction and Execute
+*
+* Used by the routines at #R35735, #R36116, #R36390, #R36471, #R36542, #R36610, #R36947, #R36950, #R36984, #R36990,
+* #R37085, #R37639, #R37753, #R38074, #R38165, #R38540, #R38554, #R41498, #R41617, #R48133, #R48142, #R48148,
+* #R48158, #R48220, #R48246, #R48260, #R48267, #R48274, #R48307, #R48336, #R48365, #R48487, #R48567, #R48593,
+* #R48641, #R48686, #R48692, #R48698, #R48704, #R48920, #R49010, #R51765, #R52029, #R52038, #R52047, #R52142,
+* #R52243, #R52309, #R52860, #R52870, #R52889 and #R52967. Input:  IX  (Entry at #R48096 and #R48098) Address of
+* complex state data for an entity Output: HL  Current position in script data
+inct_execute_script:                   ; Always branch here
+       inct hl                         ; INC HL            ; Advance Script Data Pointer by two bytes...
+                                       ; INC HL            ; ...
+* This entry point is used by the routines at #R35577, #R35735, #R36008, #R36036, #R36116, #R36367, #R36390,
+* #R36471, #R36638, #R37085, #R37639, #R37718, #R37753, #R37778, #R38074, #R38554, #R41550, #R48285, #R48295,
+* #R48307, #R48324, #R48336, #R48353, #R48365, #R48388, #R48934, #R48976, #R49010, #R51765, #R51779, #R51904,
+* #R51924, #R51944, #R51954, #R51960, #R52053, #R52148, #R52243, #R52908, #R52914, #R52967 and #R53083.
+execute_script:                        ; Always branch here
+                                       ; INC HL            ; Advance Script Data Pointer by one byte
+       movb @1(hl),a                   ; LD A,(HL)         ; Load byte at this location into A
+                                       ; DEC HL            ; Move HL back one byte
+                                       ; OR A              ; If byte loaded into A was zero (i.e. a script instruction)...
+       jeq  execute_script_1           ; JR Z,48117        ; ...then skip ahead to #R48117
+* HL pointing to a graphic layout data address, rather than a script instruction
+       mov  hl,@current_script_addr    ; LD (34277),HL     ; Store address in HL at #R34277 as position in script currently running
+       movb *hl+,@2(ix)                ; LD A,(HL)         ; Load word at location HL into Graphic Layout Address in current entity's complex state data
+                                                           ; entry (IX)...
+                                       ; LD (IX+2),A       ; ...
+                                       ; INC HL            ; ...
+       movb *hl,@3(ix)                 ; LD A,(HL)         ; ...
+                                       ; LD (IX+3),A       ; ...
+       .endproc                        ; RET               ; Return
+* HL pointing to a script instruction
+execute_script_1:
+       movb *hl,a                      ; LD A,(HL)         ; Load script "instruction" into A
+                                       ; PUSH HL           ; Store HL (pointer to current position in script data)
+                                       ; LD HL,47966       ; Point HL at Table of Script Routine Start Addresses
+       ab   a,a                        ; ADD A,A           ; Load double index of script instruction into BC...
+       movb a,@c                       ; LD C,A            ; ...
+       sb   b,b                        ; LD B,0            ; ...
+                                       ; ADD HL,BC         ; ...and add as offset in HL to point to start address of required script routine
+       mov  @script_routines_jmp_table(bc),bc ; LD C,(HL)         ; Load address at this location into BC...
+                                       ; INC HL            ; ...
+                                       ; LD B,(HL)         ; ...
+                                       ; POP HL            ; Restore HL (pointer to current position in script data)
+                                       ; PUSH BC           ; Push address in BC onto stack...
+       b    *bc                        ; RET               ; ...and RET to this address
+
+*********************************************************************************
 *
 * Table of Script Routine Start Addresses
 *
@@ -81,19 +128,19 @@ script_routine_04:
        inc  hl                         ; INC HL            ; ...
        movb *hl,a                      ; LD A,(HL)         ; Load A with sound index
        bl   @request_entity_sound      ; CALL 59601        ; If current character is in same room as target entity at IX then set pending sound to A
-       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
+       jmp  inct_execute_script        ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
 * Script Routine (62) Move Entity at IX into Room to the Left, if Appropriate
 script_routine_62:
        bl   @move_into_left_room       ; CALL 54348        ; Move entity at IX into room to the left, if appropriate
-       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
+       jmp  inct_execute_script        ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
 * Script Routine (16) Have Berk Hold an Entity, and Position it Appropriately Between his Hands
 script_routine_16:
-       bl   @position_carried_item                   ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
-       b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
+       bl   @position_carried_item     ; CALL 48850        ; Have Berk hold an entity, and position it appropriately between his hands
+       jmp  inct_execute_script        ; JP 48096          ; Advance HL to next script instruction and execute
 
 *********************************************************************************
 * Script Routine (17) Have Berk Put Down an Entity in Front of Him, if Appropriate Output: D  Depth offset for

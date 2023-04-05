@@ -1,4 +1,26 @@
 *********************************************************************************
+* Jump to Appropriate Graphic Layout Routine
+*
+* Used by the routine at #R45965. Input:  A  Index of graphic layout data instruction IX  Address of current graphic
+* layout data instruction
+jump_to_graphics_routine:
+       inc  ix                         ; INC IX            ; Advance IX to first parameter byte in graphic layout data
+       sb   @bytes+236,a               ; SUB 236           ; Subtract 236 to get zero-based index of required instruction
+       ab   a,a                        ; ADD A,A           ; Load double index of graphic layout data instruction into BC...
+       movb a,@c                       ; LD C,A            ; ...
+       sb   b,b                        ; LD B,0            ; ...
+                                       ; PUSH HL           ; Store HL
+       mov  @graphic_routines_jmp_tbl(bc),bc ; LD HL,46244       ; Point HL at start of Table of Addresses of Graphic Layout Data Handling Routines
+       b    *bc                        ; ADD HL,BC         ; Add doubled instruction index as offset to HL to point to address of required routine
+                                       ; LD A,(HL)         ; Modify JP instruction at #R46241 with this address...
+                                       ; LD (46242),A      ; ...
+                                       ; INC HL            ; ...
+                                       ; LD A,(HL)         ; ...
+                                       ; LD (46243),A      ; ...
+                                       ; POP HL            ; Restore HL
+*// jump_to_graphics_routine
+
+*********************************************************************************
 *
 * Table of Addresses of Graphic Layout Data Handling Routines
 *
