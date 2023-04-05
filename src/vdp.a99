@@ -147,35 +147,24 @@ ti_attributes:
 * On return tmp0 MSB contains the TI color FFFFBBBB.
 *
 ti_color:
-       movb a,@wrksp2
-       lwpi wrksp2
-       clr  r1
+       clr  tmp0                       ; Result
+       mov  a,tmp2
+       andi tmp2,>4000                 ; Bright bit
+       srl  tmp2,3
 *      Foreground
-       mov  r0,r2
-       andi r2,>0700                   ; Foreground bits
-       mov  r0,r3
-       andi r3,>4000                   ; Bright bit
-       srl  r3,3
-       soc  r3,r2
-       swpb r2
-       movb @tipal(r2),r1
-       sla  r1,4
+       mov  a,tmp1
+       andi tmp1,>0700                 ; Foreground bits
+       soc  tmp2,tmp1
+       swpb tmp1
+       movb @tipal(tmp1),tmp0
+       sla  tmp0,4
 *      Background
-       mov  r0,r2
-       andi r2,>3800                   ; Background bits
-       srl  r2,3
-       soc  r3,r2
-       swpb r2
-       movb @tipal(r2),r3
-       socb r3,r1
-*      Flash
-;       andi r0,>8000
-;       jeq  !
-;       srl  r1,4
-;       andi r1,>0ff0
-;       socb @wrksp2+3,r1
-!      lwpi wrksp
-       movb @wrksp2+2,tmp0
+       mov  a,tmp1
+       andi tmp1,>3800                 ; Background bits
+       srl  tmp1,3
+       soc  tmp2,tmp1
+       swpb tmp1
+       socb @tipal(tmp1),tmp0
        rt
 
 * Spectrum palette

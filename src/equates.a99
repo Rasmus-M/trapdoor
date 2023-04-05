@@ -60,10 +60,8 @@ r0lb:
        equ  wrksp+1
 r1lb:
        equ  wrksp+3
-wrksp2:
-       equ  wrksp+>20
 bits:
-       equ  wrksp2+>20
+       equ  wrksp+>20
 stack:
        equ  bits+8
 draw_display_buffer_pad:
