@@ -52,50 +52,28 @@ rndsd:
 **
 * Z80 register mapping
 *
-tmp0:
-       requ 0
-tmp1:
-       requ 1
-tmp2:
-       requ 2
-one:
-       requ 3                          ; >0100
-af:
-       requ 4
-a:
-       requ 4
-bc:
-       requ 5
-b:
-       requ 5
-c:
-       equ wrksp+11
-de:
-       requ 6
-d:
-       requ 6
-e:
-       equ wrksp+13
-hl:
-       requ 7
-h:
-       requ 7
-l:
-       equ wrksp+15
-ix:
-       requ 8
-iy:
-       requ 9
-sp:
-       requ 10
-af_:
-       requ 12
-bc_:
-       requ 13
-de_:
-       requ 14
-hl_:
-       requ 15
+tmp0   requ 0
+tmp1   requ 1
+tmp2   requ 2
+one    requ 3                          ; >0100
+af     requ 4
+a      requ 4
+bc     requ 5
+b      requ 5
+c      equ wrksp+11
+de     requ 6
+d      requ 6
+e      equ wrksp+13
+hl     requ 7
+h      requ 7
+l      equ wrksp+15
+ix     requ 8
+iy     requ 9
+sp     requ 10
+af_    requ 12
+bc_    requ 13
+de_    requ 14
+hl_    requ 15
 
 **
 * VDP memory map
