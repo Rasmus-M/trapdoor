@@ -11,6 +11,22 @@ init_bits_1:
        sla  tmp0,1
        dec  tmp2
        jne  init_bits_1
+       rt
+*// init_bits
+
+*********************************************************************
+*
+* Copy routines to pad
+*
+copy_to_pad:
+       li   tmp0,draw_display_buffer_start
+       li   tmp1,draw_display_buffer_pad
+       li   tmp2,draw_display_buffer_end-draw_display_buffer_start
+copy_to_pad_1:
+       mov  *tmp0+,*tmp1+
+       dect tmp2
+       jne  copy_to_pad_1
+       rt
 *// init_bits
 
 *********************************************************************
@@ -85,7 +101,7 @@ set_border_color:
 * Draw attribute
 *
 * a: zx attribute
-* tmp0: address in zx attribute file
+* tmp1: address in zx attribute file
 *
 draw_attribute:
        .ifeq optimize_attr_drawing,1

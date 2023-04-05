@@ -18,6 +18,7 @@ start:
        li   one,>0100
        li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
        bl   @init_bits
+       bl   @copy_to_pad
        bl   @graphics_mode
        bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
 
@@ -2933,6 +2934,11 @@ draw_display_buffer_1:
        mov de,iy                       ; PUSH DE           ; Copy address of Secondary Display Buffer into IY...
                                        ; POP IY            ; ...
        li   de_,3
+       bl   @draw_display_buffer_pad
+       .endproc
+
+draw_display_buffer_start:
+       .proc
 draw_display_buffer_2:
        movb *hl+,b                     ; LD A,(HL)         ; Read Graphic Set Index from Primary Display Buffer into A
                                        ; INC HL            ; Advance HL to next byte (Graphic Index) in Primary Display Buffer
@@ -2999,6 +3005,9 @@ draw_display_buffer_9:
        jmp  draw_display_buffer_7      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_10:
        .endproc
+draw_display_buffer_end:
+       equ  $
+
 *// draw_display_buffer
 
 *********************************************************************************
