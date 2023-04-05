@@ -270,20 +270,20 @@ vsmw_1:
        rt
 *// vsmw
 
-;*********************************************************************
-;*
-;* VDP Set Read Address
-;*
-;* R0: Read address in VDP RAM
-;*
-;vrad:
-;       swpb r0
-;       movb r0,@vdpwa                  ; Send low byte of VDP RAM read address
-;       swpb r0
-;       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
-;       rt
-;*// vrad
-;
+*********************************************************************
+*
+* VDP Set Read Address
+*
+* R0: Read address in VDP RAM
+*
+vrad:
+       swpb r0
+       movb r0,@vdpwa                  ; Send low byte of VDP RAM read address
+       swpb r0
+       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
+       rt
+*// vrad
+
 ;*********************************************************************
 ;*
 ;* VDP Single Byte Read

@@ -88,6 +88,10 @@ name_table:                            ; Name table x 2
        equ  >3800
 sprite_attr_table:                     ; Sprite attribute table
        equ  >3b00
+initial_entity_states:                 ; Table of Initial-State Data for Complex Entities
+       equ  >3c00                      ; This table is used to store the initial states of the various entities in the game,
+                                       ; so that they can be reset when a new game is started.
+
 
 **
 * Misc

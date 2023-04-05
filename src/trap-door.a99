@@ -450,8 +450,10 @@ print_text_1:
 * 
 * Used by the routine at #R34438.
 copy_initial_state_data:
+       .proc
        li   iy,level_state_data_table  ; LD IY,34687       ; Point IY at start of Table of Start Addresses of Levels' State Data for Complex Entities
-       li   de,initial_entity_states   ; LD DE,59821       ; Point DE at start of Table of Initial-State Data for Complex Entities
+       li   tmp0,initial_entity_states ; LD DE,59821       ; Point DE at start of Table of Initial-State Data for Complex Entities
+       bl   @vwad
        li   bc,4                       ; LD B,4            ; Set B to 4 (as there are 4 levels)
 copy_initial_state_data_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of levels to process)
@@ -471,8 +473,9 @@ copy_initial_state_data_2:
        mov  ix,hl                      ; PUSH IX           ; Transfer start address of current entry in complex state data into HL...
                                        ; POP HL            ; ...
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
-       .ldir                           ; LDIR              ; Copy current entry in complex state data into Table of Initial-State Data for Complex
-                                                           ; Entities at #R59821
+!      movb *hl+,@vdpwd                ; LDIR              ; Copy current entry in complex state data into Table of Initial-State Data for Complex
+       dec  bc                                             ; Entities at #R59821
+       jne  -!
 copy_initial_state_data_3:
        ai   ix,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
                                        ; ADD IX,BC         ; Advance IX to next entry in complex state data
@@ -481,7 +484,7 @@ copy_initial_state_data_4:
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of levels to process)
        dec  bc                         ; DJNZ 34704        ; Decrease B and loop back to #R34704 to process next level
        jne  copy_initial_state_data_1  ;
-       rt                              ; RET               ; Return
+       .endproc                        ; RET               ; Return
 
 *********************************************************************************
 * Reset All Game Data in Preparation for New Game
@@ -490,7 +493,8 @@ copy_initial_state_data_4:
 reset_game_data:
        .proc
        li   iy,level_state_data_table  ; LD IY,34687       ; Point IY at start of Table of Start Addresses of Levels' State Data for Complex Entities
-       li   hl,initial_entity_states   ; LD HL,59821       ; Point HL at start of Table of Initial-State Data for Complex Entities
+       li   tmp0,initial_entity_states ; LD HL,59821       ; Point HL at start of Table of Initial-State Data for Complex Entities
+       bl   @vrad
        li   bc,4                       ; LD B,4            ; Set B to 4 (as there are 4 levels)
 reset_game_data_1:
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of levels to process)
@@ -510,8 +514,9 @@ reset_game_data_2:
        mov  ix,de                      ; PUSH IX           ; Transfer start address of current entry in complex state data into DE...
                                        ; POP DE            ; ...
        li   bc,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
-       .ldir                           ; LDIR              ; Copy current entry in Table of Initial-State Data for Complex Entities at #R59821 into
-                                                           ; complex state data
+!      movb @vdprd,*de+                ; LDIR              ; Copy current entry in Table of Initial-State Data for Complex Entities at #R59821 into
+       dec  bc                                             ; complex state data
+       jne  -!
 reset_game_data_3:
        ai   ix,13                      ; LD BC,13          ; Load BC with 13 (as entries in complex state data are 13 bytes wide)
                                        ; ADD IX,BC         ; Advance IX to next entry in complex state data
