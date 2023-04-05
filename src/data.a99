@@ -244,8 +244,8 @@ prim_disp_buffer_addr:
 * { 0 | Joystick Mode off }
 * { 1 | Joystick Mode on }
 * TABLE#
-joystick_mode_flag:
-       byte 1
+;joystick_mode_flag:
+;       byte 1
 
 * Current High Score
 high_score:
@@ -265,7 +265,7 @@ current_keyboard_ctrls:
 main_menu_addrs:
        data 22666                                                    ; "S   START   "
        data 22762                                                    ; "K NEW KEYS  "
-main_menu_addrs_kempston:
+;main_menu_addrs_kempston:
        data 22851                                                    ; "J +KEMPSTON "
 main_menu_addrs_dirs:
        data 22947                                                    ; "   RIGHT    "
@@ -311,17 +311,15 @@ score_text:
 pathfinding_data_table:
        byte 0,0,0
 pathfinding_1st_entry:
-       byte 0,0
-       byte 0,0
-       byte 0,0
-       byte 0,0
-       byte 0
+       byte 0,0,0
+       byte 0,0,0
+       byte 0,0,0
 
 * Data for Pseudo-Random Number Generator
 rnd_seed:
        data 0                                                        ; Seed
-rnd_range:
-       byte 0                                                        ; Temporary store for range value
+;rnd_range:
+;       byte 0                                                        ; Temporary store for range value
 
 w96:
        data 96

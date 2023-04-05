@@ -337,34 +337,30 @@ script_routine_32:
                                                            ; Flag is set...
        cb   a,@bytes+130               ; CP 130            ; ...and if collision was not with entity of class 130 (causes Berk and Drutt to bounce off or
                                                            ; bang head)...
-       jne  _48507                     ; JR NZ,48507       ; ...then skip ahead to #R48507
+       jne  script_routine_32_1        ; JR NZ,48507       ; ...then skip ahead to #R48507
        szcb @bits+6,@9(ix)             ; RES 6,(IX+9)      ; Reset entity's Is Flying Flag
        li   hl,berk_fall_script        ; LD HL,35359       ; Load HL with script data address for Berk starting to fall downwards
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
-_48507:
+script_routine_32_1:
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of Berk's bottom edge is 121 or greater...
        cb   a,@bytes+121               ; CP 121            ; ...
-       jhe  _48527                     ; JR NC,48527       ; ...then skip ahead to #R48527
-       movb @control_input,a                  ; LD A,(34219)      ; Load A with control input
+       jhe  script_routine_32_2        ; JR NC,48527       ; ...then skip ahead to #R48527
+       movb @control_input,a           ; LD A,(34219)      ; Load A with control input
        movb a,tmp0                     ; BIT 0,A           ; If right pressed...
        andi tmp0,1*256                 ;
-       jeq  !                          ; JP NZ,48593       ; ...then move Berk right one character, and into new room if appropriate
-       b    @move_entity_right                    ;
-!
+       jne  move_entity_right          ; JP NZ,48593       ; ...then move Berk right one character, and into new room if appropriate
        movb a,tmp0                     ; BIT 1,A           ; If left pressed...
        andi tmp0,2*256                 ;
-       jeq  !                          ; JP NZ,48641       ; ...then move Berk left one character, and into new room if appropriate
-       b    @move_entity_left                    ;
-!
-_48527:
+       jne  move_entity_left           ; JP NZ,48641       ; ...then move Berk left one character, and into new room if appropriate
+script_routine_32_2:
        equ  $
        movb @6(ix),a                   ; LD A,(IX+6)       ; If y-coordinate of Berk's bottom edge is less than 98...
        cb   a,@bytes+98                ; CP 98             ; ...
        jhe  !                          ; JP C,48096        ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
-       bl    @change_room_up                   ; CALL 55433        ; Change Berk's room up one if appropriate
-       bl    @move_carried_to_front                   ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
+       bl    @change_room_up           ; CALL 55433        ; Change Berk's room up one if appropriate
+       bl    @move_carried_to_front    ; CALL 48710        ; Move carried entity in front of Berk as he faces out of screen
 * This entry point is used by the routine at #R37718. It is also the start of the routine triggered by instruction
 * 34 in script data.
 script_routine_34:
@@ -560,66 +556,60 @@ script_routine_43:
                                                            ; set...
        cb   a,@bytes+129               ; CP 129            ; ...and if collision was not with entity of class 129 (causes other entities to start
                                                            ; falling)...
-       jne  _51792                     ; JR NZ,51792       ; ...then skip ahead to #R51792
+       jne  script_routine_43_1        ; JR NZ,51792       ; ...then skip ahead to #R51792
        bl   @prepare_falling           ; CALL 55516        ; Set Drutt's Can Fall Flag and initial velocity factor to 2
        b    @script_routine_45         ; JP 52038          ; Move Drutt down one character, advance HL to next script instruction and execute
-_51792:
+script_routine_43_1:
        mov  @worm_state_addr,iy        ; LD IY,(34244)     ; Load IY with address of current level's complex state data for worm
        movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is reset...
        movb a,tmp0                     ; BIT 0,A           ; ...
        andi tmp0,1*256                 ;
-       jeq  _51841                     ; JR Z,51841        ; ...then skip ahead to #R51841
+       jeq  script_routine_43_2        ; JR Z,51841        ; ...then skip ahead to #R51841
 * Drutt Mode Flag is set (i.e. Drutt Mode)
        socb @bits+1,@9(ix)             ; SET 1,(IX+9)      ; Set Drutt's Under Player Control Flag
        movb @control_input,a           ; LD A,(34219)      ; Load A with control input
        movb a,tmp0                     ; BIT 0,A           ; If right has been pressed...
        andi tmp0,1*256                 ;
-       jne  _51904                     ; JR NZ,51904       ; ...then randomly select script data for rightward hop of size three or four, and execute
+       jne  script_routine_43_5        ; JR NZ,51904       ; ...then randomly select script data for rightward hop of size three or four, and execute
        movb a,tmp0                     ; BIT 1,A           ; If left has been pressed...
        andi tmp0,2*256                 ;
-       jne  _51924                     ; JR NZ,51924       ; ...then randomly select script data for leftward hop of size three or four, and execute
+       jne  script_routine_43_7        ; JR NZ,51924       ; ...then randomly select script data for leftward hop of size three or four, and execute
        movb a,tmp0                     ; BIT 2,A           ; If forward has been pressed...
        andi tmp0,4*256                 ;
-       jeq  !                          ; JP NZ,51954       ; ...then point HL at script data for Drutt swapping depth levels and execute
-       b    @_51954                    ;
-!
+       jne  script_routine_43_10       ; JP NZ,51954       ; ...then point HL at script data for Drutt swapping depth levels and execute
        movb a,tmp0                     ; BIT 3,A           ; If back has been pressed...
        andi tmp0,8*256                 ;
-       jeq  !                          ; JP NZ,51944       ; ...then jump to #R51944 (start Drutt jumping)
-       b    @_51944                    ;
-!
+       jne  script_routine_43_9        ; JP NZ,51944       ; ...then jump to #R51944 (start Drutt jumping)
 * At this point, no control has been pressed, so Drutt is effectively not under player control
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
        movb @1(iy),a                   ; LD A,(IY+1)       ; If worm's depth is zero (i.e. not in play area)...
        socb a,a                        ; OR A              ; ...
-       jeq  _51875                     ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
-       b    @_51960                    ; JP 51960          ; Move Drutt closer to the worm and ½ it if close enough
+       jeq  script_routine_43_4        ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
+       jmp  script_routine_43_11      ; JP 51960          ; Move Drutt closer to the worm and ½ it if close enough
 * Drutt Mode Flag is reset (i.e. Berk Mode)
-_51841:
+script_routine_43_2:
        szcb @bits+1,@9(ix)             ; RES 1,(IX+9)      ; Reset Drutt's Under Player Control Flag
        movb @1(iy),a                   ; LD A,(IY+1)       ; If worm's depth is not zero (i.e. is in play area)...
        socb a,a                        ; OR A              ; ...
-       jeq  !                          ; JP NZ,51960       ; ...then move Drutt closer to the worm and eat it if close enough
-       b    @_51960                    ;
-!
+       jne  script_routine_43_11       ; JP NZ,51960       ; ...then move Drutt closer to the worm and eat it if close enough
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb *iy,a                      ; LD A,(IY+0)       ; If Drutt is in the same room as Berk...
        cb   a,*ix                      ; CP (IX+0)         ; ...
-       jeq  _51875                     ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
+       jeq  script_routine_43_4        ; JR Z,51875        ; ...then randomly select an action for Drutt and execute
 * The following code will make Drutt move closer to the target (a worm, or Berk if in Berk Mode) if the target's
 * room is directly to the left or right of Drutt's room (i.e. no vertical separation). Otherwise, Drutt will perform
 * a random action. This entry point is used by the routine at #R51960.
-_51864:
+script_routine_43_3:
        bl   @find_direction_to_room    ; CALL 53194        ; Load A with value indicating which direction room A lies relative to Drutt's current room
        cb   a,one                      ; CP 1              ; If target room is to the right...
-       jeq  _51904                     ; JR Z,51904        ; ...then randomly select script data for rightward hop of size three or four, and execute
+       jeq  script_routine_43_5        ; JR Z,51904        ; ...then randomly select script data for rightward hop of size three or four, and execute
        cb   a,@bytes+2                 ; CP 2              ; If target room is to the left...
-       jeq  _51924                     ; JR Z,51924        ; ...then randomly select script data for leftward hop of size three or four, and execute
+       jeq  script_routine_43_7        ; JR Z,51924        ; ...then randomly select script data for leftward hop of size three or four, and execute
 * This entry point is used by the routine at #R51960.
-_51875:
+script_routine_43_4:
        movb @bytes+7,a                 ; LD A,7            ; Load A with a random number, 0-6...
        bl   @rnd_no                    ; CALL 54222        ; ...
-       li   de,drutts_script_data_actions                  ; LD DE,51890       ; Point DE at Table of Addresses of Script Data for Drutt's Actions...
+       li   de,drutts_script_data_actions ; LD DE,51890       ; Point DE at Table of Addresses of Script Data for Drutt's Actions...
        bl   @load_table_addr           ; CALL 53814        ; ...and load DE with entry of index A in this table
        .ex_de_hl                       ; EX DE,HL          ; Switch DE and HL (now contains address of randomly selected script data)
        b    @execute_script            ; JP 48098          ; Execute script data at address in HL
@@ -627,14 +617,14 @@ _51875:
 * Randomly Select Script Data for Rightward Hop of Size Three or Four, and Execute
 *
 * Used by the routine at #R51779.
-_51904:
+script_routine_43_5:
        movb @bytes+2,a                 ; LD A,2            ; Load A with a random number, 0-1...
        bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is zero (1 in 2 chance)...
-       jeq  _51918                     ; JR Z,51918        ; ...then skip ahead to #R51918
+       jeq  script_routine_43_6        ; JR Z,51918        ; ...then skip ahead to #R51918
        li   hl,_51538                  ; LD HL,51538       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size four...
        b    @execute_script            ; JP 48098          ; ...and execute
-_51918:
+script_routine_43_6:
        li   hl,_51562                  ; LD HL,51562       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size
                                                            ; three...
        b    @execute_script            ; JP 48098          ; ...and execute
@@ -642,21 +632,21 @@ _51918:
 * Randomly Select Script Data for Leftward Hop of Size Three or Four, and Execute
 *
 * Used by the routine at #R51779.
-_51924:
+script_routine_43_7:
        movb @bytes+2,a                 ; LD A,2            ; Load A with a random number, 0-1...
        bl   @rnd_no                    ; CALL 54222        ; ...
        socb a,a                        ; OR A              ; ...and if this is zero (1 in 2 chance)...
-       jeq  _51938                     ; JR Z,51938        ; ...then skip ahead to #R51938
+       jeq  script_routine_43_8        ; JR Z,51938        ; ...then skip ahead to #R51938
        li   hl,_51584                  ; LD HL,51584       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size four...
        b    @execute_script            ; JP 48098          ; ...and execute
-_51938:
+script_routine_43_8:
        li   hl,_51608                  ; LD HL,51608       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size three...
        b    @execute_script            ; JP 48098          ; ...and execute
 
 * Start Drutt Jumping
 *
 * Used by the routine at #R51779.
-_51944:
+script_routine_43_9:
        movb @bytes+130,@12(ix)         ; LD (IX+12),130    ; Set Drutt's Is Jumping Flag and set initial Jump Velocity to 2
        li   hl,_51674                  ; LD HL,51674       ; Point HL at script data for Drutt starting to jump straight up...
        b    @execute_script            ; JP 48098          ; ...and execute
@@ -664,7 +654,7 @@ _51944:
 * Point HL at Script Data for Drutt Swapping Depth Levels and Execute
 *
 * Used by the routine at #R51779.
-_51954:
+script_routine_43_10:
        li   hl,_51630                  ; LD HL,51630       ; Point HL at script data for Drutt swapping depth levels...
        b    @execute_script            ; JP 48098          ; ...and execute
 
@@ -672,40 +662,36 @@ _51954:
 *
 * Used by the routine at #R51779. Input:  IX  Address of complex state data (current level) for Drutt IY  Address of
 * complex state data (current level) for Worm
-_51960:
+script_routine_43_11:
        movb *iy,a                      ; LD A,(IY+0)       ; If Drutt and worm are not in the same room...
        cb   a,*ix                      ; CP (IX+0)         ; ...
-       jeq  !                          ; JP NZ,51864       ; ...then move Drutt closer to worm if appropriate, otherwise make Drutt perform random action
-       b    @_51864                    ;
-!
+       jne  script_routine_43_3        ; JP NZ,51864       ; ...then move Drutt closer to worm if appropriate, otherwise make Drutt perform random action
        movb @5(ix),a                   ; LD A,(IX+5)       ; If Drutt's left edge...
        cb   a,@5(iy)                   ; CP (IY+5)         ; ...is to the left of the worm's...
-       jl   _52017                     ; JR C,52017        ; ...then skip ahead to #R52017
+       jl   script_routine_43_13       ; JR C,52017        ; ...then skip ahead to #R52017
        movb @7(iy),a                   ; LD A,(IY+7)       ; If worm's right edge...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...is to the left of Drutt's left edge...
-       jl   _52023                     ; JR C,52023        ; ...then skip ahead to #R52023
+       jl   script_routine_43_14       ; JR C,52023        ; ...then skip ahead to #R52023
        movb @4(ix),a                   ; LD A,(IX+4)       ; If y-coordinate of Drutt's top edge...
        cb   a,@bytes+120               ; CP 120            ; ...is less than 120...
-       jhe  !                          ; JP C,51875        ; ...then randomly select an action for Drutt and execute
-       b    @_51875                    ;
-!
+       jl   script_routine_43_4        ; JP C,51875        ; ...then randomly select an action for Drutt and execute
        movb @1(iy),a                   ; LD A,(IY+1)       ; If worm's depth is the same as Drutt's...
        cb   a,@1(ix)                   ; CP (IX+1)         ; ...
-       jeq  _52007                     ; JR Z,52007        ; ...then skip ahead to #R52007
+       jeq  script_routine_43_12       ; JR Z,52007        ; ...then skip ahead to #R52007
 * Drutt and worm in same room, at different depth and same x-coordinate
        li   hl,_51630                  ; LD HL,51630       ; Point HL at script data for Drutt swapping depth levels...
-       b    @execute_script                    ; JP 48098          ; ...and execute
+       b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt and worm in same room, at same depth and same x-coordinate
-_52007:
+script_routine_43_12:
        movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set worm's depth to zero (i.e. remove from play)
        li   hl,_51706                  ; LD HL,51706       ; Point HL at script data for Drutt eating a worm...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt's left edge to left of worm's
-_52017:
+script_routine_43_13:
        li   hl,_51538                  ; LD HL,51538       ; Point HL at script data for moving Drutt and any pushed entity right by a hop of size four...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Worm's right edge to left of Drutt's left edge
-_52023:
+script_routine_43_14:
        li   hl,_51584                  ; LD HL,51584       ; Point HL at script data for moving Drutt and any pushed entity left by a hop of size four...
        b    @execute_script            ; JP 48098          ; ...and execute
 
@@ -1620,9 +1606,7 @@ find_direction_to_room:
        movb @e,a                       ; LD A,E            ; If room to left of Drutt's current room is the target room...
        cb   a,b                        ; CP B              ; ...then set Zero Flag
        movb @bytes+2,a                 ; LD A,2            ; Load A with 2 ("go left")
-       jne  !                          ; JP Z,53336        ; If Zero Flag is set (room to left is target room) then restore registers and return
-       b    @find_direction_to_room_7                    ;
-!
+       jeq  find_direction_to_room_7   ; JP Z,53336        ; If Zero Flag is set (room to left is target room) then restore registers and return
        bl   @add_pathfinding_entry     ; CALL 53309        ; Add entry to Pathfinding Data Table stating room to left of Drutt is to the left
 find_direction_to_room_1:
        bl   @get_right_room_index_1    ; CALL 54508        ; Load B with index of room to right of Drutt's room...
@@ -1630,9 +1614,7 @@ find_direction_to_room_1:
        movb @e,a                       ; LD A,E            ; If room to right of Drutt's current room is the target room...
        cb   a,b                        ; CP B              ; ...then set Zero Flag
        movb one,a                      ; LD A,1            ; Load A with 1 ("go right")
-       jne  !                          ; JP Z,53336        ; If Zero Flag is set (room to right is target room) then restore registers and return
-       b    @find_direction_to_room_7  ;
-!
+       jeq  find_direction_to_room_7   ; JP Z,53336        ; If Zero Flag is set (room to right is target room) then restore registers and return
        bl   @add_pathfinding_entry     ; CALL 53309        ; Add entry to Pathfinding Data Table stating room to right of Drutt is to the right
 * Now the Pathfinding Data Table has a header and zero, one or two records, depending upon the horizontal
 * connectivity of Drutt's current room.
@@ -1644,9 +1626,7 @@ find_direction_to_room_3:
        jeq  find_direction_to_room_4   ; JR Z,53271        ; ...and if there is no such room then skip ahead to #R53271
        movb @e,a                       ; LD A,E            ; If room to left of room D is the target room...
        cb   a,b                        ; CP B              ; ...
-       jne  !                          ; JP Z,53333        ; ...then load A with direction index for room D, restore registers and return
-       b    @find_direction_to_room_6                    ;
-!
+       jeq  find_direction_to_room_6   ; JP Z,53333        ; ...then load A with direction index for room D, restore registers and return
        bl   @find_pathfinding_entry    ; CALL 53317        ; If room B already has an entry in Pathfinding Data Table...
        jeq  find_direction_to_room_4   ; JR Z,53271        ; ...then skip ahead to #R53271
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with current entry's direction index (room B must lie in same direction as room D)
@@ -1656,9 +1636,7 @@ find_direction_to_room_4:
        jeq  find_direction_to_room_5   ; JR Z,53292        ; ...and if there is no such room then skip ahead to #R53292
        movb @e,a                       ; LD A,E            ; If room to right of room D is the target room...
        cb   a,b                        ; CP B              ; ...
-       jne  !                          ; JP Z,53333        ; ...then load A with direction index for room D, restore registers and return
-       b    @find_direction_to_room_6                    ;
-!
+       jeq  find_direction_to_room_6   ; JP Z,53333        ; ...then load A with direction index for room D, restore registers and return
        bl   @find_pathfinding_entry    ; CALL 53317        ; If room B already has an entry in Pathfinding Data Table...
        jeq  find_direction_to_room_5   ; JR Z,53292        ; ...then skip ahead to #R53292
        movb *ix,a                      ; LD A,(IX+0)       ; Load A with current entry's direction index (room B must lie in same direction as room D)

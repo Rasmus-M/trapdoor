@@ -143,9 +143,7 @@ update_yellow_creature:
        cb   a,@bytes+8                 ; CP 8              ; If creature is in "Attacking" mode...
        jeq  update_yellow_creature_6   ; JR Z,39918        ; ...then skip ahead to #R39918
        cb   a,@bytes+16                ; CP 16             ; If creature is in "Just Attacked" mode...
-       jne  !                          ; JP Z,39934        ; ...then set creature's mode to "Returning Home", set Berk's "Has Been Killed" Flag and return
-       b    @yellow_creature_killed_berk ;
-!
+       jeq  yellow_creature_killed_berk ; JP Z,39934        ; ...then set creature's mode to "Returning Home", set Berk's "Has Been Killed" Flag and return
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is not 3 (Yellow Creature's Room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
        jeq  !                          ; JP NZ,39998       ; ...then set creature's mode to "Returning Home", move one step closer to home and return
@@ -178,9 +176,7 @@ update_yellow_creature_2:
 update_yellow_creature_3:
        movb *ix,a                      ; LD A,(IX+0)       ; If Berk's current room is not 3 (Yellow Creature's Room)...
        cb   a,@bytes+3                 ; CP 3              ; ...
-       jeq  !                          ; JP NZ,39998       ; ...then set creature's mode to "Returning Home", move one step closer to home and return
-       b    @yellow_creature_return    ;
-!
+       jne  yellow_creature_return     ; JP NZ,39998       ; ...then set creature's mode to "Returning Home", move one step closer to home and return
        movb @berks_current_power,a     ; LD A,(34220)      ; If Berk's current power is invisibility (Level 3)...
        cb   a,@bytes+11                ; CP 11             ; ...
        jeq  update_yellow_creature_5   ; JR Z,39909        ; ...then skip ahead to #R39909 ("confused" mode)
@@ -213,7 +209,7 @@ update_yellow_creature_5:
        li   bc,_40485                  ; LD BC,40485       ; Set graphic layout data address for creature to #R40485 (Large Yellow Creature, animated,
                                                            ; confused)...
        bl   @set_gfx_addr_for_entity_l3 ; CALL 39944       ; ...
-       b    @move_entity_towards_home  ; JP 40008          ; Move creature one step closer to x (left) = 113, y (top) > 111 if not already there, and
+       jmp  move_entity_towards_home   ; JP 40008          ; Move creature one step closer to x (left) = 113, y (top) > 111 if not already there, and
                                                            ; return
 * "Attacking" mode
 update_yellow_creature_6:
@@ -222,7 +218,7 @@ update_yellow_creature_6:
        movb @bytes+16,*hl              ; LD (HL),16        ; Set creature's mode to "Just Attacked"
        li   bc,_40451                  ; LD BC,40451       ; Set graphic layout data address for creature to #R40451 (Large Yellow Creature with mouth
                                                            ; closed)...
-       b    @set_gfx_addr_for_entity_l3_1  ; JP 39944      ; ...and return
+       jmp  set_gfx_addr_for_entity_l3_1 ; JP 39944      ; ...and return
 *// update_yellow_creature
 
 *********************************************************************************
@@ -606,7 +602,7 @@ update_clawed_foot_21:
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...is not the same as the Clawed Foot's destination x-coordinate...
        jne  update_clawed_foot_22      ; RET NZ            ; ...then return
        li   iy,_44881                  ; LD IY,44881       ; Load IY with address of complex state data for Clawed Foot (Level 3)
-       b    @update_clawed_foot_17     ; JP 39501          ; Make Clawed Foot release Berk, and return
+       jmp  update_clawed_foot_17      ; JP 39501          ; Make Clawed Foot release Berk, and return
 update_clawed_foot_22:
        .endproc
 *// update_clawed_foot

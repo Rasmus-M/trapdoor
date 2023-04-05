@@ -270,7 +270,7 @@ graphics_routine_247_2:
        movb a,@c                       ; LD C,A            ; Load BC with offset value in A...
        sb   b,b                        ; LD B,0            ; ...
        a    bc,ix                      ; ADD IX,BC         ; Advance IX by offset value
-       b    @graphics_routine_248      ; JP 46481          ; Jump to #R46481 (set current position in graphic layout data to value of WORD at this
+       jmp  graphics_routine_248       ; JP 46481          ; Jump to #R46481 (set current position in graphic layout data to value of WORD at this
                                                            ; address)
 
 *********************************************************************************
@@ -288,10 +288,8 @@ graphics_routine_253:
 graphics_routine_252:
        movb @berk_entity_held,a        ; LD A,(34221)      ; If Berk is not holding anything...
                                        ; OR A              ; ...
-       jne  !                          ; JP Z,46481        ; ...then jump to #R46481 (set current position in graphic layout data to value of WORD at this
-       b    @graphics_routine_248      ;                   ; address)
-!
-
+       jeq  graphics_routine_248       ; JP Z,46481        ; ...then jump to #R46481 (set current position in graphic layout data to value of WORD at this
+                                       ;                   ; address)
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @inct_execute_gfx_script   ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 

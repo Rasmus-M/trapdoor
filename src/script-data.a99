@@ -661,7 +661,6 @@ _37872:
        byte 237,7                                                    ; Set sound 7 (spider sound) as pending
        byte 250,246,1                                                ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
        byte 238,11                                                   ; Set Repeat Counter A to 11
-_37881:
        byte 31,7,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R37881 if not zero
        byte 248,_37899%256,_37899/256                                ; Jump to #R37899 (spider, facing down)
@@ -670,7 +669,6 @@ _37888:
        byte 244,5                                                    ; Set current graphic set to 5
        byte 250,246,1                                                ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
        byte 238,11                                                   ; Set Repeat Counter A to 11
-_37895:
        byte 30,7,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R37895 if not zero
 * Spider, facing down
@@ -703,7 +701,6 @@ _37950:
        byte 244,5                                                    ; Set current graphic set to 5
        byte 250,246,1                                                ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
        byte 238,12                                                   ; Set Repeat Counter A to 12
-_37957:
        byte 30,7,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R37957 if not zero
        byte 250,0,255                                                ; Change cursor's x- and y-coordinates by -1 and 0 characters respectively
@@ -941,7 +938,6 @@ _39131:
 _40040:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 238,3                                                    ; Set Repeat Counter A to 3
-_40044:
        byte 251,_40052%256,_40052/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
        byte 254,8,0                                                  ; Change cursor's x- and y-coordinates by 0 and +8 characters respectively and store as new
                                                                      ; base coordinates
@@ -1205,7 +1201,6 @@ _40485:
 * Eyes Looking Up-Left
 _40513:
        byte 238,2                                                    ; Set Repeat Counter A to 2
-_40515:
        byte 1,79,33,3,207,31
        byte 4,79,33,4,207,33
        byte 250,255,4                                                ; Change cursor's x- and y-coordinates by +4 and -1 characters respectively
@@ -1214,7 +1209,6 @@ _40515:
 * Eyes Looking Up-Right
 _40532:
        byte 238,2                                                    ; Set Repeat Counter A to 2
-_40534:
        byte 3,79,33,1,207,31
        byte 4,79,33,4,207,33
        byte 250,255,4                                                ; Change cursor's x- and y-coordinates by +4 and -1 characters respectively
@@ -1223,7 +1217,6 @@ _40534:
 * Eyes Looking Down-Left
 _40551:
        byte 238,2                                                    ; Set Repeat Counter A to 2
-_40553:
        byte 3,79,33,3,207,31
        byte 2,79,33,4,207,33
        byte 250,255,4                                                ; Change cursor's x- and y-coordinates by +4 and -1 characters respectively
@@ -1232,7 +1225,6 @@ _40553:
 * Eyes Looking Down-Right
 _40570:
        byte 238,2                                                    ; Set Repeat Counter A to 2
-_40572:
        byte 3,79,33,3,207,31
        byte 4,79,33,2,207,33
        byte 250,255,4                                                ; Change cursor's x- and y-coordinates by +4 and -1 characters respectively
@@ -1339,7 +1331,6 @@ _41065:
        byte 60,55,33,61,70,33
        byte 61,198,33,60,55,29
        byte 238,4                                                    ; Set Repeat Counter A to 4
-_41085:
        byte 0,54,33
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R41085 if not zero
        byte 255                                                      ; End Marker
@@ -1348,7 +1339,6 @@ _41085:
 _41090:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_41094:
        byte 72,5,33
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R41094 if not zero
        byte 255                                                      ; End Marker
@@ -1358,7 +1348,6 @@ _41099:
        byte 251,_41141%256,_41141/256                                ; Process graphic layout data at #R41141 and upon returning, move cursor to base coordinates
        byte 250,249,0                                                ; Change cursor's x- and y-coordinates by 0 and -7 characters respectively
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_41110:
        byte 73,5,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R41110 if not zero
        byte 255                                                      ; End Marker
@@ -1370,7 +1359,6 @@ _41115:
        byte 250,250,5                                                ; Change cursor's x- and y-coordinates by +5 and -5 characters respectively
        byte 74,31
        byte 238,5                                                    ; Set Repeat Counter A to 5
-_41130:
        byte 75,33,76,30
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R41130 if not zero
        byte 250,0,1                                                  ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
@@ -1551,7 +1539,6 @@ _42629:
 _42648:
        byte 244,12                                                   ; Set current graphic set to 12
        byte 238,14                                                   ; Set Repeat Counter A to 14
-_42652:
        byte 24,50,161
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R42652 if not zero
        byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
@@ -1574,7 +1561,6 @@ _42692:
 _42703:
        byte 244,12                                                   ; Set current graphic set to 12
        byte 238,14                                                   ; Set Repeat Counter A to 14
-_42707:
        byte 24,50,161
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R42707 if not zero
        byte 250,254,2                                                ; Change cursor's x- and y-coordinates by +2 and -2 characters respectively
@@ -1851,12 +1837,10 @@ _49392:
        byte 244,12                                                   ; Set current graphic set to 12
        byte 242,2                                                    ; Set current attribute to 2
        byte 238,4                                                    ; Set Repeat Counter A to 4
-_49398:
        byte 9,161,11,159
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49398 if not zero
        byte 242,1                                                    ; Set current attribute to 1
        byte 238,3                                                    ; Set Repeat Counter A to 3
-_49407:
        byte 9,161,11,159
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49407 if not zero
        byte 255                                                      ; End Marker
@@ -1906,7 +1890,6 @@ _49535:
        byte 244,12                                                   ; Set current graphic set to 12
        byte 242,4                                                    ; Set current attribute to 4
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_49541:
        byte 9,161,10,161
        byte 11,159,9,161
        byte 11,158
@@ -1917,7 +1900,6 @@ _49553:
        byte 244,12                                                   ; Set current graphic set to 12
        byte 242,4                                                    ; Set current attribute to 4
        byte 238,11                                                   ; Set Repeat Counter A to 11
-_49559:
        byte 9,161,10,161
        byte 11,158,9,161
        byte 11,159
@@ -1934,7 +1916,6 @@ _49571:
 _49584:
        byte 242,18                                                   ; Set current attribute to 18
        byte 238,20                                                   ; Set Repeat Counter A to 20
-_49588:
        byte 0,33,0,33
        byte 0,33,0,33
        byte 0,28
@@ -2136,7 +2117,6 @@ _49991:
 * Graphic Layout Data Architecture (Level 1) Part 1 Three Spider's Webs
 _50008:
        byte 240,3                                                    ; Set Repeat Counter B to 3
-_50010:
        byte 251,_50018%256,_50018/256                                ; Process graphic layout data at #R50018 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 254,0,8                                                  ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively and store as
@@ -2179,7 +2159,6 @@ _50068:
 * Four Arches
 _50116:
        byte 240,4                                                    ; Set Repeat Counter B to 4
-_50118:
        byte 251,_50126%256,_50126/256                                ; Process graphic layout data at #R50126 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 254,0,8                                                  ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively and store as
@@ -2248,7 +2227,6 @@ _50267:
        byte 242,70                                                   ; Set current attribute to 70
        byte 45,161,46,161
        byte 238,5                                                    ; Set Repeat Counter A to 5
-_50277:
        byte 47,161
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50277 if not zero
        byte 48,161
@@ -2258,7 +2236,6 @@ _50283:
        byte 244,3                                                    ; Set current graphic set to 3
        byte 250,0,8                                                  ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively
        byte 238,7                                                    ; Set Repeat Counter A to 7
-_50290:
        byte 49,78,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50290 if not zero
        byte 51,78,33
@@ -2300,7 +2277,6 @@ _50338:
 _50359:
        byte 244,3                                                    ; Set current graphic set to 3
        byte 238,3                                                    ; Set Repeat Counter A to 3
-_50363:
        byte 25,4,160,27,4,160
        byte 26,4,160,28,4,160
        byte 25,132,160,27,132,160
@@ -2372,7 +2348,6 @@ _50572:
 _50579:
        byte 244,3                                                    ; Set current graphic set to 3
        byte 238,5                                                    ; Set Repeat Counter A to 5
-_50583:
        byte 21,4,33,24,4,31
        byte 22,4,33,23,4,31
        byte 23,132,33,21,132,31
@@ -2393,7 +2368,6 @@ _50642:
        byte 244,3                                                    ; Set current graphic set to 3
        byte 250,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively
        byte 238,2                                                    ; Set Repeat Counter A to 2
-_50649:
        byte 21,4,33,24,4,33
        byte 22,4,33,23,4,29
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50649 if not zero
@@ -2426,7 +2400,6 @@ _50680:
 * Door (Common)
 _50701:
        byte 238,9                                                    ; Set Repeat Counter A to 9
-_50703:
        byte 251,_50711%256,_50711/256                                ; Process graphic layout data at #R50711 and upon returning,
                                                                      ; move cursor to base coordinates
        byte 254,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1
@@ -2563,7 +2536,6 @@ _51069:
        byte 244,8                                                    ; Set current graphic set to 8
        byte 250,0,1                                                  ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_51076:
        byte 0,18,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51076 if not zero
        byte 250,249,255                                              ; Change cursor's x- and y-coordinates by -1 and -7 characters respectively
@@ -2578,7 +2550,6 @@ _51100:
        byte 244,8                                                    ; Set current graphic set to 8
        byte 250,0,1                                                  ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_51107:
        byte 0,18,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51107 if not zero
        byte 250,249,255                                              ; Change cursor's x- and y-coordinates by -1 and -7 characters respectively
@@ -2592,7 +2563,6 @@ _51107:
 _51131:
        byte 244,8                                                    ; Set current graphic set to 8
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_51135:
        byte 0,18,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51135 if not zero
        byte 250,249,1                                                ; Change cursor's x- and y-coordinates by +1 and -7 characters respectively
@@ -2606,7 +2576,6 @@ _51135:
 _51159:
        byte 244,8                                                    ; Set current graphic set to 8
        byte 238,8                                                    ; Set Repeat Counter A to 8
-_51163:
        byte 0,18,32
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51163 if not zero
        byte 250,249,1                                                ; Change cursor's x- and y-coordinates by +1 and -7 characters respectively
@@ -4427,7 +4396,6 @@ _59048:
        byte 0,9,33,0,9,33
        byte 7,193,28,34,129,33
        byte 238,3                                                    ; Set Repeat Counter A to 3
-_59133:
        byte 0,9,33
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R59133 if not zero
        byte 74,193,33,199,129,27
@@ -4509,7 +4477,6 @@ _59367:
        byte 238,2                                                    ; Set Repeat Counter A to 2
        byte 236,4,91,92,214,215                                      ; Modify following instruction to display graphic of random index, chosen from
                                                                      ; 91, 92, 214 and 215
-_59375:
        byte 91,15,33
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R59375 if not zero
        byte 255                                                      ; End Marker

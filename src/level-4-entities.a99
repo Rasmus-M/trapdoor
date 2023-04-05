@@ -221,9 +221,7 @@ update_ghost_1:
        jeq  update_ghost_2             ; JR Z,41687        ; ...then skip ahead to #R41687
        movb b,a                        ; LD A,B            ; If y-coordinate of Ghost's bottom edge...
        cb   a,@bytes+119               ; CP 119            ; ...is not 119...
-       jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
-       b    @update_flying_skeleton_6                    ;
-!
+       jne  update_flying_skeleton_6   ; JP NZ,42360       ; ...then move Ghost down one character and return
        socb @bits+0,@9(ix)             ; SET 0,(IX+9)      ; Set Ghost's Moving Upwards Flag
        jmp  update_ghost_8             ; RET               ; Return
 * Ghost's current room is 4 (room above pit)
@@ -232,9 +230,7 @@ update_ghost_2:
        jeq  update_ghost_3             ; JR Z,41703        ; ...then skip ahead to #R41703
        movb b,a                        ; LD A,B            ; If y-coordinate of Ghost's bottom edge...
        cb   a,@bytes+119               ; CP 119            ; ...is not 119...
-       jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
-       b    @update_flying_skeleton_6                    ;
-!
+       jne  update_flying_skeleton_6   ; JP NZ,42360       ; ...then move Ghost down one character and return
        ab   one,*ix                    ; INC (IX+0)        ; Increase index of Ghost's current room (to 5, pit)
        movb @bytes+94,a                ; LD A,94           ; Position Ghost such that the y-coordinate of its top edge is 115...
        jmp  update_ghost_7             ; JR 41758          ; ...and return
@@ -242,9 +238,7 @@ update_ghost_2:
 update_ghost_3:
        movb @c,a                       ; LD A,C            ; If y-coordinate of Ghost's top edge...
        cb   a,@bytes+121               ; CP 121            ; ...is not 121...
-       jeq  !                          ; JP NZ,42360       ; ...then move Ghost down one character and return
-       b    @update_flying_skeleton_6                    ;
-!
+       jne  update_flying_skeleton_6   ; JP NZ,42360       ; ...then move Ghost down one character and return
        ab   one,*ix                    ; INC (IX+0)        ; Increase index of Ghost's current room (to 5, pit)
        movb @bytes+100,a               ; LD A,100          ; Position Ghost such that the y-coordinate of its top edge is 100...
        jmp  update_ghost_7             ; JR 41758          ; ...and return
@@ -254,9 +248,7 @@ update_ghost_4:
        jeq  update_ghost_5             ; JR Z,41731        ; ...then skip ahead to #R41731
        movb @c,a                       ; LD A,C            ; If y-coordinate of Ghost's top edge...
        cb   a,@bytes+101               ; CP 101            ; ...is not 101...
-       jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
-       b    @update_flying_skeleton_8                    ;
-!
+       jne  update_flying_skeleton_8   ; JP NZ,42374       ; ...then move Ghost up one character and return
        szcb @bits+0,@9(ix)             ; RES 0,(IX+9)      ; Reset Ghost's Moving Upwards Flag (i.e. moving downwards)
        jmp  update_ghost_8             ; RET               ; Return
 * Ghost's current room is 5 (pit)
@@ -265,9 +257,7 @@ update_ghost_5:
        jeq  update_ghost_6             ; JR Z,41747        ; ...then skip ahead to #R41747
        movb @c,a                       ; LD A,C            ; If y-coordinate of Ghost's top edge...
        cb   a,@bytes+101               ; CP 101            ; ...is not 101...
-       jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
-       b    @update_flying_skeleton_8  ;
-!
+       jne  update_flying_skeleton_8   ; JP NZ,42374       ; ...then move Ghost up one character and return
        sb   one,*ix                    ; DEC (IX+0)        ; Decrease index of Ghost's current room (to 4, room above pit)
        movb @bytes+121,a               ; LD A,121          ; Position Ghost such that the y-coordinate of its top edge is 121...
        jmp  update_ghost_7             ; JR 41758          ; ...and return
@@ -275,9 +265,7 @@ update_ghost_5:
 update_ghost_6:
        movb b,a                        ; LD A,B            ; If y-coordinate of Ghost's bottom edge...
        cb   a,@bytes+100               ; CP 100            ; ...is not 100...
-       jeq  !                          ; JP NZ,42374       ; ...then move Ghost up one character and return
-       b    @update_flying_skeleton_8  ;
-!
+       jne  update_flying_skeleton_8   ; JP NZ,42374       ; ...then move Ghost up one character and return
        sb   one,*ix                    ; DEC (IX+0)        ; Decrease index of Ghost's current room (to 4, room above pit)
        movb @bytes+115,a               ; LD A,115          ; Prepare to set y-coordinate of Ghost's top edge to 115
 update_ghost_7:
@@ -537,7 +525,7 @@ update_drips_9:
        movb a,@9(ix)                   ; LD (IX+9),A       ; ...and also set drip's stage to 8...
        bl   @set_drip_stage            ; CALL 42251        ; ...
        movb @bytes+0,@12(ix)           ; LD (IX+12),0      ; Set drip's velocity factor to zero
-       b    @update_drips_5            ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
+       jmp  update_drips_5             ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
 update_drips_10:
        movb @4(ix),a                   ; LD A,(IX+4)       ; If y-coordinate of top of drip is 120...
        cb   a,@bytes+120               ; CP 120            ; ...
@@ -546,7 +534,7 @@ update_drips_10:
        ab   one,@6(ix)                 ; INC (IX+6)        ; ...
        sb   one,b                      ; DJNZ 42140        ; Decrease B (velocity factor) and loop back to #R42140 if not zero
        jne  update_drips_7             ;
-       b    @update_drips_5            ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
+       jmp  update_drips_5             ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
 update_drips_11:
        .endproc
 *// update_drips
