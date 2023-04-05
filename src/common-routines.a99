@@ -426,10 +426,10 @@ paint_red_areas:
                                                            ; location (#R34230)
        .push ix                        ; PUSH IX           ; Store IX
        bl    @clear_display_buffers    ; CALL 53635        ; Clear Display Buffers 1 & 2
-       .exx                            ; EXX               ; Switch registers
-       li   hl,display_buffer_1        ; LD HL,61312       ; Point HL at Display Buffer 1
-       li   de,display_buffer_2        ; LD DE,63424       ; Point DE at Display Buffer 2
-       .exx                            ; EXX               ; Switch registers
+                                       ; EXX               ; Switch registers
+       li   hl_,display_buffer_1       ; LD HL,61312       ; Point HL at Display Buffer 1
+       li   de_,display_buffer_2       ; LD DE,63424       ; Point DE at Display Buffer 2
+                                       ; EXX               ; Switch registers
        movb @tmp_room_dim_data+1,@l    ; LD HL,(34231)     ; For current character's current room, set H = room's right edge position and L = room's left
        movb @tmp_room_dim_data+2,h                         ; edge position (chars)
        movb @tmp_room_dim_data+3,@e    ; LD DE,(34233)     ; For current character's current room, set D = room's bottom edge position and E = room's top
@@ -451,8 +451,10 @@ paint_red_areas_2:
        movb h,a                        ; LD A,H            ; Load A with x-coordinate of right of room
        cb   a,@c                       ; CP C              ; If x-coordinate of right of room is less than current x-coordinate...
        jl   paint_red_areas_3          ; JR C,53940        ; ...then skip ahead to #R53940
-       .exx                            ; EXX               ; Switch registers
-       bl   @paint_red_cell_1          ; CALL 53977        ; Advance pointers in Display Buffers and Attribute File address to next character
+                                       ; EXX               ; Switch registers
+       ai   hl_,3                      ; CALL 53977        ; Advance pointers in Display Buffers and Attribute File address to next character
+       ai   de_,3
+       inc  ix
        jmp  paint_red_areas_4          ; JR 53943          ; Skip ahead to #R53943
 * Current x-coordinate, C, is outside range of x-coordinates spanned by room
 paint_red_areas_3:
@@ -488,28 +490,24 @@ paint_red_areas_7:
 *
 * Used by the routine at #R53887. Input:  IX  Address of start of Attribute File (22528) HL'  Current position in
 * display buffer 1 (at #R61312) DE'  Current position in display buffer 2 (at #R63424)
-; TODO: optimize
 paint_red_cell:
        .proc
 ;       movb @bytes+18,*ix              ; LD (IX+0),18      ; Set attribute to red INK, red PAPER
        li   a,18*256
        mov  ix,tmp1
        bl   @draw_attribute
-       .exx                            ; EXX               ; Switch registers
+                                       ; EXX               ; Switch registers
        movb @bytes+255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
-       movb a,*hl                      ; LD (HL),A         ; ...
-       movb a,*de                      ; LD (DE),A         ; ...
-       jmp  !
+       movb a,*hl_+                    ; LD (HL),A         ; ...
+       movb a,*de_+                    ; LD (DE),A         ; ...
 * This entry point is used by the routine at #R53887.
-paint_red_cell_1:
-       .proc
-!      inct hl                         ; INC HL            ; Advance display buffer 1 pointer by three bytes to next entry...
+       inct hl_                        ; INC HL            ; Advance display buffer 1 pointer by three bytes to next entry...
                                        ; INC HL            ; ...
-       inc  hl                         ; INC HL            ; ...
-       inct de                         ; INC DE            ; Advance display buffer 2 pointer by three bytes to next entry...
+                                       ; INC HL            ; ...
+       inct de_                        ; INC DE            ; Advance display buffer 2 pointer by three bytes to next entry...
                                        ; INC DE            ; ...
-       inc  de                         ; INC DE            ; ...
-       .exx                            ; EXX               ; Switch registers
+                                       ; INC DE            ; ...
+                                       ; EXX               ; Switch registers
        inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
        .endproc                        ; RET               ; Return
 *// paint_red_cell
