@@ -1,12 +1,4 @@
 *********************************************************************************
-* SkoolKit disassembly for Through the Trap Door
-* 
-* Copyright (c) 2017 Philip M. Anderson (this disassembly)
-* Copyright (c) 1987 Don Priestley / Piranha / Alternative Software Ltd (Through the Trap Door)
-*
-* TI-99/4A version by Rasmus Moustgaard 2023.
-*
-*********************************************************************************
 *
 * Set Up Random Seed and Disable Interrupts
 *

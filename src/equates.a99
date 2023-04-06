@@ -1,19 +1,4 @@
 **
-* Settings
-*
-optimize_attr_drawing:
-       equ  1
-**
-* Cheats
-*
-start_at_level:
-       equ  1
-berk_cant_die:
-       equ  1
-higher_jumps:
-       equ  1
-
-**
 * Memory mapped addresses
 *
 vdpwd:                                 ; VDP write data
@@ -91,8 +76,6 @@ sprite_attr_table:                     ; Sprite attribute table
 initial_entity_states:                 ; Table of Initial-State Data for Complex Entities
        equ  >3c00                      ; This table is used to store the initial states of the various entities in the game,
                                        ; so that they can be reset when a new game is started.
-
-
 **
 * Misc
 *
