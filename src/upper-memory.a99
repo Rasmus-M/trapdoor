@@ -1,10 +1,10 @@
        aorg >a000
 
        copy "main-routines.a99"
-       copy "level-1-entities.a99"
-       copy "level-2-entities.a99"
-       copy "level-3-entities.a99"
-       copy "level-4-entities.a99"
+       copy "level-1-routines.a99"
+       copy "level-2-routines.a99"
+       copy "level-3-routines.a99"
+       copy "level-4-routines.a99"
        copy "graphics-routines.a99"
        copy "script-routines.a99"
        copy "common-routines.a99"
