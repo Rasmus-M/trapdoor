@@ -11,7 +11,7 @@ data_addresses_3:
        data rev_col_check_addr_3                                     ; Start address for reverse-order collision checks (Level 3)
        data room_dim_data_3                                          ; Room Dimension Data (Level 3)
        data horz_connect_map_3                                       ; Horizontal Room Connectivity Map (Level 3)
-       data unused_data_block_09_3                                   ; Unused Data Block (09) (Level 3)
+       data update_level_3_entities                                  ; Address of routine to update entities (Level 3)
        data vert_connect_map_3                                       ; Vertical Room Connectivity Map (Level 3)
 
 * State Data for Simple Entities (Level 3)
@@ -111,10 +111,6 @@ horz_connect_map_3:
        byte 5,6                                                      ; Room above Weight Room and Coloured Creatures' Room
        byte 6,7                                                      ; Coloured Creatures' Room and room above Hatch Room
        byte 255,255                                                  ; End Marker
-
-* Unused data block (09) (Level 3)
-unused_data_block_09_3:
-       byte 255
 
 * Vertical Room Connectivity Map (Level 3)
 vert_connect_map_3:

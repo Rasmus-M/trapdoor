@@ -11,7 +11,7 @@ data_addresses_4:
        data rev_col_check_addr_4                                     ; Start address for reverse-order collision checks (Level 4)
        data room_dim_data_4                                          ; Room Dimension Data (Level 4)
        data horz_connect_map_4                                       ; Horizontal Room Connectivity Map (Level 4)
-       data unused_data_block_09_4                                   ; Unused Data Block (09) (Level 4)
+       data update_level_4_entities                                  ; Address of routine to update entities (Level 4)
        data vert_connect_map_4                                       ; Vertical Room Connectivity Map (Level 4)
 
 * State Data for Simple Entities (Level 4)
@@ -118,10 +118,6 @@ horz_connect_map_4:
        byte 2,3                                                      ; Five Drips Room and Skeleton's Room
        byte 3,4                                                      ; Skeleton's Room and Fake Boni's Room
        byte 255,255                                                  ; End Marker
-
-* Unused data block (09) (Level 4)
-unused_data_block_09_4:
-       byte 255
 
 * Vertical Room Connectivity Map (Level 4)
 vert_connect_map_4:

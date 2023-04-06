@@ -11,7 +11,7 @@ data_addresses_2:
        data rev_col_check_addr_2                                     ; Start address for reverse-order collision checks (Level 2)
        data room_dim_data_2                                          ; Room Dimension Data (Level 2)
        data horz_connect_map_2                                       ; Horizontal Room Connectivity Map (Level 2)
-       data unused_data_block_09_2                                   ; Unused Data Block (09) (Level 2)
+       data update_level_2_entities                                  ; Address of routine to update entities (Level 2)
        data vert_connect_map_2                                       ; Vertical Room Connectivity Map (Level 2)
 
 * State Data for Simple Entities (Level 2)
@@ -101,10 +101,6 @@ horz_connect_map_2:
        byte 3,6                                                      ; First Apebeast Room and Stalactite Room
        byte 6,1                                                      ; Stalactite Room and Door Room
        byte 255,255                                                  ; End Marker
-
-* Unused data block (09) (Level 2)
-unused_data_block_09_2:
-       byte 255
 
 * Vertical Room Connectivity Map (Level 2)
 vert_connect_map_2:

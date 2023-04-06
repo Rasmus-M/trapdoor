@@ -145,7 +145,7 @@ tmp_width_current_room:
        byte 0
 
 * Table of Data Addresses (Current Level)
-current_data_addrs:
+current_level_data:
        data 99                                                       ; State Data for Simple Entities
 cmplx_state_data_addr:
        data 99                                                       ; State Data for Complex Entities
@@ -161,8 +161,8 @@ room_dim_data:
        data 99                                                       ; Room Dimension Data
 horz_room_connect_map:
        data 99                                                       ; Horizontal Room Connectivity Map
-unused_data_block:
-       data 99                                                       ; Unused Data Block (09)
+update_level_entities_addr:
+       data 99                                                       ; Address of routine to update entities
 vert_room_connect_map:
        data 99                                                       ; Vertical Room Connectivity Map
 

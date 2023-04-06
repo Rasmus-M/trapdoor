@@ -11,7 +11,7 @@ data_addresses_1:
        data rev_col_check_addr_1                                     ; Start address for reverse-order collision checks (Level 1)
        data room_dim_data_1                                          ; Room Dimension Data (Level 1)
        data horz_connect_map_1                                       ; Horizontal Room Connectivity Map (Level 1)
-       data unused_data_block_09_1                                   ; Unused Data Block (09) (Level 1)
+       data update_level_1_entities                                  ; Address of routine to update entities (Level 1)
        data vert_connect_map_1                                       ; Vertical Room Connectivity Map (Level 1)
 
 * State Data for Simple Entities (Level 1)
@@ -152,10 +152,6 @@ horz_connect_map_1:
        byte 4,7                                                      ; Room at bottom of Trap Door Shaft and room at top of Pit
        byte 7,9                                                      ; Room at top of Pit and Door Room
        byte 255,255                                                  ; End Marker
-
-* Unused data block (09) (Level 1)
-unused_data_block_09_1:
-       byte 255
 
 * Vertical Room Connectivity Map (Level 1)
 vert_connect_map_1:

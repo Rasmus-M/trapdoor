@@ -7,10 +7,3 @@ level_data_table:
        data data_addresses_2
        data data_addresses_3
        data data_addresses_4
-
-* Table of Start Addresses of Levels' State Data for Complex Entities
-level_state_data_table:
-       data state_data_complex_1
-       data state_data_complex_2
-       data state_data_complex_3
-       data state_data_complex_4
