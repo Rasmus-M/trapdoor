@@ -1292,3 +1292,22 @@ play_sound:
 ;       .pop ix                         ; POP IX            ; Restore IX
 play_sound_1:
        .endproc                         ; RET               ; Return
+
+*********************************************************************
+*
+* For routines that set or reset the carry flag on return
+*
+return_with_carry:
+       .pop  r11
+return_with_carry_1:
+       seto tmp0
+       inc  tmp0
+       rt
+
+return_without_carry:
+       .pop  r11
+return_without_carry_1:
+       clr  tmp0
+       inc  tmp0
+       rt
+

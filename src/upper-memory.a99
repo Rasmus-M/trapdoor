@@ -10,4 +10,3 @@
        copy "common-routines.a99"
        copy "vdp.a99"
        copy "data.a99"
-       copy "level-data.a99"

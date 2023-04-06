@@ -501,3 +501,18 @@ skeleton_script_pos:
 ;       data 2112
 ;       data 2208
 
+* Display Buffer 1
+*
+* Three bytes per entry, 32 x 22 entries, one for each cell of Attribute File within play area. Bytes are in order:
+*
+display_buffer_1:
+       bss 32*22*3
+
+* Display Buffer 2
+*
+* Three bytes per entry, 32 x 22 entries, one for each cell of Attribute File within play area. Bytes are in order:
+*
+display_buffer_2:
+       bss 32*22*3
+
+

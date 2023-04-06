@@ -1,0 +1,521 @@
+*********************************************************************
+*
+* Table of Data Addresses (Level 2)
+*
+data_addresses_2:
+       data state_data_simple_2                                      ; State Data for Simple Entities (Level 2)
+       data state_data_complex_2                                     ; State Data for Complex Entities (Level 2)
+       data berks_state_data_2                                       ; Address of Berk's state data (Level 2)
+       data drutts_state_data_2                                      ; Address of Drutt's state data (Level 2)
+       data worms_state_data_2                                       ; Address of Worm's state data (Level 2)
+       data rev_col_check_addr_2                                     ; Start address for reverse-order collision checks (Level 2)
+       data room_dim_data_2                                          ; Room Dimension Data (Level 2)
+       data horz_connect_map_2                                       ; Horizontal Room Connectivity Map (Level 2)
+       data unused_data_block_09_2                                   ; Unused Data Block (09) (Level 2)
+       data vert_connect_map_2                                       ; Vertical Room Connectivity Map (Level 2)
+
+* State Data for Simple Entities (Level 2)
+*
+state_data_simple_2:
+       byte 1,2,_51187%256,_51187/256,100,112                        ; (#R51187) Sides of ceiling gap
+       byte 1,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 1,2,_51253%256,_51253/256,100,103                        ; (#R51253) Stalactite
+       byte 1,2,_51253%256,_51253/256,100,110                        ; (#R51253) Stalactite
+       byte 1,2,_51253%256,_51253/256,100,120                        ; (#R51253) Stalactite
+       byte 2,2,_50908%256,_50908/256,100,100                        ; (#R50908) Left wall
+       byte 2,2,_50893%256,_50893/256,100,108                        ; (#R50893) Right wall
+       byte 2,2,_50923%256,_50923/256,100,100                        ; (#R50923) Ceiling section (half)
+       byte 3,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 3,2,_51202%256,_51202/256,101,92                         ; (#R51202) Seven stalactites at various heights
+       byte 4,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 4,2,_51202%256,_51202/256,101,95                         ; (#R51202) Seven stalactites at various heights
+       byte 5,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor (see trivia)
+       byte 6,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 7,1,_50806%256,_50806/256,121,100                        ; (#R50806) Floor
+       byte 7,2,_51202%256,_51202/256,100,92                         ; (#R51202) Seven stalactites at various heights
+       byte 254                                                      ; End Marker
+
+* State Data for Complex Entities (Level 2)
+state_data_complex_2:
+       byte 1,2,_50893%256,_50893/256,100,130,122,131,128,0,0,240,0  ; (#R50893) Right wall
+       byte 1,2,_50923%256,_50923/256,100,96,101,112,130,0,0,192,0   ; (#R50923) Ceiling section (half)
+       byte 1,2,_50923%256,_50923/256,100,120,101,131,130,0,0,192,0  ; (#R50923) Ceiling section (half)
+       byte 1,2,_50800%256,_50800/256,120,99,120,114,50,0,0,48,0     ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 1,2,_50800%256,_50800/256,120,117,120,132,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 2,1,_50800%256,_50800/256,120,100,121,109,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 3,2,_50875%256,_50875/256,100,100,101,131,130,0,0,192,0  ; (#R50875) Ceiling (complete 1)
+       byte 4,2,_50884%256,_50884/256,100,100,101,131,130,0,0,192,0  ; (#R50884) Ceiling (complete 2)
+       byte 5,2,_50875%256,_50875/256,100,100,101,131,130,0,0,192,0  ; (#R50875) Ceiling (complete 1) (see trivia)
+       byte 6,2,_50884%256,_50884/256,100,100,101,131,130,0,0,192,0  ; (#R50884) Ceiling (complete 2)
+       byte 7,2,_50875%256,_50875/256,100,100,101,131,130,0,0,192,0  ; (#R50875) Ceiling (complete 1)
+       byte 7,2,_50908%256,_50908/256,101,100,121,101,128,0,0,240,0  ; (#R50908) Left wall
+berks_state_data_2:
+       byte 1,1,_57428%256,_57428/256,115,125,121,130,31,18,128,192,0 ; (#R57428) Berk
+_44162:
+       byte 3,1,_38766%256,_38766/256,120,100,121,102,25,0,128,241,100 ; (#R38766) Green Apebeast
+       byte 3,1,_38766%256,_38766/256,120,129,121,131,25,0,128,242,115 ; (#R38766) Green Apebeast
+       byte 4,1,_38766%256,_38766/256,120,100,121,102,25,0,128,241,100 ; (#R38766) Green Apebeast
+       byte 4,1,_38766%256,_38766/256,120,129,121,131,25,0,128,242,115 ; (#R38766) Green Apebeast
+_44214:
+       byte 7,0,_39131%256,_39131/256,0,0,0,0,30,0,0,0,0             ; (#R39131) Bubo's projectile
+_44227:
+       byte 7,1,_38996%256,_38996/256,119,115,121,117,16,0,128,192,0 ; (#R38996) Bubo
+_44240:
+       byte 2,2,_50792%256,_50792/256,103,104,103,105,17,0,128,240,0 ; (#R50792) Key
+       byte 2,2,_51271%256,_51271/256,119,104,120,105,2,0,128,240,0  ; (#R51271) Mushroom (Jumping, duration = permanent)
+       byte 7,2,_50800%256,_50800/256,120,100,120,103,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 7,1,_50800%256,_50800/256,121,100,121,103,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 7,2,_51271%256,_51271/256,104,104,105,105,9,0,128,240,0  ; (#R51271) Mushroom (Immunity to Bubo, duration =
+                                                                     ; permanent)
+_44305:
+       byte 6,1,_51253%256,_51253/256,98,111,98,111,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,104,98,104,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,113,98,113,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,116,98,116,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,121,98,121,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,123,98,123,34,0,0,240,0     ; (#R51253) Stalactite
+       byte 6,1,_51253%256,_51253/256,98,124,98,124,34,0,0,240,0     ; (#R51253) Stalactite
+drutts_state_data_2:
+       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,128,192,0 ; (#R52417) Drutt
+worms_state_data_2:
+       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+rev_col_check_addr_2:
+       byte 1,1,_50668%256,_50668/256,113,122,121,129,33,3,0,192,0   ; (#R50668) Level 2 Door
+       byte 255                                                      ; End Marker
+
+* Room Dimension Data (Level 2)
+room_dim_data_2:
+       byte 2,0,31,0,21                                              ; (01) Door Room
+       byte 2,11,20,0,21                                             ; (02) Key Room
+       byte 2,0,31,0,21                                              ; (03) First Apebeast Room
+       byte 2,0,31,0,21                                              ; (04) Second Apebeast Room
+       byte 2,0,31,0,21                                              ; (05) Unused (see trivia)
+       byte 2,0,31,0,21                                              ; (06) Stalactite Room
+       byte 2,0,31,0,21                                              ; (07) Bubo's Room
+       byte 255                                                      ; End Marker
+
+* Horizontal Room Connectivity Map (Level 2)
+horz_connect_map_2:
+       byte 7,4                                                      ; Bubo's Room and Second Apebeast Room
+       byte 4,3                                                      ; Second Apebeast Room and First Apebeast Room
+       byte 3,6                                                      ; First Apebeast Room and Stalactite Room
+       byte 6,1                                                      ; Stalactite Room and Door Room
+       byte 255,255                                                  ; End Marker
+
+* Unused data block (09) (Level 2)
+unused_data_block_09_2:
+       byte 255
+
+* Vertical Room Connectivity Map (Level 2)
+vert_connect_map_2:
+       byte 2,1                                                      ; Key Room and Door Room
+       byte 255,255                                                  ; End Marker
+
+* Table of Initial Positions in Apebeasts' Script Data
+apebeasts_script_data_init:
+       data _38432                                                   ; Apebeast 1 (Level 2)
+       data _38450                                                   ; Apebeast 2 (Level 2)
+       data _38432                                                   ; Apebeast 3 (Level 2)
+       data _38450                                                   ; Apebeast 4 (Level 2)
+
+* Graphic Layout Data Architecture (Level 2)
+*
+* Note that the graphic layout data that describes the floor of the rooms on Level 2 is also used (with a different
+* attribute value) for the floors on Level 3.
+* Red Floor
+_50806:
+       byte 242,2                                                    ; Set current attribute to 2
+       byte 244,1                                                    ; Set current graphic set to 1
+*      Same from here
+       byte 1,161,2,161
+       byte 3,161,4,161
+       byte 5,161,6,161
+       byte 7,161,8,161
+       byte 9,161,10,161
+       byte 11,161,12,161
+       byte 13,161,14,161
+       byte 15,161,16,161
+       byte 1,161,2,161
+       byte 3,161,4,161
+       byte 5,161,6,161
+       byte 7,161,8,161
+       byte 9,161,10,161
+       byte 11,161,12,161
+       byte 13,161,14,161
+       byte 15,161,16,161
+       byte 255                                                      ; End Marker
+* Ceiling 1
+_50875:
+       byte 251,_50923%256,_50923/256                                ; Process graphic layout data at #R50923 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,16                                                 ; Change cursor's x- and y-coordinates by +16 and 0 characters respectively
+       byte 248,_51000%256,_51000/256                                ; Jump to #R51000 (Ceiling Section 2)
+* Ceiling 2
+_50884:
+       byte 251,_51000%256,_51000/256                                ; Process graphic layout data at #R51000 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,16                                                 ; Change cursor's x- and y-coordinates by +16 and 0 characters respectively
+       byte 248,_50923%256,_50923/256                                ; Jump to #R50923 (Ceiling Section 1)
+* Right Wall
+_50893:
+       byte 251,_51069%256,_51069/256                                ; Process graphic layout data at #R51069 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,7,0                                                  ; Change cursor's x- and y-coordinates by 0 and +7 characters respectively
+       byte 251,_51100%256,_51100/256                                ; Process graphic layout data at #R51100 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,14,0                                                 ; Change cursor's x- and y-coordinates by 0 and +14 characters respectively
+       byte 248,_51069%256,_51069/256                                ; Jump to #R51069 (Right Wall Section 1)
+* Left Wall
+_50908:
+       byte 251,_51159%256,_51159/256                                ; Process graphic layout data at #R51159 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,7,0                                                  ; Change cursor's x- and y-coordinates by 0 and +7 characters respectively
+       byte 251,_51131%256,_51131/256                                ; Process graphic layout data at #R51131 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,14,0                                                 ; Change cursor's x- and y-coordinates by 0 and +14 characters respectively
+       byte 248,_51159%256,_51159/256                                ; Jump to #R51159 (Left Wall Section 1)
+* Ceiling Section 1
+_50923:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 0,18,33,0,18,33
+       byte 27,66,33,28,66,33
+       byte 29,66,33,0,18,33
+       byte 0,18,33,0,18,33
+       byte 0,18,33,0,18,33
+       byte 30,66,33,31,66,33
+       byte 0,18,33,0,18,33
+       byte 0,18,33,0,18,17
+       byte 242,66                                                   ; Set current attribute to 66
+       byte 32,33,33,35
+       byte 34,33,9,33
+       byte 10,33,32,33
+       byte 33,33,11,35
+       byte 12,33,13,33
+       byte 14,33,32,33
+       byte 255                                                      ; End Marker
+* Ceiling Section 2
+_51000:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 0,18,33,32,66,33
+       byte 0,18,33,0,18,33
+       byte 0,18,33,30,66,33
+       byte 9,66,33,33,66,33
+       byte 11,66,33,12,66,33
+       byte 29,66,33,0,18,33
+       byte 0,18,33,0,18,33
+       byte 242,66                                                   ; Set current attribute to 66
+       byte 28,33,29,17
+       byte 33,34,12,33
+       byte 14,33,33,38
+       byte 34,33,32,33
+       byte 9,33,33,34
+       byte 34,33
+       byte 255                                                      ; End Marker
+* Right Wall Section 1
+_51069:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 250,0,1                                                  ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
+       byte 238,8                                                    ; Set Repeat Counter A to 8
+       byte 0,18,32
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51076 if not zero
+       byte 250,249,255                                              ; Change cursor's x- and y-coordinates by -1 and -7 characters respectively
+       byte 242,66                                                   ; Set current attribute to 66
+       byte 15,32,16,32
+       byte 17,32,18,32
+       byte 19,32,16,32
+       byte 20,33
+       byte 255                                                      ; End Marker
+* Right Wall Section 2
+_51100:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 250,0,1                                                  ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
+       byte 238,8                                                    ; Set Repeat Counter A to 8
+       byte 0,18,32
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51107 if not zero
+       byte 250,249,255                                              ; Change cursor's x- and y-coordinates by -1 and -7 characters respectively
+       byte 242,66                                                   ; Set current attribute to 66
+       byte 18,32,16,32
+       byte 19,32,16,32
+       byte 20,32,18,32
+       byte 17,33
+       byte 255                                                      ; End Marker
+* Left Wall Section 1
+_51131:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 238,8                                                    ; Set Repeat Counter A to 8
+       byte 0,18,32
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51135 if not zero
+       byte 250,249,1                                                ; Change cursor's x- and y-coordinates by +1 and -7 characters respectively
+       byte 242,194                                                  ; Set current attribute to 194
+       byte 15,32,16,32
+       byte 17,32,18,32
+       byte 19,32,16,32
+       byte 20,33
+       byte 255                                                      ; End Marker
+* Left Wall Section 1
+_51159:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 238,8                                                    ; Set Repeat Counter A to 8
+       byte 0,18,32
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R51163 if not zero
+       byte 250,249,1                                                ; Change cursor's x- and y-coordinates by +1 and -7 characters respectively
+       byte 242,194                                                  ; Set current attribute to 194
+       byte 18,32,16,32
+       byte 19,32,16,32
+       byte 20,32,18,32
+       byte 17,33
+       byte 255                                                      ; End Marker
+* Sides of Ceiling Gap
+_51187:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 15,194,39,18,66,25
+       byte 7,66,39,20,66,33                                         ; See bugs
+       byte 255                                                      ; End Marker
+* Nine stalactites at various heights
+_51202:
+       byte 250,0,2                                                  ; Change cursor's x- and y-coordinates by +2 and 0 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,255,7                                                ; Change cursor's x- and y-coordinates by +7 and -1 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,254,11                                               ; Change cursor's x- and y-coordinates by +11 and -2 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,17                                                 ; Change cursor's x- and y-coordinates by +17 and 0 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,255,20                                               ; Change cursor's x- and y-coordinates by +20 and -1 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,26                                                 ; Change cursor's x- and y-coordinates by +26 and 0 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,254,29                                               ; Change cursor's x- and y-coordinates by +29 and -2 characters respectively
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,255,33                                               ; Change cursor's x- and y-coordinates by +33 and -1 characters respectively (see
+                                                                     ; trivia)
+       byte 251,_51253%256,_51253/256                                ; Process graphic layout data at #R51253 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,35                                                 ; Change cursor's x- and y-coordinates by +35 and 0 characters respectively (see
+                                                                     ; trivia)
+_51253:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 22,66,32,23,66,32
+       byte 24,66,32,25,2,32
+       byte 26,2,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Mushroom
+_51271:
+       byte 244,4                                                    ; Set current graphic set to 4
+       byte 34,71,33,35,71,31
+       byte 36,7,33,37,7,33
+       byte 255                                                      ; End Marker
+
+* Script Data Apebeast Walking Right
+_38432:
+       byte 12,0                                                     ; Set Apebeast's Walking Right Flag
+       byte 60,0                                                     ; Check position of apebeast and turn if appropriate
+       byte 3,0                                                      ; Move apebeast right one character
+       byte _38822%256,_38822/256                                    ; #R38822 (Apebeast, walking right, frame 3)
+       byte _38766%256,_38766/256                                    ; #R38766 (Apebeast, walking right, frame 1)
+       byte _38794%256,_38794/256                                    ; #R38794 (Apebeast, walking right, frame 2)
+       byte _38794%256,_38794/256                                    ; #R38794 (Apebeast, walking right, frame 2)
+       byte 1,0,_38432%256,_38432/256                                ; Jump back to #R38432
+
+* Script Data Apebeast Walking Left
+_38450:
+       byte 11,0                                                     ; Set Apebeast's Walking Left Flag
+       byte 60,0                                                     ; Check position of apebeast and turn if appropriate
+       byte 2,0                                                      ; Move apebeast left one character
+       byte _38937%256,_38937/256                                    ; #R38937 (Apebeast, walking left, frame 3)
+       byte _38881%256,_38881/256                                    ; #R38881 (Apebeast, walking left, frame 1)
+       byte _38909%256,_38909/256                                    ; #R38909 (Apebeast, walking left, frame 2)
+       byte _38909%256,_38909/256                                    ; #R38909 (Apebeast, walking left, frame 2)
+       byte 1,0,_38450%256,_38450/256                                ; Jump back to #R38450
+
+* Graphic Layout Data Green Apebeast (Level 2) Walking right (frame 1)
+_38766:
+       byte 250,255,2                                                ; Change cursor's x- and y-coordinates by +2 and -1 characters respectively
+       byte 251,_38856%256,_38856/256                                ; Process graphic layout data at #R38856 and upon returning, move cursor to base coordinates
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 1,68,33
+       byte 2,68,31
+       byte 3,4,33
+       byte 4,68,31
+       byte 5,4,33
+       byte 6,4,33
+       byte 255                                                      ; End Marker
+* Walking right (frame 2)
+_38794:
+       byte 250,254,2                                                ; Change cursor's x- and y-coordinates by +2 and -2 characters respectively
+       byte 251,_38856%256,_38856/256                                ; Process graphic layout data at #R38856 and upon returning, move cursor to base coordinates
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 33,68,33
+       byte 13,68,31
+       byte 14,4,33
+       byte 15,4,31
+       byte 5,4,33
+       byte 12,4,33
+       byte 255                                                      ; End Marker
+* Walking right (frame 3)
+_38822:
+       byte 250,255,2                                                ; Change cursor's x- and y-coordinates by +2 and -1 characters respectively
+       byte 251,_38856%256,_38856/256                                ; Process graphic layout data at #R38856 and upon returning, move cursor to base coordinates
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 7,68,33
+       byte 8,68,30
+       byte 9,4,33
+       byte 10,4,33
+       byte 11,4,30
+       byte 5,4,33
+       byte 12,4,33
+       byte 32,4,33
+       byte 255                                                      ; End Marker
+* Head (right-facing)
+_38856:
+       byte 244,9                                                    ; Set current graphic set to 9
+       byte 16,68,33
+       byte 236,2,20,21                                              ; Modify following instruction to display graphic of random index, chosen from 20 and 21
+       byte 20,7,31
+       byte 17,4,33
+       byte 18,7,31
+       byte 19,4,33
+       byte 31,4,33
+       byte 255                                                      ; End Marker
+* Walking left (frame 1)
+_38881:
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 251,_38971%256,_38971/256                                ; Process graphic layout data at #R38971 and upon returning, move cursor to base coordinates
+       byte 250,255,2                                                ; Change cursor's x- and y-coordinates by +2 and -1 characters respectively
+       byte 2,132,33
+       byte 1,132,31
+       byte 4,132,33
+       byte 3,132,31
+       byte 6,132,33
+       byte 5,132,33
+       byte 255                                                      ; End Marker
+* Walking left (frame 2)
+_38909:
+       byte 250,254,0                                                ; Change cursor's x- and y-coordinates by 0 and -2 characters respectively
+       byte 251,_38971%256,_38971/256                                ; Process graphic layout data at #R38971 and upon returning, move cursor to base coordinates
+       byte 250,255,2                                                ; Change cursor's x- and y-coordinates by +2 and -1 characters respectively
+       byte 13,132,33
+       byte 33,132,31
+       byte 15,132,33
+       byte 14,132,31
+       byte 12,132,33
+       byte 5,132,33
+       byte 255                                                      ; End Marker
+* Walking left (frame 3)
+_38937:
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 251,_38971%256,_38971/256                                ; Process graphic layout data at #R38971 and upon returning, move cursor to base coordinates
+       byte 250,255,2                                                ; Change cursor's x- and y-coordinates by +2 and -1 characters respectively
+       byte 8,132,33
+       byte 7,132,31
+       byte 11,132,33
+       byte 10,132,33
+       byte 9,132,30
+       byte 32,132,33
+       byte 12,132,33
+       byte 5,132,33
+       byte 255                                                      ; End Marker
+* Head (left-facing)
+_38971:
+       byte 244,9                                                    ; Set current graphic set to 9
+       byte 236,2,20,21                                              ; Modify following instruction to display graphic of random index, chosen from 20 and 21
+       byte 20,135,33
+       byte 16,132,31
+       byte 18,135,33
+       byte 17,132,31
+       byte 31,132,33
+       byte 19,132,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Bubo (Level 2) Normal, animated
+_38996:
+       byte 244,9                                                    ; Set current graphic set to 9
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 27,6,33
+       byte 28,70,33
+       byte 27,134,30
+       byte 29,6,33
+       byte 245,2,10,3,22,23,24                                      ; Decrease timer value (initially 2) and if now zero then reset to 10 and
+                                                                     ; load one of the 3 following values at random into the Graphic Index field
+                                                                     ; of the following instruction
+       byte 22,70,161
+       byte 29,134,30
+       byte 30,70,33
+       byte 34,70,161
+       byte 30,198,30
+       byte 248,_39096%256,_39096/256                                ; Jump to #R39096 (Bubo's feet)
+* Pre/post firing
+_39038:
+       byte 244,9                                                    ; Set current graphic set to 9
+       byte 250,254,1                                                ; Change cursor's x- and y-coordinates by +1 and -2 characters respectively
+       byte 0,54,32
+       byte 0,54,31
+       byte 29,6,33
+       byte 25,70,161
+       byte 29,134,30
+       byte 30,70,33
+       byte 37,70,161
+       byte 30,198,30
+       byte 248,_39096%256,_39096/256                                ; Jump to #R39096 (Bubo's feet)
+* Squashed, firing
+_39070:
+       byte 244,9                                                    ; Set current graphic set to 9
+       byte 44,6,33
+       byte 0,54,33
+       byte 44,134,29
+       byte 39,6,33
+       byte 0,54,33
+       byte 26,70,161
+       byte 0,54,33
+       byte 39,134,29
+* Feet
+_39096:
+       byte 35,70,161
+       byte 36,70,161
+       byte 35,198,33
+       byte 255                                                      ; End Marker
+* Squashed, firing, with explosion
+_39106:
+       byte 251,_39070%256,_39070/256                                ; Process graphic layout data at #R39070 and upon returning, move cursor to
+                                                                     ; base coordinates
+       byte 250,254,0                                                ; Change cursor's x- and y-coordinates by 0 and -2 characters respectively
+       byte 40,71,33,41,71,33,40,199,30
+       byte 42,71,33,43,120,33,42,199,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Bubo's Projectile (Level 2)
+_39131:
+       byte 244,9                                                    ; Set current graphic set to 9
+       byte 43,71,33
+       byte 255                                                      ; End Marker
+
+* Script Data Bubo
+_38024:
+       byte 9,0                                                      ; Reset Must Process Current Script Data Flag
+       byte _38996%256,_38996/256                                    ; #R38996 (Bubo, normal, animated)
+       byte 1,0,_38024%256,_38024/256                                ; Jump to #R38024
+* Firing
+_38032:
+       byte 8,0                                                      ; Set Must Process Current Script Data Flag
+       byte 25,0,4,0                                                 ; Start loop (2) for 4 iterations
+       byte _39038%256,_39038/256                                    ; #R39038 (Bubo, pre/post firing)
+       byte 26,0                                                     ; End loop (2)
+       byte _39070%256,_39070/256                                    ; #R39070 (Bubo, squashed, firing)
+       byte _39106%256,_39106/256                                    ; #R39106 (Bubo, squashed, firing, with explosion)
+       byte 61,0                                                     ; Fire Bubo's projectile
+       byte _39038%256,_39038/256                                    ; #R39038 (Bubo, pre/post firing)
+       byte 1,0,_38024%256,_38024/256                                ; Jump to #R38024
+
+* Graphic Layout Data Doors
+* Level 2
+_50668:
+       byte 244,8                                                    ; Set current graphic set to 8
+       byte 248,_50680%256,_50680/256                                ; Jump to #R50680

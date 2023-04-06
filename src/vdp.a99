@@ -441,22 +441,3 @@ rand   li   tmp1,28643                 ; A prime number to multiply by
        mov  tmp2,tmp0
        rt
 *// rand
-
-*********************************************************************
-*
-* For routines that set or reset the carry flag on return
-*
-return_with_carry:
-       .pop  r11
-return_with_carry_1:
-       seto tmp0
-       inc  tmp0
-       rt
-
-return_without_carry:
-       .pop  r11
-return_without_carry_1:
-       clr  tmp0
-       inc  tmp0
-       rt
-

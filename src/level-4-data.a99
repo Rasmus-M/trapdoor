@@ -1,0 +1,758 @@
+*********************************************************************
+*
+* Table of Data Addresses (Level 4)
+*
+data_addresses_4:
+       data state_data_simple_4                                      ; State Data for Simple Entities (Level 4)
+       data state_data_complex_4                                     ; State Data for Complex Entities (Level 4)
+       data berks_state_data_4                                       ; Address of Berk's state data (Level 4)
+       data drutts_state_data_4                                      ; Address of Drutt's state data (Level 4)
+       data worms_state_data_4                                       ; Address of worm's state data (Level 4)
+       data rev_col_check_addr_4                                     ; Start address for reverse-order collision checks (Level 4)
+       data room_dim_data_4                                          ; Room Dimension Data (Level 4)
+       data horz_connect_map_4                                       ; Horizontal Room Connectivity Map (Level 4)
+       data unused_data_block_09_4                                   ; Unused Data Block (09) (Level 4)
+       data vert_connect_map_4                                       ; Vertical Room Connectivity Map (Level 4)
+
+* State Data for Simple Entities (Level 4)
+*
+state_data_simple_4:
+       byte 1,2,_49178%256,_49178/256,100,126                        ; (#R49178) Left brickwork
+       byte 1,2,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
+       byte 2,1,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
+       byte 2,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 2,2,_49178%256,_49178/256,100,107                        ; (#R49178) Left brickwork
+       byte 2,2,_49178%256,_49178/256,100,125                        ; (#R49178) Left brickwork
+       byte 3,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 3,2,_49178%256,_49178/256,100,114                        ; (#R49178) Left brickwork
+       byte 3,1,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
+       byte 4,2,_49413%256,_49413/256,117,123                        ; (#R49413) Single wide brick
+       byte 4,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 4,1,_50238%256,_50238/256,121,99                         ; (#R50238) Left part of floor
+       byte 4,1,_50211_4%256,_50211_4/256,121,121                    ; (#R50211) Right part of floor
+       byte 5,1,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
+       byte 5,1,_49584%256,_49584/256,97,100                         ; (#R49584) Vertical red bar (outside normal game area)
+       byte 5,1,_49584%256,_49584/256,102,127                        ; (#R49584) Vertical red bar (outside normal game area)
+       byte 5,1,_49489%256,_49489/256,117,100                        ; (#R49489) Snake's Brickwork
+       byte 254                                                      ; End Marker
+
+* State Data for Complex Entities (Level 4)
+state_data_complex_4:
+       byte 1,1,_50800%256,_50800/256,100,100,101,111,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 1,1,_50800%256,_50800/256,100,119,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 5,1,_49104%256,_49104/256,100,95,101,110,130,0,0,240,0   ; (#R49104) Two rows of horizontal brickwork (half-width, 1)
+       byte 5,1,_49035%256,_49035/256,100,121,101,131,130,0,0,240,0  ; (#R49035) Two rows of horizontal brickwork (half-width, 2)
+       byte 5,1,_50800%256,_50800/256,120,100,121,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,1,_50800%256,_50800/256,121,122,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,2,_50800%256,_50800/256,120,107,120,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,2,_50800%256,_50800/256,120,120,120,124,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 4,1,_50800%256,_50800/256,121,127,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+berks_state_data_4:
+       byte 1,1,_57428%256,_57428/256,115,102,121,107,31,18,128,192,0 ; (#R57428) Berk
+_45404:
+       byte 3,1,_42901%256,_42901/256,110,128,121,129,36,0,128,192,0 ; (#R42901) Skeleton
+_45417:
+       byte 3,0,_50317%256,_50317/256,0,0,0,0,19,0,128,240,2         ; (#R50317) Boni
+_45430:
+       byte 4,2,_50304%256,_50304/256,113,125,116,126,21,0,128,240,0 ; (#R50304) Fake Boni
+drutts_state_data_4:
+       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
+       byte 4,2,_50792%256,_50792/256,114,118,114,119,17,0,128,240,0 ; (#R50792) Key
+worms_state_data_4:
+       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+_45482:
+       byte 3,1,_51314%256,_51314/256,110,108,114,110,30,0,0,48,0    ; (#R51314) Flying Skeleton Creature
+_45495:
+       byte 5,1,_42648%256,_42648/256,119,83,119,101,30,0,128,0,0    ; (#R42648) Snake
+_45508:
+       byte 1,1,_42530%256,_42530/256,118,122,121,124,20,0,128,240,0 ; (#R42530) Cannon
+_45521:
+       byte 2,2,_50800%256,_50800/256,104,107,104,107,40,0,128,0,0   ; (#R50800) 1st drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,105,110,105,110,41,0,128,0,0   ; (#R50800) 2nd drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,102,115,102,115,43,0,128,0,0   ; (#R50800) 3rd drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,103,120,103,120,44,0,128,0,0   ; (#R50800) 4th drip from left (Red Sausage Room)
+       byte 2,2,_50800%256,_50800/256,104,128,104,128,45,0,128,0,0   ; (#R50800) 5th drip from left (Red Sausage Room)
+       byte 3,2,_50800%256,_50800/256,104,113,104,113,46,0,128,0,0   ; (#R50800) Drip (Skeleton's Room)
+_45599:
+       byte 0,0,_50800%256,_50800/256,0,0,0,0,30,0,128,0,0           ; (#R50800) Cannon's Projectile
+       byte 2,1,_43128%256,_43128/256,121,110,121,111,3,0,128,240,0  ; (#R43128) Red Sausage (Jumping, duration = permanent)
+       byte 4,1,_43137%256,_43137/256,121,124,121,125,7,0,134,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 6)
+       byte 5,2,_43137%256,_43137/256,120,111,120,112,8,0,131,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 3)
+level_4_door:
+       byte 1,1,_50678%256,_50678/256,113,102,121,109,33,1,0,192,0   ; (#R50678) Door
+       byte 1,1,_49173%256,_49173/256,100,100,121,101,128,0,0,240,0  ; (#R49173) Yellow brick column
+       byte 1,1,_49173%256,_49173/256,110,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 1,1,_49571%256,_49571/256,112,102,112,102,30,0,0,0,0     ; (#R49571) Long yellow brick
+       byte 2,1,_49392%256,_49392/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
+       byte 3,1,_49392%256,_49392/256,115,99,118,100,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
+       byte 3,1,_49392%256,_49392/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
+       byte 4,1,_49392%256,_49392/256,115,99,118,101,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
+       byte 4,1,_50800%256,_50800/256,120,111,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 4,1,_49173%256,_49173/256,102,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 4,1,_49173%256,_49173/256,101,131,121,132,30,0,0,0,0     ; (#R49173) Yellow brick column
+_45794:
+       byte 4,1,_42754%256,_42754/256,111,121,114,122,30,0,0,0,0     ; (#R42754) Ghost
+       byte 5,1,_50800%256,_50800/256,100,100,101,110,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 5,1,_50800%256,_50800/256,100,121,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                                     ; head)
+       byte 5,1,_49535%256,_49535/256,102,104,121,106,128,0,0,16,0   ; (#R49535) Left wall, short
+rev_col_check_addr_4:
+       byte 5,1,_49553%256,_49553/256,102,125,121,127,128,0,0,32,0   ; (#R49553) Right wall, long
+       byte 255                                                      ; End Marker
+
+* Room Dimension Data (Level 4)
+room_dim_data_4:
+       byte 2,0,31,0,21                                              ; (01) Door Room
+       byte 2,0,31,0,21                                              ; (02) Five Drips Room
+       byte 2,0,31,0,21                                              ; (03) Skeleton's Room
+       byte 2,0,31,0,21                                              ; (04) Fake Boni's Room
+       byte 2,0,31,0,21                                              ; (05) Pit
+       byte 255                                                      ; End Marker
+
+* Horizontal Room Connectivity Map (Level 4)
+horz_connect_map_4:
+       byte 1,2                                                      ; Door Room and Five Drips Room
+       byte 2,3                                                      ; Five Drips Room and Skeleton's Room
+       byte 3,4                                                      ; Skeleton's Room and Fake Boni's Room
+       byte 255,255                                                  ; End Marker
+
+* Unused data block (09) (Level 4)
+unused_data_block_09_4:
+       byte 255
+
+* Vertical Room Connectivity Map (Level 4)
+vert_connect_map_4:
+       byte 4,5                                                      ; Fake Boni's Room and Pit
+       byte 255,255                                                  ; End Marker
+
+* Table of Addresses of Attribute Data in Skeleton's Graphic Layout Data Blocks
+*
+* Each of the addresses in this table is of the "operand" of a "set attribute" instruction (i.e. 242) in the
+* Skeleton's graphic layout data blocks. These are initially 7 (i.e. white). When the skeleton is killed, the
+* routine at #R41424 (instructions starting at #R41473) decreases this attribute by one per game cycle. When the
+* attribute values reach 1 (blue), the skeleton is removed from the game and replaced by Boni.
+_41412:
+       data _42910+1                                                 ; (#R42910) Standing, Full, Animated
+       data _42946+1                                                 ; (#R42946) Stepping Forward, Frame 1, Full, Animated
+       data _42987+1                                                 ; (#R42987) Stepping Forward, Frame 2, Full, Animated
+       data _43022+1                                                 ; (#R43022) Head, Animated
+       data _43061+1                                                 ; (#R43061) Torso and Spear, Extended
+       data _43095+1                                                 ; (#R43095) Torso and Spear, Retracted
+
+* Addresses of Graphic Layout Data for Drips (Level 4)
+*
+* Used by the routine at #R42251.
+gfx_layout_drips:
+       data _50800                                                   ; Stage 0 - Blank
+       data _49600                                                   ; Stage 1 - Green drip forming
+       data _49615                                                   ; Stage 2 - Red drip enlarging
+       data _49630                                                   ; Stage 3 - Magenta drip enlarging
+       data _49645                                                   ; Stage 4 - Cyan drip enlarging
+       data _49663                                                   ; Stage 5 - Yellow drip full size
+       data _49681                                                   ; Stage 6 - Yellow drip extended
+       data _49699                                                   ; Stage 7 - Drip disconnected and falling
+       data _51483                                                   ; Stage 8 - Drip exploding on contact
+
+* Script Data Skeleton (Level 4) Idling
+skeleton_idling_script:
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 63,0                                                     ; Have Skeleton advance or retreat based upon positions of Berk and Fake Boni
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256 ; Jump to #R41232 (Skeleton Idling)
+
+* Unused
+*
+* This block contains unused script data: Skeleton (level 4) threatening. Input:  Facts#unusedskeletonscript(See
+* trivia).
+;       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+;       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
+;       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
+;       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+;       byte 28,0                                                     ; End loop (3)
+;       byte _42937%256,_42937/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
+;       byte _42937%256,_42937/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
+;       byte 2,0                                                      ; Move Skeleton left two characters...
+;       byte 2,0                                                      ; ...
+;       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+;       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
+;       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
+;       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+;       byte 28,0                                                     ; End loop (3)
+;       byte 3,0                                                      ; Move Skeleton right two characters...
+;       byte 3,0                                                      ; ...
+;       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
+
+* Script Data Skeleton (Level 4) Stepping Forward (Left)
+_41280:
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
+       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 28,0                                                     ; End loop (3)
+       byte _42937%256,_42937/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
+       byte 2,0                                                      ; Move Skeleton left two characters...
+       byte 2,0                                                      ; ...
+       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
+       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 28,0                                                     ; End loop (3)
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
+
+* Script Data Skeleton (Level 4) Stepping Back (Right)
+_41318:
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
+       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 28,0                                                     ; End loop (3)
+       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte 3,0                                                      ; Move Skeleton right two characters...
+       byte 3,0                                                      ; ...
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
+       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
+       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte 28,0                                                     ; End loop (3)
+       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
+
+* Graphic Layout Data Cannon (Level 4) Loaded (Animated)
+_42519:
+       byte 243,0,4                                                  ; Increase current state value n (initially 0), up to maximum of 4, resetting to
+                                                                     ; zero if maximum reached and jump to n-th address in following list:
+       byte _42530%256,_42530/256                                    ; #R42530 (Cannon, straight)
+       byte _42556%256,_42556/256                                    ; #R42556 (Cannon, tilted right)
+       byte _42530%256,_42530/256                                    ; #R42530 (Cannon, straight)
+       byte _42594%256,_42594/256                                    ; #R42594 (Cannon, tilted left)
+* Straight
+_42530:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 41,66,33,0,18,33
+       byte 41,194,30,42,66,34
+       byte 42,194,30,44,66,34
+       byte 44,194,33
+       byte 248,_42629%256,_42629/256                                ; Jump to #R42629
+* Tilted Right
+_42556:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,1                                                ; Change cursor's x- and y-coordinates by +1 and -1 characters respectively
+       byte 48,2,31,49,2,33
+       byte 0,18,33,50,66,33
+       byte 51,2,29,52,66,34
+       byte 0,18,33,53,2,29
+       byte 54,66,34,55,66,33
+       byte 248,_42629%256,_42629/256                                ; Jump to #R42629
+* Tilted Left
+_42594:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,1                                                ; Change cursor's x- and y-coordinates by +1 and -1 characters respectively
+       byte 48,130,30,51,130,33
+       byte 50,194,33,0,18,33
+       byte 49,130,29,53,130,33
+       byte 0,18,34,52,194,30
+       byte 55,194,34,54,194,33
+_42629:
+       byte 250,255,254                                              ; Change cursor's x- and y-coordinates by -2 and -1 characters respectively
+       byte 43,50,32,45,50,31
+       byte 46,70,33,47,70,33
+       byte 46,198,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Snake (Level 4) Mouth Closed, With Animated Tongue
+_42648:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 238,14                                                   ; Set Repeat Counter A to 14
+       byte 24,50,161
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R42652 if not zero
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 27,6,33,28,6,33
+       byte 29,62,33,35,6,29
+       byte 31,6,33,31,134,33
+       byte 0,54,33,36,6,33
+       byte 37,6,33
+       byte 247,2                                                    ; Jump to one of the 2 addresses in the following list, chosen at random:
+       byte _50800%256,_50800/256                                    ; #R50800 (blank)
+       byte _42692%256,_42692/256                                    ; #R42692 (tongue, animated)
+* Tongue, animated
+_42692:
+       byte 38,5,33
+       byte 236,2,39,40                                              ; Modify following instruction to display graphic of random index, chosen from 39 and
+                                                                     ; 40
+       byte 39,5,33
+       byte 255                                                      ; End Marker
+* Mouth Open, Attacking
+_42703:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 238,14                                                   ; Set Repeat Counter A to 14
+       byte 24,50,161
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R42707 if not zero
+       byte 250,254,2                                                ; Change cursor's x- and y-coordinates by +2 and -2 characters respectively
+       byte 27,6,33,25,6,33
+       byte 26,7,28,27,6,33
+       byte 28,6,33,29,62,33
+       byte 30,6,29,31,6,33
+       byte 31,134,33,0,54,33
+       byte 32,6,31,33,6,33
+       byte 34,6,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Ghost (Level 4) Full, Fully Animated
+_42754:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 243,0,2                                                  ; Increase current state value n (initially 0), up to maximum of 2, resetting to zero
+                                                                     ; if maximum reached and jump to n-th address in following list:
+       byte _42763%256,_42763/256                                    ; #R42763 (Ghost, full, wings up, tail animated)
+       byte _42797%256,_42797/256                                    ; #R42797 (Ghost, full, wings down, tail animated)
+* Full, Wings Up, Tail Animated
+_42763:
+       byte 251,_42831%256,_42831/256                                ; Process graphic layout data at #R42831 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,254                                                ; Change cursor's x- and y-coordinates by -2 and 0 characters respectively
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 59,32,60,33
+       byte 61,31,62,33
+       byte 63,33
+       byte 250,254,3                                                ; Change cursor's x- and y-coordinates by +3 and -2 characters respectively
+       byte 242,135                                                  ; Set current attribute to 135
+       byte 59,31,61,33
+       byte 60,31,63,33
+       byte 62,33
+       byte 255                                                      ; End Marker
+* Full, Wings Down, Tail Animated
+_42797:
+       byte 251,_42831%256,_42831/256                                ; Process graphic layout data at #R42831 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,1,254                                                ; Change cursor's x- and y-coordinates by -2 and +1 characters respectively
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 64,33,65,31
+       byte 66,33,67,31
+       byte 68,33
+       byte 250,254,3                                                ; Change cursor's x- and y-coordinates by +3 and -2 characters respectively
+       byte 242,135                                                  ; Set current attribute to 135
+       byte 65,33,64,31
+       byte 67,33,66,32
+       byte 68,33
+       byte 255                                                      ; End Marker
+* Body and Tail, Without Wings
+_42831:
+       byte 250,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
+       byte 56,7,33,56,135,31
+       byte 57,7,33,57,135,31
+       byte 58,7,33,58,135,31
+       byte 0,63,33,0,63,31
+       byte 236,2,69,72                                              ; Modify following instruction to display graphic of random index, chosen from 69 and
+                                                                     ; 72
+       byte 69,7,33
+       byte 236,2,69,72                                              ; Modify following instruction to display graphic of random index, chosen from 69 and
+                                                                     ; 72
+       byte 69,135,31
+       byte 236,2,70,73                                              ; Modify following instruction to display graphic of random index, chosen from 70 and
+                                                                     ; 73
+       byte 73,7,33
+       byte 236,2,70,73                                              ; Modify following instruction to display graphic of random index, chosen from 70 and
+                                                                     ; 73
+       byte 73,135,31
+       byte 236,2,71,74                                              ; Modify following instruction to display graphic of random index, chosen from 71 and
+                                                                     ; 74
+       byte 74,7,33
+       byte 236,2,71,74                                              ; Modify following instruction to display graphic of random index, chosen from 71 and
+                                                                     ; 74
+       byte 74,135,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Skeleton (Level 4) Standing, Full, Animated
+_42901:
+       byte 251,_43020%256,_43020/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 251,_43047%256,_43047/256                                ; Process graphic layout data at #R43047 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,7,1                                                  ; Change cursor's x- and y-coordinates by +1 and +7 characters respectively
+_42910:
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 113,31,114,33
+       byte 115,31,116,33
+       byte 117,33,118,30
+       byte 119,34,120,29
+       byte 121,33,122,33
+       byte 121,33,122,33
+       byte 255                                                      ; End Marker
+* Stepping Forward, Frame 1, Full, Animated
+_42937:
+       byte 251,_43020%256,_43020/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 251,_43047%256,_43047/256                                ; Process graphic layout data at #R43047 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,7,255                                                ; Change cursor's x- and y-coordinates by -1 and +7 characters respectively
+_42946:
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 108,33,109,33
+       byte 110,30,116,34
+       byte 123,30,119,34
+       byte 117,33,118,28
+       byte 121,33,122,35
+       byte 120,31,121,33
+       byte 122,33
+       byte 255                                                      ; End Marker
+* Stepping Forward, Frame 2, Full, Animated
+_42975:
+       byte 254,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively and store as
+                                                                     ; new base coordinates
+       byte 251,_43020%256,_43020/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 251,_43058%256,_43058/256                                ; Process graphic layout data at #R43058 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,7,0                                                  ; Change cursor's x- and y-coordinates by 0 and +7 characters respectively
+_42987:
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 124,33,125,33
+       byte 126,29,127,33
+       byte 128,33,129,33
+       byte 130,30,131,34
+       byte 132,33,133,33
+       byte 134,27,121,33
+       byte 122,35,135,33
+       byte 136,33
+       byte 255                                                      ; End Marker
+* Head, Animated
+_43020:
+       byte 244,12                                                   ; Set current graphic set to 12
+_43022:
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 75,33,76,31
+       byte 77,33,78,31
+       byte 79,33,80,31
+       byte 236,2,81,82                                              ; Modify following instruction to display graphic of random index, chosen from 81 and 82
+       byte 81,33,83,33
+       byte 84,33
+       byte 255                                                      ; End Marker
+* Torso and Spear, Animated
+_43047:
+       byte 249,2,1                                                  ; If state n (initially 1) has remaining time of zero then reset its time to maximum and
+                                                                     ; randomly select a new state, n, from the 2 in the following list. Jump to the address
+                                                                     ; specified in the current state and decrease its remaining time:
+       byte 3,3,_43058%256,_43058/256                                ; #R43058 (Torso and spear, extended, for 3 ticks)
+       byte 3,3,_43092%256,_43092/256                                ; #R43092 (Torso and spear, retracted, for 3 ticks)
+* Torso and Spear, Extended
+_43058:
+       byte 250,4,0                                                  ; Change cursor's x- and y-coordinates by 0 and +4 characters respectively
+_43061:
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 98,33,99,33
+       byte 100,33,101,24
+       byte 90,33,91,33
+       byte 92,33,102,33
+       byte 103,33,104,33
+       byte 105,33,106,33
+       byte 91,30,107,33
+       byte 255                                                      ; End Marker
+* Torso and Spear, Retracted
+_43092:
+       byte 250,3,3                                                  ; Change cursor's x- and y-coordinates by +3 and +3 characters respectively
+_43095:
+       byte 242,7                                                    ; Set current attribute to 7
+       byte 85,29,86,33
+       byte 87,33,88,33
+       byte 89,25,90,33
+       byte 91,33,92,33
+       byte 93,33,94,33
+       byte 95,33,96,33
+       byte 97,33,91,29
+       byte 107,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Sausages (Level 4) Red Sausage
+_43128:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 23,2,33,23,130,33
+       byte 255                                                      ; End Marker
+* Cyan Sausage
+_43137:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 23,5,33,23,133,33
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Architecture (Level 4) Double Row of Green Bricks, 32 Characters Wide
+_49029:
+       byte 250,0,16                                                 ; Change cursor's x- and y-coordinates by +16 and 0 characters
+                                                                     ; respectively
+       byte 251,_49104%256,_49104/256                                ; Process graphic layout data at #R49104 and upon returning, move
+                                                                     ; cursor to base coordinates
+* Double Row of Green Bricks (1 / 2), 16 Characters Wide
+_49035:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,10,161,11,145
+       byte 9,161,11,161
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,11,161
+       byte 255                                                      ; End Marker
+* Double Row of Green Bricks (2 / 2), 16 Characters Wide
+_49104:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 9,161,10,161,11,161
+       byte 9,161,11,161
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,11,161
+       byte 9,161,11,145
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 255                                                      ; End Marker
+* Yellow Brick Column
+_49173:
+       byte 242,6                                                    ; Set current attribute to 6
+       byte 248,_49180%256,_49180/256                                ; Jump to #R49180 (brick column)
+* Green Brick Column
+_49178:
+       byte 242,4                                                    ; Set current attribute to 4
+_49180:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,0,249                                                ; Change cursor's x- and y-coordinates by -7 and 0 characters
+                                                                     ; respectively
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,10,161,10,161,11,143
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,10,161,10,161,10,161,11,161
+       byte 9,161,10,161,11,148
+       byte 9,161,11,161
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,10,161,11,161
+       byte 9,161,11,153
+       byte 9,161,10,161,10,161,11,161
+       byte 9,161,11,155
+       byte 9,161,10,161,10,161,11,158
+       byte 9,161,10,161,11,157
+       byte 9,161,10,161,11,158
+       byte 9,161,10,161,11,159
+       byte 9,161,11,159
+       byte 9,161,10,161,11,158
+       byte 9,161,11,158
+       byte 9,161,10,161,10,161,11,158
+       byte 9,161,11,159
+       byte 9,161,10,161,11,158
+       byte 9,161,11,158
+       byte 9,161,10,161,11,158
+       byte 9,161,10,161,10,161,11,158
+       byte 9,161,10,161,11,158
+       byte 9,161,11,158
+       byte 9,161,10,161,11,159
+       byte 9,161,11,158
+       byte 9,161,10,161,10,161,11,161
+       byte 255                                                      ; End Marker
+* Small Red and Blue Wall
+_49392:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,2                                                    ; Set current attribute to 2
+       byte 238,4                                                    ; Set Repeat Counter A to 4
+       byte 9,161,11,159
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49398 if not zero
+       byte 242,1                                                    ; Set current attribute to 1
+       byte 238,3                                                    ; Set Repeat Counter A to 3
+       byte 9,161,11,159
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49407 if not zero
+       byte 255                                                      ; End Marker
+* Fake Boni's Alcove
+_49413:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 250,251,0                                                ; Change cursor's x- and y-coordinates by 0 and -4 characters
+                                                                     ; respectively
+       byte 9,161,10,161
+       byte 10,161,10,161
+       byte 10,161,11,153
+       byte 9,161,10,161
+       byte 10,161,11,163
+       byte 9,161,11,154
+       byte 9,161,10,161
+       byte 11,163,9,161
+       byte 10,161,11,154
+       byte 9,161,11,163
+       byte 9,161,11,154
+       byte 9,161,10,161
+       byte 11,163,9,161
+       byte 10,161,11,154
+       byte 9,161,10,161
+       byte 10,161,10,161
+       byte 10,161,11,161
+       byte 255                                                      ; End Marker
+* Snake's Brickwork
+_49489:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 9,161,10,161
+       byte 10,161,10,161
+       byte 11,161
+       byte 250,3,251                                                ; Change cursor's x- and y-coordinates by -4 and +3 characters
+                                                                     ; respectively
+       byte 9,161,10,161
+       byte 11,161,9,161
+       byte 11,161,9,161
+       byte 11,154,9,161
+       byte 10,161,10,161
+       byte 11,161,9,161
+       byte 10,161,11,161
+       byte 255                                                      ; End Marker
+* Left Wall, Short
+_49535:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 238,8                                                    ; Set Repeat Counter A to 8
+       byte 9,161,10,161
+       byte 11,159,9,161
+       byte 11,158
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49541 if not zero
+       byte 255                                                      ; End Marker
+* Right Wall, Long
+_49553:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 238,11                                                   ; Set Repeat Counter A to 11
+       byte 9,161,10,161
+       byte 11,158,9,161
+       byte 11,159
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49559 if not zero
+       byte 255                                                      ; End Marker
+* Long Yellow Brick
+_49571:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 242,6                                                    ; Set current attribute to 6
+       byte 9,161,10,161
+       byte 10,161,11,161
+       byte 255                                                      ; End Marker
+* Vertical Red Bar (Outside Normal Game Area)
+_49584:
+       byte 242,18                                                   ; Set current attribute to 18
+       byte 238,20                                                   ; Set Repeat Counter A to 20
+       byte 0,33,0,33
+       byte 0,33,0,33
+       byte 0,28
+       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R49588 if not zero
+       byte 255                                                      ; End Marker
+* Drip Stage 1 - Green Drip, Forming
+_49600:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters
+                                                                     ; respectively
+       byte 12,4,33,14,4,33
+       byte 13,4,33
+       byte 255                                                      ; End Marker
+* Drip Stage 2 - Red Drip, Enlarging
+_49615:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters
+                                                                     ; respectively
+       byte 12,2,33,15,2,33
+       byte 13,2,33
+       byte 255                                                      ; End Marker
+* Drip Stage 3 - Magenta Drip, Enlarging
+_49630:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters
+                                                                     ; respectively
+       byte 12,3,33,16,3,33
+       byte 13,3,33
+       byte 255                                                      ; End Marker
+* Drip Stage 4 - Cyan Drip, Enlarging
+_49645:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters
+                                                                     ; respectively
+       byte 12,5,33,17,5,33
+       byte 13,5,31,18,5,33
+       byte 255                                                      ; End Marker
+* Drip Stage 5 - Yellow Drip, Full Size
+_49663:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters
+                                                                     ; respectively
+       byte 12,6,33,19,6,33
+       byte 13,6,31,20,6,33
+       byte 255                                                      ; End Marker
+* Drip Stage 6 - Yellow Drip, Extended
+_49681:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters
+                                                                     ; respectively
+       byte 12,6,33,21,6,33
+       byte 13,6,31,22,70,33
+       byte 255                                                      ; End Marker
+* Drip Stage 7 - Drip Disconnected and Falling / Cannon Projectile
+_49699:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 22,71,33
+       byte 255                                                      ; End Marker
+
+* Floor (Full Width, 32 chars)
+_50160_4:
+       byte 251,_50238_4%256,_50238_4/256                                ; Process graphic layout data at #R50238 and upon returning, move cursor to base
+                                                                     ; coordinates
+       byte 250,0,12                                                 ; Change cursor's x- and y-coordinates by +12 and 0 characters respectively
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 52,161,53,161
+       byte 54,161,55,161
+       byte 242,132                                                  ; Set current attribute to 132
+       byte 55,161,54,161
+       byte 53,161,52,161
+       byte 44,161,43,161
+       byte 42,161,41,161
+       byte 40,161,39,161
+       byte 38,161,37,161
+       byte 36,161,35,161
+       byte 34,161,33,161
+       byte 255                                                      ; End Marker
+
+* Right Half of Floor
+_50211_4:
+       byte 242,132                                                  ; Set current attribute to 132
+       byte 44,161,43,161
+       byte 42,161,41,161
+       byte 40,161,39,161
+       byte 38,161,37,161
+       byte 36,161,35,161
+       byte 34,161,33,161
+       byte 255                                                      ; End Marker
+
+* Left Part of Floor (Also Used in Level 4)
+_50238_4:
+       byte 244,3                                                    ; Set current graphic set to 3
+       byte 242,4                                                    ; Set current attribute to 4
+       byte 33,161,34,161
+       byte 35,161,36,161
+       byte 37,161,38,161
+       byte 39,161,40,161
+       byte 41,161,42,161
+       byte 43,161,44,161
+       byte 255                                                      ; End Marker
+
+* Graphic Layout Data Boni Fake Boni (Level 4)
+_50304:
+       byte 244,4                                                    ; Set current graphic set to 4
+       byte 242,6                                                    ; Set current attribute to 6
+       byte 248,_50321%256,_50321/256                                ; Jump to #R50321
+
+* Graphic Layout Data Doors
+* Level 4
+_50678:
+       byte 244,12                                                   ; Set current graphic set to 12
+       byte 248,_50680%256,_50680/256                                ; Jump to #R50680
