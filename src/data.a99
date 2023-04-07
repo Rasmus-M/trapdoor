@@ -167,11 +167,11 @@ vert_room_connect_map:
        data 99                                                       ; Vertical Room Connectivity Map
 
 * Miscellaneous Data 1
-bert_interaction_state:
+berk_interaction_state:
        data 0                                                        ; Address of complex state data for entity Berk is interacting with
 coll_entity_addr:
        data 0                                                        ; Address of complex state data for entity involved in last collision check
-bert_held_state:
+berk_held_state:
        data 0                                                        ; Address of complex state data for entity last held by Berk
 room_dim_data_addr:
        data 0                                                        ; Pointer to entry in room dimension data for an entity's room (See also data in this entry

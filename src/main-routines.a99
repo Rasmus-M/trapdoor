@@ -38,6 +38,9 @@ main:
        bl   @draw_timer_bar            ; CALL 47241        ; Reset Show Score Flag and draw timer figures bar
 *      Debug: start at other level
        .ifne start_at_level,1
+       li   a,(start_at_level-1)*256
+       movb a,@current_level
+       bl   @init_level_data
        .ifeq start_at_level,2
        li   tmp0,level_1_exit_door
        .endif
@@ -51,7 +54,7 @@ main:
        socb @bits+3,@flying_skeleton+9 ; Set Berk and Drutt through the trap door flag
        li   tmp0,level_4_door
        .endif
-       mov  tmp0,@bert_interaction_state
+       mov  tmp0,@berk_interaction_state
        bl   @next_level
        .endif
 *      Debug - end
@@ -2232,7 +2235,7 @@ update_berk_state_7:
 * Berk is now horizontally aligned with door
        bl   @turn_into_screen          ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
                                                            ; turn into screen
-       mov  iy,@bert_interaction_state ; LD (34256),IY     ; Store address of complex state data for door at #R34256
+       mov  iy,@berk_interaction_state ; LD (34256),IY     ; Store address of complex state data for door at #R34256
        li   hl,_35017                  ; LD HL,35017       ; Point HL at script data for Berk interacting with a door behind him...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Collision with something other than door
@@ -2247,7 +2250,7 @@ update_berk_state_8:
 * Berk is now horizontally aligned with entity pointed to by IY
        bl   @turn_into_screen          ; CALL 36367        ; If Berk is neither facing into the screen nor walking then exit this routine and have Berk
                                                            ; turn into screen
-       mov  iy,@bert_interaction_state ; LD (34256),IY     ; Store address of complex state data for entity at #R34256
+       mov  iy,@berk_interaction_state ; LD (34256),IY     ; Store address of complex state data for entity at #R34256
        movb @6(ix),b                   ; LD B,(IX+6)       ; Load B with y-coordinate of Berk's bottom edge...
        sb   one,b                      ; DEC B             ; ...minus 1 (to take into account different depth)
        movb @6(iy),a                   ; LD A,(IY+6)       ; Load A with y-coordinate of entity's bottom edge...
@@ -2344,7 +2347,7 @@ update_berk_state_17:
 * Collision with door
        bl   @move_berk_closer          ; CALL 36116        ; If Berk is not horizontally aligned with door then move him closer and exit this routine
 * Berk is now horizontally aligned with door
-       mov  iy,@bert_interaction_state ; LD (34256),IY     ; Store address of door's complex state data at #R34256
+       mov  iy,@berk_interaction_state ; LD (34256),IY     ; Store address of door's complex state data at #R34256
        li   hl,_35045                  ; LD HL,35045       ; Point HL at script data for Berk interacting with a door in front of him...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Collision with something other than door
@@ -2364,7 +2367,7 @@ update_berk_state_18:
        bl   @move_berk_closer          ; CALL 36116        ; If Berk is not horizontally aligned with entity at IY then move him closer and exit this
                                                            ; routine
 * Berk is now horizontally aligned with entity pointed to by IY
-       mov  iy,@bert_interaction_state ; LD (34256),IY     ; Store address of entity's complex state data at #R34256
+       mov  iy,@berk_interaction_state ; LD (34256),IY     ; Store address of entity's complex state data at #R34256
        li   hl,_35187                  ; LD HL,35187       ; Point HL at script data for Berk picking up an entity on floor in front of him...
        b    @execute_script            ; JP 48098          ; ...and execute
 * No collision occurred
@@ -2393,7 +2396,7 @@ eat:
        jhe  eat_1                      ; RET NC            ; ...then return
        .pop bc                         ; POP BC            ; Remove top value from stack (i.e. return address to routine that called this routine)
        bl   @move_carried_to_front     ; CALL 48710         ; Move carried entity in front of Berk as he faces out of screen
-       mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity held by Berk
+       mov  @berk_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity held by Berk
        sb   one,@4(iy)                 ; DEC (IY+4)        ; Move entity up one character to level of Berk's mouth...
        sb   one,@6(iy)                 ; DEC (IY+6)        ; ...
        li   hl,_35493                  ; LD HL,35493       ; Point HL at script data for Berk eating an entity...
@@ -2505,7 +2508,7 @@ attempt_to_move_right_2:
        cb   a,@bytes+129               ; CP 129            ; If collision was not with entity of class 129 (causes other entities to start falling)...
        jne  attempt_to_move_right_3    ; JR NZ,36266       ; ...then skip ahead to #R36266
        bl   @drop_item                 ; CALL 36296        ; Make Berk drop the entity he is holding and load IY with its complex state data address
-       mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk (see trivia)
+       mov  @berk_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk (see trivia)
        li   hl,_35327                  ; LD HL,35327       ; Point HL at script data for Berk starting to fall to the right...
        b    @execute_script            ; JP 48098          ; ...and execute
 attempt_to_move_right_3:

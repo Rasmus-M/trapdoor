@@ -12,7 +12,7 @@ drop_item_0:
        jeq  drop_item_5                ; RET Z             ; ...then return
        sb   a,a                        ; XOR A             ; Set class of entity held by Berk to zero (i.e. nothing)...
        movb a,@berk_entity_held        ; LD (34221),A      ; ...
-       mov  @bert_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk
+       mov  @berk_held_state,iy        ; LD IY,(34260)     ; Load IY with address of complex state data for entity last held by Berk
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set this dropped entity's velocity factor to 2...
        szcb @bits+5,@10(iy)            ; RES 5,(IY+10)     ; ...reset its Is Being Carried Flag...
        socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; ...and set its Can Fall Flag
@@ -219,20 +219,22 @@ next_level:
                                        ; LD A,(34208)      ; Set Update Scores and Display Flag...
        socb @bits+5,@game_flags        ; SET 5,A           ; ...
                                        ; LD (34208),A      ; ...
-       mov  @bert_interaction_state,iy ; LD IY,(34256)     ; Load IY with address of complex state data for Door just interacted with
-       movb @9(iy),a                   ; LD A,(IY+9)       ; Load A with destination level from Door's state data...
-       movb a,@current_level           ; LD (34207),A      ; ...and set current level to this value
-       cb   a,one                      ; CP 1              ; If destination level is not Level 1...
+       mov  @berk_interaction_state,iy ; LD IY,(34256)     ; Load IY with address of complex state data for Door just interacted with
+       movb @9(iy),@current_level      ; LD A,(IY+9)       ; Load A with destination level from Door's state data...
+                                       ; LD (34207),A      ; ...and set current level to this value
+       bl   @init_level_data
+       bl   @align_with_level_1_door
+       cb   @current_level,one         ; CP 1              ; If destination level is not Level 1...
        jne  next_level_1               ; JR NZ,36725       ; ...then skip ahead to #R36725
 * Destination level is Level 1 (i.e. Level 4 completed)
-       bl   @align_with_level_1_door   ; CALL 36753        ; Load IX with address of Berk's complex state data and set his horizontal position to match
+                                       ; CALL 36753        ; Load IX with address of Berk's complex state data and set his horizontal position to match
                                                            ; Level 1's entry door
        socb @bits+2,@10(ix)            ; SET 2,(IX+10)     ; Set "Back to Level 1" Flag
        movb @bytes+10,*ix              ; LD (IX+0),10      ; Set Berk's room to 10
        movb @bytes+103,@4(ix)          ; LD (IX+4),103     ; Set y-coordinate of Berk's top edge to 103
        movb @bytes+109,@6(ix)          ; LD (IX+6),109     ; Set y-coordinate of Berk's bottom edge to 109
        li   iy,bonis_state_data_1      ; LD IY,43606       ; Load IY with address of Boni's entry in Level 1's State Data for Complex Entities...
-       mov  iy,@bert_interaction_state ; LD (34256),IY     ; ...and store at #R34256
+       mov  iy,@berk_interaction_state ; LD (34256),IY     ; ...and store at #R34256
        bl   @position_carried_item     ; CALL 48850        ; Have Berk hold Boni, and position him appropriately between Berk's hands
        movb one,@1(iy)                 ; LD (IY+1),1       ; Set Boni's depth to 1
        movb @bytes+10,*iy              ; LD (IY+0),10      ; Set Boni's room to 10
@@ -250,9 +252,9 @@ next_level:
        b    @execute_script            ; JP 48098          ; ...and execute
 * Destination level is not Level 1
 next_level_1:
-       bl   @align_with_level_1_door   ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
+                                       ; CALL 36753        ; Set Berk's horizontal position to match Level 1's entry door
        mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt...
-       mov  iy,@bert_interaction_state ; LD (34256),IY     ; ...and store at #R34256
+       mov  iy,@berk_interaction_state ; LD (34256),IY     ; ...and store at #R34256
        bl   @position_carried_item     ; CALL 48850        ; Have Berk hold Drutt, and position him appropriately between Berk's hands
        jmp  !
 lock_level_1_exit_door:
@@ -271,7 +273,7 @@ lock_level_1_exit_door:
 * Used by the routine at #R36638.
 align_with_level_1_door:
        .proc
-       bl   @init_level_data           ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
+                                       ; CALL 34864        ; Copy start addresses of current level's data blocks to #R34236 and clean up old data
        movb @bytes+33,a                ; LD A,33           ; Load IY with address of complex state data for first entity that has class of 33 (Entry
                                                            ; Door)...
        bl   @find_1st_entity_of_class                   ; CALL 54019        ; ...
