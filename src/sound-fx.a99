@@ -1,0 +1,40 @@
+**
+* Sound FXs
+*
+snd_vol_freq_drop:
+       byte T1
+       byte 32                         ; Frames
+       byte 0                          ; Attn start
+       byte 8                          ; Attn step
+       data 4                          ; Freq step
+snd_vol_drop:
+       byte T1
+       byte 48                         ; Frames
+       byte 0                          ; Attn start
+       byte 5                          ; Attn step
+       data 0                          ; Freq step
+snd_freq_drop:
+       byte T1
+       byte 16                         ; Frames
+       byte 0                          ; Attn start
+       byte 0                          ; Attn step
+       data 25                         ; Freq step
+snd_freq_raise:
+       byte T1
+       byte 24                         ; Frames
+       byte 0                          ; Attn start
+       byte 0                          ; Attn step
+       data -8                         ; Freq step
+snd_short:
+       byte T1
+       byte 3                          ; Frames
+       byte 0                          ; Attn start
+       byte 64                         ; Attn step
+       data 0
+snd_crash:
+       byte W2
+       byte 64                         ; Frames
+       byte 0                          ; Attn start
+       byte 4                          ; Attn step
+
+       even

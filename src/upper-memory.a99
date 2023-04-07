@@ -5,6 +5,9 @@
        copy "script-routines.a99"
        copy "common-routines.a99"
        copy "ti-routines.a99"
+       copy "sound-player.a99"
+       copy "sound-fx-routines.a99"
+       copy "sound-fx.a99"
        copy "common-script-data.a99"
        copy "data.a99"
 

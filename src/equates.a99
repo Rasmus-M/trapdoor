@@ -103,3 +103,5 @@ level_1_2_bank_select:
        equ  >600A
 level_3_4_bank_select:
        equ  >600C
+
+       copy "sound-defs.a99"

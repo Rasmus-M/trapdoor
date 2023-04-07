@@ -46,7 +46,7 @@ border_color:
        byte 1
 
 * Index of Current Character's Current Room
-current_characters_room:
+current_chars_room:
        byte 0
 
 * Control Input Bitmap
@@ -443,33 +443,6 @@ coloured_creatures_cycles:
 * Current Position in Skeleton's Script Data
 skeleton_script_pos:
        data skeleton_idling_script                                                   ; (#R41232, Skeleton Idling)
-
-* Table of Sound Parameters
-*
-* #TABLE(default,centre,:w)
-* { =h Offset | =h Meaning }
-* { 0 | Index (unused) }
-* { 1 | Outer repeat counter }
-* { 2 | Inner repeat counter }
-* { 3 | Delay constant (controls speed, higher value is slower) }
-* { 4 | Delay constant (controls speed / pitch, higher value is slower / lower) }
-* { 5 | Increment for delay constant D }
-* { 6 | Increment for delay constant E }
-* { 7 | Most significant byte of pseudo-random address plus No Pause Flag }
-* TABLE#
-;sound_table:
-;       byte 1,4,168,29,167,254,3,1                                   ; (01) - Out of time
-;       byte 2,3,160,57,6,1,0,128                                     ; (02) - Main Menu sound (three blips)
-;       byte 3,15,141,214,46,1,253,128                                ; (03) - Unused
-;       byte 4,1,40,82,59,253,1,6                                     ; (04) - Explosion
-;_59666:
-;       byte 5,1,84,93,115,4,251,11                                   ; (05) - Berk landing
-;       byte 6,1,190,58,25,0,250,128                                  ; (06) - Berk/Drutt banging head on ceiling
-;       byte 7,1,30,180,12,0,252,128                                  ; (07) - Spider sound
-;       byte 8,1,134,55,58,251,4,128                                  ; (08) - Drutt eating a worm
-;       byte 9,1,10,60,187,253,247,128                                ; (09) - Drutt hopping
-;       byte 10,1,68,160,79,254,254,128                               ; (10) - Unused
-;       byte 11,1,122,123,102,205,0,128                               ; (11) - Unused
 
 * Table of Multiples of 96
 *

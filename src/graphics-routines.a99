@@ -57,7 +57,7 @@ graphic_routines_jmp_tbl:
 * layout data instruction Output: B  Do Not Recalculate Display Buffer Address Flag (0)
 graphics_routine_237:
        movb *ix,a                      ; LD A,(IX+0)       ; Load current byte of graphic layout data into A
-       bl   @request_sound             ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
+       bl   @request_sound_and_play             ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address
        b    @inc_execute_gfx_script    ; JP 46001          ; Advance graphic layout data pointer by one byte and read / process next data
 

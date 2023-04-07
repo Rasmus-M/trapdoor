@@ -1,0 +1,162 @@
+*********************************************************************
+* Table of Sound Parameters
+*
+* #TABLE(default,centre,:w)
+* { =h Offset | =h Meaning }
+* { 0 | Index (unused) }
+* { 1 | Outer repeat counter }
+* { 2 | Inner repeat counter }
+* { 3 | Delay constant (controls speed, higher value is slower) }
+* { 4 | Delay constant (controls speed / pitch, higher value is slower / lower) }
+* { 5 | Increment for delay constant D }
+* { 6 | Increment for delay constant E }
+* { 7 | Most significant byte of pseudo-random address plus No Pause Flag }
+* TABLE#
+;sound_table:
+;       byte 1,4,168,29,167,254,3,1                                   ; (01) - Out of time
+;       byte 2,3,160,57,6,1,0,128                                     ; (02) - Main Menu sound (three blips)
+;       byte 3,15,141,214,46,1,253,128                                ; (03) - Unused
+;       byte 4,1,40,82,59,253,1,6                                     ; (04) - Explosion
+;       byte 5,1,84,93,115,4,251,11                                   ; (05) - Berk landing
+;       byte 6,1,190,58,25,0,250,128                                  ; (06) - Berk/Drutt banging head on ceiling
+;       byte 7,1,30,180,12,0,252,128                                  ; (07) - Spider sound
+;       byte 8,1,134,55,58,251,4,128                                  ; (08) - Drutt eating a worm
+;       byte 9,1,10,60,187,253,247,128                                ; (09) - Drutt hopping
+;       byte 10,1,68,160,79,254,254,128                               ; (10) - Unused
+;       byte 11,1,122,123,102,205,0,128                               ; (11) - Unused
+
+snd_fx_table:
+        data play_hit                  ; Unused
+        data play_ball_lost            ; (01) - Out of time
+        data play_launch               ; (02) - Main Menu sound (three blips)
+        data play_bumper               ; (03) - Unused
+        data play_hit                  ; (04) - Explosion
+        data play_rollover             ; (05) - Berk landing
+        data play_saucer               ; (06) - Berk/Drutt banging head on ceiling
+        data play_path                 ; (07) - Spider sound
+        data play_target               ; (08) - Drutt eating a worm
+        data play_ball_lost            ; (09) - Drutt hopping
+
+*********************************************************************
+*
+* Mute sound
+*
+mute_sound:
+       li   r0,mute_table              ; Mute all
+       li   r2,4
+mute_sound_1:
+       movb *r0+,@sound
+       dec  r2
+       jne  mute_sound_1
+       clr  @snd_channel_1
+       clr  @snd_channel_2
+       clr  @snd_channel_3
+       clr  @snd_channel_4
+*      Return
+       rt
+mute_table:
+       byte >9f, >bf, >df, >ff
+*// mute_sound
+
+*********************************************************************
+*
+* Play launch
+*
+play_launch:
+       .proc
+       li   r0,snd_vol_freq_drop
+       li   r1,snd_channel_1
+       li   r2,C5
+       bl   @play_snd
+       .endproc
+*// play_launch
+
+*********************************************************************
+*
+* Play target
+*
+play_target:
+       .proc
+       li   r0,snd_vol_drop
+       li   r1,snd_channel_1
+       li   r2,A4
+       bl   @play_snd
+       .endproc
+*// play_target
+
+*********************************************************************
+*
+* Play bumper
+*
+play_bumper:
+       .proc
+       li   r0,snd_freq_drop
+       li   r1,snd_channel_1
+       li   r2,C2
+       bl   @play_snd
+       .endproc
+*// play_bumper
+
+*********************************************************************
+*
+* Play saucer
+*
+play_saucer:
+       .proc
+       li   r0,snd_freq_drop
+       li   r1,snd_channel_1
+       li   r2,C4
+       bl   @play_snd
+       .endproc
+*// play_saucer
+
+*********************************************************************
+*
+* Play rollover
+*
+play_rollover:
+       .proc
+       li   r0,snd_freq_raise
+       li   r1,snd_channel_1
+       li   r2,A2
+       bl   @play_snd
+       .endproc
+*// play_rollover
+
+*********************************************************************
+*
+* Play path
+*
+play_path:
+       .proc
+       li   r0,snd_freq_raise
+       li   r1,snd_channel_1
+       li   r2,A3
+       bl   @play_snd
+       .endproc
+*// play_path
+
+*********************************************************************
+*
+* Play hit
+*
+play_hit:
+       .proc
+       li   r0,snd_short
+       li   r1,snd_channel_1
+       li   r2,A1
+       bl   @play_snd
+       .endproc
+*// play_hit
+
+*********************************************************************
+*
+* Play ball lost
+*
+play_ball_lost:
+       .proc
+       li   r0,snd_crash
+       li   r1,snd_channel_4
+       bl   @play_snd
+       .endproc
+*// play_ball_lost
