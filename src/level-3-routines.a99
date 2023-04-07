@@ -35,7 +35,7 @@ update_coloured_creatures:
        movb *hl,a                      ; LD A,(HL)         ; ...
        cb   a,@bytes+100               ; CP 100            ; ...and if less than 100...
        jl   update_coloured_creatures_4 ; RET C            ; ...then return
-       movb @bytes+0,*hl               ; LD (HL),0         ; Set cycles elapsed since last swap of creatures to zero
+       movb @zero,*hl               ; LD (HL),0         ; Set cycles elapsed since last swap of creatures to zero
        bl   @cycle_colors_and_refresh  ; CALL 36616        ; Cycle attributes (full-screen), clear display buffers and paint red areas outside current
                                                            ; room
        li   hl,coloured_creatures_curr_seq ; LD HL,39599   ; Point HL at current Sequence ID
@@ -214,7 +214,7 @@ update_yellow_creature_5:
 * "Attacking" mode
 update_yellow_creature_6:
        bl   @move_entity_down_l3       ; CALL 39951        ; Move creature down two characters
-       movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set Berk's depth to zero
+       movb @zero,@1(ix)            ; LD (IX+1),0       ; Set Berk's depth to zero
        movb @bytes+16,*hl              ; LD (HL),16        ; Set creature's mode to "Just Attacked"
        li   bc,_40451                  ; LD BC,40451       ; Set graphic layout data address for creature to #R40451 (Large Yellow Creature with mouth
                                                            ; closed)...
@@ -229,7 +229,7 @@ update_yellow_creature_6:
 yellow_creature_killed_berk:
        bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        szcb @bits+5,@9(ix)             ; RES 5,(IX+9)      ; Reset Berk's "Do Not Update State" Flag
-       movb @bytes+0,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
+       movb @zero,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
        .endproc                        ; RET               ; Return
 *// yellow_creature_killed_berk
 
@@ -308,7 +308,7 @@ move_entity_closer_l3_3:
 * creature
 * Jump - not call
 yellow_creature_return:
-       movb @bytes+0,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
+       movb @zero,*hl               ; LD (HL),0         ; Set creature's mode to "Returning Home"
        movb @bytes+2,@1(iy)            ; LD (IY+1),2       ; Set creature's depth to 2
        movb @bytes+122,a               ; LD A,122          ; Move creature one step closer to x (Left) = 113, y (Top) > 122...
        jmp  move_entity_towards_home_1                     ; JR 40010          ; ...and return
@@ -416,7 +416,7 @@ update_hatch_5:
        jmp  update_hatch_7             ; JR 39274          ; Skip ahead to #R39274 (set Hatch's GLD address to value in HL and return)
 * Hatch State Index is 11 (Berk was thrown 10 cycles ago)
 update_hatch_6:
-       movb @bytes+0,*hl               ; LD (HL),0         ; Set Hatch State Index to zero
+       movb @zero,*hl               ; LD (HL),0         ; Set Hatch State Index to zero
        li   hl,_41090                  ; LD HL,41090       ; Load HL with graphic layout data address of Hatch closed
 update_hatch_7:
        movb @l,@hatch+2                ; LD (44792),HL     ; Set Hatch's graphic layout data address to value in HL
@@ -573,7 +573,7 @@ update_clawed_foot_17:
        bl   @update_clawed_foot_8      ; CALL 39410        ; ...make Berk drop the entity he is holding and load IY with its complex state data address
 * Reset Clawed Foot to inactive state
 update_clawed_foot_18:
-       movb @bytes+0,@9(iy)            ; LD (IY+9),0       ; Reset Clawed Foot's Flags
+       movb @zero,@9(iy)            ; LD (IY+9),0       ; Reset Clawed Foot's Flags
        jmp  update_clawed_foot_22      ; RET               ; Return
 * Check Clawed Foot's Moving Left Flag
 update_clawed_foot_19:

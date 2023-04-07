@@ -2780,7 +2780,7 @@ spawn_new_worm_2:
        li   hl,_52735                  ; LD HL,52735       ; Point HL at script data for worm rising from floor...
        b    @execute_script            ; JP 48098          ; ...and execute
 spawn_new_worm_3:
-       movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set worm's depth to zero
+       movb @zero,@1(ix)            ; LD (IX+1),0       ; Set worm's depth to zero
 spawn_new_worm_4:
        .endproc                        ; RET               ; Return
 *// spawn_new_worm

@@ -44,7 +44,7 @@ update_skeleton_state:
        movb @_42910+1,a                ; LD A,(42911)      ; If current attribute in Skeleton's graphic layout data is not 1...
        cb   a,one                      ; CP 1              ; ...
        jne  update_skeleton_state_1                     ; JR NZ,41473       ; ...then skip ahead to #R41473
-       movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set Skeleton's room to 0
+       movb @zero,@1(ix)            ; LD (IX+1),0       ; Set Skeleton's room to 0
        li   iy,_45417                  ; LD IY,45417       ; Load IY with address of complex state data for Boni (Level 4)
        movb @4(ix),a                   ; LD A,(IX+4)       ; Set y-coordinate of Boni's top edge...
        movb a,@4(iy)                   ; LD (IY+4),A       ; ...to same as that of skeleton
@@ -327,7 +327,7 @@ update_cannon_4:
 * Berk and Cannon overlapping horizontally
        movb one,@e                     ; LD E,1            ; Load E with 1 (as Projectile will appear one character to the right of the Cannon's
                                                            ; coordinate position)
-       movb @bytes+0,@9(ix)            ; LD (IX+9),0       ; Prepare to set Projectile's state to zero (fired vertically)
+       movb @zero,@9(ix)            ; LD (IX+9),0       ; Prepare to set Projectile's state to zero (fired vertically)
        li   bc,_42530                  ; LD BC,42530       ; Load BC with graphic layout data address for Cannon (Upright)
        jmp  update_cannon_7            ; JR 41880          ; Skip ahead to #R41880
 * Berk is to the right of the Cannon
@@ -341,7 +341,7 @@ update_cannon_5:
 update_cannon_6:
        movb @bytes+2,@9(ix)            ; LD (IX+9),2       ; Prepare to set Projectile's state to 2 (fired right)
        li   bc,_42594                  ; LD BC,42594       ; Load BC with graphic layout data address for Cannon (Tilted Left)
-       movb @bytes+0,@e                ; LD E,0            ; Load E with 0 (as Projectile will appear at the same x-coordinate as in the Cannon's
+       movb @zero,@e                ; LD E,0            ; Load E with 0 (as Projectile will appear at the same x-coordinate as in the Cannon's
                                                            ; coordinate position)
 update_cannon_7:
        bl   @set_gfx_addr_for_entity   ; CALL 42512        ; Set Cannon's graphic layout data address to value in BC
@@ -401,7 +401,7 @@ update_projectile:
        jeq  update_projectile_3        ; JR Z,42015        ; ...then skip ahead to #R42015
        cb   a,@bytes+8                 ; CP 8              ; If Projectile's state is not 8 (finished)...
        jne  update_projectile_1        ; JR NZ,41991       ; ...then skip ahead to #R41991
-       movb @bytes+0,@1(ix)            ; LD (IX+1),0       ; Set Projectile's depth to 0
+       movb @zero,@1(ix)            ; LD (IX+1),0       ; Set Projectile's depth to 0
        jmp  update_projectile_5        ; RET               ; Return
 update_projectile_1:
        cb   a,@bytes+2                 ; CP 2              ; If Projectile's state is not 2 (fired right)...
@@ -524,7 +524,7 @@ update_drips_9:
        movb @bytes+8,a                 ; LD A,8            ; Set drip's graphical stage to 8 (exploding on contact)...
        movb a,@9(ix)                   ; LD (IX+9),A       ; ...and also set drip's stage to 8...
        bl   @set_drip_stage            ; CALL 42251        ; ...
-       movb @bytes+0,@12(ix)           ; LD (IX+12),0      ; Set drip's velocity factor to zero
+       movb @zero,@12(ix)           ; LD (IX+12),0      ; Set drip's velocity factor to zero
        jmp  update_drips_5             ; JP 42119          ; Advance IX to next entry in complex state data and loop back to #R42070
 update_drips_10:
        movb @4(ix),a                   ; LD A,(IX+4)       ; If y-coordinate of top of drip is 120...
@@ -600,7 +600,7 @@ update_snake_3:
        movb @5(ix),a                   ; LD A,(IX+5)       ; If x-coordinate of Snake's left edge is not 83...
        cb   a,@bytes+83                ; CP 83             ; ...
        jne  update_snake_4a            ; JR NZ,42447       ; ...then move Snake left one character and return
-       movb @bytes+0,*hl               ; LD (HL),0         ; Set Snake's Attack Progress Index to 0
+       movb @zero,*hl               ; LD (HL),0         ; Set Snake's Attack Progress Index to 0
        jmp  update_snake_10            ; RET               ; Return
 * This entry point is used by the routine at #R41961.
 update_snake_4:

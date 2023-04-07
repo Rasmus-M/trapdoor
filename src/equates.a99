@@ -55,6 +55,7 @@ tmp0   requ 0
 tmp1   requ 1
 tmp2   requ 2
 one    requ 3                          ; >0100
+zero   equ  wrksp+7
 af     requ 4
 a      requ 4
 bc     requ 5

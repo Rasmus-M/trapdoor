@@ -146,7 +146,7 @@ script_routine_16:
 * Script Routine (17) Have Berk Put Down an Entity in Front of Him, if Appropriate Output: D  Depth offset for
 * entity being put down
 script_routine_17:
-       movb @bytes+0,d                 ; LD D,0            ; Load D with depth offset of 0 (as Berk is putting down an entity in front of him)
+       movb @zero,d                 ; LD D,0            ; Load D with depth offset of 0 (as Berk is putting down an entity in front of him)
        jmp  _48160                     ; JR 48160          ; Have Berk put down an entity, if appropriate
 
 *********************************************************************************
@@ -194,7 +194,7 @@ _48198:
 *
 * Used by the routine at #R36542. Output: E  Combination of flags to (re)set
 script_routine_10:
-       movb @bytes+0,@e                ; LD E,0            ; Reset Entity Walking Left and Entity Walking Right flags...
+       movb @zero,@e                ; LD E,0            ; Reset Entity Walking Left and Entity Walking Right flags...
        jmp  _48222                     ; JR 48222          ; ...and advance HL to next script instruction and execute
 
 *********************************************************************************
@@ -730,7 +730,7 @@ script_routine_43_11:
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt and worm in same room, at same depth and same x-coordinate
 script_routine_43_12:
-       movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set worm's depth to zero (i.e. remove from play)
+       movb @zero,@1(iy)            ; LD (IY+1),0       ; Set worm's depth to zero (i.e. remove from play)
        li   hl,_51706                  ; LD HL,51706       ; Point HL at script data for Drutt eating a worm...
        b    @execute_script            ; JP 48098          ; ...and execute
 * Drutt's left edge to left of worm's
@@ -986,7 +986,7 @@ _36393:
        movb @bytes+7,a                 ; LD A,7            ; Set door colour to 7 (white, i.e. unlocked)...
        movb a,@_50711+1                ; LD (50712),A      ; ...
        bl   @drop_item                 ; CALL 36296        ; Make Berk drop the key and load IY with its complex state data address
-       movb @bytes+0,@1(iy)            ; LD (IY+1),0       ; Set depth of key to 0 (i.e. out of display)
+       movb @zero,@1(iy)            ; LD (IY+1),0       ; Set depth of key to 0 (i.e. out of display)
        socb @bits+4,@e                 ; SET 4,E           ; Set Level Exit Door Unlocked Flag...
        movb @e,a                       ; LD A,E            ; ...
        movb a,@game_flags              ; LD (34208),A      ; ...
@@ -1980,7 +1980,7 @@ handle_vertical_jump_5:
        sb   one,b                      ; DJNZ 55235        ; Decrease B (remaining number of characters to move up) and loop back to #R55235 if not zero
        jne  handle_vertical_jump_3     ;
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease current velocity of jumper's jump, slowing ascent
-       movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping upwards, no collision)
+       movb @zero,@e                ; LD E,0            ; Load E with zero (jumper jumping upwards, no collision)
        b    @handle_vertical_jump_20   ; RET               ; Return
 * Downward Jump Phase Flag is set, i.e. in downward phase of jump
 handle_vertical_jump_6:
@@ -2006,7 +2006,7 @@ handle_vertical_jump_9:
        .push hl                        ; PUSH HL           ; Store HL
        bl   @change_room_down          ; CALL 55616        ; Change jumper's room down one if appropriate
        .pop hl                         ; POP HL            ; Restore HL
-       movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping downwards, no collision)
+       movb @zero,@e                ; LD E,0            ; Load E with zero (jumper jumping downwards, no collision)
        b    @handle_vertical_jump_20   ; RET               ; Return
 * Jumper is at the bottom of the screen
 handle_vertical_jump_10:
@@ -2058,7 +2058,7 @@ handle_vertical_jump_15:
        andi a,15*256                   ; AND 15            ; ...
        cb   a,@bytes+4                 ; CP 4              ; ...
        jhe  handle_vertical_jump_16    ; JR NC,55393       ; ...then skip ahead to #R55393
-       movb @bytes+0,@12(ix)           ; LD (IX+12),0      ; Reset jumper's Is Jumping Flag and set current velocity of jump to zero
+       movb @zero,@12(ix)           ; LD (IX+12),0      ; Reset jumper's Is Jumping Flag and set current velocity of jump to zero
        movb @bytes+3,@e                ; LD E,3            ; Load E with 3 (jumper's jump velocity less than 4, and back not pressed, i.e. terminate
                                                            ; jumping)
        jmp  handle_vertical_jump_20    ; RET               ; Return
@@ -2084,7 +2084,7 @@ handle_vertical_jump_18:
        jmp  handle_vertical_jump_20    ; RET               ; Return
 * Right Bit (and Left and Back bits) reset
 handle_vertical_jump_19:
-       movb @bytes+0,@e                ; LD E,0            ; Load E with zero (current velocity of jumper's jump is at least 4 and Back, Left and Right
+       movb @zero,@e                ; LD E,0            ; Load E with zero (current velocity of jumper's jump is at least 4 and Back, Left and Right
                                                            ; Control Input bits are reset)
        jmp  handle_vertical_jump_18    ; JR 55410          ; Decrease current velocity of jumper's jump by two and return
 handle_vertical_jump_20:
