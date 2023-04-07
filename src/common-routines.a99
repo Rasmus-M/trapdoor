@@ -883,7 +883,6 @@ get_left_room_index_1:
        mov  @horz_room_connect_map,iy                 ; LD IY,(34250)     ; Load start address of current level's Horizontal Room Connectivity Data into IY
        movb @b255,b                                   ; Init result to not found
 * This entry point is used by the routine at #R54533.
-get_left_room_index_0:
        inc  iy                         ; INC IY            ; Advance by one byte to second byte (right room index) of first entry
 get_left_room_index_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Load second byte (right room index) of current entry into A

@@ -244,8 +244,8 @@ prim_disp_buffer_addr:
 * { 0 | Joystick Mode off }
 * { 1 | Joystick Mode on }
 * TABLE#
-;joystick_mode_flag:
-;       byte 1
+joystick_mode_flag:
+       byte 1
 
 * Current High Score
 high_score:
@@ -278,16 +278,16 @@ main_menu_addrs_dirs:
 
 * Table of Main Menu Strings
 main_menu_strings:
-       text 'S   START   '
+       text 'S/FIRE START'
        text '  CONTROLS  '
-       text ' JOYSTICK + '
-       text '   RIGHT    '
-       text '   LEFT     '
-       text '   FORWARD  '
-       text '   BACK     '
-       text '   BERK/DRUT'                                           ; (see bugs)
-       text '   PAUSE    '
-       text '   RESTART  '
+       text 'JOYSTICK OR '
+       text '  RIGHT     '
+       text '  LEFT      '
+       text '  FORWARD   '
+       text '  BACK      '
+       text '  BERK/DRUTT'                                           ; (see bugs)
+       text '  PAUSE     '
+       text '  RESTART   '
 
 * "THROUGH the TRAPDOOR" String
 title_text:
@@ -518,4 +518,13 @@ bytes:
        byte >d0,>d1,>d2,>d3,>d4,>d5,>d6,>d7,>d8,>d9,>da,>db,>dc,>dd,>de,>df
        byte >e0,>e1,>e2,>e3,>e4,>e5,>e6,>e7,>e8,>e9,>ea,>eb,>ec,>ed,>ee,>ef
        byte >f0,>f1,>f2,>f3,>f4,>f5,>f6,>f7,>f8,>f9,>fa,>fb,>fc,>fd,>fe,>ff
+
+bit0:  data >0100
+bit1:  data >0200
+bit2:  data >0400
+bit3:  data >0800
+bit4:  data >1000
+bit5:  data >2000
+bit6:  data >4000
+bit7:  data >8000
 

@@ -11,7 +11,6 @@
 **
 * Set Up Random Seed and Disable Interrupts
 *
-start:
        limi 0                          ; DI                ; Disable interrupts
        lwpi wrksp
        mov @rndsd,@rnd_seed            ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
@@ -94,13 +93,13 @@ main_loop:
                                        ; JR NZ,34537       ; ...then skip ahead to #R34537
 * Level 2
                                        ; CALL 38009        ; Update states of all Level 2 entities
-main_check_level_3:
+;main_check_level_3:
                                        ; LD A,(34207)      ; If current level is not Level 3...
                                        ; CP 3              ; ...
                                        ; JR NZ,34547       ; ...then skip ahead to #R34547
 * Level 3
                                        ; CALL 39137        ; Update states of all Level 3 entities
-main_check_level_4:
+;main_check_level_4:
                                        ; LD A,(34207)      ; If current level is not Level 4...
                                        ; CP 4              ; ...
                                        ; JR NZ,34557       ; ...then skip ahead to #R34557
@@ -320,8 +319,8 @@ main_menu_2:
 *
 * Used by the routine at #R46830. Output: F  Carry Flag set if Kempston Interface not present, Kempston Joystick
 * moved or fire pressed, reset otherwise
-check_for_joystick:
-       .proc
+;check_for_joystick:
+;       .proc
 ;       sb   b,b                        ; LD B,0            ; Set B to zero (to repeat check loop 256 times)
 ;_47045:
 ;       ; IN A,(31)                     ; IN A,(31)         ; Read value from Port 31 into A (Kempston Interface)
@@ -1426,37 +1425,44 @@ digit_to_str_1:
 * Check for Control Key Press and Store at 34219
 * 
 * Used by the routine at #R34438.
-; TODO: optimize
 check_control_input:
        .proc
        sb   a,a                        ; XOR A             ; Clear previously stored control input...
-       li   r0,JOY_RT
-       bl   @check_key
-       jeq  check_control_input_1
-       socb @bits+0,a
-check_control_input_1:
-       li   r0,JOY_LT
-       bl   @check_key
-       jeq  check_control_input_2
-       socb @bits+1,a
-check_control_input_2:
-       li   r0,JOY_DN
-       bl   @check_key
-       jeq  check_control_input_3
-       socb @bits+2,a
-check_control_input_3:
-       li   r0,JOY_UP
-       bl   @check_key
-       jeq  check_control_input_4
-       socb @bits+3,a
-check_control_input_4:
-       li   r0,JOY_FI
-       bl   @check_key
+       movb @joystick_mode_flag,tmp0
        jeq  check_control_input_5
-       socb @bits+4,a
+*      Read joystick
+       li   r12,>0024                  ; CRU address of the column decoder
+       li   tmp0,>0600
+       ldcr tmp0,3                     ; Select column
+       li   r12,>0006
+       stcr tmp0,8
+       inv  tmp0
+*      Right
+       coc  @bit2,tmp0
+       jne  check_control_input_1
+       socb @bits+0,a                  ; Right
+check_control_input_1:
+*      Left
+       coc  @bit1,tmp0
+       jne  check_control_input_2
+       socb @bits+1,a                  ; Left
+check_control_input_2:
+*      Down
+       coc  @bit3,tmp0
+       jne  check_control_input_3
+       socb @bits+2,a                  ; Forward
+check_control_input_3:
+*      Up
+       coc  @bit4,tmp0
+       jne  check_control_input_4
+       socb @bits+3,a                  ; Back
+check_control_input_4:
+*      Fire
+       coc  @bit0,tmp0
+       jne  check_control_input_10
+       socb @bits+4,a                  ; Change
+*      Read keyboard
 check_control_input_5:
-       movb  a,a
-       jne   check_control_input_10
        li   r0,KEY_D
        bl   @check_key
        jeq  check_control_input_6
@@ -1481,6 +1487,7 @@ check_control_input_9:
        bl   @check_key
        jeq  check_control_input_10
        socb @bits+4,a
+*      Shared
 check_control_input_10:
        li   r0,KEY_P
        bl   @check_key
@@ -1523,7 +1530,7 @@ check_control_input_12:
 * If Joystick Mode is On, then Read Joystick Input
 * 
 * Used by the routine at #R47893.
-_47930:
+;_47930:
 ;       movb @_34298,a                  ; LD A,(34298)      ; If Joystick Mode is Off...
 ;       socb a,a                        ; OR A              ; ...
 ;       jne  !                          ; RET Z             ; ...then return
@@ -1542,11 +1549,9 @@ _47930:
 * Used by the routines at #R34438, #R47893 and #R47955.
 wait_release_and_keypress:
        .proc
-wait_release_and_keypress_1:
        bl   @release_keypress          ; CALL 47788        ; Read keyboard and load character of pressed key into A
                                        ; OR A              ; If a key is pressed...
                                        ; JR NZ,47942       ; ...then loop back to #R47942
-wait_release_and_keypress_2:
        bl   @wait_keypress             ; CALL 47788        ; Read keyboard and load character of pressed key into A
                                        ; OR A              ; If a key is not pressed...
                                        ; JR Z,47948        ; ...then loop back to #R47948
@@ -1577,16 +1582,20 @@ wait_keypress:
 wait_keypress_1:
        li   r0,KEY_S
        bl   @check_key
-       jne  wait_keypress_2
+       jeq  wait_keypress_2
+       movb @zero,@joystick_mode_flag
+       jmp  wait_keypress_3
+wait_keypress_2:
        li   r0,JOY_FI
        bl   @check_key
        jeq  wait_keypress_1
+       movb one,@joystick_mode_flag
 ;       .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
 ;       .push af                        ; PUSH AF           ; Store AF (A = last pressed key)
 ;       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
 ;       bl   @request_sound_a           ; CALL 59722        ; ...
 ;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
-wait_keypress_2:
+wait_keypress_3:
        .endproc                         ; RET               ; Return
 *// wait_keypress
 
