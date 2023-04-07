@@ -19,6 +19,7 @@ init_bits_1:
 * Copy routines to pad
 *
 copy_to_pad:
+*      draw_display_buffer
        li   tmp0,draw_display_buffer_start
        li   tmp1,draw_display_buffer_pad
        li   tmp2,draw_display_buffer_end-draw_display_buffer_start
@@ -26,6 +27,14 @@ copy_to_pad_1:
        mov  *tmp0+,*tmp1+
        dect tmp2
        jne  copy_to_pad_1
+*      clear_display_buffer
+       li   tmp0,clear_display_buffer_start
+       li   tmp1,clear_display_buffer_pad
+       li   tmp2,clear_display_buffer_end-clear_display_buffer_start
+copy_to_pad_2:
+       mov  *tmp0+,*tmp1+
+       dect tmp2
+       jne  copy_to_pad_2
        rt
 *// copy_to_pad
 
@@ -302,13 +311,13 @@ vsmw_1:
 *
 * R0: Read address in VDP RAM
 *
-vrad:
-       swpb r0
-       movb r0,@vdpwa                  ; Send low byte of VDP RAM read address
-       swpb r0
-       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
-       rt
-*// vrad
+;vrad:
+;       swpb r0
+;       movb r0,@vdpwa                  ; Send low byte of VDP RAM read address
+;       swpb r0
+;       movb r0,@vdpwa                  ; Send high byte of VDP RAM read address
+;       rt
+;*// vrad
 
 ;*********************************************************************
 ;*

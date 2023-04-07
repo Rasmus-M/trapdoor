@@ -45,6 +45,8 @@ stack:
        equ  bits+8
 draw_display_buffer_pad:
        equ  stack+>20
+clear_display_buffer_pad:
+       equ  draw_display_buffer_pad+>58
 rndsd:
        equ  >83c0                      ; Random number seed
 
