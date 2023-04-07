@@ -1622,7 +1622,6 @@ cycle_attributes_short:
 *********************************************************************************
 * This entry point is used by the routine at #R53577.
 cycle_attributes:
-       .ifeq optimize_attr_drawing,1
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of iterations required)
        li   hl,ti_attributes           ; LD HL,22528       ; Point HL at start of Attribute File
        li   bc,704                     ; LD BC,704         ; Set BC to 704 (i.e. gap between start of Attribute File and start of second-last row (timer
@@ -1659,16 +1658,6 @@ cycle_attributes_3:
        socb @c,a                       ; OR C              ; ...
        jne  cycle_attributes_1         ; JR NZ,53590       ; ...then loop back to #R53590
        .pop bc                         ; POP BC            ; Restore BC (B = remaining number of iterations required)
-       .else
-       li   r0,color_table
-       li   r1,>f000
-       li   r2,>1600
-       bl   @vsmw
-       li   r0,color_table
-       li   r1,>e000
-       li   r2,>1600
-       bl   @vsmw
-       .endif
        sb   one,b                      ; DJNZ 53583        ; Loop back for next iteration
        jne  cycle_attributes           ;
        jmp  clear_display_buffers_0
@@ -1695,14 +1684,14 @@ clear_display_buffers_1:
 * Used by the routines at #R46830 and #R53723. Input:  A  Attribute
 fill_screen:
        .proc
-       .ifeq optimize_attr_drawing,1
+*      TI attributes
        li   tmp0,ti_attributes
        li   tmp2,22*32
 fill_screen_1:
        movb a,*tmp0+
        dec  tmp2
        jne  fill_screen_1
-       .endif
+*      ZX attributes
        bl   @ti_color
        mov  tmp0,r1
        li   r0,color_table

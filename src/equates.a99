@@ -1,9 +1,4 @@
 **
-* Settings
-*
-optimize_attr_drawing:
-       equ  1
-**
 * Cheats
 *
 start_at_level:
