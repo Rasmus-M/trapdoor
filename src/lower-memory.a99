@@ -1,11 +1,19 @@
        aorg >2000
 
-       copy "common-script-data.a99"
-       copy "level-data.a99"
-       copy "level-1-data.a99"
-       copy "level-2-data.a99"
-       copy "level-3-data.a99"
-       copy "level-4-data.a99"
+* Display Buffer 1
+*
+* Three bytes per entry, 32 x 22 entries, one for each cell of Attribute File within play area. Bytes are in order:
+*
+display_buffer_1:
+       bss 32*22*3
 
+* Display Buffer 2
+*
+* Three bytes per entry, 32 x 22 entries, one for each cell of Attribute File within play area. Bytes are in order:
+*
+display_buffer_2:
+       bss 32*22*3
 
-
+* Level data copied here
+level_data:
+       equ  $

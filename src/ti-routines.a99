@@ -27,7 +27,33 @@ copy_to_pad_1:
        dect tmp2
        jne  copy_to_pad_1
        rt
-*// init_bits
+*// copy_to_pad
+
+*********************************************************************
+*
+* Copy level data from ROM bank
+*
+copy_level_data:
+       clr  tmp1
+       movb @current_level,tmp1
+       swpb tmp1
+       dec  tmp1
+       mov  tmp1,tmp0
+       andi tmp1,2
+       ai   tmp1,level_1_2_bank_select
+       seto *tmp1
+       andi tmp0,1
+       sla  tmp0,12
+       ai   tmp0,>6000
+       li   tmp1,level_data
+       li   tmp2,>f80
+copy_level_data_1:
+       mov  *tmp0+,*tmp1+
+       dect tmp2
+       jne  copy_level_data_1
+       seto @graphics_bank_select
+       rt
+*// copy_level_data
 
 *********************************************************************
 *

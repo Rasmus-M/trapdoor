@@ -181,15 +181,16 @@ change_room_down_4:
 * Used by the routines at #R34438 and #R36753.
 init_level_data:
        .proc
+       bl   @copy_level_data                               ; Copy level data from ROM
        .push de                        ; PUSH DE           ; Store DE
        .push hl                        ; PUSH HL           ; Store HL
-       mov  @worm_state_addr,hl        ; LD HL,(34244)     ; Load HL with address of complex state data (current level) for worm
-       movb @bytes+0,*hl               ; LD (HL),0         ; Set worm's current room to zero
-       clr  hl
-       movb @current_level,@l          ; LD A,(34207)      ; Load current level into A
-       dec  hl
-       sla  hl,1                       ; LD HL,34281       ; Point HL at position 20 bytes before start of list of start addresses of level 1's data
-       mov  @level_data_table(hl),hl                       ; blocks
+;       mov  @worm_state_addr,hl        ; LD HL,(34244)     ; Load HL with address of complex state data (current level) for worm
+;       movb @bytes+0,*hl               ; LD (HL),0         ; Set worm's current room to zero
+       li   hl,level_data
+                                       ; LD A,(34207)      ; Load current level into A
+
+                                       ; LD HL,34281       ; Point HL at position 20 bytes before start of list of start addresses of level 1's data
+                                                           ; blocks
        li   bc,20                      ; LD BC,20          ; Set data length to 20, as there are 10 data blocks per level (so 10 addresses)
 
                                        ; ADD HL,BC         ; Advance HL to start of data block address list for next level

@@ -1,12 +1,11 @@
        aorg >a000
 
        copy "main-routines.a99"
-       copy "level-1-routines.a99"
-       copy "level-2-routines.a99"
-       copy "level-3-routines.a99"
-       copy "level-4-routines.a99"
        copy "graphics-routines.a99"
        copy "script-routines.a99"
        copy "common-routines.a99"
        copy "ti-routines.a99"
+       copy "common-script-data.a99"
        copy "data.a99"
+
+       data -1

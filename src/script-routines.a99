@@ -1981,7 +1981,7 @@ handle_vertical_jump_5:
        jne  handle_vertical_jump_3     ;
        sb   one,@12(ix)                ; DEC (IX+12)       ; Decrease current velocity of jumper's jump, slowing ascent
        movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping upwards, no collision)
-       jmp  handle_vertical_jump_20    ; RET               ; Return
+       b    @handle_vertical_jump_20   ; RET               ; Return
 * Downward Jump Phase Flag is set, i.e. in downward phase of jump
 handle_vertical_jump_6:
        bl   @inc_jump_velocity         ; CALL 55421        ; Increase current velocity of jumper's jump if less than 7, speeding descent, and load into A
@@ -2007,7 +2007,7 @@ handle_vertical_jump_9:
        bl   @change_room_down          ; CALL 55616        ; Change jumper's room down one if appropriate
        .pop hl                         ; POP HL            ; Restore HL
        movb @bytes+0,@e                ; LD E,0            ; Load E with zero (jumper jumping downwards, no collision)
-       jmp  handle_vertical_jump_20    ; RET               ; Return
+       b    @handle_vertical_jump_20   ; RET               ; Return
 * Jumper is at the bottom of the screen
 handle_vertical_jump_10:
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check jumper for collision with another entity at same depth whose Interaction (11,6) Flag is

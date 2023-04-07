@@ -4,6 +4,3 @@
 font:
        bcopy "font.bin"
        copy "lookup-tables.a99"
-
-
-

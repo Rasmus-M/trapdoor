@@ -1,0 +1,13 @@
+       copy "equates.a99"
+       copy "macros.a99"
+
+       copy "lower-memory.a99"
+       copy "level-1.a99"
+       copy "level-2.a99"
+       copy "level-3.a99"
+       copy "level-4.a99"
+       copy "graphics-bank.a99"
+
+       save >a000,
+       copy "upper-memory.a99"
+

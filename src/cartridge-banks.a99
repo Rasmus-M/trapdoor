@@ -1,0 +1,25 @@
+       copy "equates.a99"
+       copy "macros.a99"
+       copy "lower-memory.a99"
+       copy "upper-memory.a99"
+
+       bank 0
+       copy "graphics-bank.a99"
+
+       bank 1
+       aorg >6000
+       copy "level-1.a99"
+       aorg >7000
+       copy "level-2.a99"
+
+       bank 2
+       aorg >6000
+       copy "level-3.a99"
+       aorg >7000
+       copy "level-4.a99"
+
+       bank 3
+       aorg >6000
+       data -1
+
+

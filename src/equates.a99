@@ -1,4 +1,18 @@
 **
+* Settings
+*
+optimize_attr_drawing:
+       equ  1
+**
+* Cheats
+*
+start_at_level:
+       equ  1
+berk_cant_die:
+       equ  1
+higher_jumps:
+       equ  1
+**
 * Memory mapped addresses
 *
 vdpwd:                                 ; VDP write data
@@ -81,3 +95,9 @@ initial_entity_states:                 ; Table of Initial-State Data for Complex
 *
 zx_attributes:
        equ  22528
+graphics_bank_select:
+       equ  >6008
+level_1_2_bank_select:
+       equ  >600A
+level_3_4_bank_select:
+       equ  >600C

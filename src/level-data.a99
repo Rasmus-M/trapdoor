@@ -1,9 +1,0 @@
-*********************************************************************
-*
-* Level data table
-*
-level_data_table:
-       data data_addresses_1
-       data data_addresses_2
-       data data_addresses_3
-       data data_addresses_4
