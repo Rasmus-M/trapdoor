@@ -73,7 +73,7 @@ change_room_up:
        movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity into D
 change_room_up_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load second byte (lower room index) of current entry into A
-       cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
+       cb   a,@b255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
        jeq  change_room_up_3                     ; JR Z,55512        ; ...then skip ahead to #R55512
        cb   a,d                        ; CP D              ; If byte is the same as the entity's current room...
        jeq  change_room_up_2                     ; JR Z,55467        ; ...then skip ahead to #R55467
@@ -136,7 +136,7 @@ change_room_down:
        movb *ix,d                      ; LD D,(IX+0)       ; Load current room of entity into D
 change_room_down_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load first byte (upper room index) of current entry into A
-       cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
+       cb   a,@b255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
        jeq  change_room_down_3                     ; JR Z,55695        ; ...then skip ahead to #R55695
        cb   a,d                        ; CP D              ; If byte is the same as the entity's current room...
        jeq  change_room_down_2                     ; JR Z,55647        ; ...then skip ahead to #R55647
@@ -500,7 +500,7 @@ paint_red_cell:
        mov  ix,tmp1
        bl   @draw_attribute
                                        ; EXX               ; Switch registers
-       movb @bytes+255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
+       movb @b255,a               ; LD A,255          ; Load 255 into current positions in Display Buffers 1 and 2...
        movb a,*hl_+                    ; LD (HL),A         ; ...
        movb a,*de_+                    ; LD (DE),A         ; ...
 * This entry point is used by the routine at #R53887.
@@ -854,12 +854,12 @@ get_right_room_index_1:
 * This entry point is used by the routine at #R54499.
 get_right_room_index_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Load first byte (left room index) of current entry into A
-       cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
+       cb   a,@b255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
        jeq  get_right_room_index_3     ; RET Z             ; ...then return
        cb   a,d                        ; CP D              ; If byte is not the same as the room index in D...
        jne  _54527                     ; JR NZ,54527       ; ...then skip ahead to #R54527
        movb @1(iy),b                   ; LD B,(IY+1)       ; Load second byte (right room index) of current entry into B
-       cb   a,@bytes+255               ; CP 255            ; Reset zero flag (as current room cannot be 255)
+       cb   a,@b255               ; CP 255            ; Reset zero flag (as current room cannot be 255)
        jmp  get_right_room_index_3     ; RET               ; Return
 _54527:
        inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
@@ -881,18 +881,18 @@ get_left_room_index:
 * This entry point is used by the routine at #R53194.
 get_left_room_index_1:
        mov  @horz_room_connect_map,iy                 ; LD IY,(34250)     ; Load start address of current level's Horizontal Room Connectivity Data into IY
-       movb @bytes+255,b                                   ; Init result to not found
+       movb @b255,b                                   ; Init result to not found
 * This entry point is used by the routine at #R54533.
 get_left_room_index_0:
        inc  iy                         ; INC IY            ; Advance by one byte to second byte (right room index) of first entry
 get_left_room_index_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Load second byte (right room index) of current entry into A
-       cb   a,@bytes+255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
+       cb   a,@b255               ; CP 255            ; If byte is 255 (i.e. the End Marker)...
        jeq  get_left_room_index_4      ; RET Z             ; ...then return
        cb   a,d                        ; CP D              ; If byte is not the same as the room index in D...
        jne  get_left_room_index_3      ; JR NZ,54563       ; ...then skip ahead to #R54563
        movb @-1(iy),b                  ; LD B,(IY-1)       ; Load first byte (left room index) of current entry into B
-       cb   a,@bytes+255               ; CP 255            ; Reset zero flag (as current room cannot be 255)
+       cb   a,@b255               ; CP 255            ; Reset zero flag (as current room cannot be 255)
        jmp  get_left_room_index_4      ; RET               ; Return
 get_left_room_index_3:
        inct iy                         ; INC IY            ; Advance by two bytes to the next entry...
@@ -914,7 +914,7 @@ chk_coll_right:
        mov  @cmplx_state_data_addr,iy  ; LD IY,(34238)     ; Load start address of current level's complex state data into IY
 chk_coll_right_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load A with room index for current IY entity
-       cb   a,@bytes+255               ; CP 255            ; If this is not 255 (i.e. End Marker)...
+       cb   a,@b255               ; CP 255            ; If this is not 255 (i.e. End Marker)...
        jne  chk_coll_right_2           ; JR NZ,54585       ; ...then skip ahead to #R54585
                                        ; SCF               ; Set Carry Flag
        b    @return_with_carry         ; RET               ; Return
@@ -968,7 +968,7 @@ chk_coll_left:
        mov  @cmplx_state_data_addr,iy  ; LD IY,(34238)     ; Load start address of current level's complex state data into IY
 chk_coll_left_1:
        movb *iy,a                      ; LD A,(IY+0)       ; Load A with room index for current IY entity
-       cb   a,@bytes+255               ; CP 255            ; If this is not 255 (i.e. End Marker)...
+       cb   a,@b255               ; CP 255            ; If this is not 255 (i.e. End Marker)...
        jne  chk_coll_left_2            ; JR NZ,54682       ; ...then skip ahead to #R54682
                                        ; SCF               ; Set Carry Flag
        b    @return_with_carry         ; RET               ; Return
@@ -1035,7 +1035,7 @@ chk_coll_same_depth_1:
        li   de,13                      ; LD DE,13          ; Load DE with 13 (as entries in complex state data are 13 bytes wide)
 chk_coll_same_depth_2:
        movb *iy,a                      ; LD A,(IY+0)       ; Load A with room index for current IY entity
-       cb   a,@bytes+255               ; CP 255            ; If this is not 255 (i.e. End Marker)...
+       cb   a,@b255               ; CP 255            ; If this is not 255 (i.e. End Marker)...
        jne  chk_coll_same_depth_3      ; JR NZ,54786       ; ...then skip ahead to #R54786
                                        ; SCF               ; Set Carry Flag
        b    @return_with_carry_1       ; RET               ; Return
@@ -1154,7 +1154,7 @@ chk_coll_next_depth_rev_2:
 * This entry point is used by the routine at #R54878.
 chk_coll_next_depth_rev_3:
        movb @-1(iy),a                  ; LD A,(IY-1)       ; If byte before current IY position is 254 (i.e. end marker for simple state data)...
-       cb   a,@bytes+254               ; CP 254            ; ...
+       cb   a,@b254               ; CP 254            ; ...
        jeq  chk_coll_next_depth_rev_4  ; JP Z,55000        ; ...then skip ahead to #R55000
        a    de,iy                      ; ADD IY,DE         ; Move IY back 13 bytes (i.e. to start of previous entry)
        jmp  chk_coll_next_depth_rev_1  ; JP 54899          ; Jump to #R54899

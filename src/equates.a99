@@ -43,8 +43,12 @@ bits:
        equ  wrksp+>20
 stack:
        equ  bits+8
-draw_display_buffer_pad:
+b255:
        equ  stack+>20
+b254:
+       equ  b255+1
+draw_display_buffer_pad:
+       equ  b254+1
 clear_display_buffer_pad:
        equ  draw_display_buffer_pad+>58
 rndsd:
