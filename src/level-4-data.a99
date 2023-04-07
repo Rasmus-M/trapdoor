@@ -17,90 +17,90 @@ data_addresses_4:
 * State Data for Simple Entities (Level 4)
 *
 state_data_simple_4:
-       byte 1,2,_49178%256,_49178/256,100,126                        ; (#R49178) Left brickwork
-       byte 1,2,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
-       byte 2,1,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
-       byte 2,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
-       byte 2,2,_49178%256,_49178/256,100,107                        ; (#R49178) Left brickwork
-       byte 2,2,_49178%256,_49178/256,100,125                        ; (#R49178) Left brickwork
-       byte 3,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
-       byte 3,2,_49178%256,_49178/256,100,114                        ; (#R49178) Left brickwork
-       byte 3,1,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
-       byte 4,2,_49413%256,_49413/256,117,123                        ; (#R49413) Single wide brick
-       byte 4,2,_49029%256,_49029/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
-       byte 4,1,_50238%256,_50238/256,121,99                         ; (#R50238) Left part of floor
-       byte 4,1,_50211_4%256,_50211_4/256,121,121                    ; (#R50211) Right part of floor
-       byte 5,1,_50160_4%256,_50160_4/256,121,100                    ; (#R50160) Floor (full width)
-       byte 5,1,_49584%256,_49584/256,97,100                         ; (#R49584) Vertical red bar (outside normal game area)
-       byte 5,1,_49584%256,_49584/256,102,127                        ; (#R49584) Vertical red bar (outside normal game area)
-       byte 5,1,_49489%256,_49489/256,117,100                        ; (#R49489) Snake's Brickwork
+       byte 1,2,_49178&>00ff,(_49178&>ff00)/256,100,126                        ; (#R49178) Left brickwork
+       byte 1,2,_50160_4&>00ff,(_50160_4&>ff00)/256,121,100                    ; (#R50160) Floor (full width)
+       byte 2,1,_50160_4&>00ff,(_50160_4&>ff00)/256,121,100                    ; (#R50160) Floor (full width)
+       byte 2,2,_49029&>00ff,(_49029&>ff00)/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 2,2,_49178&>00ff,(_49178&>ff00)/256,100,107                        ; (#R49178) Left brickwork
+       byte 2,2,_49178&>00ff,(_49178&>ff00)/256,100,125                        ; (#R49178) Left brickwork
+       byte 3,2,_49029&>00ff,(_49029&>ff00)/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 3,2,_49178&>00ff,(_49178&>ff00)/256,100,114                        ; (#R49178) Left brickwork
+       byte 3,1,_50160_4&>00ff,(_50160_4&>ff00)/256,121,100                    ; (#R50160) Floor (full width)
+       byte 4,2,_49413&>00ff,(_49413&>ff00)/256,117,123                        ; (#R49413) Single wide brick
+       byte 4,2,_49029&>00ff,(_49029&>ff00)/256,100,100                        ; (#R49029) Double Row of Green Bricks (full width)
+       byte 4,1,_50238&>00ff,(_50238&>ff00)/256,121,99                         ; (#R50238) Left part of floor
+       byte 4,1,_50211_4&>00ff,(_50211_4&>ff00)/256,121,121                    ; (#R50211) Right part of floor
+       byte 5,1,_50160_4&>00ff,(_50160_4&>ff00)/256,121,100                    ; (#R50160) Floor (full width)
+       byte 5,1,_49584&>00ff,(_49584&>ff00)/256,97,100                         ; (#R49584) Vertical red bar (outside normal game area)
+       byte 5,1,_49584&>00ff,(_49584&>ff00)/256,102,127                        ; (#R49584) Vertical red bar (outside normal game area)
+       byte 5,1,_49489&>00ff,(_49489&>ff00)/256,117,100                        ; (#R49489) Snake's Brickwork
        byte 254                                                      ; End Marker
 
 * State Data for Complex Entities (Level 4)
 state_data_complex_4:
-       byte 1,1,_50800%256,_50800/256,100,100,101,111,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+       byte 1,1,_50800&>00ff,(_50800&>ff00)/256,100,100,101,111,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
                                                                      ; head)
-       byte 1,1,_50800%256,_50800/256,100,119,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+       byte 1,1,_50800&>00ff,(_50800&>ff00)/256,100,119,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
                                                                      ; head)
-       byte 5,1,_49104%256,_49104/256,100,95,101,110,130,0,0,240,0   ; (#R49104) Two rows of horizontal brickwork (half-width, 1)
-       byte 5,1,_49035%256,_49035/256,100,121,101,131,130,0,0,240,0  ; (#R49035) Two rows of horizontal brickwork (half-width, 2)
-       byte 5,1,_50800%256,_50800/256,120,100,121,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
-       byte 5,1,_50800%256,_50800/256,121,122,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
-       byte 5,2,_50800%256,_50800/256,120,107,120,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
-       byte 5,2,_50800%256,_50800/256,120,120,120,124,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
-       byte 4,1,_50800%256,_50800/256,121,127,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,1,_49104&>00ff,(_49104&>ff00)/256,100,95,101,110,130,0,0,240,0   ; (#R49104) Two rows of horizontal brickwork (half-width, 1)
+       byte 5,1,_49035&>00ff,(_49035&>ff00)/256,100,121,101,131,130,0,0,240,0  ; (#R49035) Two rows of horizontal brickwork (half-width, 2)
+       byte 5,1,_50800&>00ff,(_50800&>ff00)/256,120,100,121,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,1,_50800&>00ff,(_50800&>ff00)/256,121,122,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,2,_50800&>00ff,(_50800&>ff00)/256,120,107,120,109,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 5,2,_50800&>00ff,(_50800&>ff00)/256,120,120,120,124,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 4,1,_50800&>00ff,(_50800&>ff00)/256,121,127,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
 berks_state_data_4:
-       byte 1,1,_57428%256,_57428/256,115,102,121,107,31,18,128,192,0 ; (#R57428) Berk
+       byte 1,1,_57428&>00ff,(_57428&>ff00)/256,115,102,121,107,31,18,128,192,0 ; (#R57428) Berk
 _45404:
-       byte 3,1,_42901%256,_42901/256,110,128,121,129,36,0,128,192,0 ; (#R42901) Skeleton
+       byte 3,1,_42901&>00ff,(_42901&>ff00)/256,110,128,121,129,36,0,128,192,0 ; (#R42901) Skeleton
 _45417:
-       byte 3,0,_50317%256,_50317/256,0,0,0,0,19,0,128,240,2         ; (#R50317) Boni
+       byte 3,0,_50317&>00ff,(_50317&>ff00)/256,0,0,0,0,19,0,128,240,2         ; (#R50317) Boni
 _45430:
-       byte 4,2,_50304%256,_50304/256,113,125,116,126,21,0,128,240,0 ; (#R50304) Fake Boni
+       byte 4,2,_50304&>00ff,(_50304&>ff00)/256,113,125,116,126,21,0,128,240,0 ; (#R50304) Fake Boni
 drutts_state_data_4:
-       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
-       byte 4,2,_50792%256,_50792/256,114,118,114,119,17,0,128,240,0 ; (#R50792) Key
+       byte 1,1,_52417&>00ff,(_52417&>ff00)/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
+       byte 4,2,_50792&>00ff,(_50792&>ff00)/256,114,118,114,119,17,0,128,240,0 ; (#R50792) Key
 worms_state_data_4:
-       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+       byte 0,0,_53340&>00ff,(_53340&>ff00)/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
 _45482:
-       byte 3,1,_51314%256,_51314/256,110,108,114,110,30,0,0,48,0    ; (#R51314) Flying Skeleton Creature
+       byte 3,1,_51314&>00ff,(_51314&>ff00)/256,110,108,114,110,30,0,0,48,0    ; (#R51314) Flying Skeleton Creature
 _45495:
-       byte 5,1,_42648%256,_42648/256,119,83,119,101,30,0,128,0,0    ; (#R42648) Snake
+       byte 5,1,_42648&>00ff,(_42648&>ff00)/256,119,83,119,101,30,0,128,0,0    ; (#R42648) Snake
 _45508:
-       byte 1,1,_42530%256,_42530/256,118,122,121,124,20,0,128,240,0 ; (#R42530) Cannon
+       byte 1,1,_42530&>00ff,(_42530&>ff00)/256,118,122,121,124,20,0,128,240,0 ; (#R42530) Cannon
 _45521:
-       byte 2,2,_50800%256,_50800/256,104,107,104,107,40,0,128,0,0   ; (#R50800) 1st drip from left (Red Sausage Room)
-       byte 2,2,_50800%256,_50800/256,105,110,105,110,41,0,128,0,0   ; (#R50800) 2nd drip from left (Red Sausage Room)
-       byte 2,2,_50800%256,_50800/256,102,115,102,115,43,0,128,0,0   ; (#R50800) 3rd drip from left (Red Sausage Room)
-       byte 2,2,_50800%256,_50800/256,103,120,103,120,44,0,128,0,0   ; (#R50800) 4th drip from left (Red Sausage Room)
-       byte 2,2,_50800%256,_50800/256,104,128,104,128,45,0,128,0,0   ; (#R50800) 5th drip from left (Red Sausage Room)
-       byte 3,2,_50800%256,_50800/256,104,113,104,113,46,0,128,0,0   ; (#R50800) Drip (Skeleton's Room)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,104,107,104,107,40,0,128,0,0   ; (#R50800) 1st drip from left (Red Sausage Room)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,105,110,105,110,41,0,128,0,0   ; (#R50800) 2nd drip from left (Red Sausage Room)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,102,115,102,115,43,0,128,0,0   ; (#R50800) 3rd drip from left (Red Sausage Room)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,103,120,103,120,44,0,128,0,0   ; (#R50800) 4th drip from left (Red Sausage Room)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,104,128,104,128,45,0,128,0,0   ; (#R50800) 5th drip from left (Red Sausage Room)
+       byte 3,2,_50800&>00ff,(_50800&>ff00)/256,104,113,104,113,46,0,128,0,0   ; (#R50800) Drip (Skeleton's Room)
 _45599:
-       byte 0,0,_50800%256,_50800/256,0,0,0,0,30,0,128,0,0           ; (#R50800) Cannon's Projectile
-       byte 2,1,_43128%256,_43128/256,121,110,121,111,3,0,128,240,0  ; (#R43128) Red Sausage (Jumping, duration = permanent)
-       byte 4,1,_43137%256,_43137/256,121,124,121,125,7,0,134,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 6)
-       byte 5,2,_43137%256,_43137/256,120,111,120,112,8,0,131,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 3)
+       byte 0,0,_50800&>00ff,(_50800&>ff00)/256,0,0,0,0,30,0,128,0,0           ; (#R50800) Cannon's Projectile
+       byte 2,1,_43128&>00ff,(_43128&>ff00)/256,121,110,121,111,3,0,128,240,0  ; (#R43128) Red Sausage (Jumping, duration = permanent)
+       byte 4,1,_43137&>00ff,(_43137&>ff00)/256,121,124,121,125,7,0,134,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 6)
+       byte 5,2,_43137&>00ff,(_43137&>ff00)/256,120,111,120,112,8,0,131,240,0  ; (#R43137) Cyan Sausage (Flying, duration = 3)
 level_4_door:
-       byte 1,1,_50678%256,_50678/256,113,102,121,109,33,1,0,192,0   ; (#R50678) Door
-       byte 1,1,_49173%256,_49173/256,100,100,121,101,128,0,0,240,0  ; (#R49173) Yellow brick column
-       byte 1,1,_49173%256,_49173/256,110,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
-       byte 1,1,_49571%256,_49571/256,112,102,112,102,30,0,0,0,0     ; (#R49571) Long yellow brick
-       byte 2,1,_49392%256,_49392/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
-       byte 3,1,_49392%256,_49392/256,115,99,118,100,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
-       byte 3,1,_49392%256,_49392/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
-       byte 4,1,_49392%256,_49392/256,115,99,118,101,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
-       byte 4,1,_50800%256,_50800/256,120,111,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 4,1,_49173%256,_49173/256,102,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
-       byte 4,1,_49173%256,_49173/256,101,131,121,132,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 1,1,_50678&>00ff,(_50678&>ff00)/256,113,102,121,109,33,1,0,192,0   ; (#R50678) Door
+       byte 1,1,_49173&>00ff,(_49173&>ff00)/256,100,100,121,101,128,0,0,240,0  ; (#R49173) Yellow brick column
+       byte 1,1,_49173&>00ff,(_49173&>ff00)/256,110,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 1,1,_49571&>00ff,(_49571&>ff00)/256,112,102,112,102,30,0,0,0,0     ; (#R49571) Long yellow brick
+       byte 2,1,_49392&>00ff,(_49392&>ff00)/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
+       byte 3,1,_49392&>00ff,(_49392&>ff00)/256,115,99,118,100,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
+       byte 3,1,_49392&>00ff,(_49392&>ff00)/256,115,131,118,132,128,0,0,240,0  ; (#R49392) Blue and Red Mini Wall
+       byte 4,1,_49392&>00ff,(_49392&>ff00)/256,115,99,118,101,128,0,0,240,0   ; (#R49392) Blue and Red Mini Wall
+       byte 4,1,_50800&>00ff,(_50800&>ff00)/256,120,111,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 4,1,_49173&>00ff,(_49173&>ff00)/256,102,109,121,110,30,0,0,0,0     ; (#R49173) Yellow brick column
+       byte 4,1,_49173&>00ff,(_49173&>ff00)/256,101,131,121,132,30,0,0,0,0     ; (#R49173) Yellow brick column
 _45794:
-       byte 4,1,_42754%256,_42754/256,111,121,114,122,30,0,0,0,0     ; (#R42754) Ghost
-       byte 5,1,_50800%256,_50800/256,100,100,101,110,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+       byte 4,1,_42754&>00ff,(_42754&>ff00)/256,111,121,114,122,30,0,0,0,0     ; (#R42754) Ghost
+       byte 5,1,_50800&>00ff,(_50800&>ff00)/256,100,100,101,110,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
                                                                      ; head)
-       byte 5,1,_50800%256,_50800/256,100,121,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+       byte 5,1,_50800&>00ff,(_50800&>ff00)/256,100,121,101,131,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
                                                                      ; head)
-       byte 5,1,_49535%256,_49535/256,102,104,121,106,128,0,0,16,0   ; (#R49535) Left wall, short
+       byte 5,1,_49535&>00ff,(_49535&>ff00)/256,102,104,121,106,128,0,0,16,0   ; (#R49535) Left wall, short
 rev_col_check_addr_4:
-       byte 5,1,_49553%256,_49553/256,102,125,121,127,128,0,0,32,0   ; (#R49553) Right wall, long
+       byte 5,1,_49553&>00ff,(_49553&>ff00)/256,102,125,121,127,128,0,0,32,0   ; (#R49553) Right wall, long
        byte 255                                                      ; End Marker
 
 * Room Dimension Data (Level 4)
@@ -154,77 +154,77 @@ gfx_layout_drips:
 
 * Script Data Skeleton (Level 4) Idling
 skeleton_idling_script:
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 63,0                                                     ; Have Skeleton advance or retreat based upon positions of Berk and Fake Boni
-       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256 ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script&>00ff,(skeleton_idling_script&>ff00)/256 ; Jump to #R41232 (Skeleton Idling)
 
 * Unused
 *
 * This block contains unused script data: Skeleton (level 4) threatening. Input:  Facts#unusedskeletonscript(See
 * trivia).
-;       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+;       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
 ;       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
 ;       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
-;       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+;       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
 ;       byte 28,0                                                     ; End loop (3)
-;       byte _42937%256,_42937/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
-;       byte _42937%256,_42937/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
+;       byte _42937&>00ff,(_42937&>ff00)/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
+;       byte _42937&>00ff,(_42937&>ff00)/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
 ;       byte 2,0                                                      ; Move Skeleton left two characters...
 ;       byte 2,0                                                      ; ...
-;       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+;       byte _42975&>00ff,(_42975&>ff00)/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
 ;       byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
 ;       byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
-;       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+;       byte _42975&>00ff,(_42975&>ff00)/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
 ;       byte 28,0                                                     ; End loop (3)
 ;       byte 3,0                                                      ; Move Skeleton right two characters...
 ;       byte 3,0                                                      ; ...
-;       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
+;       byte 1,0,skeleton_idling_script&>00ff,(skeleton_idling_script&>ff00)/256                                ; Jump to #R41232 (Skeleton Idling)
 
 * Script Data Skeleton (Level 4) Stepping Forward (Left)
 _41280:
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
        byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 28,0                                                     ; End loop (3)
-       byte _42937%256,_42937/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
+       byte _42937&>00ff,(_42937&>ff00)/256                                    ; #R42937 (Skeleton, Stepping Forward, Frame 1, Full, Animated)
        byte 2,0                                                      ; Move Skeleton left two characters...
        byte 2,0                                                      ; ...
-       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
-       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42975&>00ff,(_42975&>ff00)/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42975&>00ff,(_42975&>ff00)/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
        byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 28,0                                                     ; End loop (3)
-       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script&>00ff,(skeleton_idling_script&>ff00)/256                                ; Jump to #R41232 (Skeleton Idling)
 
 * Script Data Skeleton (Level 4) Stepping Back (Right)
 _41318:
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
        byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 28,0                                                     ; End loop (3)
-       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
-       byte _42975%256,_42975/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42975&>00ff,(_42975&>ff00)/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
+       byte _42975&>00ff,(_42975&>ff00)/256                                    ; #R42975 (Skeleton, Stepping Forward, Frame 2, Full, Animated)
        byte 3,0                                                      ; Move Skeleton right two characters...
        byte 3,0                                                      ; ...
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 64,0                                                     ; Set number of iterations in following loop script instruction to random number, 1-10
        byte 27,0,1,0                                                 ; Start loop (3) for random number (1-10) of iterations
-       byte _42901%256,_42901/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
+       byte _42901&>00ff,(_42901&>ff00)/256                                    ; #R42901 (Skeleton, Standing, Full, Animated)
        byte 28,0                                                     ; End loop (3)
-       byte 1,0,skeleton_idling_script%256,skeleton_idling_script/256                                ; Jump to #R41232 (Skeleton Idling)
+       byte 1,0,skeleton_idling_script&>00ff,(skeleton_idling_script&>ff00)/256                                ; Jump to #R41232 (Skeleton Idling)
 
 * Graphic Layout Data Cannon (Level 4) Loaded (Animated)
 _42519:
        byte 243,0,4                                                  ; Increase current state value n (initially 0), up to maximum of 4, resetting to
                                                                      ; zero if maximum reached and jump to n-th address in following list:
-       byte _42530%256,_42530/256                                    ; #R42530 (Cannon, straight)
-       byte _42556%256,_42556/256                                    ; #R42556 (Cannon, tilted right)
-       byte _42530%256,_42530/256                                    ; #R42530 (Cannon, straight)
-       byte _42594%256,_42594/256                                    ; #R42594 (Cannon, tilted left)
+       byte _42530&>00ff,(_42530&>ff00)/256                                    ; #R42530 (Cannon, straight)
+       byte _42556&>00ff,(_42556&>ff00)/256                                    ; #R42556 (Cannon, tilted right)
+       byte _42530&>00ff,(_42530&>ff00)/256                                    ; #R42530 (Cannon, straight)
+       byte _42594&>00ff,(_42594&>ff00)/256                                    ; #R42594 (Cannon, tilted left)
 * Straight
 _42530:
        byte 244,12                                                   ; Set current graphic set to 12
@@ -232,7 +232,7 @@ _42530:
        byte 41,194,30,42,66,34
        byte 42,194,30,44,66,34
        byte 44,194,33
-       byte 248,_42629%256,_42629/256                                ; Jump to #R42629
+       byte 248,_42629&>00ff,(_42629&>ff00)/256                                ; Jump to #R42629
 * Tilted Right
 _42556:
        byte 244,12                                                   ; Set current graphic set to 12
@@ -242,7 +242,7 @@ _42556:
        byte 51,2,29,52,66,34
        byte 0,18,33,53,2,29
        byte 54,66,34,55,66,33
-       byte 248,_42629%256,_42629/256                                ; Jump to #R42629
+       byte 248,_42629&>00ff,(_42629&>ff00)/256                                ; Jump to #R42629
 * Tilted Left
 _42594:
        byte 244,12                                                   ; Set current graphic set to 12
@@ -272,8 +272,8 @@ _42648:
        byte 0,54,33,36,6,33
        byte 37,6,33
        byte 247,2                                                    ; Jump to one of the 2 addresses in the following list, chosen at random:
-       byte _50800%256,_50800/256                                    ; #R50800 (blank)
-       byte _42692%256,_42692/256                                    ; #R42692 (tongue, animated)
+       byte _50800&>00ff,(_50800&>ff00)/256                                    ; #R50800 (blank)
+       byte _42692&>00ff,(_42692&>ff00)/256                                    ; #R42692 (tongue, animated)
 * Tongue, animated
 _42692:
        byte 38,5,33
@@ -302,11 +302,11 @@ _42754:
        byte 244,12                                                   ; Set current graphic set to 12
        byte 243,0,2                                                  ; Increase current state value n (initially 0), up to maximum of 2, resetting to zero
                                                                      ; if maximum reached and jump to n-th address in following list:
-       byte _42763%256,_42763/256                                    ; #R42763 (Ghost, full, wings up, tail animated)
-       byte _42797%256,_42797/256                                    ; #R42797 (Ghost, full, wings down, tail animated)
+       byte _42763&>00ff,(_42763&>ff00)/256                                    ; #R42763 (Ghost, full, wings up, tail animated)
+       byte _42797&>00ff,(_42797&>ff00)/256                                    ; #R42797 (Ghost, full, wings down, tail animated)
 * Full, Wings Up, Tail Animated
 _42763:
-       byte 251,_42831%256,_42831/256                                ; Process graphic layout data at #R42831 and upon returning, move cursor to base
+       byte 251,_42831&>00ff,(_42831&>ff00)/256                                ; Process graphic layout data at #R42831 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,0,254                                                ; Change cursor's x- and y-coordinates by -2 and 0 characters respectively
        byte 242,7                                                    ; Set current attribute to 7
@@ -321,7 +321,7 @@ _42763:
        byte 255                                                      ; End Marker
 * Full, Wings Down, Tail Animated
 _42797:
-       byte 251,_42831%256,_42831/256                                ; Process graphic layout data at #R42831 and upon returning, move cursor to base
+       byte 251,_42831&>00ff,(_42831&>ff00)/256                                ; Process graphic layout data at #R42831 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,1,254                                                ; Change cursor's x- and y-coordinates by -2 and +1 characters respectively
        byte 242,7                                                    ; Set current attribute to 7
@@ -363,9 +363,9 @@ _42831:
 
 * Graphic Layout Data Skeleton (Level 4) Standing, Full, Animated
 _42901:
-       byte 251,_43020%256,_43020/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
+       byte 251,_43020&>00ff,(_43020&>ff00)/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 251,_43047%256,_43047/256                                ; Process graphic layout data at #R43047 and upon returning, move cursor to base
+       byte 251,_43047&>00ff,(_43047&>ff00)/256                                ; Process graphic layout data at #R43047 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,7,1                                                  ; Change cursor's x- and y-coordinates by +1 and +7 characters respectively
 _42910:
@@ -379,9 +379,9 @@ _42910:
        byte 255                                                      ; End Marker
 * Stepping Forward, Frame 1, Full, Animated
 _42937:
-       byte 251,_43020%256,_43020/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
+       byte 251,_43020&>00ff,(_43020&>ff00)/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 251,_43047%256,_43047/256                                ; Process graphic layout data at #R43047 and upon returning, move cursor to base
+       byte 251,_43047&>00ff,(_43047&>ff00)/256                                ; Process graphic layout data at #R43047 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,7,255                                                ; Change cursor's x- and y-coordinates by -1 and +7 characters respectively
 _42946:
@@ -398,9 +398,9 @@ _42946:
 _42975:
        byte 254,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively and store as
                                                                      ; new base coordinates
-       byte 251,_43020%256,_43020/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
+       byte 251,_43020&>00ff,(_43020&>ff00)/256                                ; Process graphic layout data at #R43020 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 251,_43058%256,_43058/256                                ; Process graphic layout data at #R43058 and upon returning, move cursor to base
+       byte 251,_43058&>00ff,(_43058&>ff00)/256                                ; Process graphic layout data at #R43058 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,7,0                                                  ; Change cursor's x- and y-coordinates by 0 and +7 characters respectively
 _42987:
@@ -431,8 +431,8 @@ _43047:
        byte 249,2,1                                                  ; If state n (initially 1) has remaining time of zero then reset its time to maximum and
                                                                      ; randomly select a new state, n, from the 2 in the following list. Jump to the address
                                                                      ; specified in the current state and decrease its remaining time:
-       byte 3,3,_43058%256,_43058/256                                ; #R43058 (Torso and spear, extended, for 3 ticks)
-       byte 3,3,_43092%256,_43092/256                                ; #R43092 (Torso and spear, retracted, for 3 ticks)
+       byte 3,3,_43058&>00ff,(_43058&>ff00)/256                                ; #R43058 (Torso and spear, extended, for 3 ticks)
+       byte 3,3,_43092&>00ff,(_43092&>ff00)/256                                ; #R43092 (Torso and spear, retracted, for 3 ticks)
 * Torso and Spear, Extended
 _43058:
        byte 250,4,0                                                  ; Change cursor's x- and y-coordinates by 0 and +4 characters respectively
@@ -476,7 +476,7 @@ _43137:
 _49029:
        byte 250,0,16                                                 ; Change cursor's x- and y-coordinates by +16 and 0 characters
                                                                      ; respectively
-       byte 251,_49104%256,_49104/256                                ; Process graphic layout data at #R49104 and upon returning, move
+       byte 251,_49104&>00ff,(_49104&>ff00)/256                                ; Process graphic layout data at #R49104 and upon returning, move
                                                                      ; cursor to base coordinates
 * Double Row of Green Bricks (1 / 2), 16 Characters Wide
 _49035:
@@ -513,7 +513,7 @@ _49104:
 * Yellow Brick Column
 _49173:
        byte 242,6                                                    ; Set current attribute to 6
-       byte 248,_49180%256,_49180/256                                ; Jump to #R49180 (brick column)
+       byte 248,_49180&>00ff,(_49180&>ff00)/256                                ; Jump to #R49180 (brick column)
 * Green Brick Column
 _49178:
        byte 242,4                                                    ; Set current attribute to 4
@@ -701,7 +701,7 @@ _49699:
 
 * Floor (Full Width, 32 chars)
 _50160_4:
-       byte 251,_50238_4%256,_50238_4/256                                ; Process graphic layout data at #R50238 and upon returning, move cursor to base
+       byte 251,_50238_4&>00ff,(_50238_4&>ff00)/256                                ; Process graphic layout data at #R50238 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,0,12                                                 ; Change cursor's x- and y-coordinates by +12 and 0 characters respectively
        byte 242,4                                                    ; Set current attribute to 4
@@ -745,10 +745,10 @@ _50238_4:
 _50304:
        byte 244,4                                                    ; Set current graphic set to 4
        byte 242,6                                                    ; Set current attribute to 6
-       byte 248,_50321%256,_50321/256                                ; Jump to #R50321
+       byte 248,_50321&>00ff,(_50321&>ff00)/256                                ; Jump to #R50321
 
 * Graphic Layout Data Doors
 * Level 4
 _50678:
        byte 244,12                                                   ; Set current graphic set to 12
-       byte 248,_50680%256,_50680/256                                ; Jump to #R50680
+       byte 248,_50680&>00ff,(_50680&>ff00)/256                                ; Jump to #R50680

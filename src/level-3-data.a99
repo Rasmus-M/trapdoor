@@ -17,79 +17,79 @@ data_addresses_3:
 * State Data for Simple Entities (Level 3)
 *
 state_data_simple_3:
-       byte 1,2,_49781%256,_49781/256,100,100                        ; (#R49781) Fifteen glowing tangleweeds
-       byte 1,2,_40073%256,_40073/256,111,101                        ; (#R40073) Door Archway
-       byte 1,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
-       byte 2,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
-       byte 2,2,_49789%256,_49789/256,100,96                         ; (#R49789) Six glowing tangleweeds
-       byte 2,2,_49781%256,_49781/256,100,121                        ; (#R49781) Fifteen glowing tangleweeds
-       byte 3,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
-       byte 3,2,_49797%256,_49797/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
-       byte 4,1,_50801%256,_50801/256,121,79                         ; (#R50801) Floor
-       byte 4,1,_50801%256,_50801/256,121,119                        ; (#R50801) Floor
-       byte 4,2,_49789%256,_49789/256,100,100                        ; (#R49789) Six glowing tangleweeds
-       byte 4,2,_49781%256,_49781/256,100,119                        ; (#R49781) Fifteen glowing tangleweeds
-       byte 5,2,_49797%256,_49797/256,100,99                         ; (#R49797) Twenty two glowing tangleweeds (full screen width)
-       byte 5,1,_50801%256,_50801/256,121,73                         ; (#R50801) Floor
-       byte 5,1,_50801%256,_50801/256,121,121                        ; (#R50801) Floor
-       byte 6,2,_49797%256,_49797/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
-       byte 6,1,_50801%256,_50801/256,121,100                        ; (#R50801) Floor
-       byte 7,2,_49797%256,_49797/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
-       byte 7,1,_50801%256,_50801/256,121,119                        ; (#R50801) Floor
-       byte 7,1,_50801%256,_50801/256,121,79                         ; (#R50801) Floor
+       byte 1,2,_49781&>00ff,(_49781&>ff00)/256,100,100                        ; (#R49781) Fifteen glowing tangleweeds
+       byte 1,2,_40073&>00ff,(_40073&>ff00)/256,111,101                        ; (#R40073) Door Archway
+       byte 1,1,_50801&>00ff,(_50801&>ff00)/256,121,100                        ; (#R50801) Floor
+       byte 2,1,_50801&>00ff,(_50801&>ff00)/256,121,100                        ; (#R50801) Floor
+       byte 2,2,_49789&>00ff,(_49789&>ff00)/256,100,96                         ; (#R49789) Six glowing tangleweeds
+       byte 2,2,_49781&>00ff,(_49781&>ff00)/256,100,121                        ; (#R49781) Fifteen glowing tangleweeds
+       byte 3,1,_50801&>00ff,(_50801&>ff00)/256,121,100                        ; (#R50801) Floor
+       byte 3,2,_49797&>00ff,(_49797&>ff00)/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 4,1,_50801&>00ff,(_50801&>ff00)/256,121,79                         ; (#R50801) Floor
+       byte 4,1,_50801&>00ff,(_50801&>ff00)/256,121,119                        ; (#R50801) Floor
+       byte 4,2,_49789&>00ff,(_49789&>ff00)/256,100,100                        ; (#R49789) Six glowing tangleweeds
+       byte 4,2,_49781&>00ff,(_49781&>ff00)/256,100,119                        ; (#R49781) Fifteen glowing tangleweeds
+       byte 5,2,_49797&>00ff,(_49797&>ff00)/256,100,99                         ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 5,1,_50801&>00ff,(_50801&>ff00)/256,121,73                         ; (#R50801) Floor
+       byte 5,1,_50801&>00ff,(_50801&>ff00)/256,121,121                        ; (#R50801) Floor
+       byte 6,2,_49797&>00ff,(_49797&>ff00)/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 6,1,_50801&>00ff,(_50801&>ff00)/256,121,100                        ; (#R50801) Floor
+       byte 7,2,_49797&>00ff,(_49797&>ff00)/256,100,100                        ; (#R49797) Twenty two glowing tangleweeds (full screen width)
+       byte 7,1,_50801&>00ff,(_50801&>ff00)/256,121,119                        ; (#R50801) Floor
+       byte 7,1,_50801&>00ff,(_50801&>ff00)/256,121,79                         ; (#R50801) Floor
        byte 254                                                      ; End Marker
 
 * State Data for Complex Entities (Level 3)
 state_data_complex_3:
-       byte 1,2,_50673%256,_50673/256,112,102,120,109,33,4,0,192,0   ; (#R50673) Level 3 Door
-       byte 2,1,_49711%256,_49711/256,100,89,100,104,130,0,0,240,0   ; (#R49711) Ceiling (left section)
-       byte 2,1,_49711%256,_49711/256,100,121,100,131,130,0,0,240,0  ; (#R49711) Ceiling (right section)
-       byte 2,2,_40110%256,_40110/256,107,118,108,122,35,0,0,240,0   ; (#R40110) Platform
-       byte 2,2,_50800%256,_50800/256,107,113,108,117,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 2,2,_50800%256,_50800/256,107,123,108,127,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 2,2,_50800%256,_50800/256,108,118,109,122,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+       byte 1,2,_50673&>00ff,(_50673&>ff00)/256,112,102,120,109,33,4,0,192,0   ; (#R50673) Level 3 Door
+       byte 2,1,_49711&>00ff,(_49711&>ff00)/256,100,89,100,104,130,0,0,240,0   ; (#R49711) Ceiling (left section)
+       byte 2,1,_49711&>00ff,(_49711&>ff00)/256,100,121,100,131,130,0,0,240,0  ; (#R49711) Ceiling (right section)
+       byte 2,2,_40110&>00ff,(_40110&>ff00)/256,107,118,108,122,35,0,0,240,0   ; (#R40110) Platform
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,107,113,108,117,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,107,123,108,127,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 2,2,_50800&>00ff,(_50800&>ff00)/256,108,118,109,122,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
                                                                      ; head)
-       byte 2,2,_40040%256,_40040/256,100,104,121,104,30,0,0,48,0    ; (#R40040) Vertical wall
-       byte 3,1,_49705%256,_49705/256,100,100,100,131,130,0,0,240,0  ; (#R49705) Ceiling (full width)
-       byte 4,1,_49711%256,_49711/256,100,95,100,110,130,0,0,240,0   ; (#R49711) Ceiling (left section)
-       byte 4,1,_49711%256,_49711/256,100,119,100,131,130,0,0,240,0  ; (#R49711) Ceiling (right section)
-       byte 4,2,_40040%256,_40040/256,100,119,121,119,30,0,0,48,0    ; (#R40040) Vertical wall
-       byte 5,1,_50800%256,_50800/256,120,105,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 5,1,_49705%256,_49705/256,100,102,100,131,130,0,0,240,0  ; (#R49705) Ceiling (full width)
+       byte 2,2,_40040&>00ff,(_40040&>ff00)/256,100,104,121,104,30,0,0,48,0    ; (#R40040) Vertical wall
+       byte 3,1,_49705&>00ff,(_49705&>ff00)/256,100,100,100,131,130,0,0,240,0  ; (#R49705) Ceiling (full width)
+       byte 4,1,_49711&>00ff,(_49711&>ff00)/256,100,95,100,110,130,0,0,240,0   ; (#R49711) Ceiling (left section)
+       byte 4,1,_49711&>00ff,(_49711&>ff00)/256,100,119,100,131,130,0,0,240,0  ; (#R49711) Ceiling (right section)
+       byte 4,2,_40040&>00ff,(_40040&>ff00)/256,100,119,121,119,30,0,0,48,0    ; (#R40040) Vertical wall
+       byte 5,1,_50800&>00ff,(_50800&>ff00)/256,120,105,121,120,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 5,1,_49705&>00ff,(_49705&>ff00)/256,100,102,100,131,130,0,0,240,0  ; (#R49705) Ceiling (full width)
 hatch:
-       byte 4,1,_41090%256,_41090/256,121,111,121,118,30,0,0,0,0     ; (#R41090) Hatch (closed)
-       byte 6,2,_40138%256,_40138/256,115,106,115,110,32,0,0,128,0   ; (#R40138) Red coloured creature's slot (see trivia)
-       byte 6,2,_40143%256,_40143/256,115,113,115,117,32,0,0,128,0   ; (#R40143) Yellow coloured creature's slot (see trivia)
-       byte 6,2,_40148%256,_40148/256,115,120,115,124,32,0,0,128,0   ; (#R40148) White coloured creature's slot (see trivia)
-       byte 7,1,_50800%256,_50800/256,120,111,121,118,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 4,1,_41090&>00ff,(_41090&>ff00)/256,121,111,121,118,30,0,0,0,0     ; (#R41090) Hatch (closed)
+       byte 6,2,_40138&>00ff,(_40138&>ff00)/256,115,106,115,110,32,0,0,128,0   ; (#R40138) Red coloured creature's slot (see trivia)
+       byte 6,2,_40143&>00ff,(_40143&>ff00)/256,115,113,115,117,32,0,0,128,0   ; (#R40143) Yellow coloured creature's slot (see trivia)
+       byte 6,2,_40148&>00ff,(_40148&>ff00)/256,115,120,115,124,32,0,0,128,0   ; (#R40148) White coloured creature's slot (see trivia)
+       byte 7,1,_50800&>00ff,(_50800&>ff00)/256,120,111,121,118,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
 berks_state_data_3:
-       byte 1,1,_57058%256,_57058/256,115,102,121,107,31,18,128,192,0 ; (#R57058) Berk
+       byte 1,1,_57058&>00ff,(_57058&>ff00)/256,115,102,121,107,31,18,128,192,0 ; (#R57058) Berk
 _44868:
-       byte 3,2,_40451%256,_40451/256,122,113,135,118,26,0,128,0,0   ; (#R40451) Large yellow creature
+       byte 3,2,_40451&>00ff,(_40451&>ff00)/256,122,113,135,118,26,0,128,0,0   ; (#R40451) Large yellow creature
 _44881:
-       byte 6,1,_40320%256,_40320/256,93,125,95,29,30,0,128,240,0    ; (#R40320) Clawed foot
+       byte 6,1,_40320&>00ff,(_40320&>ff00)/256,93,125,95,29,30,0,128,240,0    ; (#R40320) Clawed foot
 _44894:
-       byte 6,1,_40284%256,_40284/256,118,108,121,108,15,0,128,192,0 ; (#R40284) White coloured creature
-       byte 6,1,_40254%256,_40254/256,118,115,121,115,13,0,128,192,0 ; (#R40254) Red coloured creature
-       byte 6,1,_40269%256,_40269/256,118,122,121,122,14,0,128,192,0 ; (#R40269) Yellow coloured creature
-       byte 2,2,_41175%256,_41175/256,118,121,120,123,12,0,128,240,0 ; (#R41175) Weight (see trivia)
-       byte 3,2,_40192%256,_40192/256,120,109,120,110,10,0,148,240,0 ; (#R40192) Edible eyes (Floating, duration = 20)
-       byte 7,2,_40192%256,_40192/256,120,126,120,127,5,0,130,240,0  ; (#R40192) Edible eyes (Flying, duration = 2)
+       byte 6,1,_40284&>00ff,(_40284&>ff00)/256,118,108,121,108,15,0,128,192,0 ; (#R40284) White coloured creature
+       byte 6,1,_40254&>00ff,(_40254&>ff00)/256,118,115,121,115,13,0,128,192,0 ; (#R40254) Red coloured creature
+       byte 6,1,_40269&>00ff,(_40269&>ff00)/256,118,122,121,122,14,0,128,192,0 ; (#R40269) Yellow coloured creature
+       byte 2,2,_41175&>00ff,(_41175&>ff00)/256,118,121,120,123,12,0,128,240,0 ; (#R41175) Weight (see trivia)
+       byte 3,2,_40192&>00ff,(_40192&>ff00)/256,120,109,120,110,10,0,148,240,0 ; (#R40192) Edible eyes (Floating, duration = 20)
+       byte 7,2,_40192&>00ff,(_40192&>ff00)/256,120,126,120,127,5,0,130,240,0  ; (#R40192) Edible eyes (Flying, duration = 2)
 _44972:
-       byte 6,1,_40192%256,_40192/256,90,127,90,128,6,0,131,240,0    ; (#R40192) Edible eyes (Flying, duration = 3)
-       byte 4,2,_40192%256,_40192/256,120,122,120,123,11,0,131,240,0 ; (#R40192) Edible eyes (Invisibility, duration = 3)
+       byte 6,1,_40192&>00ff,(_40192&>ff00)/256,90,127,90,128,6,0,131,240,0    ; (#R40192) Edible eyes (Flying, duration = 3)
+       byte 4,2,_40192&>00ff,(_40192&>ff00)/256,120,122,120,123,11,0,131,240,0 ; (#R40192) Edible eyes (Invisibility, duration = 3)
 drutts_state_data_3:
-       byte 1,1,_52417%256,_52417/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
-       byte 4,2,_50792%256,_50792/256,108,127,108,128,17,0,128,240,0 ; (#R50792) Key
+       byte 1,1,_52417&>00ff,(_52417&>ff00)/256,121,115,121,115,18,0,160,192,0 ; (#R52417) Drutt
+       byte 4,2,_50792&>00ff,(_50792&>ff00)/256,108,127,108,128,17,0,128,240,0 ; (#R50792) Key
 worms_state_data_3:
-       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
-       byte 5,1,_40040%256,_40040/256,100,100,121,100,128,0,0,240,0  ; (#R40040) Vertical wall
-       byte 1,1,_40040%256,_40040/256,100,100,121,100,128,0,0,240,0  ; (#R40040) Vertical wall
-       byte 4,1,_40040%256,_40040/256,100,131,121,131,128,0,0,240,0  ; (#R40040) Vertical wall
-       byte 4,2,_50800%256,_50800/256,120,129,120,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
-       byte 4,1,_50800%256,_50800/256,121,129,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 0,0,_53340&>00ff,(_53340&>ff00)/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+       byte 5,1,_40040&>00ff,(_40040&>ff00)/256,100,100,121,100,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 1,1,_40040&>00ff,(_40040&>ff00)/256,100,100,121,100,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 4,1,_40040&>00ff,(_40040&>ff00)/256,100,131,121,131,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 4,2,_50800&>00ff,(_50800&>ff00)/256,120,129,120,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 4,1,_50800&>00ff,(_50800&>ff00)/256,121,129,121,131,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
 rev_col_check_addr_3:
-       byte 7,1,_40040%256,_40040/256,100,131,121,131,128,0,0,240,0  ; (#R40040) Vertical wall
+       byte 7,1,_40040&>00ff,(_40040&>ff00)/256,100,131,121,131,128,0,0,240,0  ; (#R40040) Vertical wall
        byte 255                                                      ; End Marker
 
 * Room Dimension Data (Level 3)
@@ -120,12 +120,12 @@ vert_connect_map_3:
 
 * Graphic Layout Data Architecture (Level 3) Ceiling (Full Width)
 _49705:
-       byte 251,_49716%256,_49716/256                                ; Process graphic layout data at #R49716 and upon returning, move cursor to base coordinates
+       byte 251,_49716&>00ff,(_49716&>ff00)/256                                ; Process graphic layout data at #R49716 and upon returning, move cursor to base coordinates
        byte 250,0,16                                                 ; Change cursor's x- and y-coordinates by +16 and 0 characters respectively
 * Ceiling (Half Width)
 _49711:
        byte 242,196                                                  ; Set current attribute to 196
-       byte 248,_49718%256,_49718/256                                ; Jump to #R49718
+       byte 248,_49718&>00ff,(_49718&>ff00)/256                                ; Jump to #R49718
 _49716:
        byte 242,68                                                   ; Set current attribute to 68
 _49718:
@@ -154,76 +154,76 @@ _49781:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 254,0,246                                                ; Change cursor's x- and y-coordinates by -10 and 0 characters respectively and store as new
                                                                      ; base coordinates
-       byte 248,_49841%256,_49841/256                                ; Jump to #R49841
+       byte 248,_49841&>00ff,(_49841&>ff00)/256                                ; Jump to #R49841
 * Six Glowing Tangleweeds, Animated
 _49789:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 254,0,233                                                ; Change cursor's x- and y-coordinates by -23 and 0 characters respectively and store as new
                                                                      ; base coordinates
-       byte 248,_49901%256,_49901/256                                ; Jump to #R49901
+       byte 248,_49901&>00ff,(_49901&>ff00)/256                                ; Jump to #R49901
 * Twenty Two Glowing Tangleweeds, Animated
 _49797:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 250,254,0                                                ; Change cursor's x- and y-coordinates by 0 and -2 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,251,1                                                ; Change cursor's x- and y-coordinates by +1 and -5 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,251,3                                                ; Change cursor's x- and y-coordinates by +3 and -5 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,251,6                                                ; Change cursor's x- and y-coordinates by +6 and -5 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,252,7                                                ; Change cursor's x- and y-coordinates by +7 and -4 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,251,8                                                ; Change cursor's x- and y-coordinates by +8 and -5 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,254,9                                                ; Change cursor's x- and y-coordinates by +9 and -2 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
 _49841:
        byte 250,0,10                                                 ; Change cursor's x- and y-coordinates by +10 and 0 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,251,11                                               ; Change cursor's x- and y-coordinates by +11 and -5 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,250,14                                               ; Change cursor's x- and y-coordinates by +14 and -6 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,253,14                                               ; Change cursor's x- and y-coordinates by +14 and -3 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,255,17                                               ; Change cursor's x- and y-coordinates by +17 and -1 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,251,18                                               ; Change cursor's x- and y-coordinates by +18 and -5 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,253,19                                               ; Change cursor's x- and y-coordinates by +19 and -3 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,255,20                                               ; Change cursor's x- and y-coordinates by +20 and -1 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,253,21                                               ; Change cursor's x- and y-coordinates by +21 and -3 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,252,22                                               ; Change cursor's x- and y-coordinates by +22 and -4 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
 _49901:
        byte 250,254,23                                               ; Change cursor's x- and y-coordinates by +23 and -2 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,255,25                                               ; Change cursor's x- and y-coordinates by +25 and -1 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,252,26                                               ; Change cursor's x- and y-coordinates by +26 and -4 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,253,28                                               ; Change cursor's x- and y-coordinates by +28 and -3 characters respectively
-       byte 251,_49971%256,_49971/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
+       byte 251,_49971&>00ff,(_49971&>ff00)/256                                ; Process graphic layout data at #R49971 and upon returning, move cursor to base coordinates
        byte 250,0,30                                                 ; Change cursor's x- and y-coordinates by +30 and 0 characters respectively
-       byte 251,_49934%256,_49934/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
+       byte 251,_49934&>00ff,(_49934&>ff00)/256                                ; Process graphic layout data at #R49934 and upon returning, move cursor to base coordinates
        byte 250,252,31                                               ; Change cursor's x- and y-coordinates by +31 and -4 characters respectively
 _49934:
        byte 247,3                                                    ; Jump to one of the 3 addresses in the following list, chosen at random:
-       byte _49942%256,_49942/256                                    ; #R49942 (Green Tangleweed 1)
-       byte _49947%256,_49947/256                                    ; #R49947 (Yellow Tangleweed 1)
-       byte _49952%256,_49952/256                                    ; #R49952 (Green Tangleweed 1) (see trivia)
+       byte _49942&>00ff,(_49942&>ff00)/256                                    ; #R49942 (Green Tangleweed 1)
+       byte _49947&>00ff,(_49947&>ff00)/256                                    ; #R49947 (Yellow Tangleweed 1)
+       byte _49952&>00ff,(_49952&>ff00)/256                                    ; #R49952 (Green Tangleweed 1) (see trivia)
 * Green Tangleweed (1)
 _49942:
        byte 242,4                                                    ; Set current attribute to 4
-       byte 248,_49954%256,_49954/256                                ; Jump to #R49954
+       byte 248,_49954&>00ff,(_49954&>ff00)/256                                ; Jump to #R49954
 * Yellow Tangleweed (1)
 _49947:
        byte 242,6                                                    ; Set current attribute to 6
-       byte 248,_49954%256,_49954/256                                ; Jump to #R49954
+       byte 248,_49954&>00ff,(_49954&>ff00)/256                                ; Jump to #R49954
 * Green Tangleweed (1)
 _49952:
        byte 242,4                                                    ; Set current attribute to 4
@@ -236,17 +236,17 @@ _49954:
 * Glowing Tangleweed (2)
 _49971:
        byte 247,3                                                    ; Jump to one of the 3 addresses in the following list, chosen at random:
-       byte _49979%256,_49979/256                                    ; #R49979 (Green Tangleweed 2)
-       byte _49984%256,_49984/256                                    ; #R49984 (Yellow Tangleweed 2)
-       byte _49989%256,_49989/256                                    ; #R49989 (Green Tangleweed 2) (see trivia)
+       byte _49979&>00ff,(_49979&>ff00)/256                                    ; #R49979 (Green Tangleweed 2)
+       byte _49984&>00ff,(_49984&>ff00)/256                                    ; #R49984 (Yellow Tangleweed 2)
+       byte _49989&>00ff,(_49989&>ff00)/256                                    ; #R49989 (Green Tangleweed 2) (see trivia)
 * Green Tangleweed (2)
 _49979:
        byte 242,4                                                    ; Set current attribute to 4
-       byte 248,_49991%256,_49991/256                                ; Jump to #R49991
+       byte 248,_49991&>00ff,(_49991&>ff00)/256                                ; Jump to #R49991
 * Yellow Tangleweed (2)
 _49984:
        byte 242,6                                                    ; Set current attribute to 6
-       byte 248,_49991%256,_49991/256                                ; Jump to #R49991
+       byte 248,_49991&>00ff,(_49991&>ff00)/256                                ; Jump to #R49991
 * Green Tangleweed (2)
 _49989:
        byte 242,4                                                    ; Set current attribute to 4
@@ -286,13 +286,13 @@ _50801:
 * Level 3
 _50673:
        byte 244,10                                                   ; Set current graphic set to 10
-       byte 248,_50680%256,_50680/256                                ; Jump to #R50680
+       byte 248,_50680&>00ff,(_50680&>ff00)/256                                ; Jump to #R50680
 
 * Graphic Layout Data Architecture (Level 3) Vertical wall
 _40040:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 238,3                                                    ; Set Repeat Counter A to 3
-       byte 251,_40052%256,_40052/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
+       byte 251,_40052&>00ff,(_40052&>ff00)/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
        byte 254,8,0                                                  ; Change cursor's x- and y-coordinates by 0 and +8 characters respectively and store as new
                                                                      ; base coordinates
        byte 239                                                      ; Decrement Repeat Counter A and loop back to #R40044 if not zero
@@ -314,9 +314,9 @@ _40052:
 _40073:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 250,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively
-       byte 251,_40052%256,_40052/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
+       byte 251,_40052&>00ff,(_40052&>ff00)/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
        byte 250,1,9                                                  ; Change cursor's x- and y-coordinates by +9 and +1 characters respectively
-       byte 251,_40052%256,_40052/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
+       byte 251,_40052&>00ff,(_40052&>ff00)/256                                ; Process graphic layout data at #R40052 and upon returning, move cursor to base coordinates
        byte 242,4                                                    ; Set current attribute to 4
        byte 25,33
        byte 28,33
@@ -349,11 +349,11 @@ _40110:
 * Red Coloured Creature's Slot (see trivia)
 _40138:
        byte 242,2                                                    ; Set current attribute to 2 (red)
-       byte 248,_40150%256,_40150/256                                ; Jump to #R40150 (draw slot)
+       byte 248,_40150&>00ff,(_40150&>ff00)/256                                ; Jump to #R40150 (draw slot)
 * Yellow Coloured Creature's Slot (see trivia)
 _40143:
        byte 242,6                                                    ; Set current attribute to 6 (yellow)
-       byte 248,_40150%256,_40150/256                                ; Jump to #R40150 (draw slot)
+       byte 248,_40150&>00ff,(_40150&>ff00)/256                                ; Jump to #R40150 (draw slot)
 * White Coloured Creature's Slot (see trivia)
 _40148:
        byte 242,7                                                    ; Set current attribute to 7 (white)
@@ -384,14 +384,14 @@ _40150:
 _40192:
        byte 244,4                                                    ; Set current graphic set to 4
        byte 247,7                                                    ; Jump to one of the 7 addresses (see bugs) in the following list, chosen at random:
-       byte _40212%256,_40212/256                                    ; #R40212 (eyes, closed)
-       byte _40212%256,_40212/256                                    ; #R40212 (eyes, closed)
-       byte _40212%256,_40212/256                                    ; #R40212 (eyes, closed)
-       byte _40219%256,_40219/256                                    ; #R40219 (eyes, looking ahead)
-       byte _40226%256,_40226/256                                    ; #R40226 (eyes, looking up)
-       byte _40233%256,_40233/256                                    ; #R40233 (eyes, looking down)
-       byte _40240%256,_40240/256                                    ; #R40240 (eyes, looking right)
-       byte _40247%256,_40247/256                                    ; #R40247 (eyes, looking left)
+       byte _40212&>00ff,(_40212&>ff00)/256                                    ; #R40212 (eyes, closed)
+       byte _40212&>00ff,(_40212&>ff00)/256                                    ; #R40212 (eyes, closed)
+       byte _40212&>00ff,(_40212&>ff00)/256                                    ; #R40212 (eyes, closed)
+       byte _40219&>00ff,(_40219&>ff00)/256                                    ; #R40219 (eyes, looking ahead)
+       byte _40226&>00ff,(_40226&>ff00)/256                                    ; #R40226 (eyes, looking up)
+       byte _40233&>00ff,(_40233&>ff00)/256                                    ; #R40233 (eyes, looking down)
+       byte _40240&>00ff,(_40240&>ff00)/256                                    ; #R40240 (eyes, looking right)
+       byte _40247&>00ff,(_40247&>ff00)/256                                    ; #R40247 (eyes, looking left)
 * Closed
 _40212:
        byte 28,3,33
@@ -430,7 +430,7 @@ _40254:
                                                                      ; the 3 following values at random into the Attribute field of the following
                                                                      ; instruction
        byte 51,66,31
-       byte 248,_40296%256,_40296/256                                ; Jump to #R40296 (draw creature)
+       byte 248,_40296&>00ff,(_40296&>ff00)/256                                ; Jump to #R40296 (draw creature)
 * Yellow
 _40269:
        byte 244,10                                                   ; Set current graphic set to 10
@@ -438,7 +438,7 @@ _40269:
                                                                      ; the 3 following values at random into the Attribute field of the following
                                                                      ; instruction
        byte 51,70,31
-       byte 248,_40296%256,_40296/256                                ; Jump to #R40296 (draw creature)
+       byte 248,_40296&>00ff,(_40296&>ff00)/256                                ; Jump to #R40296 (draw creature)
 * White
 _40284:
        byte 244,10                                                   ; Set current graphic set to 10
@@ -461,7 +461,7 @@ _40296:
 * Graphic Layout Data Clawed Foot (Level 3) Reaching, Open
 _40320:
        byte 244,10                                                   ; Set current graphic set to 10
-       byte 251,_40404%256,_40404/256                                ; Process graphic layout data at #R40404 and upon returning, move cursor to base coordinates
+       byte 251,_40404&>00ff,(_40404&>ff00)/256                                ; Process graphic layout data at #R40404 and upon returning, move cursor to base coordinates
        byte 250,0,255                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively
        byte 36,6,33
        byte 37,70,34
@@ -480,7 +480,7 @@ _40320:
 * Reaching, Closed
 _40368:
        byte 244,10                                                   ; Set current graphic set to 10
-       byte 251,_40404%256,_40404/256                                ; Process graphic layout data at #R40404 and upon returning, move cursor to base coordinates
+       byte 251,_40404&>00ff,(_40404&>ff00)/256                                ; Process graphic layout data at #R40404 and upon returning, move cursor to base coordinates
        byte 44,6,34
        byte 44,134,29
        byte 45,6,33
@@ -516,16 +516,16 @@ _40404:
 
 * Graphic Layout Data Large Yellow Creature (Level 3) Mouth Open
 _40442:
-       byte 251,_40589%256,_40589/256                                ; Process graphic layout data at #R40589 and upon returning, move cursor to base
+       byte 251,_40589&>00ff,(_40589&>ff00)/256                                ; Process graphic layout data at #R40589 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 251,_40858%256,_40858/256                                ; Process graphic layout data at #R40858 and upon returning, move cursor to base
+       byte 251,_40858&>00ff,(_40858&>ff00)/256                                ; Process graphic layout data at #R40858 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 248,_40457%256,_40457/256                                ; Jump to #R40457
+       byte 248,_40457&>00ff,(_40457&>ff00)/256                                ; Jump to #R40457
 * Mouth Closed
 _40451:
-       byte 251,_40589%256,_40589/256                                ; Process graphic layout data at #R40589 and upon returning, move cursor to base
+       byte 251,_40589&>00ff,(_40589&>ff00)/256                                ; Process graphic layout data at #R40589 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 251,_40975%256,_40975/256                                ; Process graphic layout data at #R40975 and upon returning, move cursor to base
+       byte 251,_40975&>00ff,(_40975&>ff00)/256                                ; Process graphic layout data at #R40975 and upon returning, move cursor to base
                                                                      ; coordinates
 _40457:
        byte 250,2,255                                                ; Change cursor's x- and y-coordinates by -1 and +2 characters respectively
@@ -540,19 +540,19 @@ _40457:
        byte 255                                                      ; End Marker
 * Animated, confused
 _40485:
-       byte 251,_40589%256,_40589/256                                ; Process graphic layout data at #R40589 and upon returning, move cursor to base
+       byte 251,_40589&>00ff,(_40589&>ff00)/256                                ; Process graphic layout data at #R40589 and upon returning, move cursor to base
                                                                      ; coordinates
-       byte 251,_40847%256,_40847/256                                ; Process graphic layout data at #R40847 and upon returning, move cursor to base
+       byte 251,_40847&>00ff,(_40847&>ff00)/256                                ; Process graphic layout data at #R40847 and upon returning, move cursor to base
                                                                      ; coordinates
        byte 250,2,255                                                ; Change cursor's x- and y-coordinates by -1 and +2 characters respectively
        byte 249,4,1                                                  ; If state n (initially 1) has remaining time of zero then reset its time to
                                                                      ; maximum and randomly select a new state, n, from the 4 in the following list.
                                                                      ; Jump to the address specified in the current state and decrease its remaining
                                                                      ; time:
-       byte 3,3,_40513%256,_40513/256                                ; #R40513 (Eyes looking up-left, for 3 ticks)
-       byte 3,3,_40532%256,_40532/256                                ; #R40532 (Eyes looking up-right, for 3 ticks)
-       byte 6,6,_40551%256,_40551/256                                ; #R40551 (Eyes looking down-left, for 6 ticks)
-       byte 6,6,_40570%256,_40570/256                                ; #R40570 (Eyes looking down-right, for 6 ticks)
+       byte 3,3,_40513&>00ff,(_40513&>ff00)/256                                ; #R40513 (Eyes looking up-left, for 3 ticks)
+       byte 3,3,_40532&>00ff,(_40532&>ff00)/256                                ; #R40532 (Eyes looking up-right, for 3 ticks)
+       byte 6,6,_40551&>00ff,(_40551&>ff00)/256                                ; #R40551 (Eyes looking down-left, for 6 ticks)
+       byte 6,6,_40570&>00ff,(_40570&>ff00)/256                                ; #R40570 (Eyes looking down-right, for 6 ticks)
 * Eyes Looking Up-Left
 _40513:
        byte 238,2                                                    ; Set Repeat Counter A to 2
@@ -638,8 +638,8 @@ _40847:
                                                                      ; maximum and randomly select a new state, n, from the 2 in the following list.
                                                                      ; Jump to the address specified in the current state and decrease its remaining
                                                                      ; time:
-       byte 3,3,_40858%256,_40858/256                                ; #R40858 (Jaw open, for 3 ticks)
-       byte 3,3,_40975%256,_40975/256                                ; #R40975 (Jaw closed, for 3 ticks)
+       byte 3,3,_40858&>00ff,(_40858&>ff00)/256                                ; #R40858 (Jaw open, for 3 ticks)
+       byte 3,3,_40975&>00ff,(_40975&>ff00)/256                                ; #R40975 (Jaw closed, for 3 ticks)
 * Jaw (Open)
 _40858:
        byte 250,7,254                                                ; Change cursor's x- and y-coordinates by -2 and +7 characters respectively
@@ -662,7 +662,7 @@ _40858:
        byte 62,70,33,63,70,37
        byte 63,198,33,62,198,33
        byte 250,254,250                                              ; Change cursor's x- and y-coordinates by -5 and -2 characters respectively
-       byte 248,_41065%256,_41065/256                                ; Jump to #R41065
+       byte 248,_41065&>00ff,(_41065&>ff00)/256                                ; Jump to #R41065
 * Jaw (Closed)
 _40975:
        byte 250,7,254                                                ; Change cursor's x- and y-coordinates by -2 and +7 characters respectively
@@ -700,7 +700,7 @@ _41090:
 * Fully Open With Small Bat (Animated)
 _41099:
        byte 250,251,4                                                ; Change cursor's x- and y-coordinates by +4 and -4 characters respectively
-       byte 251,_41141%256,_41141/256                                ; Process graphic layout data at #R41141 and upon returning, move cursor to base coordinates
+       byte 251,_41141&>00ff,(_41141&>ff00)/256                                ; Process graphic layout data at #R41141 and upon returning, move cursor to base coordinates
        byte 250,249,0                                                ; Change cursor's x- and y-coordinates by 0 and -7 characters respectively
        byte 238,8                                                    ; Set Repeat Counter A to 8
        byte 73,5,32
@@ -709,7 +709,7 @@ _41099:
 * Half Open With Small Bat (Animated)
 _41115:
        byte 250,254,4                                                ; Change cursor's x- and y-coordinates by +4 and -2 characters respectively
-       byte 251,_41141%256,_41141/256                                ; Process graphic layout data at #R41141 and upon returning, move cursor to base coordinates
+       byte 251,_41141&>00ff,(_41141&>ff00)/256                                ; Process graphic layout data at #R41141 and upon returning, move cursor to base coordinates
        byte 242,5                                                    ; Set current attribute to 5
        byte 250,250,5                                                ; Change cursor's x- and y-coordinates by +5 and -5 characters respectively
        byte 74,31
@@ -724,10 +724,10 @@ _41141:
        byte 244,10                                                   ; Set current graphic set to 10
        byte 243,0,4                                                  ; Increase current state value n (initially 0), up to maximum of 4, resetting to zero if
                                                                      ; maximum reached and jump to n-th address in following list:
-       byte _41154%256,_41154/256                                    ; #R41154 (Small Bat, wings up)
-       byte _41158%256,_41158/256                                    ; #R41158 (Small Bat, wings level)
-       byte _41171%256,_41171/256                                    ; #R41171 (Small Bat, wings down)
-       byte _41158%256,_41158/256                                    ; #R41158 (Small Bat, wings level)
+       byte _41154&>00ff,(_41154&>ff00)/256                                    ; #R41154 (Small Bat, wings up)
+       byte _41158&>00ff,(_41158&>ff00)/256                                    ; #R41158 (Small Bat, wings level)
+       byte _41171&>00ff,(_41171&>ff00)/256                                    ; #R41171 (Small Bat, wings down)
+       byte _41158&>00ff,(_41158&>ff00)/256                                    ; #R41158 (Small Bat, wings level)
 * Small Bat (Wings Up)
 _41154:
        byte 77,7,33
@@ -757,9 +757,9 @@ _41175:
 
 * Script Data Berk Being Thrown Left by Hatch (Level 3)
 _35523:
-       byte _59048%256,_59048/256                                    ; #R59048 (Berk being thrown left)
+       byte _59048&>00ff,(_59048&>ff00)/256                                    ; #R59048 (Berk being thrown left)
        byte 23,0,5,0                                                 ; Start loop (1) for 5 iterations
-       byte _59048%256,_59048/256                                    ; #R59048 (Berk being thrown left)
+       byte _59048&>00ff,(_59048&>ff00)/256                                    ; #R59048 (Berk being thrown left)
        byte 2,0                                                      ; Move Berk left two characters...
        byte 2,0                                                      ; ...
        byte 62,0                                                     ; Move Berk into room to the left, if appropriate
@@ -767,17 +767,17 @@ _35523:
        byte 34,0                                                     ; ...
        byte 24,0                                                     ; End loop (1)
        byte 23,0,4,0                                                 ; Start loop (1) for 4 iterations
-       byte _59048%256,_59048/256                                    ; #R59048 (Berk being thrown left)
+       byte _59048&>00ff,(_59048&>ff00)/256                                    ; #R59048 (Berk being thrown left)
        byte 2,0                                                      ; Move Berk left two characters...
        byte 2,0                                                      ; ...
        byte 35,0                                                     ; Move Berk down two characters...
        byte 35,0                                                     ; ...
        byte 24,0                                                     ; End loop (1)
        byte 23,0,2,0                                                 ; Start loop (1) for 2 iterations
-       byte _59168%256,_59168/256                                    ; #R59168 (Floating / starting to fall, animated)
+       byte _59168&>00ff,(_59168&>ff00)/256                                    ; #R59168 (Floating / starting to fall, animated)
        byte 2,0                                                      ; Move Berk left one character
        byte 35,0                                                     ; Move Berk down two characters...
        byte 35,0                                                     ; ...
        byte 24,0                                                     ; End loop (1)
-       byte 1,0,_35371%256,_35371/256                                ; Jump to #R35371 (Berk lying on floor stunned and getting up)
+       byte 1,0,_35371&>00ff,(_35371&>ff00)/256                                ; Jump to #R35371 (Berk lying on floor stunned and getting up)
 

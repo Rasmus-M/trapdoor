@@ -3,16 +3,16 @@
 * Table of Data Addresses (Level 1)
 *
 data_addresses_1:
-       data state_data_simple_1                                      ; State Data for Simple Entities (Level 1)
-       data state_data_complex_1                                     ; State Data for Complex Entities (Level 1)
-       data berks_state_data_1                                       ; Address of Berk's state data (Level 1)
-       data drutts_state_data_1                                      ; Address of Drutt's state data (Level 1)
-       data worms_state_data_1                                       ; Address of worm's state data (Level 1)
-       data rev_col_check_addr_1                                     ; Start address for reverse-order collision checks (Level 1)
-       data room_dim_data_1                                          ; Room Dimension Data (Level 1)
-       data horz_connect_map_1                                       ; Horizontal Room Connectivity Map (Level 1)
-       data update_level_1_entities                                  ; Address of routine to update entities (Level 1)
-       data vert_connect_map_1                                       ; Vertical Room Connectivity Map (Level 1)
+       data state_data_simple_1                  ; State Data for Simple Entities (Level 1)
+       data state_data_complex_1                 ; State Data for Complex Entities (Level 1)
+       data berks_state_data_1                   ; Address of Berk's state data (Level 1)
+       data drutts_state_data_1                  ; Address of Drutt's state data (Level 1)
+       data worms_state_data_1                   ; Address of worm's state data (Level 1)
+       data rev_col_check_addr_1                 ; Start address for reverse-order collision checks (Level 1)
+       data room_dim_data_1                      ; Room Dimension Data (Level 1)
+       data horz_connect_map_1                   ; Horizontal Room Connectivity Map (Level 1)
+       data update_level_1_entities              ; Address of routine to update entities (Level 1)
+       data vert_connect_map_1                   ; Vertical Room Connectivity Map (Level 1)
 
 * State Data for Simple Entities (Level 1)
 *
@@ -25,97 +25,97 @@ data_addresses_1:
 * { 5 | x-coordinate + 100 (chars) }
 * TABLE#
 state_data_simple_1:
-       byte 1,2,_50389%256,_50389/256,107,100                        ; (#R50389) Left brickwork
-       byte 1,2,_50389%256,_50389/256,106,117                        ; (#R50389) Right brickwork
+       byte 1,2,_50389&>00ff,(_50389&>ff00)/256,107,100    ; (#R50389) Left brickwork
+       byte 1,2,_50389&>00ff,(_50389&>ff00)/256,106,117    ; (#R50389) Right brickwork
 home_sweet_home:
-       byte 1,0,_50479%256,_50479/256,107,107                        ; (#R50479) "Home Sweet Home" brick border
-       byte 1,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
-       byte 1,2,_50018%256,_50018/256,100,100                        ; (#R50018) Spider's web
-       byte 1,1,_50238%256,_50238/256,121,100                        ; (#R50238) Left part of floor
-       byte 1,1,_50211%256,_50211/256,121,120                        ; (#R50211) Right part of floor
+       byte 1,0,_50479&>00ff,(_50479&>ff00)/256,107,107    ; (#R50479) "Home Sweet Home" brick border
+       byte 1,2,_50116&>00ff,(_50116&>ff00)/256,100,100    ; (#R50116) Four arches
+       byte 1,2,_50018&>00ff,(_50018&>ff00)/256,100,100    ; (#R50018) Spider's web
+       byte 1,1,_50238&>00ff,(_50238&>ff00)/256,121,100    ; (#R50238) Left part of floor
+       byte 1,1,_50211&>00ff,(_50211&>ff00)/256,121,120    ; (#R50211) Right part of floor
 closed_trap_door:
-       byte 1,2,_50267%256,_50267/256,121,112                        ; (#R50267) Closed Trap Door
-       byte 1,2,_50147%256,_50147/256,112,115                        ; (#R50147) Boni's shelf
-       byte 2,1,_50359%256,_50359/256,100,100                        ; (#R50359) Left wall
-       byte 2,1,_50359%256,_50359/256,99,109                         ; (#R50359) Right wall
-       byte 3,1,_50359%256,_50359/256,100,100                        ; (#R50359) Left wall
-       byte 3,1,_50359%256,_50359/256,99,115                         ; (#R50359) Right wall
-       byte 4,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
-       byte 4,2,_50126%256,_50126/256,101,100                        ; (#R50126) Single arch, left
-       byte 4,2,_50126%256,_50126/256,101,124                        ; (#R50126) Single arch, right
-       byte 4,2,_50359%256,_50359/256,97,108                         ; (#R50359) Wall, vertical bricks, single row, left
-       byte 4,2,_50359%256,_50359/256,97,123                         ; (#R50359) Wall, vertical bricks, single row, right
-       byte 5,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
-       byte 6,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
-       byte 6,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
-       byte 6,2,_50579%256,_50579/256,107,99                         ; (#R50579) Wall, horizontal bricks
-       byte 7,1,_50238%256,_50238/256,121,94                         ; (#R50238) Left part of floor
-       byte 7,1,_50211%256,_50211/256,121,126                        ; (#R50211) Right part of floor
-       byte 7,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
-       byte 8,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
-       byte 8,1,_50359%256,_50359/256,101,100                        ; (#R50359) Wall, vertical bricks, single row, left
-       byte 8,1,_50359%256,_50359/256,101,131                        ; (#R50359) Wall, vertical bricks, single row, right
-       byte 9,1,_50160%256,_50160/256,121,100                        ; (#R50160) Floor (full width)
-       byte 9,2,_50116%256,_50116/256,100,100                        ; (#R50116) Four arches
-       byte 9,2,_50609%256,_50609/256,111,123                        ; (#R50609) Row of five horizontal bricks
-       byte 254                                                      ; End Marker
+       byte 1,2,_50267&>00ff,(_50267&>ff00)/256,121,112    ; (#R50267) Closed Trap Door
+       byte 1,2,_50147&>00ff,(_50147&>ff00)/256,112,115    ; (#R50147) Boni's shelf
+       byte 2,1,_50359&>00ff,(_50359&>ff00)/256,100,100    ; (#R50359) Left wall
+       byte 2,1,_50359&>00ff,(_50359&>ff00)/256,99,109     ; (#R50359) Right wall
+       byte 3,1,_50359&>00ff,(_50359&>ff00)/256,100,100    ; (#R50359) Left wall
+       byte 3,1,_50359&>00ff,(_50359&>ff00)/256,99,115     ; (#R50359) Right wall
+       byte 4,1,_50160&>00ff,(_50160&>ff00)/256,121,100    ; (#R50160) Floor (full width)
+       byte 4,2,_50126&>00ff,(_50126&>ff00)/256,101,100    ; (#R50126) Single arch, left
+       byte 4,2,_50126&>00ff,(_50126&>ff00)/256,101,124    ; (#R50126) Single arch, right
+       byte 4,2,_50359&>00ff,(_50359&>ff00)/256,97,108     ; (#R50359) Wall, vertical bricks, single row, left
+       byte 4,2,_50359&>00ff,(_50359&>ff00)/256,97,123     ; (#R50359) Wall, vertical bricks, single row, right
+       byte 5,1,_50160&>00ff,(_50160&>ff00)/256,121,100    ; (#R50160) Floor (full width)
+       byte 6,1,_50160&>00ff,(_50160&>ff00)/256,121,100    ; (#R50160) Floor (full width)
+       byte 6,2,_50116&>00ff,(_50116&>ff00)/256,100,100    ; (#R50116) Four arches
+       byte 6,2,_50579&>00ff,(_50579&>ff00)/256,107,99     ; (#R50579) Wall, horizontal bricks
+       byte 7,1,_50238&>00ff,(_50238&>ff00)/256,121,94     ; (#R50238) Left part of floor
+       byte 7,1,_50211&>00ff,(_50211&>ff00)/256,121,126    ; (#R50211) Right part of floor
+       byte 7,2,_50116&>00ff,(_50116&>ff00)/256,100,100    ; (#R50116) Four arches
+       byte 8,1,_50160&>00ff,(_50160&>ff00)/256,121,100    ; (#R50160) Floor (full width)
+       byte 8,1,_50359&>00ff,(_50359&>ff00)/256,101,100    ; (#R50359) Wall, vertical bricks, single row, left
+       byte 8,1,_50359&>00ff,(_50359&>ff00)/256,101,131    ; (#R50359) Wall, vertical bricks, single row, right
+       byte 9,1,_50160&>00ff,(_50160&>ff00)/256,121,100    ; (#R50160) Floor (full width)
+       byte 9,2,_50116&>00ff,(_50116&>ff00)/256,100,100    ; (#R50116) Four arches
+       byte 9,2,_50609&>00ff,(_50609&>ff00)/256,111,123    ; (#R50609) Row of five horizontal bricks
+       byte 254                                            ; End Marker
 
 * State Data for Complex Entities (Level 1)
 *
 * For more details on individual bits, see trivia.
 state_data_complex_1:
-       byte 10,2,_50663%256,_50663/256,100,112,108,119,33,0,0,0,0    ; (#R50663) Entry door (above Trap Door Room, where Berk
-                                                                     ; emerges at the end of the game)
-       byte 10,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 11,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 10,2,_50663&>00ff,(_50663&>ff00)/256,100,112,108,119,33,0,0,0,0    ; (#R50663) Entry door (above Trap Door Room, where Berk
+                                                           ; emerges at the end of the game)
+       byte 10,1,_50800&>00ff,(_50800&>ff00)/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 11,1,_50800&>00ff,(_50800&>ff00)/256,120,100,121,131,129,0,0,240,0 ; (#R50800) Marker (makes Berk and Drutt fall)
 level_1_exit_door:
-       byte 9,2,_50663%256,_50663/256,112,124,120,131,33,2,0,192,0   ; (#R50663) Exit door
-       byte 9,2,_50579%256,_50579/256,107,123,120,124,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
-       byte 9,2,_50579%256,_50579/256,107,131,120,132,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
-       byte 6,2,_50579%256,_50579/256,107,107,120,108,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
-       byte 6,1,_50800%256,_50800/256,121,102,121,102,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
+       byte 9,2,_50663&>00ff,(_50663&>ff00)/256,112,124,120,131,33,2,0,192,0   ; (#R50663) Exit door
+       byte 9,2,_50579&>00ff,(_50579&>ff00)/256,107,123,120,124,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
+       byte 9,2,_50579&>00ff,(_50579&>ff00)/256,107,131,120,132,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
+       byte 6,2,_50579&>00ff,(_50579&>ff00)/256,107,107,120,108,30,0,0,48,0    ; (#R50579) Wall, horizontal bricks
+       byte 6,1,_50800&>00ff,(_50800&>ff00)/256,121,102,121,102,50,0,0,48,0    ; (#R50800) Marker (makes Drutt swap depth levels)
 opened_trap_door:
-       byte 0,1,_50283%256,_50283/256,114,112,121,119,129,0,0,240,0  ; (#R50283) Open Trap Door (also acts as marker, makes Berk
-                                                                     ; and Drutt fall)
+       byte 0,1,_50283&>00ff,(_50283&>ff00)/256,114,112,121,119,129,0,0,240,0  ; (#R50283) Open Trap Door (also acts as marker, makes Berk
+                                                           ; and Drutt fall)
 marker:
-       byte 1,1,_50800%256,_50800/256,114,120,121,120,128,0,0,48,0   ; (#R50800) Marker (prevents Berk and Drutt passing)
+       byte 1,1,_50800&>00ff,(_50800&>ff00)/256,114,120,121,120,128,0,0,48,0   ; (#R50800) Marker (prevents Berk and Drutt passing)
 bat:
-       byte 6,1,_37205%256,_37205/256,93,115,98,118,30,0,128,192,0   ; (#R37205) Bat
-       byte 7,1,_50800%256,_50800/256,120,106,121,125,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 8,1,_50609%256,_50609/256,100,96,100,105,130,0,0,240,0   ; (#R50609) Ceiling (left section)
-       byte 8,1,_50609%256,_50609/256,100,126,100,135,130,0,0,240,0  ; (#R50609) Ceiling (right section)
-       byte 8,2,_50642%256,_50642/256,107,119,108,122,35,0,0,240,0   ; (#R50642) Pit Platform
-       byte 8,2,_50800%256,_50800/256,107,114,108,118,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 8,2,_50800%256,_50800/256,107,123,108,127,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 8,2,_50800%256,_50800/256,109,119,109,122,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
-                                                                     ; head)
-       byte 8,2,_50579%256,_50579/256,101,104,120,105,30,0,0,240,0   ; (#R50579) Wall, horizontal bricks
-       byte 8,2,_50579%256,_50579/256,101,126,120,127,30,0,0,240,0   ; (#R50579) Wall, horizontal bricks
+       byte 6,1,_37205&>00ff,(_37205&>ff00)/256,93,115,98,118,30,0,128,192,0   ; (#R37205) Bat
+       byte 7,1,_50800&>00ff,(_50800&>ff00)/256,120,106,121,125,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 8,1,_50609&>00ff,(_50609&>ff00)/256,100,96,100,105,130,0,0,240,0   ; (#R50609) Ceiling (left section)
+       byte 8,1,_50609&>00ff,(_50609&>ff00)/256,100,126,100,135,130,0,0,240,0  ; (#R50609) Ceiling (right section)
+       byte 8,2,_50642&>00ff,(_50642&>ff00)/256,107,119,108,122,35,0,0,240,0   ; (#R50642) Pit Platform
+       byte 8,2,_50800&>00ff,(_50800&>ff00)/256,107,114,108,118,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 8,2,_50800&>00ff,(_50800&>ff00)/256,107,123,108,127,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 8,2,_50800&>00ff,(_50800&>ff00)/256,109,119,109,122,130,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt bounce off or bang
+                                                           ; head)
+       byte 8,2,_50579&>00ff,(_50579&>ff00)/256,101,104,120,105,30,0,0,240,0   ; (#R50579) Wall, horizontal bricks
+       byte 8,2,_50579&>00ff,(_50579&>ff00)/256,101,126,120,127,30,0,0,240,0   ; (#R50579) Wall, horizontal bricks
 berks_state_data_1:
-       byte 1,1,_56804%256,_56804/256,115,123,121,128,31,0,128,192,0 ; (#R56804) Berk
+       byte 1,1,_56804&>00ff,(_56804&>ff00)/256,115,123,121,128,31,0,128,192,0 ; (#R56804) Berk
 bonis_state_data_1:
-       byte 1,2,_50317%256,_50317/256,108,115,111,116,19,0,128,0,0   ; (#R50317) Boni
+       byte 1,2,_50317&>00ff,(_50317&>ff00)/256,108,115,111,116,19,0,128,0,0   ; (#R50317) Boni
 flying_skeleton:
-       byte 1,2,_51314%256,_51314/256,124,115,128,116,30,0,128,192,0 ; (#R51314) Flying Skeleton Creature
-       byte 6,2,_50792%256,_50792/256,105,103,105,104,17,0,128,240,0 ; (#R50792) Key
-       byte 9,2,_50560%256,_50560/256,105,103,105,104,4,0,131,240,0  ; (#R50560) Red Sweet (Flying, duration = 3)
-       byte 8,1,_50565%256,_50565/256,121,104,121,105,1,0,128,240,0  ; (#R50565) Green Sweet (Jumping, duration = permanent)
+       byte 1,2,_51314&>00ff,(_51314&>ff00)/256,124,115,128,116,30,0,128,192,0 ; (#R51314) Flying Skeleton Creature
+       byte 6,2,_50792&>00ff,(_50792&>ff00)/256,105,103,105,104,17,0,128,240,0 ; (#R50792) Key
+       byte 9,2,_50560&>00ff,(_50560&>ff00)/256,105,103,105,104,4,0,131,240,0  ; (#R50560) Red Sweet (Flying, duration = 3)
+       byte 8,1,_50565&>00ff,(_50565&>ff00)/256,121,104,121,105,1,0,128,240,0  ; (#R50565) Green Sweet (Jumping, duration = permanent)
 drutts_state_data_1:
-       byte 1,1,_52417%256,_52417/256,121,129,121,129,18,0,128,192,0 ; (#R52417) Drutt
+       byte 1,1,_52417&>00ff,(_52417&>ff00)/256,121,129,121,129,18,0,128,192,0 ; (#R52417) Drutt
 worms_state_data_1:
-       byte 0,0,_53340%256,_53340/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
-       byte 2,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 3,1,_50800%256,_50800/256,120,100,121,131,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
-       byte 4,1,_50609%256,_50609/256,100,99,100,108,130,0,0,240,0   ; (#R50609) Ceiling, left section
+       byte 0,0,_53340&>00ff,(_53340&>ff00)/256,121,109,121,110,24,0,128,0,0   ; (#R53340) Worm
+       byte 2,1,_50800&>00ff,(_50800&>ff00)/256,120,100,121,131,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 3,1,_50800&>00ff,(_50800&>ff00)/256,120,100,121,131,129,0,0,240,0  ; (#R50800) Marker (makes Berk and Drutt fall)
+       byte 4,1,_50609&>00ff,(_50609&>ff00)/256,100,99,100,108,130,0,0,240,0   ; (#R50609) Ceiling, left section
 rev_col_check_addr_1:
-       byte 4,1,_50609%256,_50609/256,100,123,100,132,130,0,0,240,0  ; (#R50609) Ceiling, right section
+       byte 4,1,_50609&>00ff,(_50609&>ff00)/256,100,123,100,132,130,0,0,240,0  ; (#R50609) Ceiling, right section
 spider:
-       byte 5,2,_37888%256,_37888/256,103,118,106,120,27,0,128,0,0   ; (#R37888) Spider
-       byte 5,2,_37888%256,_37888/256,103,110,106,112,28,0,128,0,0   ; (#R37888) Spider
-       byte 5,2,_37888%256,_37888/256,103,102,106,104,29,0,128,0,0   ; (#R37888) Spider
-       byte 5,2,_50008%256,_50008/256,100,100,0,0,30,0,0,0,0         ; (#R50008) Spiders' Webs
-       byte 5,2,_50116%256,_50116/256,100,100,0,0,30,0,0,0,0         ; (#R50116) Spiders' Arches
-       byte 255                                                      ; End Marker
+       byte 5,2,_37888&>00ff,(_37888&>ff00)/256,103,118,106,120,27,0,128,0,0   ; (#R37888) Spider
+       byte 5,2,_37888&>00ff,(_37888&>ff00)/256,103,110,106,112,28,0,128,0,0   ; (#R37888) Spider
+       byte 5,2,_37888&>00ff,(_37888&>ff00)/256,103,102,106,104,29,0,128,0,0   ; (#R37888) Spider
+       byte 5,2,_50008&>00ff,(_50008&>ff00)/256,100,100,0,0,30,0,0,0,0         ; (#R50008) Spiders' Webs
+       byte 5,2,_50116&>00ff,(_50116&>ff00)/256,100,100,0,0,30,0,0,0,0         ; (#R50116) Spiders' Arches
+       byte 255                                            ; End Marker
 
 *
 * Room Dimension Data (Level 1)
@@ -129,73 +129,73 @@ spider:
 * { 4 | Position of bottom edge of room (chars) }
 * TABLE#
 room_dim_data_1:
-       byte 2,0,31,0,21                                              ; (01) Trap Door Room
-       byte 2,11,20,0,21                                             ; (02) 1st room below Trap Door
-       byte 2,8,23,0,21                                              ; (03) 2nd room below Trap Door
-       byte 2,0,31,0,21                                              ; (04) Room at bottom of Trap Door Shaft
-       byte 2,0,31,0,21                                              ; (05) Spider Room
-       byte 2,0,31,0,21                                              ; (06) Bat Room
-       byte 2,0,31,0,21                                              ; (07) Room at top of Pit
-       byte 2,0,31,0,21                                              ; (08) Pit
-       byte 2,0,31,0,21                                              ; (09) Door Room
-       byte 2,0,31,0,21                                              ; (10) Entry Room
-       byte 2,0,31,0,21                                              ; (11) Room above Trap Door Room
-       byte 255                                                      ; End Marker
+       byte 2,0,31,0,21                          ; (01) Trap Door Room
+       byte 2,11,20,0,21                         ; (02) 1st room below Trap Door
+       byte 2,8,23,0,21                          ; (03) 2nd room below Trap Door
+       byte 2,0,31,0,21                          ; (04) Room at bottom of Trap Door Shaft
+       byte 2,0,31,0,21                          ; (05) Spider Room
+       byte 2,0,31,0,21                          ; (06) Bat Room
+       byte 2,0,31,0,21                          ; (07) Room at top of Pit
+       byte 2,0,31,0,21                          ; (08) Pit
+       byte 2,0,31,0,21                          ; (09) Door Room
+       byte 2,0,31,0,21                          ; (10) Entry Room
+       byte 2,0,31,0,21                          ; (11) Room above Trap Door Room
+       byte 255                                  ; End Marker
 
 * Horizontal Room Connectivity Map (Level 1)
 *
 * Each entry represents a link between two rooms. The first byte in the entry is the index of the room to the left
 * and the second byte is the index of the room to the right.
 horz_connect_map_1:
-       byte 6,5                                                      ; Bat Room and Spider Room
-       byte 5,4                                                      ; Spider Room and room at bottom of Trap Door Shaft
-       byte 4,7                                                      ; Room at bottom of Trap Door Shaft and room at top of Pit
-       byte 7,9                                                      ; Room at top of Pit and Door Room
-       byte 255,255                                                  ; End Marker
+       byte 6,5                                  ; Bat Room and Spider Room
+       byte 5,4                                  ; Spider Room and room at bottom of Trap Door Shaft
+       byte 4,7                                  ; Room at bottom of Trap Door Shaft and room at top of Pit
+       byte 7,9                                  ; Room at top of Pit and Door Room
+       byte 255,255                              ; End Marker
 
 * Vertical Room Connectivity Map (Level 1)
 vert_connect_map_1:
-       byte 1,2                                                      ; Trap Door Room and 1st room below Trap Door
-       byte 2,3                                                      ; 1st room below Trap Door and 2nd room below Trap Door
-       byte 3,4                                                      ; 2nd room below Trap Door and room at bottom of Trap Door Shaft
-       byte 7,8                                                      ; Room at top of Pit and Pit
-       byte 10,11                                                    ; Entry Room and room above Trap Door Room
-       byte 11,1                                                     ; Room above Trap Door Room and Trap Door Room
-       byte 255,255                                                  ; End Marker
+       byte 1,2                                  ; Trap Door Room and 1st room below Trap Door
+       byte 2,3                                  ; 1st room below Trap Door and 2nd room below Trap Door
+       byte 3,4                                  ; 2nd room below Trap Door and room at bottom of Trap Door Shaft
+       byte 7,8                                  ; Room at top of Pit and Pit
+       byte 10,11                                ; Entry Room and room above Trap Door Room
+       byte 11,1                                 ; Room above Trap Door Room and Trap Door Room
+       byte 255,255                              ; End Marker
 
 * State Data for Drutt Upon Returning to Level 1
 *
 * After completing Level 4, the data here is written into Drutt's slot in Level 1's State Data for Complex Entities
 * block (#R43333). This ensures that Drutt follows Berk and Boni through the final door.
 init_drutts_state_data_1:
-       byte 10,1,_52417%256,_52417/256,30,119,30,119,18,0,192,192,2
+       byte 10,1,_52417&>00ff,(_52417&>ff00)/256,30,119,30,119,18,0,192,192,2
 
 * Background brickwork
 _50389:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 250,0,12                                                 ; Change cursor's x- and y-coordinates by +12 and 0 characters respectively
+       byte 244,3                                ; Set current graphic set to 3
+       byte 250,0,12                             ; Change cursor's x- and y-coordinates by +12 and 0 characters respectively
        byte 21,4,33,23,4,21
        byte 22,4,33,24,4,32
-       byte 250,0,7                                                  ; Change cursor's x- and y-coordinates by +7 and 0 characters respectively
+       byte 250,0,7                              ; Change cursor's x- and y-coordinates by +7 and 0 characters respectively
        byte 25,4,32,27,4,27
        byte 23,132,33,21,132,27
        byte 24,132,33,22,132,33
-       byte 250,1,8                                                  ; Change cursor's x- and y-coordinates by +8 and +1 characters respectively
+       byte 250,1,8                              ; Change cursor's x- and y-coordinates by +8 and +1 characters respectively
        byte 23,132,33,22,132,24
        byte 22,4,33,22,132,33
-       byte 250,1,3                                                  ; Change cursor's x- and y-coordinates by +3 and +1 characters respectively
+       byte 250,1,3                              ; Change cursor's x- and y-coordinates by +3 and +1 characters respectively
        byte 26,4,32,28,4,25
        byte 23,132,33,22,132,43
        byte 25,132,32,28,4,21
        byte 21,4,33,23,4,33
-       byte 250,1,5                                                  ; Change cursor's x- and y-coordinates by +5 and +1 characters respectively
+       byte 250,1,5                              ; Change cursor's x- and y-coordinates by +5 and +1 characters respectively
        byte 22,4,33,24,4,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * "Home Sweet Home" Message Brick Border (End of Game)
 _50479:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 242,4                                                    ; Set current attribute to 4
+       byte 244,3                                ; Set current graphic set to 3
+       byte 242,4                                ; Set current attribute to 4
        byte 21,161,23,161
        byte 22,161,24,161
        byte 21,161,24,161
@@ -215,34 +215,34 @@ _50479:
        byte 24,161,22,161
        byte 23,161,21,161
        byte 24,161,28,161
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Four Arches
 _50116:
-       byte 240,4                                                    ; Set Repeat Counter B to 4
-       byte 251,_50126%256,_50126/256                                ; Process graphic layout data at #R50126 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 254,0,8                                                  ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively and store as
-                                                                     ; new base coordinates
-       byte 241                                                      ; Decrement Repeat Counter B and loop back to #R50118 if not zero
-       byte 255                                                      ; End Marker
+       byte 240,4                                ; Set Repeat Counter B to 4
+       byte 251,_50126&>00ff,(_50126&>ff00)/256  ; Process graphic layout data at #R50126 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 254,0,8                              ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively and store as
+                                                 ; new base coordinates
+       byte 241                                  ; Decrement Repeat Counter B and loop back to #R50118 if not zero
+       byte 255                                  ; End Marker
 
 * Single Arch
 _50126:
-       byte 251,_50068%256,_50068/256                                ; Process graphic layout data at #R50068 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 250,4,0                                                  ; Change cursor's x- and y-coordinates by 0 and +4 characters respectively
-       byte 242,6                                                    ; Set current attribute to 6
+       byte 251,_50068&>00ff,(_50068&>ff00)/256  ; Process graphic layout data at #R50068 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 250,4,0                              ; Change cursor's x- and y-coordinates by 0 and +4 characters respectively
+       byte 242,6                                ; Set current attribute to 6
        byte 23,39,22,25
        byte 30,39,29,25
        byte 32,39,31,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Upper Section of Arch
 _50068:
-       byte 242,4                                                    ; Set current attribute to 4
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 250,0,2                                                  ; Change cursor's x- and y-coordinates by +2 and 0 characters respectively
+       byte 242,4                                ; Set current attribute to 4
+       byte 244,3                                ; Set current graphic set to 3
+       byte 250,0,2                              ; Change cursor's x- and y-coordinates by +2 and 0 characters respectively
        byte 56,33,57,33
        byte 58,33,59,28
        byte 60,33,61,33
@@ -253,70 +253,70 @@ _50068:
        byte 15,33,16,25
        byte 17,33,18,37
        byte 19,33,20,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Left Part of Floor (Also Used in Level 4)
 _50238:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 242,4                                                    ; Set current attribute to 4
+       byte 244,3                                ; Set current graphic set to 3
+       byte 242,4                                ; Set current attribute to 4
        byte 33,161,34,161
        byte 35,161,36,161
        byte 37,161,38,161
        byte 39,161,40,161
        byte 41,161,42,161
        byte 43,161,44,161
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Right Half of Floor
 _50211:
-       byte 242,132                                                  ; Set current attribute to 132
+       byte 242,132                              ; Set current attribute to 132
        byte 44,161,43,161
        byte 42,161,41,161
        byte 40,161,39,161
        byte 38,161,37,161
        byte 36,161,35,161
        byte 34,161,33,161
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Trap Door, Closed
 _50267:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 242,70                                                   ; Set current attribute to 70
+       byte 244,3                                ; Set current graphic set to 3
+       byte 242,70                               ; Set current attribute to 70
        byte 45,161,46,161
-       byte 238,5                                                    ; Set Repeat Counter A to 5
+       byte 238,5                                ; Set Repeat Counter A to 5
        byte 47,161
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50277 if not zero
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R50277 if not zero
        byte 48,161
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Boni's Platform
 _50147:
-       byte 242,6                                                    ; Set current attribute to 6
-       byte 244,3                                                    ; Set current graphic set to 3
+       byte 242,6                                ; Set current attribute to 6
+       byte 244,3                                ; Set current graphic set to 3
        byte 29,33,30,31
        byte 31,33,32,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Graphic Layout Data Architecture (Level 1) Part 2 Wall, vertical bricks, single row
 _50359:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 238,3                                                    ; Set Repeat Counter A to 3
+       byte 244,3                                ; Set current graphic set to 3
+       byte 238,3                                ; Set Repeat Counter A to 3
        byte 25,4,160,27,4,160
        byte 26,4,160,28,4,160
        byte 25,132,160,27,132,160
        byte 26,132,160,28,132,160
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50363 if not zero
-       byte 255                                                      ; End Marker
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R50363 if not zero
+       byte 255                                  ; End Marker
 
 * Floor (Full Width, 32 chars)
 _50160:
-       byte 251,_50238%256,_50238/256                                ; Process graphic layout data at #R50238 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 250,0,12                                                 ; Change cursor's x- and y-coordinates by +12 and 0 characters respectively
-       byte 242,4                                                    ; Set current attribute to 4
+       byte 251,_50238&>00ff,(_50238&>ff00)/256  ; Process graphic layout data at #R50238 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 250,0,12                             ; Change cursor's x- and y-coordinates by +12 and 0 characters respectively
+       byte 242,4                                ; Set current attribute to 4
        byte 52,161,53,161
        byte 54,161,55,161
-       byte 242,132                                                  ; Set current attribute to 132
+       byte 242,132                              ; Set current attribute to 132
        byte 55,161,54,161
        byte 53,161,52,161
        byte 44,161,43,161
@@ -325,95 +325,95 @@ _50160:
        byte 38,161,37,161
        byte 36,161,35,161
        byte 34,161,33,161
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Graphic Layout Data Architecture (Level 1) Part 3 Vertical Wall (Horizontal Bricks)
 _50579:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 238,5                                                    ; Set Repeat Counter A to 5
+       byte 244,3                                ; Set current graphic set to 3
+       byte 238,5                                ; Set Repeat Counter A to 5
        byte 21,4,33,24,4,31
        byte 22,4,33,23,4,31
        byte 23,132,33,21,132,31
        byte 24,132,33,22,132,31
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50583 if not zero
-       byte 255                                                      ; End Marker
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R50583 if not zero
+       byte 255                                  ; End Marker
 
 * Row of five horizontal bricks
 _50609:
-       byte 244,3                                                    ; Set current graphic set to 3
+       byte 244,3                                ; Set current graphic set to 3
        byte 21,4,33,24,4,33
        byte 22,4,33,23,4,33
        byte 23,132,33,21,132,33
        byte 24,132,33,22,132,33
        byte 21,4,33,24,4,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Graphic Layout Data Doors
 * Level 1
 _50663:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 248,_50680%256,_50680/256                                ; Jump to #R50680
+       byte 244,3                                ; Set current graphic set to 3
+       byte 248,_50680&>00ff,(_50680&>ff00)/256  ; Jump to #R50680
 
 * Trap Door, Open
 _50283:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 250,0,8                                                  ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively
-       byte 238,7                                                    ; Set Repeat Counter A to 7
+       byte 244,3                                ; Set current graphic set to 3
+       byte 250,0,8                              ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively
+       byte 238,7                                ; Set Repeat Counter A to 7
        byte 49,78,32
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50290 if not zero
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R50290 if not zero
        byte 51,78,33
-       byte 250,250,0                                                ; Change cursor's x- and y-coordinates by 0 and -6 characters respectively
+       byte 250,250,0                            ; Change cursor's x- and y-coordinates by 0 and -6 characters respectively
        byte 50,6,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Script Data Bat (Level 1)
 *
 * Stationary (off top of screen)
 bat_script:
-       byte _37205%256,_37205/256                                    ; #R37205 (Flying, full wing flap)
-       byte 1,0,bat_script%256,bat_script/256                        ; Jump to #R37018
+       byte _37205&>00ff,(_37205&>ff00)/256      ; #R37205 (Flying, full wing flap)
+       byte 1,0,bat_script&>00ff,(bat_script&>ff00)/256    ; Jump to #R37018
 * Attacking
 _37024:
-       byte 8,0                                                      ; Set Must Process Current Script Data Flag
-       byte 27,0,8,0                                                 ; Start loop (3) for 8 iterations
-       byte _37216%256,_37216/256                                    ; #R37216 (Flying, half wing flap)
-       byte 35,0                                                     ; Move Bat down two characters...
-       byte 35,0                                                     ; ...
-       byte 28,0                                                     ; End loop (3)
-       byte 27,0,8,0                                                 ; Start loop (3) for 8 iterations
-       byte _37205%256,_37205/256                                    ; #R37205 (Flying, full wing flap)
-       byte 28,0                                                     ; End loop (3)
-       byte 27,0,17,0                                                ; Start loop (3) for 17 iterations
-       byte _37205%256,_37205/256                                    ; #R37205 (Flying, full wing flap)
-       byte 34,0                                                     ; Move Bat up one character
-       byte 28,0                                                     ; End loop (3)
-       byte 9,0                                                      ; Reset Must Process Current Script Data Flag
-       byte 1,0,bat_script%256,bat_script/256                                ; Jump to #R37018
+       byte 8,0                                  ; Set Must Process Current Script Data Flag
+       byte 27,0,8,0                             ; Start loop (3) for 8 iterations
+       byte _37216&>00ff,(_37216&>ff00)/256      ; #R37216 (Flying, half wing flap)
+       byte 35,0                                 ; Move Bat down two characters...
+       byte 35,0                                 ; ...
+       byte 28,0                                 ; End loop (3)
+       byte 27,0,8,0                             ; Start loop (3) for 8 iterations
+       byte _37205&>00ff,(_37205&>ff00)/256      ; #R37205 (Flying, full wing flap)
+       byte 28,0                                 ; End loop (3)
+       byte 27,0,17,0                            ; Start loop (3) for 17 iterations
+       byte _37205&>00ff,(_37205&>ff00)/256      ; #R37205 (Flying, full wing flap)
+       byte 34,0                                 ; Move Bat up one character
+       byte 28,0                                 ; End loop (3)
+       byte 9,0                                  ; Reset Must Process Current Script Data Flag
+       byte 1,0,bat_script&>00ff,(bat_script&>ff00)/256    ; Jump to #R37018
 
 * Graphic Layout Data Bat (Level 1) Flying, full wing flap - 3 stages, i.e. hovering at floor-level / going up
 _37205:
-       byte 243,0,4                                                  ; Increase current state value n (initially 0), up to maximum of 4, resetting to zero if
-                                                                     ; maximum reached and jump to n-th address in following list:
-       byte _37322%256,_37322/256                                    ; #R37322 (Bat, full, wings raised, eyes animated)
-       byte _37425%256,_37425/256                                    ; #R37425 (Bat, full, wings level, eyes animated)
-       byte _37507%256,_37507/256                                    ; #R37507 (Bat, full, wings down, eyes animated)
-       byte _37425%256,_37425/256                                    ; #R37425 (Bat, full, wings level, eyes animated)
+       byte 243,0,4                              ; Increase current state value n (initially 0), up to maximum of 4, resetting to zero if
+                                                 ; maximum reached and jump to n-th address in following list:
+       byte _37322&>00ff,(_37322&>ff00)/256      ; #R37322 (Bat, full, wings raised, eyes animated)
+       byte _37425&>00ff,(_37425&>ff00)/256      ; #R37425 (Bat, full, wings level, eyes animated)
+       byte _37507&>00ff,(_37507&>ff00)/256      ; #R37507 (Bat, full, wings down, eyes animated)
+       byte _37425&>00ff,(_37425&>ff00)/256      ; #R37425 (Bat, full, wings level, eyes animated)
 * Flying, half wing flap - 2 stages, i.e. going down
 _37216:
-       byte 243,0,2                                                  ; Increase current state value n (initially 0), up to maximum of 2, resetting to zero if
-                                                                     ; maximum reached and jump to n-th address in following list:
-       byte _37322%256,_37322/256                                    ; #R37322 (Bat, full, wings raised, eyes animated)
-       byte _37425%256,_37425/256                                    ; #R37425 (Bat, full, wings level, eyes animated)
+       byte 243,0,2                              ; Increase current state value n (initially 0), up to maximum of 2, resetting to zero if
+                                                 ; maximum reached and jump to n-th address in following list:
+       byte _37322&>00ff,(_37322&>ff00)/256      ; #R37322 (Bat, full, wings raised, eyes animated)
+       byte _37425&>00ff,(_37425&>ff00)/256      ; #R37425 (Bat, full, wings level, eyes animated)
 * Head, body and claws only, eyes animated
 _37223:
-       byte 244,6                                                    ; Set current graphic set to 6
-       byte 251,_37271%256,_37271/256                                ; Process graphic layout data at #R37271 and upon returning, move cursor to base coordinates
-       byte 250,0,1                                                  ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
+       byte 244,6                                ; Set current graphic set to 6
+       byte 251,_37271&>00ff,(_37271&>ff00)/256  ; Process graphic layout data at #R37271 and upon returning, move cursor to base coordinates
+       byte 250,0,1                              ; Change cursor's x- and y-coordinates by +1 and 0 characters respectively
        byte 25,4,33
        byte 25,132,31
        byte 26,4,33
        byte 26,132,31
-       byte 250,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively
+       byte 250,1,0                              ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively
        byte 28,68,161
        byte 28,196,159
        byte 29,124,161
@@ -422,48 +422,48 @@ _37223:
        byte 30,4,33
        byte 30,132,33
        byte 31,132,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Eyes, animated
 _37271:
-       byte 250,2,1                                                  ; Change cursor's x- and y-coordinates by +1 and +2 characters respectively
-       byte 243,0,5                                                  ; Increase current state value n (initially 0), up to maximum of 5, resetting to zero if
-                                                                     ; maximum reached and jump to n-th address in following list:
-       byte _37287%256,_37287/256                                    ; #R37287 (Bat's eyes, white)
-       byte _37294%256,_37294/256                                    ; #R37294 (Bat's eyes, yellow)
-       byte _37301%256,_37301/256                                    ; #R37301 (Bat's eyes, cyan)
-       byte _37308%256,_37308/256                                    ; #R37308 (Bat's eyes, magenta)
-       byte _37315%256,_37315/256                                    ; #R37315 (Bat's eyes, red)
+       byte 250,2,1                              ; Change cursor's x- and y-coordinates by +1 and +2 characters respectively
+       byte 243,0,5                              ; Increase current state value n (initially 0), up to maximum of 5, resetting to zero if
+                                                 ; maximum reached and jump to n-th address in following list:
+       byte _37287&>00ff,(_37287&>ff00)/256      ; #R37287 (Bat's eyes, white)
+       byte _37294&>00ff,(_37294&>ff00)/256      ; #R37294 (Bat's eyes, yellow)
+       byte _37301&>00ff,(_37301&>ff00)/256      ; #R37301 (Bat's eyes, cyan)
+       byte _37308&>00ff,(_37308&>ff00)/256      ; #R37308 (Bat's eyes, magenta)
+       byte _37315&>00ff,(_37315&>ff00)/256      ; #R37315 (Bat's eyes, red)
 * Eyes, white
 _37287:
        byte 27,124,33
        byte 27,252,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Eyes, yellow
 _37294:
        byte 27,116,33
        byte 27,244,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Eyes, cyan
 _37301:
        byte 27,108,33
        byte 27,236,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Eyes, magenta
 _37308:
        byte 27,92,33
        byte 27,220,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Eyes, red
 _37315:
        byte 27,84,33
        byte 27,212,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Full, wings raised, eyes animated
 _37322:
-       byte 254,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively and store as new
-                                                                     ; base coordinates
-       byte 251,_37223%256,_37223/256                                ; Process graphic layout data at #R37223 and upon returning, move cursor to base coordinates
-       byte 250,255,253                                              ; Change cursor's x- and y-coordinates by -3 and -1 characters respectively
+       byte 254,1,0                              ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively and store as new
+                                                 ; base coordinates
+       byte 251,_37223&>00ff,(_37223&>ff00)/256  ; Process graphic layout data at #R37223 and upon returning, move cursor to base coordinates
+       byte 250,255,253                          ; Change cursor's x- and y-coordinates by -3 and -1 characters respectively
        byte 52,4,33
        byte 53,68,33
        byte 54,4,30
@@ -479,7 +479,7 @@ _37322:
        byte 0,36,32
        byte 63,68,32
        byte 64,68,33
-       byte 250,251,3                                                ; Change cursor's x- and y-coordinates by +3 and -5 characters respectively
+       byte 250,251,3                            ; Change cursor's x- and y-coordinates by +3 and -5 characters respectively
        byte 54,132,33
        byte 53,196,33
        byte 52,132,29
@@ -495,11 +495,11 @@ _37322:
        byte 62,196,159
        byte 63,196,32
        byte 64,196,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Full, wings level, eyes animated
 _37425:
-       byte 251,_37223%256,_37223/256                                ; Process graphic layout data at #R37223 and upon returning, move cursor to base coordinates
-       byte 250,1,255                                                ; Change cursor's x- and y-coordinates by -1 and +1 characters respectively
+       byte 251,_37223&>00ff,(_37223&>ff00)/256  ; Process graphic layout data at #R37223 and upon returning, move cursor to base coordinates
+       byte 250,1,255                            ; Change cursor's x- and y-coordinates by -1 and +1 characters respectively
        byte 41,4,29
        byte 42,4,33
        byte 43,68,33
@@ -512,7 +512,7 @@ _37425:
        byte 0,36,31
        byte 50,4,33
        byte 51,68,33
-       byte 250,253,3                                                ; Change cursor's x- and y-coordinates by +3 and -3 characters respectively
+       byte 250,253,3                            ; Change cursor's x- and y-coordinates by +3 and -3 characters respectively
        byte 41,132,31
        byte 46,196,33
        byte 45,196,161
@@ -525,13 +525,13 @@ _37425:
        byte 47,132,29
        byte 51,196,33
        byte 50,132,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Full, wings down, eyes animated
 _37507:
-       byte 254,255,0                                                ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively and store as new
-                                                                     ; base coordinates
-       byte 251,_37223%256,_37223/256                                ; Process graphic layout data at #R37223 and upon returning, move cursor to base coordinates
-       byte 250,2,0                                                  ; Change cursor's x- and y-coordinates by 0 and +2 characters respectively
+       byte 254,255,0                            ; Change cursor's x- and y-coordinates by 0 and -1 characters respectively and store as new
+                                                 ; base coordinates
+       byte 251,_37223&>00ff,(_37223&>ff00)/256  ; Process graphic layout data at #R37223 and upon returning, move cursor to base coordinates
+       byte 250,2,0                              ; Change cursor's x- and y-coordinates by 0 and +2 characters respectively
        byte 40,4,31
        byte 32,4,33
        byte 33,68,30
@@ -542,7 +542,7 @@ _37507:
        byte 37,68,31
        byte 38,4,33
        byte 39,4,33
-       byte 250,252,3                                                ; Change cursor's x- and y-coordinates by +3 and -4 characters respectively
+       byte 250,252,3                            ; Change cursor's x- and y-coordinates by +3 and -4 characters respectively
        byte 40,132,32
        byte 33,196,33
        byte 32,132,31
@@ -553,171 +553,171 @@ _37507:
        byte 36,196,31
        byte 39,132,33
        byte 38,132,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Platform (Pit)
 _50642:
-       byte 244,3                                                    ; Set current graphic set to 3
-       byte 250,1,0                                                  ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively
-       byte 238,2                                                    ; Set Repeat Counter A to 2
+       byte 244,3                                ; Set current graphic set to 3
+       byte 250,1,0                              ; Change cursor's x- and y-coordinates by 0 and +1 characters respectively
+       byte 238,2                                ; Set Repeat Counter A to 2
        byte 21,4,33,24,4,33
        byte 22,4,33,23,4,29
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R50649 if not zero
-       byte 255                                                      ; End Marker
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R50649 if not zero
+       byte 255                                  ; End Marker
 
 * Boni Talking (Animated)
 _50311:
-       byte 247,2                                                    ; Jump to one of the 2 addresses in the following list, chosen at random:
-       byte _50317%256,_50317/256                                    ; #R50317 (Boni, mouth closed)
-       byte _50338%256,_50338/256                                    ; #R50338 (Boni, mouth open)
+       byte 247,2                                ; Jump to one of the 2 addresses in the following list, chosen at random:
+       byte _50317&>00ff,(_50317&>ff00)/256      ; #R50317 (Boni, mouth closed)
+       byte _50338&>00ff,(_50338&>ff00)/256      ; #R50338 (Boni, mouth open)
 * Graphic Layout Data Sweets (Level 1) Red Sweet
 _50560:
-       byte 242,66                                                   ; Set current attribute to 66
-       byte 248,_50572%256,_50572/256                                ; Jump to #R50572
+       byte 242,66                               ; Set current attribute to 66
+       byte 248,_50572&>00ff,(_50572&>ff00)/256  ; Jump to #R50572
 * Green Sweet
 _50565:
-       byte 242,68                                                   ; Set current attribute to 68
-       byte 248,_50572%256,_50572/256                                ; Jump to #R50572
+       byte 242,68                               ; Set current attribute to 68
+       byte 248,_50572&>00ff,(_50572&>ff00)/256  ; Jump to #R50572
 * Cyan Sweet (Unused)
-       byte 242,69                                                   ; Set current attribute to 69
+       byte 242,69                               ; Set current attribute to 69
 _50572:
-       byte 244,4                                                    ; Set current graphic set to 4
+       byte 244,4                                ; Set current graphic set to 4
        byte 17,33,18,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Script Data Spiders (Level 1)
 *
 * Waiting
 _37792:
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 42,0                                                     ; Decrease remaining time until spider next descends and if zero, start descent
-       byte 1,0,_37792%256,_37792/256                                ; Jump to #R37792
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 42,0                                 ; Decrease remaining time until spider next descends and if zero, start descent
+       byte 1,0,_37792&>00ff,(_37792&>ff00)/256  ; Jump to #R37792
 * Moving down
 _37800:
-       byte 8,0                                                      ; Set Must Process Current Script Data Flag
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 4,0,7,0                                                  ; If current character and target entity are in the same room then set pending sound to 7
-                                                                     ; (spider sound)
-       byte 40,0                                                     ; Move spider down one character, and if at bottom, advance it to bounce / climb up mode
-       byte 40,0                                                     ; Move spider down one character, and if at bottom, advance it to bounce / climb up mode
-       byte 1,0,_37800%256,_37800/256                                ; Jump to #R37800
+       byte 8,0                                  ; Set Must Process Current Script Data Flag
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 4,0,7,0                              ; If current character and target entity are in the same room then set pending sound to 7
+                                                 ; (spider sound)
+       byte 40,0                                 ; Move spider down one character, and if at bottom, advance it to bounce / climb up mode
+       byte 40,0                                 ; Move spider down one character, and if at bottom, advance it to bounce / climb up mode
+       byte 1,0,_37800&>00ff,(_37800&>ff00)/256  ; Jump to #R37800
 * Bounce / climb up mode
 _37816:
-       byte _37872%256,_37872/256                                    ; #R37872 (Spider, web trail stretched)
-       byte 34,0                                                     ; Move Spider up one character
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 34,0                                                     ; Move Spider up one character
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 34,0                                                     ; Move Spider up one character
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 35,0                                                     ; Move Spider down one character
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 35,0                                                     ; Move Spider down one character
-       byte _37872%256,_37872/256                                    ; #R37872 (Spider, web trail stretched)
-       byte _37872%256,_37872/256                                    ; #R37872 (Spider, web trail stretched)
-       byte 34,0                                                     ; Move Spider up one character
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte 35,0                                                     ; Move Spider down one character
-       byte _37872%256,_37872/256                                    ; #R37872 (Spider, web trail stretched)
-       byte _37872%256,_37872/256                                    ; #R37872 (Spider, web trail stretched)
-       byte 34,0                                                     ; Move Spider up one character
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte _37888%256,_37888/256                                    ; #R37888 (Spider, web trail slack)
-       byte _37950%256,_37950/256                                    ; #R37950 (Spider climbing up web trail)
+       byte _37872&>00ff,(_37872&>ff00)/256      ; #R37872 (Spider, web trail stretched)
+       byte 34,0                                 ; Move Spider up one character
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 34,0                                 ; Move Spider up one character
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 34,0                                 ; Move Spider up one character
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 35,0                                 ; Move Spider down one character
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 35,0                                 ; Move Spider down one character
+       byte _37872&>00ff,(_37872&>ff00)/256      ; #R37872 (Spider, web trail stretched)
+       byte _37872&>00ff,(_37872&>ff00)/256      ; #R37872 (Spider, web trail stretched)
+       byte 34,0                                 ; Move Spider up one character
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte 35,0                                 ; Move Spider down one character
+       byte _37872&>00ff,(_37872&>ff00)/256      ; #R37872 (Spider, web trail stretched)
+       byte _37872&>00ff,(_37872&>ff00)/256      ; #R37872 (Spider, web trail stretched)
+       byte 34,0                                 ; Move Spider up one character
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte _37888&>00ff,(_37888&>ff00)/256      ; #R37888 (Spider, web trail slack)
+       byte _37950&>00ff,(_37950&>ff00)/256      ; #R37950 (Spider climbing up web trail)
 _37864:
-       byte _37950%256,_37950/256                                    ; #R37950 (Spider climbing up web trail)
-       byte 41,0                                                     ; Move spider up one character and, if home, reset its timer and make it wait
-       byte 1,0,_37864%256,_37864/256                                ; Jump to #R37864
+       byte _37950&>00ff,(_37950&>ff00)/256      ; #R37950 (Spider climbing up web trail)
+       byte 41,0                                 ; Move spider up one character and, if home, reset its timer and make it wait
+       byte 1,0,_37864&>00ff,(_37864&>ff00)/256  ; Jump to #R37864
 
 * Graphic Layout Data Spiders (Level 1) Spider, web trail stretched
 _37872:
-       byte 244,5                                                    ; Set current graphic set to 5
-       byte 237,7                                                    ; Set sound 7 (spider sound) as pending
-       byte 250,246,1                                                ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
-       byte 238,11                                                   ; Set Repeat Counter A to 11
+       byte 244,5                                ; Set current graphic set to 5
+       byte 237,7                                ; Set sound 7 (spider sound) as pending
+       byte 250,246,1                            ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
+       byte 238,11                               ; Set Repeat Counter A to 11
        byte 31,7,32
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R37881 if not zero
-       byte 248,_37899%256,_37899/256                                ; Jump to #R37899 (spider, facing down)
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R37881 if not zero
+       byte 248,_37899&>00ff,(_37899&>ff00)/256  ; Jump to #R37899 (spider, facing down)
 * Spider, web trail slack
 _37888:
-       byte 244,5                                                    ; Set current graphic set to 5
-       byte 250,246,1                                                ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
-       byte 238,11                                                   ; Set Repeat Counter A to 11
+       byte 244,5                                ; Set current graphic set to 5
+       byte 250,246,1                            ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
+       byte 238,11                               ; Set Repeat Counter A to 11
        byte 30,7,32
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R37895 if not zero
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R37895 if not zero
 * Spider, facing down
 _37899:
-       byte 250,255,255                                              ; Change cursor's x- and y-coordinates by -1 and -1 characters respectively
+       byte 250,255,255                          ; Change cursor's x- and y-coordinates by -1 and -1 characters respectively
        byte 22,2,34
        byte 22,130,30
        byte 29,2,33
        byte 23,66,33
        byte 29,130,31
        byte 25,2,32
-       byte 236,2,26,27                                              ; Modify following instruction to display graphic of random index, chosen from 26 and 27
+       byte 236,2,26,27                          ; Modify following instruction to display graphic of random index, chosen from 26 and 27
        byte 26,7,33
-       byte 250,255,254                                              ; Change cursor's x- and y-coordinates by -2 and -1 characters respectively
-       byte 247,2                                                    ; Jump to one of the 2 addresses in the following list, chosen at random:
-       byte _37936%256,_37936/256                                    ; #R37936 (Spider's eyes, large pupils)
-       byte _37943%256,_37943/256                                    ; #R37943 (Spider's eyes, small pupils)
+       byte 250,255,254                          ; Change cursor's x- and y-coordinates by -2 and -1 characters respectively
+       byte 247,2                                ; Jump to one of the 2 addresses in the following list, chosen at random:
+       byte _37936&>00ff,(_37936&>ff00)/256      ; #R37936 (Spider's eyes, large pupils)
+       byte _37943&>00ff,(_37943&>ff00)/256      ; #R37943 (Spider's eyes, small pupils)
 * Spider's eyes, large pupils
 _37936:
        byte 24,7,34
        byte 24,135,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Spider's eyes, small pupils
 _37943:
        byte 28,7,34
        byte 28,135,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Spider climbing up web trail
 _37950:
-       byte 244,5                                                    ; Set current graphic set to 5
-       byte 250,246,1                                                ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
-       byte 238,12                                                   ; Set Repeat Counter A to 12
+       byte 244,5                                ; Set current graphic set to 5
+       byte 250,246,1                            ; Change cursor's x- and y-coordinates by +1 and -10 characters respectively
+       byte 238,12                               ; Set Repeat Counter A to 12
        byte 30,7,32
-       byte 239                                                      ; Decrement Repeat Counter A and loop back to #R37957 if not zero
-       byte 250,0,255                                                ; Change cursor's x- and y-coordinates by -1 and 0 characters respectively
+       byte 239                                  ; Decrement Repeat Counter A and loop back to #R37957 if not zero
+       byte 250,0,255                            ; Change cursor's x- and y-coordinates by -1 and 0 characters respectively
        byte 36,7,33
        byte 25,2,33
        byte 36,135,31
        byte 35,2,33
-       byte 243,0,2                                                  ; Increase current state value n (initially 0), up to maximum of 2, resetting to zero if
-                                                                     ; maximum reached and jump to n-th address in following list:
-       byte _37983%256,_37983/256                                    ; #R37983 (Spider's legs, left extended, right not, climbing up web trail)
-       byte _37996%256,_37996/256                                    ; #R37996 (Spider's legs, right extended, left not, climbing up web trail)
+       byte 243,0,2                              ; Increase current state value n (initially 0), up to maximum of 2, resetting to zero if
+                                                 ; maximum reached and jump to n-th address in following list:
+       byte _37983&>00ff,(_37983&>ff00)/256      ; #R37983 (Spider's legs, left extended, right not, climbing up web trail)
+       byte _37996&>00ff,(_37996&>ff00)/256      ; #R37996 (Spider's legs, right extended, left not, climbing up web trail)
 * Spider's legs (left extended, right not), climbing up web trail
 _37983:
-       byte 250,253,254                                              ; Change cursor's x- and y-coordinates by -2 and -3 characters respectively
+       byte 250,253,254                          ; Change cursor's x- and y-coordinates by -2 and -3 characters respectively
        byte 32,2,32
        byte 33,2,34
        byte 34,130,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Spider's legs (right extended, left not), climbing up web trail
 _37996:
-       byte 250,253,0                                                ; Change cursor's x- and y-coordinates by 0 and -3 characters respectively
+       byte 250,253,0                            ; Change cursor's x- and y-coordinates by 0 and -3 characters respectively
        byte 32,130,30
        byte 34,2,34
        byte 33,130,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Graphic Layout Data Architecture (Level 1) Part 1 Three Spider's Webs
 _50008:
-       byte 240,3                                                    ; Set Repeat Counter B to 3
-       byte 251,_50018%256,_50018/256                                ; Process graphic layout data at #R50018 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 254,0,8                                                  ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively and store as
-                                                                     ; new base coordinates
-       byte 241                                                      ; Decrement Repeat Counter B and loop back to #R50010 if not zero
-       byte 255                                                      ; End Marker
+       byte 240,3                                ; Set Repeat Counter B to 3
+       byte 251,_50018&>00ff,(_50018&>ff00)/256  ; Process graphic layout data at #R50018 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 254,0,8                              ; Change cursor's x- and y-coordinates by +8 and 0 characters respectively and store as
+                                                 ; new base coordinates
+       byte 241                                  ; Decrement Repeat Counter B and loop back to #R50010 if not zero
+       byte 255                                  ; End Marker
 * Spider's Web
 _50018:
-       byte 244,5                                                    ; Set current graphic set to 5
-       byte 242,7                                                    ; Set current attribute to 7
-       byte 250,2,2                                                  ; Change cursor's x- and y-coordinates by +2 and +2 characters respectively
+       byte 244,5                                ; Set current graphic set to 5
+       byte 242,7                                ; Set current attribute to 7
+       byte 250,2,2                              ; Change cursor's x- and y-coordinates by +2 and +2 characters respectively
        byte 1,161,2,161
        byte 3,157,4,161
        byte 5,161,6,161
@@ -729,60 +729,60 @@ _50018:
        byte 17,161,18,161
        byte 19,156,20,165
        byte 21,161
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 
 * Script Data Boni's Kidnap
 boni_kidnap_script:
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte 25,0,6,0                                                 ; Start loop (2) for 6 iterations
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte 26,0                                                     ; End loop (2)
-       byte 39,0                                                     ; Open the Trap Door
-       byte 25,0,10,0                                                ; Start loop (2) for 10 iterations
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte 34,0                                                     ; Move creature up one character
-       byte 26,0                                                     ; End loop (2)
-       byte 25,0,10,0                                                ; Start loop (2) for 10 iterations
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte 2,0                                                      ; Move creature left one character
-       byte 26,0                                                     ; End loop (2)
-       byte 25,0,10,0                                                ; Start loop (2) for 10 iterations
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte 3,0                                                      ; Move creature right one character
-       byte 26,0                                                     ; End loop (2)
-       byte 25,0,4,0                                                 ; Start loop (2) for 4 iterations
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte _51314%256,_51314/256                                    ; #R51314 (Flying Skeleton Creature, animated)
-       byte 34,0                                                     ; Move creature up one character
-       byte 26,0                                                     ; End loop (2)
-       byte 36,0                                                     ; Remove Boni from Level 1
-       byte 25,0,16,0                                                ; Start loop (2) for 16 iterations
-       byte _51286%256,_51286/256                                    ; #R51286 (Boni being kidnapped, shouting for help, animated)
-       byte 26,0                                                     ; End loop (2)
-       byte 25,0,12,0                                                ; Start loop (2) for 12 iterations
-       byte _51308%256,_51308/256                                    ; #R51308 (Boni being kidnapped, mouth closed)
-       byte 35,0                                                     ; Move creature down one character
-       byte 26,0                                                     ; End loop (2)
-       byte 38,0                                                     ; Close the Trap Door
-       byte 37,0                                                     ; Remove Flying Skeleton Creature from Level 1
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte 25,0,6,0                             ; Start loop (2) for 6 iterations
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte 26,0                                 ; End loop (2)
+       byte 39,0                                 ; Open the Trap Door
+       byte 25,0,10,0                            ; Start loop (2) for 10 iterations
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte 34,0                                 ; Move creature up one character
+       byte 26,0                                 ; End loop (2)
+       byte 25,0,10,0                            ; Start loop (2) for 10 iterations
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte 2,0                                  ; Move creature left one character
+       byte 26,0                                 ; End loop (2)
+       byte 25,0,10,0                            ; Start loop (2) for 10 iterations
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte 3,0                                  ; Move creature right one character
+       byte 26,0                                 ; End loop (2)
+       byte 25,0,4,0                             ; Start loop (2) for 4 iterations
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte _51314&>00ff,(_51314&>ff00)/256      ; #R51314 (Flying Skeleton Creature, animated)
+       byte 34,0                                 ; Move creature up one character
+       byte 26,0                                 ; End loop (2)
+       byte 36,0                                 ; Remove Boni from Level 1
+       byte 25,0,16,0                            ; Start loop (2) for 16 iterations
+       byte _51286&>00ff,(_51286&>ff00)/256      ; #R51286 (Boni being kidnapped, shouting for help, animated)
+       byte 26,0                                 ; End loop (2)
+       byte 25,0,12,0                            ; Start loop (2) for 12 iterations
+       byte _51308&>00ff,(_51308&>ff00)/256      ; #R51308 (Boni being kidnapped, mouth closed)
+       byte 35,0                                 ; Move creature down one character
+       byte 26,0                                 ; End loop (2)
+       byte 38,0                                 ; Close the Trap Door
+       byte 37,0                                 ; Remove Flying Skeleton Creature from Level 1
 
 * Graphic Layout Data Flying Skeleton Creature Boni being kidnapped, shouting for help, animated
 _51286:
-       byte 251,_51314%256,_51314/256                                ; Process graphic layout data at #R51314 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 251,_50311%256,_50311/256                                ; Process graphic layout data at #R50311 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 244,6                                                    ; Set current graphic set to 6
-       byte 250,2,2                                                  ; Change cursor's x- and y-coordinates by +2 and +2 characters respectively
-       byte 242,7                                                    ; Set current attribute to 7
+       byte 251,_51314&>00ff,(_51314&>ff00)/256  ; Process graphic layout data at #R51314 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 251,_50311&>00ff,(_50311&>ff00)/256  ; Process graphic layout data at #R50311 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 244,6                                ; Set current graphic set to 6
+       byte 250,2,2                              ; Change cursor's x- and y-coordinates by +2 and +2 characters respectively
+       byte 242,7                                ; Set current attribute to 7
        byte 21,33,22,161
        byte 23,161,24,33
-       byte 255                                                      ; End Marker
+       byte 255                                  ; End Marker
 * Boni being kidnapped, mouth closed
 _51308:
-       byte 251,_51314%256,_51314/256                                ; Process graphic layout data at #R51314 and upon returning, move cursor to base
-                                                                     ; coordinates
-       byte 248,_50317%256,_50317/256                                ; Jump to #R50317 (Boni, Mouth Closed)
+       byte 251,_51314&>00ff,(_51314&>ff00)/256  ; Process graphic layout data at #R51314 and upon returning, move cursor to base
+                                                 ; coordinates
+       byte 248,_50317&>00ff,(_50317&>ff00)/256  ; Jump to #R50317 (Boni, Mouth Closed)
