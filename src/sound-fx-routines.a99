@@ -26,16 +26,16 @@
 ;       byte 11,1,122,123,102,205,0,128                               ; (11) - Unused
 
 snd_fx_table:
-        data play_hit                  ; Unused
-        data play_ball_lost            ; (01) - Out of time
-        data play_launch               ; (02) - Main Menu sound (three blips)
-        data play_bumper               ; (03) - Unused
-        data play_hit                  ; (04) - Explosion
-        data play_rollover             ; (05) - Berk landing
-        data play_saucer               ; (06) - Berk/Drutt banging head on ceiling
-        data play_path                 ; (07) - Spider sound
-        data play_target               ; (08) - Drutt eating a worm
-        data play_ball_lost            ; (09) - Drutt hopping
+        data 0                         ; (00) - Unused
+        data play_out_of_time          ; (01) - Out of time
+        data play_main_menu            ; (02) - Main Menu sound (three blips)
+        data 0                         ; (03) - Unused
+        data play_explosion            ; (04) - Explosion
+        data play_berk_landing         ; (05) - Berk landing
+        data play_head_banging         ; (06) - Berk/Drutt banging head on ceiling
+        data play_spider               ; (07) - Spider sound
+        data play_eat_worm             ; (08) - Drutt eating a worm
+        data play_drutt_hopping        ; (09) - Drutt hopping
 
 *********************************************************************
 *
@@ -60,103 +60,103 @@ mute_table:
 
 *********************************************************************
 *
-* Play launch
+* Play out of time
 *
-play_launch:
+play_out_of_time:
        .proc
        li   r0,snd_vol_freq_drop
        li   r1,snd_channel_1
        li   r2,C5
        bl   @play_snd
        .endproc
-*// play_launch
+*// play_out_of_time
 
 *********************************************************************
 *
-* Play target
+* Play eat worm
 *
-play_target:
+play_eat_worm:
        .proc
        li   r0,snd_vol_drop
        li   r1,snd_channel_1
        li   r2,A4
        bl   @play_snd
        .endproc
-*// play_target
+*// play_eat_worm
 
 *********************************************************************
 *
-* Play bumper
+* Play Berk landing
 *
-play_bumper:
+play_berk_landing:
        .proc
        li   r0,snd_freq_drop
        li   r1,snd_channel_1
        li   r2,C2
        bl   @play_snd
        .endproc
-*// play_bumper
+*// play_berk_landing
 
 *********************************************************************
 *
-* Play saucer
+* Play head banging
 *
-play_saucer:
+play_head_banging:
        .proc
        li   r0,snd_freq_drop
        li   r1,snd_channel_1
        li   r2,C4
        bl   @play_snd
        .endproc
-*// play_saucer
+*// play_head_banging
 
 *********************************************************************
 *
-* Play rollover
+* Play spider
 *
-play_rollover:
+play_spider:
        .proc
        li   r0,snd_freq_raise
        li   r1,snd_channel_1
        li   r2,A2
        bl   @play_snd
        .endproc
-*// play_rollover
+*// play_spider
 
 *********************************************************************
 *
-* Play path
+* Play main menu
 *
-play_path:
+play_main_menu:
        .proc
        li   r0,snd_freq_raise
        li   r1,snd_channel_1
        li   r2,A3
        bl   @play_snd
        .endproc
-*// play_path
+*// play_main_menu
 
 *********************************************************************
 *
-* Play hit
+* Play Drutt happing
 *
-play_hit:
+play_drutt_hopping:
        .proc
        li   r0,snd_short
        li   r1,snd_channel_1
        li   r2,A1
        bl   @play_snd
        .endproc
-*// play_hit
+*// play_drut_hopping
 
 *********************************************************************
 *
-* Play ball lost
+* Play explosion
 *
-play_ball_lost:
+play_explosion:
        .proc
        li   r0,snd_crash
        li   r1,snd_channel_4
        bl   @play_snd
        .endproc
-*// play_ball_lost
+*// play_explosion

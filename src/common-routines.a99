@@ -1180,7 +1180,6 @@ set_swap_pending_flag:
 * pending sound (i.e. lower index has higher priority). Input:  A  Index of requested sound IX  Address of complex
 * state data for target entity
 request_sound_if_same_room:
-       rt
        .proc
                                        ; PUSH AF           ; Store AF (A = index of requested sound)
                                        ; LD A,(34218)      ; If current character's current room is the same as current room of target entity...
@@ -1191,20 +1190,48 @@ request_sound_if_same_room:
                                        ; POP AF            ; Restore AF (A = index of requested sound)
 
 *********************************************************************************
+* At this point, A will hold the index of a requested sound, and RAM address #R34273 will contain the index of a
+* pending sound. If the index of the requested sound is lower than the index of the pending sound, then the pending
+* sound's index at #R34273 will be overwritten by the index of the requested sound in A. Sounds with lower indices
+* therefore take priority over sounds with higher indices. This entry point is used by the routines at #R46284,
+* #R55196 and #R59722.
+request_sound:
+       .proc
+request_sound_0:
+       clr  tmp1
+       movb a,tmp1
+       swpb tmp1
+       sla  tmp1,1
+       mov  @snd_fx_table(tmp1),tmp1
+       jeq  request_sound_1
+       bl   *tmp1
+;       socb a,a                        ; OR A              ; If index of requested sound is zero...
+;       jeq  request_sound_2            ; RET Z             ; ...then return
+;       .push de                        ; PUSH DE           ; Store DE
+;       movb a,@e                       ; LD E,A            ; Load E with index of requested sound
+;       movb @idx_pending_sound,a       ; LD A,(34273)      ; Load index of pending sound into A...
+;                                       ; OR A              ; ...and if this is zero (i.e. no sound pending)...
+;       jeq  request_sound_1            ; JR Z,59628        ; ...then skip ahead to #R59628
+;       cb   a,@e                       ; CP E              ; If index of requested sound is less than or equal to index of pending sound...
+;       jhe  request_sound_1            ; JR NC,59628       ; ...then skip ahead to #R59628
+;       .pop de                         ; POP DE            ; Restore DE
+;       jmp  request_sound_2            ; RET               ; Return
+;request_sound_1:
+;       movb @e,@idx_pending_sound      ; LD A,E            ; Set requested sound to be new pending sound...
+;                                       ; LD (34273),A      ; ...
+;       .pop de                         ; POP DE            ; Restore DE
+;request_sound_2:
+request_sound_1:
+       .endproc                        ; RET               ; Return
+
+*********************************************************************************
 * Set Sound of Index A as Pending if Appropriate, then Play and Clear Pending Sound
 *
 * The sound with index A will become the pending sound if the currently pending sound index is either zero, or of
 * higher index than A (i.e. lower priority). Input:  A  Sound index L  Undefined, pseudo-random value
 request_sound_and_play:
-       rt
-       .proc
-       bl   @request_sound             ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
-       jmp  play_sound_0
+       jmp  request_sound               ; CALL 59613        ; Set pending sound index to A if it is currently zero, or lower priority
 * This entry point is used by the routine at #R34438.
-play_sound:
-       .proc
-play_sound_0:
-       bl   @play_snd
 ;       movb @idx_pending_sound,a       ; LD A,(34273)      ; Load index of pending sound into A...
 ;                                       ; OR A              ; ...and if this is zero...
 ;       jeq  play_sound_7               ; RET Z             ; ...then return
@@ -1273,41 +1300,6 @@ play_sound_0:
 ;       .pop ix                         ; POP IX            ; Restore IX
 play_sound_7:
        .endproc                         ; RET               ; Return
-
-*********************************************************************************
-* At this point, A will hold the index of a requested sound, and RAM address #R34273 will contain the index of a
-* pending sound. If the index of the requested sound is lower than the index of the pending sound, then the pending
-* sound's index at #R34273 will be overwritten by the index of the requested sound in A. Sounds with lower indices
-* therefore take priority over sounds with higher indices. This entry point is used by the routines at #R46284,
-* #R55196 and #R59722.
-request_sound:
-       rt
-       .proc
-request_sound_0:
-       clr  tmp1
-       movb a,tmp1
-       swpb tmp1
-       sla  tmp1,1
-       mov  @snd_fx_table(tmp1),tmp1
-       bl   *tmp1
-;request_sound_0:
-;       socb a,a                        ; OR A              ; If index of requested sound is zero...
-;       jeq  request_sound_2            ; RET Z             ; ...then return
-;       .push de                        ; PUSH DE           ; Store DE
-;       movb a,@e                       ; LD E,A            ; Load E with index of requested sound
-;       movb @idx_pending_sound,a       ; LD A,(34273)      ; Load index of pending sound into A...
-;                                       ; OR A              ; ...and if this is zero (i.e. no sound pending)...
-;       jeq  request_sound_1            ; JR Z,59628        ; ...then skip ahead to #R59628
-;       cb   a,@e                       ; CP E              ; If index of requested sound is less than or equal to index of pending sound...
-;       jhe  request_sound_1            ; JR NC,59628       ; ...then skip ahead to #R59628
-;       .pop de                         ; POP DE            ; Restore DE
-;       jmp  request_sound_2            ; RET               ; Return
-;request_sound_1:
-;       movb @e,@idx_pending_sound      ; LD A,E            ; Set requested sound to be new pending sound...
-;                                       ; LD (34273),A      ; ...
-;       .pop de                         ; POP DE            ; Restore DE
-;request_sound_2:
-       .endproc                        ; RET               ; Return
 
 *********************************************************************
 *

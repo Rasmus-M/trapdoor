@@ -9,7 +9,7 @@
 * Modifies r0-r3
 *
 play_snd:
-       rt
+       .push r3
        mov  r0,*r1+                    ; Init address
        movb *r0+,r3                    ; Operation
        movb *r0+,*r1+                  ; Init duration
@@ -38,6 +38,7 @@ play_snd_1:
        ori  r3,>1f00                   ; Change operation to full attenuation
        movb r3,@sound
 play_snd_3:
+       .pop r3
        rt
 *// play_snd
 
@@ -49,6 +50,12 @@ play_snd_3:
 *
 *
 snd_player:
+       movb @vdpsta,tmp0
+       jlt  snd_player_0
+       rt
+snd_player_0:
+       .push r3
+       .push r4
        li   r2,snd_channel_4           ; Start with last channel
 snd_player_1:
        mov  *r2,r3                     ; Get sound address
@@ -95,20 +102,16 @@ snd_player_4:
        ai   r2,-snd_channel_size       ; Next (previous) channel
        ci   r2,snd_channel_1           ; Are we done?
        jhe  snd_player_1               ; No - loop
+       .pop r4
+       .pop r3
        rt                              ; Return
 *// snd_player
 
 snd_channel_1:
-       equ  $
+       bss  snd_channel_size
 snd_channel_2:
-       equ  snd_channel_1+snd_channel_size
+       bss  snd_channel_size
 snd_channel_3:
-       equ  snd_channel_2+snd_channel_size
+       bss  snd_channel_size
 snd_channel_4:
-       equ  snd_channel_3+snd_channel_size
-snd_track_1:
-       equ  snd_channel_4+snd_channel_size
-snd_track_2:
-       equ  snd_track_1+snd_track_size
-snd_track_3:
-       equ  snd_track_2+snd_track_size
+       bss  snd_channel_size

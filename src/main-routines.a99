@@ -21,6 +21,7 @@
        li   sp,stack                   ; LD SP,34426       ; Set Stack Pointer
        bl   @init_bits
        bl   @copy_to_pad
+       bl   @mute_sound
        bl   @graphics_mode
        seto @graphics_bank_select
 ;      bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
@@ -60,6 +61,7 @@ main:
 *      Debug - end
 * Start of main loop
 main_loop:
+       bl   @snd_player
        bl   @check_berk_killed         ; CALL 53723        ; If Berk has been killed then reset his state, flash screen and decrease time / lives
        bl   @update_berk_state         ; CALL 35689        ; Update state of Berk and store current position in script data
        bl   @update_drutt_worm_state   ; CALL 51739        ; Update states of Drutt and worm and store current positions in script data
@@ -107,13 +109,17 @@ main_loop:
                                        ; CALL 41211        ; Update states of all Level 4 entities
 * All levels
 main_all_levels:
+       bl   @snd_player
        bl   @check_control_input       ; CALL 47893        ; Check for control input and store at #R34219
        bl   @move_falling_entities     ; CALL 55525        ; Move all falling entities down by distances appropriate to their current velocity factors
        bl   @swap_characters           ; CALL 34916        ; If Fire Pressed, or Character Swap Pending Flag set, then swap characters
+       bl   @snd_player
        bl   @clear_display_buffer      ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
+       bl   @snd_player
        bl   @populate_display_buffer   ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
+       bl   @snd_player
        bl   @draw_display_buffer       ; CALL 54034        ; Draw contents of Primary Display Buffer to display
-       bl   @play_sound                ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
+       bl   @snd_player                ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
                                        ; OR A              ; If no time / lives are left...
        jeq  time_out                   ; JR Z,34645        ; ...then jump to #R34645
@@ -122,6 +128,7 @@ main_all_levels:
        jne  all_home                   ; JR NZ,34658       ; ...then skip ahead to #R34658
        bl   @update_timer              ; CALL 47363        ; Update eyes of a randomly selected timer figure, increase Timer Tick Counter and process
                                                            ; timer figure blinking
+       bl   @snd_player
        li   hl,game_flags              ; LD HL,34208       ; If Update Scores and Display Flag is reset...
        movb *hl,tmp0                   ; BIT 5,(HL)        ; ...
        andi tmp0,32*256                ;
@@ -146,7 +153,7 @@ skip_swap_buffers:
 * Restart has been pressed
 restart:
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound_and_play             ; CALL 59722        ; ...
+       bl   @request_sound_and_play    ; CALL 59722        ; ...
        bl   @reset_game_data           ; CALL 34751        ; Reset all game data in preparation for new game
        b    @main                      ; JP 34438          ; Jump back to #R34438 (return to Main Menu)
 * No time/lives left
@@ -154,13 +161,13 @@ time_out:
        bl   @update_and_print_score    ; CALL 47499        ; Update scores and display
        bl   @print_times_up            ; CALL 47185        ; Print "SORRY BERK,  BUT YOUR TIME IS UP" string
        movb one,a                      ; LD A,1            ; Set sound 1 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound_and_play             ; CALL 59722        ; ...
+       bl   @request_sound_and_play    ; CALL 59722        ; ...
        jmp  wait_key_and_restart       ; JR 34666          ; Skip ahead to #R34666
 * "All Home" Flag is set
 all_home:
        bl   @print_home_sweet_home     ; CALL 47213        ; Print "HOME SWEET HOME" string
        movb @bytes+3,a                 ; LD A,3            ; Set sound 3 as pending if appropriate, then play and clear pending sound...
-       bl   @request_sound_and_play             ; CALL 59722        ; ...
+       bl   @request_sound_and_play    ; CALL 59722        ; ...
 wait_key_and_restart:
        bl   @wait_release_and_keypress ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
        bl   @reset_game_data           ; CALL 34751        ; Reset all game data in preparation for new game
@@ -1564,6 +1571,7 @@ wait_release_and_keypress:
 release_keypress:
        .proc
 release_keypress_1:
+       bl   @snd_player
        li   r0,KEY_S
        bl   @check_key
        jne  release_keypress_1
@@ -1580,6 +1588,7 @@ release_keypress_1:
 wait_keypress:
        .proc
 wait_keypress_1:
+       bl   @snd_player
        li   r0,KEY_S
        bl   @check_key
        jeq  wait_keypress_2
