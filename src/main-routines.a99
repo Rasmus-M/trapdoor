@@ -23,6 +23,8 @@
        bl   @copy_to_pad
        bl   @mute_sound
        bl   @graphics_mode
+       bl   @title_screen
+       bl   @wait_release_and_keypress
        seto @graphics_bank_select
 ;      bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
 
@@ -1591,10 +1593,14 @@ wait_keypress_1:
        bl   @snd_player
        li   r0,KEY_S
        bl   @check_key
-       jeq  wait_keypress_2
-       movb @zero,@joystick_mode_flag
-       jmp  wait_keypress_3
+       jne  wait_keypress_2
+       li   r0,KEY_SP
+       bl   @check_key
+       jeq  wait_keypress_3
 wait_keypress_2:
+       movb @zero,@joystick_mode_flag
+       jmp  wait_keypress_4
+wait_keypress_3:
        li   r0,JOY_FI
        bl   @check_key
        jeq  wait_keypress_1
@@ -1604,7 +1610,7 @@ wait_keypress_2:
 ;       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
 ;       bl   @request_sound_a           ; CALL 59722        ; ...
 ;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
-wait_keypress_3:
+wait_keypress_4:
        .endproc                         ; RET               ; Return
 *// wait_keypress
 
@@ -2801,3 +2807,72 @@ spawn_new_worm_4:
        .endproc                        ; RET               ; Return
 *// spawn_new_worm
 
+*********************************************************************************
+*
+* Display title screen
+*
+title_screen:
+       .proc
+*      Set all colors to black on white
+       li   a,>7800
+       bl   @fill_screen
+*      Draw patterns
+       seto @title_bank_select
+       li   hl,>6000+bank_offset
+       clr  ix
+title_screen_1:
+       clr  iy
+title_screen_2:
+       li   de,pattern_table
+       a    ix,de
+       a    iy,de
+       li   bc,8*32
+title_screen_3:
+       mov  de,tmp0
+       bl   @vwad
+       movb *hl+,@vdpwd
+       ai   de,8
+       bl   @alternate_border_color
+       dec  bc
+       jne  title_screen_3
+       inc  iy
+       ci   iy,8
+       jne  title_screen_2
+       ai   ix,8*32*8
+       ci   ix,3*8*32*8
+       jne  title_screen_1
+*      Draw attributes
+       li   de,zx_attributes
+       li   bc,768
+title_screen_4:
+       movb *hl+,a
+       mov  de,tmp1
+       bl   @draw_attribute
+       inc  de
+       bl   @alternate_border_color
+       dec  bc
+       jne  title_screen_4
+*      Black border
+       clr  af
+       bl   @set_border_color
+       .endproc
+*// title_screen
+
+*********************************************************************************
+*
+* Switch between blue and yellow border
+*
+alternate_border_color:
+       .proc
+       movb @border_color,a
+       cb   a,@bytes+9
+       jne  alternate_border_color_1
+       movb @bytes+14,a
+       jmp  alternate_border_color_2
+alternate_border_color_1:
+       movb @bytes+9,a
+alternate_border_color_2:
+       movb a,@border_color
+       bl   @set_border_color
+       .endproc
+*// alternate_border_color

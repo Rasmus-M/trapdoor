@@ -103,5 +103,9 @@ level_1_2_bank_select:
        equ  >600A
 level_3_4_bank_select:
        equ  >600C
+title_bank_select:
+       equ  >600E
+bank_offset:
+       equ  >40
 
        copy "sound-defs.a99"

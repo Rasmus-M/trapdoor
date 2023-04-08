@@ -20,6 +20,8 @@
 
        bank 3
        aorg >6000
-       data -1
+       bss  bank_offset
+       bcopy "../ZX-Spectrum/title-screen.scr"
+
 
 

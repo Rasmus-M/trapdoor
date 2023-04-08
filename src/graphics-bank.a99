@@ -2,5 +2,5 @@
 
        copy "graphics.a99"
 font:
-       bcopy "font.bin"
+       bcopy "../ZX-Spectrum/font.bin"
        copy "lookup-tables.a99"
