@@ -54,8 +54,7 @@ snd_player:
        jlt  snd_player_0
        rt
 snd_player_0:
-       .push r3
-       .push r4
+       lwpi sndws
        li   r2,snd_channel_4           ; Start with last channel
 snd_player_1:
        mov  *r2,r3                     ; Get sound address
@@ -97,13 +96,12 @@ snd_player_3:
        movb r0,@sound                  ; Write attenuation
        ab   @snd_attn_step(r3),@snd_channel_attn(r2)    ; Change attenuation
 *      Count down and loop
-       sb   one,@snd_channel_duration(r2)      ; Count down duration
+       sb   @bytes+1,@snd_channel_duration(r2)      ; Count down duration
 snd_player_4:
        ai   r2,-snd_channel_size       ; Next (previous) channel
        ci   r2,snd_channel_1           ; Are we done?
        jhe  snd_player_1               ; No - loop
-       .pop r4
-       .pop r3
+       lwpi wrksp
        rt                              ; Return
 *// snd_player
 

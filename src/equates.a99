@@ -24,6 +24,8 @@ spchwt:
        equ  >9400
 spchrd:
        equ  >9000
+rndsd:
+       equ  >83c0                      ; Random number seed
 
 **
 * Scratch pad
@@ -34,8 +36,10 @@ r0lb:
        equ  wrksp+1
 r1lb:
        equ  wrksp+3
-bits:
+sndws:
        equ  wrksp+>20
+bits:
+       equ  sndws+>0a
 stack:
        equ  bits+8
 b255:
@@ -45,9 +49,9 @@ b254:
 draw_display_buffer_pad:
        equ  b254+1
 clear_display_buffer_pad:
-       equ  draw_display_buffer_pad+>58
-rndsd:
-       equ  >83c0                      ; Random number seed
+       equ  draw_display_buffer_pad+>5c
+pad_max:
+       equ  clear_display_buffer_pad+>1e
 
 **
 * Z80 register mapping

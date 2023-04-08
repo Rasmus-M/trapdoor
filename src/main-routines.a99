@@ -723,6 +723,7 @@ populate_display_buffer_4:
        a    de,ix                      ; ADD IX,DE         ; Advance IX to next entity's state data
        jmp  populate_display_buffer_2  ; JR 45921          ; Loop back to #R45921
 populate_display_buffer_5:
+       bl   @snd_player
        sb   one,@c                     ; DEC C             ; Decrease current depth (i.e. closer to screen)
        jne  populate_display_buffer_1  ; JR NZ,45915       ; If depth is not zero (i.e. still depth levels to process) then loop back to #R45915
        .endproc                        ; RET               ; Return
@@ -1047,7 +1048,7 @@ ret_if_show_score_flag:
        jne  !                          ; RET Z             ; ...then return
        rt                              ;
 !
-       .pop bc                         ; POP BC            ; Remove return address from stack...
+                                       ; POP BC            ; Remove return address from stack...
        .endproc                        ; RET               ; ...and return to routine that called the calling routine
 
 *// draw_timer_bar
@@ -1910,6 +1911,7 @@ draw_display_buffer_4:
 draw_display_buffer_5:
                                        ; PUSH HL           ; Store HL (pointer to current position in Primary Display Buffer)
        bl   @draw_character_block      ; CALL 54144        ; Draw a graphic character block to display
+       bl   @snd_player
                                        ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
 draw_display_buffer_6:
        inc  hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
