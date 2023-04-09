@@ -64,7 +64,7 @@ mute_table:
 *
 play_out_of_time:
        .proc
-       li   r0,snd_vol_freq_drop
+       li   r0,snd_out_of_time
        li   r1,snd_channel_1
        li   r2,C5
        bl   @play_snd
@@ -73,16 +73,28 @@ play_out_of_time:
 
 *********************************************************************
 *
-* Play eat worm
+* Play main menu
 *
-play_eat_worm:
+play_main_menu:
        .proc
-       li   r0,snd_vol_drop
+       li   r0,snd_main_menu
        li   r1,snd_channel_1
-       li   r2,A4
+       li   r2,A3
        bl   @play_snd
        .endproc
-*// play_eat_worm
+*// play_main_menu
+
+*********************************************************************
+*
+* Play explosion
+*
+play_explosion:
+       .proc
+       li   r0,snd_explosion
+       li   r1,snd_channel_4
+       bl   @play_snd
+       .endproc
+*// play_explosion
 
 *********************************************************************
 *
@@ -90,7 +102,7 @@ play_eat_worm:
 *
 play_berk_landing:
        .proc
-       li   r0,snd_freq_drop
+       li   r0,snd_berk_landing
        li   r1,snd_channel_1
        li   r2,C2
        bl   @play_snd
@@ -103,7 +115,7 @@ play_berk_landing:
 *
 play_head_banging:
        .proc
-       li   r0,snd_freq_drop
+       li   r0,snd_head_banging
        li   r1,snd_channel_1
        li   r2,C4
        bl   @play_snd
@@ -116,7 +128,7 @@ play_head_banging:
 *
 play_spider:
        .proc
-       li   r0,snd_freq_raise
+       li   r0,snd_spider
        li   r1,snd_channel_1
        li   r2,A2
        bl   @play_snd
@@ -125,16 +137,16 @@ play_spider:
 
 *********************************************************************
 *
-* Play main menu
+* Play eat worm
 *
-play_main_menu:
+play_eat_worm:
        .proc
-       li   r0,snd_freq_raise
+       li   r0,snd_eat_worm
        li   r1,snd_channel_1
-       li   r2,A3
+       li   r2,A4
        bl   @play_snd
        .endproc
-*// play_main_menu
+*// play_eat_worm
 
 *********************************************************************
 *
@@ -142,21 +154,9 @@ play_main_menu:
 *
 play_drutt_hopping:
        .proc
-       li   r0,snd_short
+       li   r0,snd_drutt_hopping
        li   r1,snd_channel_1
        li   r2,A1
        bl   @play_snd
        .endproc
 *// play_drut_hopping
-
-*********************************************************************
-*
-* Play explosion
-*
-play_explosion:
-       .proc
-       li   r0,snd_crash
-       li   r1,snd_channel_4
-       bl   @play_snd
-       .endproc
-*// play_explosion

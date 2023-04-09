@@ -23,8 +23,8 @@
        bl   @copy_to_pad
        bl   @mute_sound
        bl   @graphics_mode
-       bl   @title_screen
-       bl   @wait_release_and_keypress
+;       bl   @title_screen
+;       bl   @wait_release_and_keypress
        seto @graphics_bank_select
 ;      bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
 
@@ -117,9 +117,7 @@ main_all_levels:
        bl   @swap_characters           ; CALL 34916        ; If Fire Pressed, or Character Swap Pending Flag set, then swap characters
        bl   @snd_player
        bl   @clear_display_buffer      ; CALL 53782        ; Set each value in Primary Display Buffer within play area to zero
-       bl   @snd_player
        bl   @populate_display_buffer   ; CALL 45899        ; Populate Primary Display Buffer with layout data for current character's current room
-       bl   @snd_player
        bl   @draw_display_buffer       ; CALL 54034        ; Draw contents of Primary Display Buffer to display
        bl   @snd_player                ; CALL 59725        ; Play and clear pending sound (index as stored at #R34273)
        movb @time_left,a               ; LD A,(34210)      ; Load remaining time / lives into A
@@ -1608,8 +1606,8 @@ wait_keypress_3:
        movb one,@joystick_mode_flag
 ;       .call @_47942                   ; CALL 47942        ; Wait for current key to be released and another to be pressed, storing in A
 ;       .push af                        ; PUSH AF           ; Store AF (A = last pressed key)
-;       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
-;       bl   @request_sound_a           ; CALL 59722        ; ...
+       movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
+       bl   @request_sound             ; CALL 59722        ; ...
 ;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
 wait_keypress_4:
        .endproc                         ; RET               ; Return
@@ -1870,6 +1868,13 @@ draw_display_buffer_1:
        mov de,iy                       ; PUSH DE           ; Copy address of Secondary Display Buffer into IY...
                                        ; POP IY            ; ...
        li   de_,3
+       li   bc_,8*32
+       bl   @draw_display_buffer_pad
+       bl   @snd_player
+       li   bc_,8*32
+       bl   @draw_display_buffer_pad
+       bl   @snd_player
+       li   bc_,6*32
        bl   @draw_display_buffer_pad
        .endproc
 
@@ -1911,7 +1916,6 @@ draw_display_buffer_4:
 draw_display_buffer_5:
                                        ; PUSH HL           ; Store HL (pointer to current position in Primary Display Buffer)
        bl   @draw_character_block      ; CALL 54144        ; Draw a graphic character block to display
-       bl   @snd_player
                                        ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
 draw_display_buffer_6:
        inc  hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
@@ -1925,7 +1929,7 @@ draw_display_buffer_7:
                                        ; JR NZ,54122       ; ...then skip ahead to #R54122
                                        ; LD A,D            ; If current Attribute File address is 23232 (256*90 + 192, i.e. at start of second last
                                                            ; display character row)...
-       ci   ix,zx_attributes+(22*32)   ; CP 90             ; ...
+       dec  bc_                        ; CP 90             ; ...
        jeq  draw_display_buffer_10     ; RET Z             ; ...then return, as only timer figures appear in last two rows
                                        ; LD DE,3           ; Advance current position in Secondary Display Buffer by 3 bytes...
        a    de_,iy                     ; ADD IY,DE         ; ...
@@ -1990,7 +1994,9 @@ draw_character_block_1:
 draw_character_block_2:
        movb *tmp0+,@r1lb
        movb @byte_mirror_table(tmp1),*tmp2
-       dec  bc
+       movb *tmp0+,@r1lb
+       movb @byte_mirror_table(tmp1),*tmp2
+       dect bc
        jne  draw_character_block_2
 *      Draw attribute
 draw_character_block_3:

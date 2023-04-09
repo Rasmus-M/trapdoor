@@ -1,40 +1,60 @@
 **
 * Sound FXs
 *
-snd_vol_freq_drop:
+
+snd_out_of_time:
        byte T1
        byte 32                         ; Frames
        byte 0                          ; Attn start
        byte 8                          ; Attn step
        data 4                          ; Freq step
-snd_vol_drop:
-       byte T1
-       byte 48                         ; Frames
-       byte 0                          ; Attn start
-       byte 5                          ; Attn step
-       data 0                          ; Freq step
-snd_freq_drop:
-       byte T1
-       byte 16                         ; Frames
-       byte 0                          ; Attn start
-       byte 0                          ; Attn step
-       data 25                         ; Freq step
-snd_freq_raise:
+
+snd_main_menu:
        byte T1
        byte 24                         ; Frames
        byte 0                          ; Attn start
        byte 0                          ; Attn step
        data -8                         ; Freq step
-snd_short:
+
+snd_explosion:
+       byte W2
+       byte 64                         ; Frames
+       byte 0                          ; Attn start
+       byte 4                          ; Attn step
+
+snd_berk_landing:
+       byte T1
+       byte 16                         ; Frames
+       byte 0                          ; Attn start
+       byte 0                          ; Attn step
+       data 25                         ; Freq step
+
+snd_head_banging:
+       byte T1
+       byte 16                         ; Frames
+       byte 0                          ; Attn start
+       byte 0                          ; Attn step
+       data 25                         ; Freq step
+
+snd_spider:
+       byte T1
+       byte 24                         ; Frames
+       byte 0                          ; Attn start
+       byte 0                          ; Attn step
+       data -8                         ; Freq step
+
+snd_eat_worm:
+       byte T1
+       byte 48                         ; Frames
+       byte 0                          ; Attn start
+       byte 5                          ; Attn step
+       data 0                          ; Freq step
+
+snd_drutt_hopping:
        byte T1
        byte 3                          ; Frames
        byte 0                          ; Attn start
        byte 64                         ; Attn step
        data 0
-snd_crash:
-       byte W2
-       byte 64                         ; Frames
-       byte 0                          ; Attn start
-       byte 4                          ; Attn step
 
        even
