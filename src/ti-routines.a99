@@ -143,13 +143,18 @@ draw_attribute:
        jne  !
        rt
 !      movb a,@ti_attributes-zx_attributes(tmp1)
-       .proc
-       mov  tmp1,tmp0
-       ai   tmp0,-zx_attributes
-       sla  tmp0,3
-       ai   tmp0,color_table
-       bl   @vwad
-       bl   @ti_color
+*      VDP write address
+       ai   tmp1,-zx_attributes
+       sla  tmp1,3
+       ai   tmp1,color_table+>4000
+*      Set VDP write address
+       movb @r1lb,@vdpwa               ; Send low byte of VDP RAM write address
+       movb tmp1,@vdpwa                ; Send high byte of VDP RAM write address
+*      Color
+       swpb a
+       movb @ti_colors(a),tmp0
+       swpb a
+*      Draw
        li   tmp2,vdpwd
        movb tmp0,*tmp2
        movb tmp0,*tmp2
@@ -159,7 +164,7 @@ draw_attribute:
        movb tmp0,*tmp2
        movb tmp0,*tmp2
        movb tmp0,*tmp2
-       .endproc
+       rt
 *// draw_attribute
 
 ti_attributes:

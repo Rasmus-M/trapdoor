@@ -2862,7 +2862,9 @@ title_screen_3:
 title_screen_4:
        movb *hl+,a
        mov  de,tmp1
+       seto @graphics_bank_select
        bl   @draw_attribute
+       seto @title_bank_select
        inc  de
        bl   @alternate_border_color
        dec  bc
