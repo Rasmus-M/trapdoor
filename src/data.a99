@@ -263,18 +263,18 @@ current_keyboard_ctrls:
 
 * Table of Attribute File Addresses for Main Menu Strings
 main_menu_addrs:
-       data 22666                                                    ; "S   START   "
-       data 22762                                                    ; "K NEW KEYS  "
+       data 22666                                                    ; "S   START   "
+       data 22762                                                    ; "K NEW KEYS  "
 ;main_menu_addrs_kempston:
        data 22851                                                    ; "J +KEMPSTON "
-main_menu_addrs_dirs:
-       data 22947                                                    ; "   RIGHT    "
-       data 23043                                                    ; "   LEFT     "
-       data 23139                                                    ; "   FORWARD  "
-       data 22865                                                    ; "   BACK     "
-       data 22961                                                    ; "   BERK/DRUT"
-       data 23057                                                    ; "   PAUSE    "
-       data 23153                                                    ; "   RESTART  "
+main_menu_dir_addrs:
+       data 22947                                                    ; "   RIGHT    "
+       data 23043                                                    ; "   LEFT     "
+       data 23139                                                    ; "   FORWARD  "
+       data 22865                                                    ; "   BACK     "
+       data 22961                                                    ; "   BERK/DRUT"
+       data 23057                                                    ; "   PAUSE    "
+       data 23153                                                    ; "   RESTART  "
 
 * Table of Main Menu Strings
 main_menu_strings:
