@@ -2053,12 +2053,14 @@ _53403:
 _53454:
        byte 244,7                                ; Set current graphic set to 7
        byte 7,7,33
-       byte 248,_53464&>00ff,(_53464&>ff00)/256  ; Jump to #R53464
+       byte 248,_53467&>00ff,(_53467&>ff00)/256  ; Jump to #R53464
 * Crawling Left (Frame 1 / 2)
 _53462:
        byte 244,7                                ; Set current graphic set to 7
 _53464:
-       byte 5,7,33,10,3,33
+       byte 5,7,33
+_53467:
+       byte 10,3,33
        byte 10,3,33,9,3,33
        byte 255                                  ; End Marker
 * Crawling Left (Frame 2 / 2)
