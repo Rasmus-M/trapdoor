@@ -13,8 +13,8 @@
 *
        limi 0                          ; DI                ; Disable interrupts
        lwpi wrksp
-       mov @rndsd,@rnd_seed            ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
-                                       ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
+       mov  @rndsd,@rnd_seed            ; LD A,(23672)      ; Store the least significant byte of the system variable FRAMES...
+       clr  @rnd_seed                   ; LD (54219),A      ; ...at 54219 as the seed for the pseudo-random number generator
        li   one,>0100
        li   tmp0,>fffe
        mov  tmp0,@b255
@@ -23,8 +23,8 @@
        bl   @copy_to_pad
        bl   @mute_sound
        bl   @graphics_mode
-       bl   @title_screen
-       bl   @wait_release_and_keypress
+;       bl   @title_screen
+;       bl   @wait_release_and_keypress
        seto @graphics_bank_select
 ;      bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
 
@@ -791,14 +791,16 @@ draw_graphics:
        jeq  draw_graphics_1            ; JP Z,46051        ; If B is zero (i.e. we don't need to recalculate current position in display buffer), then
                                        ;                   ; skip ahead to #R46051
 * If B was 1, then we need to load DE with the address of the current position in the Primary Display Buffer.
-       clr  de
-       movb h,@e
-       mov  de,tmp0
-       a    tmp0,tmp0
-       a    tmp0,de
-       movb @l,@r0lb
-       mpy  @w96,tmp0
-       a    tmp1,de
+*      hl=000hhhhh000lllll
+*      x=h=000hhhhh
+*      y=l=000lllll
+*      wanted=0000lllllhhhhh00
+       swpb hl                         ; 000lllll000hhhhh
+       mov  hl,de                      ; 000lllll000hhhhh
+       sla  de,3                       ; lllll000hhhhh000
+       movb h,d                        ; 000lllllhhhhh000
+       srl  de,1                       ; 0000lllllhhhhh00
+       swpb hl                         ; 000hhhhh000lllll
 ;       movb h,a                        ; LD A,H            ; Load C with three times entity's x-coordinate...
 ;       ab   a,a                        ; ADD A,A           ; ...
 ;       ab   h,a                        ; ADD A,H           ; ...
@@ -829,22 +831,22 @@ draw_graphics_1:
        movb @graphic_set_index,*de+    ; LD A,(34268)      ; Load current Graphic Set Index into this location in Primary Display Buffer...
                                        ; LD (DE),A         ; ...
                                        ; INC DE            ; Advance to Graphic Index in current character block's entry in Primary Display Buffer
-       movb *ix,*de+                   ; LD A,(IX+0)       ; Load Graphic Index into current Display Buffer location...
+       movb *ix+,*de+                  ; LD A,(IX+0)       ; Load Graphic Index into current Display Buffer location...
                                        ; LD (DE),A         ; ...
                                        ; INC DE            ; Advance to next byte in current character block's display buffer entry (Attribute)
        movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
                                        ; OR A              ; ...and if not zero...
        jne  draw_graphics_2            ; JR NZ,46077       ; ...then skip ahead to #R46077
 * Current Attribute is zero (i.e. not set) so DE points to attribute data
-       inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)...
-       movb *ix,a                      ; LD A,(IX+0)       ; ...and load into A
+                                       ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)...
+       movb *ix+,a                     ; LD A,(IX+0)       ; ...and load into A
 * At this point, A holds an attribute value either from the graphic layout data, or the Current Attribute as stored
 * at #R34270. This attribute is to be applied to the current display buffer location. IX (current position in
 * graphic layout data) is pointing to either the graphic index (if the Current Attribute at #R34270 is set) or the
 * attribute data (if the Current Attribute is not set). In either case, IX+1 is the address of the Cursor Shift
 * byte. Bit 7 of the Cursor Shift byte is the Override Attribute Flag.
 draw_graphics_2:
-       movb @1(ix),tmp0                ; BIT 7,(IX+1)      ; If bit 7 (Override Attribute Flag) is set...
+       movb *ix,tmp0                   ; BIT 7,(IX+1)      ; If bit 7 (Override Attribute Flag) is set...
                                        ;
        jlt  draw_graphics_4            ; JP NZ,46111       ; ...then skip ahead to #R46111
 * Override Attribute Flag reset
@@ -883,9 +885,10 @@ draw_graphics_4:
 * to after writing the current character block. A value of 33 advances the cursor right by one character. A value,
 * n, less than 33 moves the cursor down a character row, and left by 33-(n+1) characters. A value greater than 33
 * moves the cursor right by (n+1)-33 characters. Bit 7 is the Override Attribute Flag.
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
-       cb   a,@b255               ; CP 255            ; ...and if this is 255 (End Marker)...
+       movb *ix,a                      ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
+       cb   a,@b255                    ; CP 255            ; ...and if this is 255 (End Marker)...
        jne  draw_graphics_4a           ; JP Z,46418        ; ...then jump to #R46418 (load HL with stored coordinates from #R34281 and return from
+       dec  ix
        b    @graphics_routine_255                          ; drawing)
 draw_graphics_4a:
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
@@ -902,14 +905,14 @@ draw_graphics_6:
        ab   h,a                        ; ADD A,H           ; ...
        movb a,h                        ; LD H,A            ; ...
        sb   b,b                        ; LD B,0            ; Prepare to recalculate Display Buffer address as change in coordinates is non-trivial
-       jmp  inct_execute_gfx_script    ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
+       jmp  inc_execute_gfx_script     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * Cursor Shift byte was 33 (move the cursor right by one character)
 draw_graphics_7:
-       inc  de                         ; INC DE            ; Advance pointer to start of next entry in Primary Display Buffer
+       inct de                         ; INC DE            ; Advance pointer to start of next entry in Primary Display Buffer
        ab   one,h                      ; INC H             ; Increase x-coordinate by one
                                        ; JP Z,46135        ; If x-coordinate is zero then jump back to #R46135 (see trivia)
        movb one,b                      ; LD B,1            ; Prepare to skip over recalculation of Display Buffer address as we moved right one character
-       jmp  inct_execute_gfx_script    ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
+       jmp  inc_execute_gfx_script     ; JP 45999          ; Advance graphic layout data pointer by two bytes and read / process next data
 * First byte in Primary Display Buffer entry for current position is 255 (i.e. outside dimensions of room)
 draw_graphics_8:
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
@@ -917,9 +920,9 @@ draw_graphics_9:
        movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
                                        ; OR A              ; ...and if not zero...
        jne  draw_graphics_10           ; JP NZ,46160       ; ...then skip ahead to #R46160
-       inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)
+       inct ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)
 draw_graphics_10:
-       movb @1(ix),a                   ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
+       movb *ix,a                      ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
        mov  a,tmp0                     ; required
        sb   @bytes+33,a                ; SUB 33            ; Subtract 33...
@@ -1687,7 +1690,7 @@ clear_display_buffers:
        .proc
 clear_display_buffers_0:
        li   hl,display_buffer_1        ; LD HL,61312       ; Clear Display Buffers 1 and 2...
-       li   bc,>1080                   ; LD BC,4224        ; ...
+       li   bc,32*22*4*2               ; LD BC,4224        ; ...
 clear_display_buffers_1:
        clr  *hl+                       ; LD (HL),0         ; ...
                                        ; LD D,H            ; ...
@@ -1768,9 +1771,9 @@ check_berk_killed_1:
 clear_display_buffer:
        .proc
        mov  @prim_disp_buffer_addr,hl  ; LD HL,(34279)     ; Load HL with start address of Primary Display Buffer
-       li   bc,704                     ; LD BC,704         ; Set BC to 704, as there are 704 entries in a Display Buffer
-       li   de,3                       ; LD DE,3           ; Load DE with 3 as each entry in the Display Buffer is three bytes wide
-       clr  tmp0
+       li   bc,32*22                   ; LD BC,704         ; Set BC to 704, as there are 704 entries in a Display Buffer
+                                       ; LD DE,3           ; Load DE with 3 as each entry in the Display Buffer is three bytes wide
+
        bl   @clear_display_buffer_pad
        .endproc                        ; RET               ; Return
 clear_display_buffer_start:
@@ -1780,28 +1783,18 @@ clear_display_buffer_1:
                                        ; INC A             ; ...and add one
        jlt  clear_display_buffer_2    ; JP Z,53806        ; If value is now zero (i.e. was previously 255 and therefore outside normal play area), then
                                                            ; skip ahead to #R53806
-*      Even
                                        ; XOR A             ; Set all values in current entry to zero...
        clr  *hl+                       ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
                                        ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
-       movb tmp0,*hl+                  ; LD (HL),A         ; ...
+       clr  *hl+                       ; LD (HL),A         ; ...
                                        ; INC HL            ; ...
        jmp  clear_display_buffer_3
 clear_display_buffer_2:
        a    de,hl
 clear_display_buffer_3:
-       movb *hl,a
-       jlt  clear_display_buffer_4
-*      Odd
-       movb tmp0,*hl+
-       clr  *hl+
-       jmp  clear_display_buffer_5     ; JP 53807          ; Skip ahead to #R53807
-clear_display_buffer_4:
-       a    de,hl                      ; ADD HL,DE         ; Advance current position in Display Buffer to next entry
-clear_display_buffer_5:
-       dect bc                         ; DEC BC            ; Decrease remaining number of entries to process
+       dec  bc                         ; DEC BC            ; Decrease remaining number of entries to process
                                        ; LD A,B            ; If remaining number of entries is not zero...
                                        ; OR C              ; ...
        jne  clear_display_buffer_1     ; JP NZ,53791       ; ...then loop back to #R53791
@@ -1871,18 +1864,18 @@ draw_display_buffer:
 draw_display_buffer_1:
        mov de,iy                       ; PUSH DE           ; Copy address of Secondary Display Buffer into IY...
                                        ; POP IY            ; ...
-       li   de_,3
+       li   de_,4
        li   bc_,6*32
-       bl   @draw_display_buffer_pad
+       bl   @draw_display_buffer_start
        bl   @snd_player
        li   bc_,6*32
-       bl   @draw_display_buffer_pad
+       bl   @draw_display_buffer_start
        bl   @snd_player
        li   bc_,6*32
-       bl   @draw_display_buffer_pad
+       bl   @draw_display_buffer_start
        bl   @snd_player
        li   bc_,4*32
-       bl   @draw_display_buffer_pad
+       bl   @draw_display_buffer_start
        .endproc
 
 draw_display_buffer_start:
@@ -1925,8 +1918,7 @@ draw_display_buffer_5:
        bl   @draw_character_block      ; CALL 54144        ; Draw a graphic character block to display
                                        ; POP HL            ; Restore HL (pointer to current position in Primary Display Buffer)
 draw_display_buffer_6:
-       inc  hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
-draw_display_buffer_7:
+       inct hl                         ; INC HL            ; Advance HL to next byte in Primary Display Buffer (start of next entry)
        inc  ix                         ; INC IX            ; Advance IX to next byte in Attribute File
                                        ; PUSH IX           ; Copy current Attribute File address from IX to DE...
                                        ; POP DE            ; ...
@@ -1949,8 +1941,8 @@ draw_display_buffer_8:
        bl   @draw_attribute
        jmp  draw_display_buffer_6      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_9:
-       inct hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
-       jmp  draw_display_buffer_7      ; JP 54107          ; Loop back to #R54107
+       inc  hl                         ; INC HL            ; Advance HL to third byte (attribute) in Primary Display Buffer entry
+       jmp  draw_display_buffer_6      ; JP 54107          ; Loop back to #R54107
 draw_display_buffer_10:
        .endproc
 draw_display_buffer_end:

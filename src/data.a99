@@ -180,6 +180,7 @@ blinking_eye_attr_addr:
        data 0                                                        ; Attribute File address of eyes of currently blinking timer figure
 script_for_next_level:
        data 0                                                        ; Temporary store for script data to execute upon arrival on new level
+; TODO: move to pad
 graphic_set_index:
        byte 0                                                        ; Current Graphic Set Index
 print_attr:
