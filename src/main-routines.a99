@@ -922,10 +922,11 @@ draw_graphics_7:
 draw_graphics_8:
        .pop hl                         ; POP HL            ; Restore HL (H = x-coordinate to draw to, L = y-coordinate to draw to)
 draw_graphics_9:
+       inc  ix
        movb @current_attr,a            ; LD A,(34270)      ; Load Current Attribute into A...
                                        ; OR A              ; ...and if not zero...
        jne  draw_graphics_10           ; JP NZ,46160       ; ...then skip ahead to #R46160
-       inct ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)
+       inc  ix                         ; INC IX            ; Advance IX to next byte in graphic layout data (attribute)
 draw_graphics_10:
        movb *ix,a                      ; LD A,(IX+1)       ; Load A with Cursor Shift byte...
        andi a,127*256                  ; AND 127           ; Reset bit 7 (Override Attribute Flag)
