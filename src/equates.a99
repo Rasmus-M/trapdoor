@@ -46,8 +46,12 @@ b255:
        equ  stack+>20
 b254:
        equ  b255+1
-draw_display_buffer_pad:
+graphic_set_index:
        equ  b254+1
+display_buffer_flag:
+       equ  graphic_set_index+1        ; "Display Buffer 2 is Primary" Flag
+draw_display_buffer_pad:
+       equ  display_buffer_flag+1
 clear_display_buffer_pad:
        equ  draw_display_buffer_pad+>38
 pad_max:

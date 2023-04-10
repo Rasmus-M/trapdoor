@@ -441,6 +441,26 @@ check_key:
        rt
 *// check_key
 
+***************************************************************************
+*
+* Check quit
+*
+check_quit:
+       clr  r1                         ; Test column 0
+       li   r12,>0024                  ; Address for column selection
+       ldcr r1,3                       ; Select column
+       li   r12,>0006                  ; Address to read rows
+       stcr r1,8
+       andi r1,>1100
+       jeq  quit
+*      Return
+       rt
+*      Quit
+quit   clr  @>83c4                     ; Reset user ISR address
+       seto @>6000                     ; Select first ROM bank
+       blwp @>0000
+*// check_quit
+
 *********************************************************************
 *
 * Generate a pseudo random number within the given limit

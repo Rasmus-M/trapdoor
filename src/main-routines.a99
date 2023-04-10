@@ -27,6 +27,7 @@
 ;       bl   @wait_release_and_keypress
        seto @graphics_bank_select
 ;      bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
+       clr  @graphic_set_index         ; graphic_set_index + display_buffer_flag
 
 *********************************************************************************
 * Display Main Menu and Handle Main Game Loop
@@ -113,6 +114,7 @@ main_loop:
 main_all_levels:
        bl   @snd_player
        bl   @check_control_input       ; CALL 47893        ; Check for control input and store at #R34219
+       bl   @check_quit
        bl   @snd_player
        bl   @move_falling_entities     ; CALL 55525        ; Move all falling entities down by distances appropriate to their current velocity factors
        bl   @swap_characters           ; CALL 34916        ; If Fire Pressed, or Character Swap Pending Flag set, then swap characters
@@ -1597,6 +1599,7 @@ wait_keypress:
        .proc
 wait_keypress_1:
        bl   @snd_player
+       bl   @check_quit
        li   r0,KEY_S
        bl   @check_key
        jne  wait_keypress_2
@@ -1615,9 +1618,9 @@ wait_keypress_3:
 ;       .push af                        ; PUSH AF           ; Store AF (A = last pressed key)
        movb @bytes+2,a                 ; LD A,2            ; Set sound 2 as pending if appropriate, then play and clear pending sound...
        bl   @request_sound             ; CALL 59722        ; ...
-;       .pop af                         ; POP AF            ; Restore AF (A = last pressed key)
+;       .pop af                        ; POP AF            ; Restore AF (A = last pressed key)
 wait_keypress_4:
-       .endproc                         ; RET               ; Return
+       .endproc                        ; RET               ; Return
 *// wait_keypress
 
 *********************************************************************************

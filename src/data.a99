@@ -180,15 +180,10 @@ blinking_eye_attr_addr:
        data 0                                                        ; Attribute File address of eyes of currently blinking timer figure
 script_for_next_level:
        data 0                                                        ; Temporary store for script data to execute upon arrival on new level
-; TODO: move to pad
-graphic_set_index:
-       byte 0                                                        ; Current Graphic Set Index
 print_attr:
        byte 0                                                        ; Attribute for text printing
 current_attr:
        byte 0                                                        ; Current Attribute
-display_buffer_flag:
-       byte 0                                                        ; "Display Buffer 2 is Primary" Flag
 carried_entity_width:
        byte 0                                                        ; Width of entity carried by Berk (characters), minus 1
 idx_pending_sound:
@@ -322,8 +317,6 @@ rnd_seed:
 ;rnd_range:
 ;       byte 0                                                        ; Temporary store for range value
 
-w96:
-       data 96
 paper_bits:
        data >3800
 preserve_ink_flag:
