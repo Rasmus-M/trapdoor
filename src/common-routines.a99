@@ -531,18 +531,24 @@ reset_1st_entity_of_class:
 reset_1st_entity_of_class_0:
        .proc
 reset_1st_entity_of_class_1:
-       li   iy,initial_entity_states   ; LD IY,59821       ; Point IY at start of Table of Initial-State Data for Complex Entities
-       bl   @find_1st_entity_of_class_0                   ; CALL 54023        ; Advance IY to first entry in copied complex state data that has class A
+       bl   @get_level_data_rom_addr   ; Get ROM address of level data in tmp0
+       mov  tmp0,iy                    ; LD IY,59821       ; Point IY at start of Table of Initial-State Data for Complex Entities
+       inct tmp0                       ; Address of pointer to complex state data
+       mov  *tmp0,tmp0                 ; Get pointer to complex state data
+       ai   tmp0,-level_data           ; Calculate offset
+       a    tmp0,iy                    ; Add to ROM address
+       bl   @find_1st_entity_of_class_0 ; CALL 54023        ; Advance IY to first entry in copied complex state data that has class A
        .push ix                        ; PUSH IX           ; Store IX (address of entry in complex state data to overwrite)
-       movb @e,b                       ; LD B,E            ; Load B with 13 (DE set to 13 in routine at #R54019)
+       li   bc,13                      ; LD B,E            ; Load B with 13 (DE set to 13 in routine at #R54019)
 reset_1st_entity_of_class_2:
-       movb *iy,a                      ; LD A,(IY+0)       ; Overwrite IX data entry with IY data...
-       movb a,*ix+                     ; LD (IX+0),A       ; ...
+       movb *iy+,*ix+                  ; LD A,(IY+0)      ; Overwrite IX data entry with IY data...
+                                       ; LD (IX+0),A       ; ...
                                        ; INC IX            ; ...
-       inc  iy                         ; INC IY            ; ...
-       sb   one,b                      ; DJNZ 54004        ; ...
+                                       ; INC IY            ; ...
+       dec  bc                         ; DJNZ 54004        ; ...
        jne  reset_1st_entity_of_class_2                     ;
        .pop ix                         ; POP IX            ; Restore IX (address of entry in complex state data just overwritten)
+       seto @graphics_bank_select
        .endproc                        ; RET               ; Return
 *// reset_1st_entity_of_class
 

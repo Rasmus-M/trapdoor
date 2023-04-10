@@ -43,6 +43,24 @@ copy_to_pad_2:
 * Copy level data from ROM bank
 *
 copy_level_data:
+       .proc
+       bl   @get_level_data_rom_addr
+       li   tmp1,level_data
+       li   tmp2,>f80
+copy_level_data_1:
+       mov  *tmp0+,*tmp1+
+       dect tmp2
+       jne  copy_level_data_1
+       seto @graphics_bank_select
+       .endproc
+*// copy_level_data
+
+*********************************************************************
+*
+* Select ROM bank for copying Glevel data
+* and return address in tmp0
+*
+get_level_data_rom_addr:
        clr  tmp1
        movb @current_level,tmp1
        swpb tmp1
@@ -54,15 +72,8 @@ copy_level_data:
        andi tmp0,1
        sla  tmp0,12
        ai   tmp0,>6000
-       li   tmp1,level_data
-       li   tmp2,>f80
-copy_level_data_1:
-       mov  *tmp0+,*tmp1+
-       dect tmp2
-       jne  copy_level_data_1
-       seto @graphics_bank_select
        rt
-*// copy_level_data
+*// get_level_data_rom_addr
 
 *********************************************************************
 *
