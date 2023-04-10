@@ -352,11 +352,11 @@ berk_reset_table:
 *
 * Complex state data reverted to by Berk after he is "killed"
 berk_init_state_level_1:
-       byte 4,1,103,231,85,113,91,118,31,1,192,192,10                ; Level 1
+       byte 4,1,_59239&>00ff,(_59239&>ff00)/256,85,113,91,118,31,1,192,192,10                ; Level 1
 berk_init_state_level_3:
-       byte 1,1,103,231,85,107,91,112,31,1,192,192,10                ; Level 3
+       byte 1,1,_59239&>00ff,(_59239&>ff00)/256,85,107,91,112,31,1,192,192,10                ; Level 3
 berk_init_state_level_2_4:
-       byte 1,1,103,231,85,113,91,118,31,1,192,192,10                ; Levels 2 & 4
+       byte 1,1,_59239&>00ff,(_59239&>ff00)/256,85,113,91,118,31,1,192,192,10                ; Levels 2 & 4
 
 * Current Position in Drutt's Script Data
 drutts_script_pos:
