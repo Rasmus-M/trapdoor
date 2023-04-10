@@ -23,8 +23,8 @@
        bl   @copy_to_pad
        bl   @mute_sound
        bl   @graphics_mode
-;       bl   @title_screen
-;       bl   @wait_release_and_keypress
+       bl   @title_screen
+       bl   @wait_release_and_keypress
        seto @graphics_bank_select
 ;      bl   @copy_initial_state_data   ; CALL 34695        ; Copy State Data for all resettable complex entities into Table of Initial-State Data
        clr  @graphic_set_index         ; graphic_set_index + display_buffer_flag

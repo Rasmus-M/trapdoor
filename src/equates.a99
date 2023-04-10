@@ -4,7 +4,7 @@
 start_at_level:
        equ  1
 berk_cant_die:
-       equ  1
+       equ  0
 higher_jumps:
        equ  1
 **
