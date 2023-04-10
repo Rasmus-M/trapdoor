@@ -6,3 +6,6 @@ java -jar tools/ea5tocart.jar bin\main "THROUGH THE TRAPDOOR"
 copy /b bin\main8.bin ^
     + bin\banks.bin ^
     trapdoor8.bin
+
+java -jar tools/CopyHeader.jar trapdoor8.bin 60 4 5 6
+
