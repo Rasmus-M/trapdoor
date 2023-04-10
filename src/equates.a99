@@ -49,9 +49,9 @@ b254:
 draw_display_buffer_pad:
        equ  b254+1
 clear_display_buffer_pad:
-       equ  draw_display_buffer_pad+>5c
+       equ  draw_display_buffer_pad+>38
 pad_max:
-       equ  clear_display_buffer_pad+>1e
+       equ  clear_display_buffer_pad+>16
 
 **
 * Z80 register mapping
