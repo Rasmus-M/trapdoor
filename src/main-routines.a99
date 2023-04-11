@@ -55,11 +55,13 @@ main:
        li   tmp0,state_data_complex_3
        .endif
        .ifeq start_at_level,5
-       socb @bits+3,@flying_skeleton+9 ; Set Berk and Drutt through the trap door flag
        li   tmp0,level_4_door
        .endif
        mov  tmp0,@berk_interaction_state
        bl   @next_level
+       .ifeq start_at_level,5
+       socb @bits+3,@flying_skeleton+9 ; Set Berk and Drutt through the trap door flag
+       .endif
        .endif
 *      Debug - end
 * Start of main loop
