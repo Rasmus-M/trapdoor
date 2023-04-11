@@ -4,9 +4,9 @@
 * Used by the routine at #R34438.
 update_level_1_entities:
        .proc
-       bl   @execute_bonis_kidnap     ; CALL 36887        ; Execute script data for Boni's kidnap and handle Trap Door opening and closing
-       bl   @update_bat_state_and_store ; CALL 37062        ; Update state of Bat (Level 1) and store current position in script data
-       bl   @update_state_of_spiders  ; CALL 37586        ; Update states of the Spiders (Level 1) and store current positions in script data
+       bl   @execute_bonis_kidnap      ; CALL 36887        ; Execute script data for Boni's kidnap and handle Trap Door opening and closing
+       bl   @update_bat_and_store      ; CALL 37062        ; Update state of Bat (Level 1) and store current position in script data
+       bl   @update_spiders            ; CALL 37586        ; Update states of the Spiders (Level 1) and store current positions in script data
        .endproc                        ; RET               ; Return
 *// update_level_1_entities
 
@@ -79,63 +79,62 @@ open_trap_door_if_berk_is_near_1:
 * Update State of Bat (Level 1) and Store Current Position in Script Data
 *
 * Used by the routine at #R36791.
-update_bat_state_and_store:
+update_bat_and_store:
        .proc
-       li   ix,bat                  ; LD IX,43463       ; Point IX at position data for Bat (Level 1)
+       li   ix,bat                     ; LD IX,43463       ; Point IX at position data for Bat (Level 1)
        bl   @copy_room_dim_data_to_tmp_3 ; CALL 53848        ; Store room size data for Bat's room
        mov  @bat_script_pos,hl         ; LD HL,(37016)     ; Load current position in Bat's script data from #R37016 into HL...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
-       bl   @update_bat_state          ; CALL 37085        ; Update state of Bat
+       bl   @update_bat          ; CALL 37085        ; Update state of Bat
        mov  @current_script_addr,hl    ; LD HL,(34277)     ; Store address (current position in script data) stored at #R34277...
        mov  hl,@bat_script_pos         ; LD (37016),HL     ; ...at #R37016 as current position in Bat's script data
        .ret                            ; RET               ; Return
-*// update_bat_state_and_store
+*// update_bat_and_store
 
 *********************************************************************************
 * Update State of Bat (Level 1)
 *
 * Used by the routine at #R37062. Input:  IX  (always #R43463, entry in Level 1 complex state data for Bat) HL
 * Current position in Bat's script data
-update_bat_state:
+update_bat:
        .proc
        bl    @chk_coll_same_depth      ; CALL 54768        ; Check entity at IX for collision with another entity at same depth whose Interaction (11,6)
                                                            ; Flag is set...
-       joc  update_bat_state_2         ; JR C,37104        ; ...and if no collision occurred, then skip ahead to #R37104
+       joc  update_bat_2               ; JR C,37104        ; ...and if no collision occurred, then skip ahead to #R37104
        cb   a,@bytes+31                ; CP 31             ; If collision was not with entity of class 31 (Berk)...
-       jne  update_bat_state_1         ; JR NZ,37100       ; ...then skip ahead to #R37100
+       jne  update_bat_1               ; JR NZ,37100       ; ...then skip ahead to #R37100
        bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
-update_bat_state_1:
+update_bat_1:
        cb   a,@bytes+18                ; CP 18             ; If collision was with entity of class 18 (Drutt)...
-       jeq  update_bat_state_3         ; JR Z,37111        ; ...then skip ahead to #R37111
-update_bat_state_2:
+       jeq  update_bat_3               ; JR Z,37111        ; ...then skip ahead to #R37111
+update_bat_2:
        bl   @chk_coll_next_depth_rev   ; CALL 54890        ; Check entity at IX for collision with another entity (in reverse order) at next depth level
                                                            ; into screen whose Interaction (11,7) Flag is set...
        cb   a,@bytes+18                ; CP 18             ; ...and if collision was not with entity of class 18 (Drutt)...
-       jne  update_bat_state_4         ; JR NZ,37128       ; ...then skip ahead to #R37128
-update_bat_state_3:
+       jne  update_bat_4               ; JR NZ,37128       ; ...then skip ahead to #R37128
+update_bat_3:
        movb @10(iy),tmp0               ; BIT 6,(IY+10)     ; If Drutt's Can Fall Flag is set...
        andi tmp0,64*256                ;
-       jne  update_bat_state_4         ; JR NZ,37128       ; ...then skip ahead to #R37128
+       jne  update_bat_4               ; JR NZ,37128       ; ...then skip ahead to #R37128
        socb @bits+6,@10(iy)            ; SET 6,(IY+10)     ; Set Drutt's Can Fall Flag
        movb @bytes+2,@12(iy)           ; LD (IY+12),2      ; Set Drutt's Velocity Factor to 2
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
-update_bat_state_4:
+update_bat_4:
        movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If Bat's Paralysed Flag is set...
        andi tmp0,1*256                 ;
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
        b    @inct_execute_script       ;
 !
-       movb @game_flags,a              ; LD A,(34208)      ; If Drutt Mode Flag is set...
-       movb a,tmp0                     ; BIT 0,A           ; ...
-       andi tmp0,1*256                 ;
-       jne  update_bat_state_5         ; JR NZ,37148       ; ...then skip ahead to #R37148
+                                       ; LD A,(34208)      ; If Drutt Mode Flag is set...
+       abs  @game_flag_0               ; BIT 0,A           ; ...
+       jne  update_bat_5               ; JR NZ,37148       ; ...then skip ahead to #R37148
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
-       jmp  update_bat_state_6         ; JR 37152          ; Skip ahead to #R37152
-update_bat_state_5:
+       jmp  update_bat_6               ; JR 37152          ; Skip ahead to #R37152
+update_bat_5:
        mov  @drutt_state_addr,iy       ; LD IY,(34242)     ; Load IY with address of current level's complex state data for Drutt
 * At this point, IY points to the complex state data entry for the current character.
-update_bat_state_6:
+update_bat_6:
        movb *iy,a                      ; LD A,(IY+0)       ; If current character's current room is not the same as the Bat's...
        cb   a,*ix                      ; CP (IX+0)         ; ...
        jeq  !                          ; JP NZ,48096       ; ...then jump to #R48096 (advance HL to next script instruction and execute)
@@ -143,45 +142,56 @@ update_bat_state_6:
 !
        movb @7(iy),a                   ; LD A,(IY+7)       ; If the current character's right side...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...is to the left of the Bat's left side...
-       jl   update_bat_state_8         ; JR C,37194        ; ...then skip ahead to #R37194
+       jl   update_bat_8               ; JR C,37194        ; ...then skip ahead to #R37194
        movb @7(ix),a                   ; LD A,(IX+7)       ; If the Bat's right side...
        cb   a,@5(iy)                   ; CP (IY+5)         ; ...is to the left of the current character's left side...
-       jl   update_bat_state_7         ; JR C,37183        ; ...then skip ahead to #R37183
+       jl   update_bat_7               ; JR C,37183        ; ...then skip ahead to #R37183
        li   hl,_37024                  ; LD HL,37024       ; Point HL at script data for Bat attacking...
        b    @execute_script            ; JP 48098          ; ...and execute
-update_bat_state_7:
+update_bat_7:
        movb @7(ix),a                   ; LD A,(IX+7)       ; If the x-coordinate of the Bat's right side is less than 130...
        cb   a,@bytes+130               ; CP 130            ; ...
        jhe  !                          ; JP C,48615        ; ...then move Bat right by one character
        b    @script_routine_03         ;
 !
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
-update_bat_state_8:
+update_bat_8:
        movb @bytes+101,a               ; LD A,101          ; If the x-coordinate of the Bat's left side is greater than 101...
        cb   a,@5(ix)                   ; CP (IX+5)         ; ...
        jhe  !                          ; JP C,48660        ; ...then move Bat left by one character
        b    @script_routine_02         ;
 !
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
-*// update_bat_state
+*// update_bat
 
 *********************************************************************************
 * Update the States of the Spiders (Level 1) and Store Current Positions in Script Data
 *
 * Used by the routine at #R36791.
-update_state_of_spiders:
+update_spiders:
        .proc
+                                       ; LD A,(34208)      ; If "Reset Spiders to Initial State" Flag is reset...
+       abs  @game_flag_3               ; BIT 3,A           ; ...
+       jeq  update_spiders_1           ; JR Z,37662        ; ...then skip ahead to #R37662
+       movb @bytes+27,a                ; LD A,27           ; Reset complex state data for right-hand spider to that stored in Initial-State Table...
+       bl   @reset_1st_entity_of_class ; CALL 53987        ; ...
+       movb @bytes+28,a                ; LD A,28           ; Reset complex state data for middle spider to that stored in Initial-State Table...
+       bl   @reset_1st_entity_of_class ; CALL 53987        ; ...
+       movb @bytes+29,a                ; LD A,29           ; Reset complex state data for left-hand spider to that stored in Initial-State Table...
+       bl   @reset_1st_entity_of_class ; CALL 53987        ; ...
+       jmp  update_spiders_3           ; RET               ; Return
+update_spiders_1:
        li   ix,spider                  ; LD IX,43749       ; Load IX with address of complex state data for Spider 1 (Level 1)
        li   iy,spiders_script_data_pos ; LD IY,37580       ; Load IY with start address of Table of Current Positions in Spiders' Script Data
        movb @bytes+3,b                 ; LD B,3            ; Load B with 3 as there are 3 spiders
-update_state_of_spiders_1:
+update_spiders_2:
        mov  *iy,hl                     ; LD L,(IY+0)       ; Load HL with current position in script data for current spider...
                                        ; LD H,(IY+1)       ; ...
        mov  hl,@current_script_addr    ; LD (34277),HL     ; ...and store at #R34277 as position in script currently running
        .push ix                        ; PUSH IX           ; Store IX
        .push iy                        ; PUSH IY           ; Store IY
        .push bc                        ; PUSH BC           ; Store BC
-       bl   @update_spider_state      ; CALL 37639        ; Update the state of the current spider (Level 1)
+       bl   @update_spider             ; CALL 37639        ; Update the state of the current spider (Level 1)
        .pop bc                         ; POP BC            ; Restore BC
        .pop iy                         ; POP IY            ; Restore IY
        .pop ix                         ; POP IX            ; Restore IX
@@ -193,42 +203,30 @@ update_state_of_spiders_1:
                                        ; LD DE,13          ; Advance IX by 13 bytes (i.e. to entry for next spider)...
        ai   ix,13                      ; ADD IX,DE         ; ...
        sb   one,b                      ; DJNZ 37596        ; Decrease B (remaining number of spiders to process) and loop back to #R37596
-       jne  update_state_of_spiders_1                     ;
+       jne  update_spiders_2                     ;
+update_spiders_3:
        .endproc                        ; RET               ; Return
-*// update_state_of_spiders
+*// update_spiders
 
 *********************************************************************************
 * Update the State of a Spider (Level 1)
 *
 * Used by the routine at #R37586. Input:  IX  Address of complex state data for a (Level 1) spider (#R43749, #R43762
 * or #R43775)
-update_spider_state:
+update_spider:
        .proc
-       movb @game_flags,a              ; LD A,(34208)      ; If "Reset Spiders to Initial State" Flag is reset...
-       movb a,tmp0                     ; BIT 3,A           ; ...
-       andi tmp0,8*256                 ;
-       jeq  update_spider_state_1      ; JR Z,37662        ; ...then skip ahead to #R37662
-       movb @bytes+27,a                ; LD A,27           ; Reset complex state data for right-hand spider to that stored in Initial-State Table...
-       bl   @reset_1st_entity_of_class ; CALL 53987        ; ...
-       movb @bytes+28,a                ; LD A,28           ; Reset complex state data for middle spider to that stored in Initial-State Table...
-       bl   @reset_1st_entity_of_class ; CALL 53987        ; ...
-       movb @bytes+29,a                ; LD A,29           ; Reset complex state data for left-hand spider to that stored in Initial-State Table...
-       bl   @reset_1st_entity_of_class ; CALL 53987        ; ...
-       .ret                            ; RET               ; Return
-update_spider_state_1:
-       movb a,tmp0                     ; BIT 2,A           ; If Berk Has Been Killed Flag is set...
-       andi tmp0,4*256                 ;
-       jne  update_spider_state_3      ; RET NZ            ; ...then return
+       abs  @game_flag_2               ; BIT 2,A           ; If Berk Has Been Killed Flag is set...
+       jne  update_spider_3            ; RET NZ            ; ...then return
        bl   @chk_coll_next_depth       ; CALL 54764        ; Check entity at IX for collision with another entity at next depth level out of screen whose
                                                            ; Interaction (11,6) Flag is set...
        cb   a,@bytes+31                ; CP 31             ; ...and if collision was not with entity of class 31 (Berk)...
-       jne  update_spider_state_2      ; JR NZ,37685       ; ...then skip ahead to #R37685
+       jne  update_spider_2            ; JR NZ,37685       ; ...then skip ahead to #R37685
        bl   @set_berk_killed           ; CALL 53667        ; Set "Berk Has Been Killed" Flag
        movb @berk_killed_by_spider,a   ; LD A,(34223)      ; Increase count of number of times a spider has killed Berk...
        ab   one,a                      ; INC A             ; ...
        movb a,@berk_killed_by_spider   ; LD (34223),A      ; ...
        b    @inct_execute_script       ; JP 48096          ; Advance HL to next script instruction and execute
-update_spider_state_2:
+update_spider_2:
        mov  @berk_state_addr,iy        ; LD IY,(34240)     ; Load IY with address of current level's complex state data for Berk
        movb @9(ix),tmp0                ; BIT 0,(IX+9)      ; If spider's Must Process Current Script Data Flag is set...
        andi tmp0,1*256                 ;
@@ -237,16 +235,16 @@ update_spider_state_2:
 !
        movb *ix,a                      ; LD A,(IX+0)       ; If the spider and Berk are in different rooms...
        cb   a,*iy                      ; CP (IY+0)         ; ...
-       jne  update_spider_state_3      ; RET NZ            ; ...then return
+       jne  update_spider_3            ; RET NZ            ; ...then return
        movb @7(ix),a                   ; LD A,(IX+7)       ; Load A with the x-coordinate of the spider's right side...
        ab   @bytes+4,a                 ; ADD A,4           ; ...plus 4...
        cb   a,@5(iy)                   ; CP (IY+5)         ; ...and if the x-coordinate of Berk's left side is greater than this...
-       jl   update_spider_state_3      ; RET C             ; ...then return
+       jl   update_spider_3            ; RET C             ; ...then return
        li   hl,_37800                  ; LD HL,37800       ; Point HL at script data for spider moving down...
        b    @execute_script            ; JP 48098          ; ...and execute
-update_spider_state_3:
+update_spider_3:
        .endproc
-*// update_spider_state
+*// update_spider
 
 *********************************************************************************
 * Advance HL to Next Script Instruction and Start Executing

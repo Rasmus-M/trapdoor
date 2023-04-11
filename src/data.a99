@@ -22,6 +22,23 @@ current_level:
 game_flags:
        byte 0
 
+game_flag_0:       ; Drutt Mode Flag (Set = Drutt mode / Reset = Berk mod
+       data 0
+game_flag_1:       ; Characters Already Swapped Flag
+       data 0
+game_flag_2:       ; "Berk Has Been Killed" Flag
+       data 0
+game_flag_3:       ; "Reset Spiders to Initial State" Flag
+       data 0
+game_flag_4:       ; Level Exit Door Unlocked Flag
+       data 0
+game_flag_5:       ; Update Scores and Display Flag (Reset = draw timer figures / Set = calculate/update scores and display)
+       data 0
+game_flag_6:       ; Character Swap Pending Flag
+       data 0
+game_flag_7:       ; Show Score Flag (Reset = draw Timer Figures / Set = Display Score / Hi Score)
+       data 0
+
 * Cannon's (Level 4) Ammunition Counter
 *
 * Number of shots Cannon can fire before returning to its dormant state. Increases by 10 for each drip the Cannon
