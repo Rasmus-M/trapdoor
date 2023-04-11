@@ -113,5 +113,7 @@ title_bank_select:
        equ  >600E
 bank_offset:
        equ  >40
+level_data:
+       equ  >f000
 
        copy "sound-defs.a99"

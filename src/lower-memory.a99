@@ -13,7 +13,3 @@ display_buffer_1:
 *
 display_buffer_2:
        bss 32*22*4
-
-* Level data copied here
-level_data:
-       equ  >f000
