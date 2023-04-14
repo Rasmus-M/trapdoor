@@ -1648,6 +1648,7 @@ cycle_attributes_short:
 *********************************************************************************
 * This entry point is used by the routine at #R53577.
 cycle_attributes:
+       bl   @mute_sound
        .push bc                        ; PUSH BC           ; Store BC (B = remaining number of iterations required)
        li   hl,ti_attributes           ; LD HL,22528       ; Point HL at start of Attribute File
        li   bc,704                     ; LD BC,704         ; Set BC to 704 (i.e. gap between start of Attribute File and start of second-last row (timer
